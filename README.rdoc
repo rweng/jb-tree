@@ -3,3 +3,5 @@
 * test FileResourceManager & Pages
 ...
 * done
+
+for FileResourceManager and IOChannel look at: [[http://www.yaldex.com/java_tutorial/0600410861.htm]]
