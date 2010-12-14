@@ -23,7 +23,8 @@ public abstract class Node<K,V> implements MultiMap<K, V> {
 	public abstract int size();
 	
 	
-	/* (non-Javadoc)
+	/* 
+	 * (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#isEmpty()
 	 */
 	@Override
