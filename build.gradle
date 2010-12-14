@@ -1,0 +1,18 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+	// compile "org.apache.hadoop:avro:1.3.3@jar"
+	// runtime "org.codehaus.jackson:jackson-mapper-asl:1.4.2" // dependency of avro 1.3.3
+	
+	compile "junit:junit:4.8.2@jar"
+	
+}
+
+//************* java plugin configuration ********************
+sourceCompatibility = 1.6
+version = '0.01'

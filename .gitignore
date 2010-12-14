@@ -1,0 +1,11 @@
+.classpath
+tpch/
+.project
+.settings/
+build.properties
+build/
+.externalToolBuilders/
+bin/
+target/
+.gradle/
+libs/
