@@ -9,6 +9,8 @@ dependencies {
 	// compile "org.apache.hadoop:avro:1.3.3@jar"
 	// runtime "org.codehaus.jackson:jackson-mapper-asl:1.4.2" // dependency of avro 1.3.3
 	
+	// compile "http://google-guice.googlecode.com/files/guice-3.0-rc1-src.zip"
+	
 	compile "junit:junit:4.8.2@jar"
 	
 }

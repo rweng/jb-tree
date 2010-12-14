@@ -10,8 +10,10 @@ package com.freshbourne.io;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileLock;
 import java.nio.channels.FileChannel;
+import java.nio.channels.OverlappingFileLockException;
 
 
 /**
@@ -50,6 +52,7 @@ public class FileResourceManager implements ResourceManager {
 		}
 		
 		handle = new RandomAccessFile(file, "rw");
+		initIOChannel(handle);
 	}
 
 	/* (non-Javadoc)
@@ -57,9 +60,10 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public Page newPage() throws IOException {
-		// TODO Auto-generated method stub
+		channelIsOpen();
 		
-		byte[] buffer = new byte[pageSize];
+		byte[] bytes = new byte[pageSize];
+		ByteBuffer buffer = ByteBuffer.wrap(bytes);
 		
 		if(file.length() > Integer.MAX_VALUE){
 			//TODO: enable this!
@@ -69,9 +73,10 @@ public class FileResourceManager implements ResourceManager {
 		// when creating a new Page, the buffer array provided to the page
 		// should be initialized by the Page constructor.
 		// The page header should be written to the buffer
-		Page page = new Page(buffer, numberOfPages() , this);
-		handle.write(buffer, (int)file.length(), pageSize);
+		Page page = new Page(buffer, getNumberOfPages() + 1 , this);
+		
 		numberOfPages++;
+		
 		return page;
 	}
 
@@ -79,16 +84,17 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#writePage(com.freshbourne.io.Page)
 	 */
 	@Override
-	public void writePage(Page page) {
-		// TODO Auto-generated method stub
-		
+	public void writePage(Page page) throws IOException {
+		channelIsOpen();
+		ioChannel.write(page.getBuffer(), (page.getId() - 1) * pageSize);
 	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ResourceManager#readPage(int)
 	 */
 	@Override
-	public Page readPage(int pageId) {
+	public Page readPage(int pageId) throws IOException {
+		channelIsOpen();
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -98,8 +104,21 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void close() throws IOException {
-		handle.close();
-		handle = null;
+		if(ioChannel != null){
+			ioChannel.close();
+			ioChannel = null;
+			fileLock = null;
+		}
+		
+		if(fileLock != null && fileLock.isValid()){
+			fileLock.release();
+			fileLock = null;
+		}
+		
+		if(handle != null){
+			handle.close();
+			handle = null;
+		}
 	}
 
 	/* (non-Javadoc)
@@ -114,8 +133,55 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#numberOfPages()
 	 */
 	@Override
-	public int numberOfPages() {
+	public int getNumberOfPages() throws IOException {
+		channelIsOpen();
 		return numberOfPages;
 	}
 
+	
+	/**
+	 * Generic private initializer that takes the random access file and initializes
+	 * the I/O channel and locks it for exclusive use by this instance.
+	 * 
+	 * from minidb
+	 * 
+	 * @param fileHandle The random access file representing the index.
+	 * @throws IOException Thrown, when the I/O channel could not be opened.
+	 */
+	private void initIOChannel(RandomAccessFile fileHandle)
+	throws IOException
+	{
+		// Open the channel. If anything fails, make sure we close it again
+		try {
+			ioChannel = fileHandle.getChannel();
+			try {
+				fileLock = ioChannel.tryLock();
+			}
+			catch (OverlappingFileLockException oflex) {
+				throw new IOException("Index file locked by other consumer.");
+			}
+			
+			if (fileLock == null) {
+				throw new IOException("Could acquire index file handle for exclusive usage. File locked otherwise.");
+			}
+		}
+		catch (Throwable t) {
+			// something failed.
+			close();
+			
+			// propagate the exception
+			if (t instanceof IOException) {
+				throw (IOException) t;
+			}
+			else {
+				throw new IOException("An error occured while opening the index: " + t.getMessage());
+			}
+		}
+	}
+	
+	private void channelIsOpen() throws IOException{
+		if(ioChannel == null || !ioChannel.isOpen()){
+			throw new IOException("File not open");
+		}
+	}
 }

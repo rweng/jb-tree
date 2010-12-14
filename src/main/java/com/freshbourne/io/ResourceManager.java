@@ -19,10 +19,10 @@ public interface ResourceManager {
 	
 	void open() throws IOException;
 	Page newPage() throws IOException;
-	void writePage(Page page);
-	Page readPage(int pageId);
+	void writePage(Page page) throws IOException;
+	Page readPage(int pageId) throws IOException;
 	void close() throws IOException;
 	int getPageSize();
-	int numberOfPages();
+	int getNumberOfPages() throws IOException;
 
 }

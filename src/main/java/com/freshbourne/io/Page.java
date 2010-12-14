@@ -7,6 +7,9 @@
  */
 package com.freshbourne.io;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 /**
  * A Page is a <code>byte[]</code> from a {@link ResourceManager}.
  * 
@@ -19,30 +22,28 @@ package com.freshbourne.io;
  */
 public class Page {
 	
-	private byte[] buffer;
+	private ByteBuffer buffer;
 	private int id;
 	private ResourceManager resourceManager;
-	
-	/**
-	 * is set to true if the Page is valid.
-	 */
-	private boolean valid = false;
-	
-	
-	public Page(byte[] buffer, int id, ResourceManager rm){
+		
+	public Page(ByteBuffer buffer, int id, ResourceManager rm){
 		this.buffer = buffer;
 		this.id = id;
 		this.resourceManager = rm;
 	}
 	
-	public void initialize(){
-		writeHeader();
+	public ByteBuffer getBuffer(){
+		return buffer;
 	}
 	
-	public boolean isValid(){
-		return valid;
+	public int getSize(){
+		return buffer.capacity();
 	}
 	
+	public int getId(){return id;}
 	
-	private void writeHeader(){}
+	public ResourceManager getResourceManager(){return resourceManager;}
+	public void save() throws IOException{
+		resourceManager.writePage(this);
+	}
 }

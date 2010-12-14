@@ -62,7 +62,6 @@ public interface MultiMap<K, V> {
      * 
      * @param key
      * @param value
-     * @return <code>this</code> for method-chaining
      */
     void add(K key, V value);
     
@@ -87,7 +86,6 @@ public interface MultiMap<K, V> {
     
     /**
      * removes all keys and values
-     * @return <code>this</code> for method-chaining
      */
     void clear();
 }
