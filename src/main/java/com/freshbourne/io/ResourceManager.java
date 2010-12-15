@@ -25,5 +25,4 @@ public interface ResourceManager {
 	int getPageSize();
 	int getNumberOfPages() throws IOException;
 	boolean isOpen();
-
 }

@@ -9,6 +9,7 @@ package com.freshbourne.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import com.freshbourne.io.FileResourceManager;
 import com.freshbourne.io.Page;
@@ -51,15 +52,37 @@ public class FileResourceManagerTest extends TestCase {
 		
 		// test created page
 		assertTrue(p instanceof Page);
-		assertEquals(pageSize, p.getSize());
+		assertEquals(pageSize, p.size());
 		assertEquals(1, p.getId());
 		assertEquals(rm, p.getResourceManager());
 		
 		// test rm
 		assertEquals(1, rm.getNumberOfPages());
 		
+		// test the page
+		assertFalse(p.valid());
+		p.initialize();
+		assertTrue(p.valid());
+				
 		// test saving the page
 		p.save();
 		assertEquals(pageSize, file.length());
+		
+		rm.close();
+		rm.open();
+		p = rm.readPage(1);
+		assertTrue(p.valid());
+		
+		// altering the page size should throw an error
+		rm.close();
+		rm = new FileResourceManager(file, pageSize * 2);
+		try{
+			rm.open();
+			fail("this should throw an error");
+		} catch (Exception e) {
+		}
 	}
+	
+	
+	
 }

@@ -11,11 +11,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- * A Page is a <code>byte[]</code> from a {@link ResourceManager}.
- * 
- * If the 
- * 
- * 
+ * A Page is wraped around a {@link ByteBuffer} from a {@link ResourceManager}.
  * 
  * @author "Robin Wenglewski <robin@wenglewski.de>"
  *
@@ -25,25 +21,59 @@ public class Page {
 	private ByteBuffer buffer;
 	private int id;
 	private ResourceManager resourceManager;
-		
-	public Page(ByteBuffer buffer, int id, ResourceManager rm){
+	private final PageHeader header;
+	private final PageBody body;
+	private boolean valid = false;
+	
+	
+	Page(ByteBuffer buffer, int id, ResourceManager rm){
 		this.buffer = buffer;
 		this.id = id;
 		this.resourceManager = rm;
+		
+		buffer.position(0);
+		buffer.limit(PageHeader.size());
+		this.header = new PageHeader(this, buffer.slice());
+		buffer.limit(buffer.capacity());
+		buffer.position(PageHeader.size());
+		this.body = new PageBody(this, buffer.slice());
+		buffer.limit(buffer.capacity());
 	}
 	
-	public ByteBuffer getBuffer(){
-		return buffer;
+	/**
+	 * writes the header to the buffer.
+	 * Requires the buffer to be uninitialized.
+	 */
+	void initialize(){
+		header.bodyHash(body.hashCode());
+		valid = true;
 	}
 	
-	public int getSize(){
+	PageHeader getHeader(){
+		return header;
+	}
+	
+	PageBody body(){
+		return body;
+	}
+	
+	boolean valid(){
+		return valid || header.bodyHash() == body.hashCode();
+	}
+	
+	ByteBuffer getBuffer(){
+		buffer.position(0);
+		return buffer.duplicate();
+	}
+	
+	public int size(){
 		return buffer.capacity();
 	}
 	
-	public int getId(){return id;}
+	int getId(){return id;}
 	
-	public ResourceManager getResourceManager(){return resourceManager;}
-	public void save() throws IOException{
+	ResourceManager getResourceManager(){return resourceManager;}
+	void save() throws IOException{
 		resourceManager.writePage(this);
 	}
 }

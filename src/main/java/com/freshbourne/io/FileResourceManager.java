@@ -43,7 +43,7 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void open() throws IOException {
-		if(handle != null)
+		if(isOpen())
 			throw new IOException("File already open");
 		
 		// if the file does not exist already
@@ -53,6 +53,9 @@ public class FileResourceManager implements ResourceManager {
 		
 		handle = new RandomAccessFile(file, "rw");
 		initIOChannel(handle);
+		if(handle.length() > 0 && !readPage(1).valid()){
+			throw new IOException("File exists but Pages are not valid");
+		}
 	}
 
 	/* (non-Javadoc)
