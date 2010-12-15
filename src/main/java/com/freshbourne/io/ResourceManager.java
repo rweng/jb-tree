@@ -21,8 +21,9 @@ public interface ResourceManager {
 	Page newPage() throws IOException;
 	void writePage(Page page) throws IOException;
 	Page readPage(int pageId) throws IOException;
-	void close() throws IOException;
+	void close();
 	int getPageSize();
 	int getNumberOfPages() throws IOException;
+	boolean isOpen();
 
 }

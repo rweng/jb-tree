@@ -5,7 +5,7 @@
  * 
  * (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io.test;
+package com.freshbourne.io;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +13,9 @@ import java.io.IOException;
 import com.freshbourne.io.FileResourceManager;
 import com.freshbourne.io.Page;
 import com.freshbourne.io.ResourceManager;
+import com.freshbourne.io.ResourceManagerModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 import junit.framework.TestCase;
 
@@ -30,6 +33,11 @@ public class FileResourceManagerTest extends TestCase {
 		}
 		rm = new FileResourceManager(file, pageSize);
 		rm.open();
+		
+	}
+	
+	public void tearDown() throws IOException{
+		rm.close();
 	}
 	
 	public void testCreation() throws IOException{
@@ -52,7 +60,6 @@ public class FileResourceManagerTest extends TestCase {
 		
 		// test saving the page
 		p.save();
-		rm.close();
 		assertEquals(pageSize, file.length());
 	}
 }

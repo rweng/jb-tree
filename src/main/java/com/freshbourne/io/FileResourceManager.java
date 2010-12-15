@@ -27,13 +27,13 @@ import java.nio.channels.OverlappingFileLockException;
  */
 public class FileResourceManager implements ResourceManager {
 	private RandomAccessFile handle;
-	private File file;
-	private int pageSize;
+	private final File file;
+	private final int pageSize;
 	private int numberOfPages = 0;
 	private FileLock fileLock;
 	private FileChannel ioChannel;
 
-	public FileResourceManager(File f, int pageSize){
+	FileResourceManager(File f, int pageSize){
 		this.file = f;
 		this.pageSize = pageSize;
 	}
@@ -59,9 +59,8 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#newPage()
 	 */
 	@Override
+	@MustBeOpen
 	public Page newPage() throws IOException {
-		channelIsOpen();
-		
 		byte[] bytes = new byte[pageSize];
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
 		
@@ -84,8 +83,8 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#writePage(com.freshbourne.io.Page)
 	 */
 	@Override
+	@MustBeOpen
 	public void writePage(Page page) throws IOException {
-		channelIsOpen();
 		ioChannel.write(page.getBuffer(), (page.getId() - 1) * pageSize);
 	}
 
@@ -93,17 +92,19 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#readPage(int)
 	 */
 	@Override
+	@MustBeOpen
 	public Page readPage(int pageId) throws IOException {
-		channelIsOpen();
-		// TODO Auto-generated method stub
-		return null;
+		ByteBuffer buf = ByteBuffer.wrap(new byte[getPageSize()]);
+		ioChannel.read(buf, (pageId - 1) * getPageSize());
+		return new Page(buf, pageId, this);
 	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ResourceManager#close()
 	 */
 	@Override
-	public void close() throws IOException {
+	public void close() {
+		try{
 		if(ioChannel != null){
 			ioChannel.close();
 			ioChannel = null;
@@ -119,6 +120,8 @@ public class FileResourceManager implements ResourceManager {
 			handle.close();
 			handle = null;
 		}
+		} catch (Exception ignored) {
+		}
 	}
 
 	/* (non-Javadoc)
@@ -133,8 +136,8 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#numberOfPages()
 	 */
 	@Override
+	@MustBeOpen
 	public int getNumberOfPages() throws IOException {
-		channelIsOpen();
 		return numberOfPages;
 	}
 
@@ -179,9 +182,7 @@ public class FileResourceManager implements ResourceManager {
 		}
 	}
 	
-	private void channelIsOpen() throws IOException{
-		if(ioChannel == null || !ioChannel.isOpen()){
-			throw new IOException("File not open");
-		}
+	public boolean isOpen() {
+		return !(ioChannel == null || !ioChannel.isOpen());
 	}
 }
