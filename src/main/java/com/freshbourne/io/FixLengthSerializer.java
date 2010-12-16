@@ -5,21 +5,17 @@
  * 
  * (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.multimap.btree;
-
-import com.freshbourne.multimap.MultiMap;
+package com.freshbourne.io;
 
 /**
- * Abstract class for all nodes of a B-Tree
+ * A Serializer that serializes always to the same String/Buffer length
  * 
  * @author "Robin Wenglewski <robin@wenglewski.de>"
  *
  */
-public interface Node<K extends Comparable<? super K>,V> extends MultiMap<K, V> {
-	
+public interface FixLengthSerializer<InputType, ResultType> extends Serializer<InputType, ResultType> {
 	/**
-	 * @return the number of values in or under this node
+	 * @return length of the object returned by {@link serialize()}
 	 */
-	public abstract int size();
-
+	public int serializedLength();
 }

@@ -23,7 +23,7 @@ public class PageBody {
 		return buffer.hashCode();
 	}
 	
-	int size(){
+	public int bufferSize(){
 		return buffer.limit();
 	}
 }

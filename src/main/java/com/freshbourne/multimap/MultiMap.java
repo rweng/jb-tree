@@ -33,11 +33,6 @@ public interface MultiMap<K, V> {
 	public int size();
 	
 	/**
-	 * @return true if {@link #size()} == 0
-	 */
-	public boolean isEmpty();
-	
-	/**
 	 * @return boolean if the key is contained in the map
 	 */
 	public boolean containsKey(K key);
@@ -62,8 +57,10 @@ public interface MultiMap<K, V> {
      * 
      * @param key
      * @param value
+     * 
+     * @return if the operation was successful
      */
-    void add(K key, V value);
+    void add(K key, V value) throws Exception;
     
     /**
      * Removes the key with all its associated values from the map.

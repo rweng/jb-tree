@@ -10,6 +10,7 @@ package com.freshbourne.io;
 import java.io.File;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 import com.google.inject.matcher.Matchers;
 
 public class FileResourceManagerModule extends AbstractModule{
@@ -33,8 +34,11 @@ public class FileResourceManagerModule extends AbstractModule{
 	@Override
 	protected void configure() {
 		bindInterceptor(Matchers.any(), Matchers.annotatedWith(MustBeOpen.class), new IsOpenEnsurer());
+		
 		bind(Integer.class).annotatedWith(PageSize.class).toInstance(pageSize);
 		bind(File.class).annotatedWith(ResourceFile.class).toInstance(file);
+		
+		bind(ResourceManager.class).to(FileResourceManager.class).in(Singleton.class);
 	}
 	
 }

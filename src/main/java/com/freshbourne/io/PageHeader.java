@@ -25,9 +25,9 @@ public class PageHeader {
 		buffer.putInt(hash);
 	}
 	
-	static int size(){ return 4; }
+	static int bufferSize(){ return 4; }
 	
-	int bodyHash(){
+	public int bodyHash(){
 		buffer.position(0);
 		return buffer.getInt();
 	}

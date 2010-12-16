@@ -32,10 +32,10 @@ public class Page {
 		this.resourceManager = rm;
 		
 		buffer.position(0);
-		buffer.limit(PageHeader.size());
+		buffer.limit(PageHeader.bufferSize());
 		this.header = new PageHeader(this, buffer.slice());
 		buffer.limit(buffer.capacity());
-		buffer.position(PageHeader.size());
+		buffer.position(PageHeader.bufferSize());
 		this.body = new PageBody(this, buffer.slice());
 		buffer.limit(buffer.capacity());
 	}

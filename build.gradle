@@ -4,10 +4,11 @@ apply plugin: 'eclipse'
 repositories {
     mavenCentral()
 	mavenRepo urls: "http://guice-maven.googlecode.com/svn/trunk"
+	// mavenRepo urls: 
 }
 
 dependencies {
-	// compile "org.apache.hadoop:avro:1.3.3@jar"
+	compile "org.apache.avro:avro:1.4.1@jar"
 	// runtime "org.codehaus.jackson:jackson-mapper-asl:1.4.2" // dependency of avro 1.3.3
 	
 	compile "com.google.code.guice:guice:2.0.1@jar"

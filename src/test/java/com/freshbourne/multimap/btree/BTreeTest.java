@@ -32,7 +32,6 @@ public class BTreeTest extends TestCase {
 	public void testInitState(){
 		assertTrue(tree instanceof BTree);
 		assertEquals(0, tree.size());
-		assertTrue(tree.isEmpty());
 	}
 
 }
