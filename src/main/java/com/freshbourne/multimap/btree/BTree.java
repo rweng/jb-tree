@@ -7,12 +7,15 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.util.Comparator;
+
 public class BTree<K extends Comparable<? super K>, V> implements Node<K,V> {
 
 	private Node<K,V> root;
+	private final Comparator<K> comparator;
 	
-	BTree(){
-		
+	BTree(Comparator<K> comparator){
+		this.comparator = comparator;
 	}
 	
 	/* (non-Javadoc)

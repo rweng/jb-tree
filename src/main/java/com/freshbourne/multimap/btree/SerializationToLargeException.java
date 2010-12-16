@@ -12,7 +12,7 @@ public class SerializationToLargeException extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * @param object which caused the exception
+	 * @param o object which caused the exception
 	 */
 	public SerializationToLargeException(Object o) {
 		super("Serialization too large for Object: " + o.getClass().toString());

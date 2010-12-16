@@ -58,7 +58,6 @@ public interface MultiMap<K, V> {
      * @param key
      * @param value
      * 
-     * @return if the operation was successful
      */
     void add(K key, V value) throws Exception;
     
