@@ -16,18 +16,18 @@ package com.freshbourne.io;
 public class PagePointer {
 	
 	private int offset;
-	private int pageId;
+	private int id;
 	
 	
 	
 	/**
 	 * @param offset
-	 * @param pageId
+	 * @param id
 	 */
-	public PagePointer(int offset, int pageId) {
+	public PagePointer(int id, int offset) {
 		super();
 		this.offset = offset;
-		this.pageId = pageId;
+		this.id = id;
 	}
 	
 	/**
@@ -45,14 +45,19 @@ public class PagePointer {
 	/**
 	 * @param pageId the pageId to set
 	 */
-	public void setPageId(int pageId) {
-		this.pageId = pageId;
+	public void setId(int pageId) {
+		this.id = pageId;
 	}
 	/**
 	 * @return the pageId
 	 */
-	public int getPageId() {
-		return pageId;
+	public int getId() {
+		return id;
+	}
+	
+	public boolean equals(Object o){
+		return o instanceof PagePointer && ((PagePointer)o).getId() == getId() && 
+			((PagePointer)o).getOffset() == getOffset();
 	}
 
 }

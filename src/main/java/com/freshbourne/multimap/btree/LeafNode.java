@@ -30,7 +30,7 @@ public class LeafNode<K extends Comparable<? super K>,V> implements Node<K,V> {
 	private final RawPage page;
 	private final Serializer<K, byte[]> keySerializer;
 	private final Serializer<V, byte[]> valueSerializer;
-	private final Serializer<PagePointer, byte[]> pointerSerializer;
+	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	private final ResourceManager resourceManager;
 	
 	// right now, we always store key/value pairs. If the entries are not unique,
@@ -62,7 +62,7 @@ public class LeafNode<K extends Comparable<? super K>,V> implements Node<K,V> {
 		this.valueSerializer = valueSerializer;
 		this.pointerSerializer = pointerSerializer;
 		
-		this.serializedPointerSize = pointerSerializer.serializedLength();
+		this.serializedPointerSize = pointerSerializer.serializedLength(PagePointer.class);
 		maxEntries = page.body().length / serializedPointerSize;
 	}
 	
@@ -115,8 +115,8 @@ public class LeafNode<K extends Comparable<? super K>,V> implements Node<K,V> {
 			valuePage = resourceManager.readPage(lastValuePageId);
 		}
 		
-		DataPage<K> keyDataPage = new DataPage<K>(keyPage.body());
-		DataPage<V> valueDataPage = new DataPage<V>(valuePage.body());
+		DataPage keyDataPage = new DynamicDataPage(keyPage.body(), pointerSerializer);
+		DataPage valueDataPage = new DynamicDataPage(valuePage.body(), pointerSerializer);
 		
 		// int keyPos = keyDataPage.add(keyBytes);
 		

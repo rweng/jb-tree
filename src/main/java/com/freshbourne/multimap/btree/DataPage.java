@@ -7,61 +7,37 @@
  */
 package com.freshbourne.multimap.btree;
 
-import java.nio.ByteBuffer;
-
 import com.freshbourne.io.Page;
 
 /**
- * Wraps around a <code>byte[]</code> and can hold values of type T.
+ * Pages implementing this interface use the provided buffer to store data.
  * 
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
- * @param <T>
  */
-public class DataPage<T> implements Page{
+public interface DataPage extends Page{
 	
-	private final ByteBuffer p;
+	/**
+	 * adds some bytes to the underlying body. It is possible that the header
+	 * also grows through this process.
+	 * 
+	 * @param bytes array to be written
+	 * @return id of the entry/byte[] within this page
+	 */
+	public int add(byte[] bytes) throws Exception;
 	
-	DataPage(byte[] p){
-		this.p = ByteBuffer.wrap(p);
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.Page#initialize()
-	 */
-	@Override
-	public void initialize() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.Page#buffer()
-	 */
-	@Override
-	public byte[] buffer() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.Page#body()
-	 */
-	@Override
-	public byte[] body() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.Page#valid()
-	 */
-	@Override
-	public boolean valid() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 	
-	// add(value), remove_value, 
-
+	/**
+	 * @param id within this page
+	 * @return byte array with this id
+	 */
+	public byte[] get(int id) throws Exception;
+	
+	
+	/**
+	 * removes the byte array with the given id and truncates the page
+	 * @param id of the byte array to be removed
+	 * @throws ElementNotFoundException 
+	 */
+	public void remove(int id) throws ElementNotFoundException;
 }
