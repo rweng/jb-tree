@@ -67,7 +67,7 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	@MustBeOpen
-	public Page newPage() throws IOException {
+	public RawPage newPage() throws IOException {
 		byte[] bytes = new byte[pageSize];
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
 		
@@ -79,7 +79,7 @@ public class FileResourceManager implements ResourceManager {
 		// when creating a new Page, the buffer array provided to the page
 		// should be initialized by the Page constructor.
 		// The page header should be written to the buffer
-		Page page = new Page(buffer, getNumberOfPages() + 1 , this);
+		RawPage page = new RawPage(buffer, getNumberOfPages() + 1 , this);
 		
 		numberOfPages++;
 		
@@ -91,8 +91,9 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	@MustBeOpen
-	public void writePage(Page page) throws IOException {
-		ioChannel.write(page.getBuffer(), (page.getId() - 1) * pageSize);
+	public void writePage(RawPage page) throws IOException {
+		ByteBuffer buffer = ByteBuffer.wrap(page.buffer());
+		ioChannel.write(buffer, (page.getId() - 1) * pageSize);
 	}
 
 	/* (non-Javadoc)
@@ -100,10 +101,10 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	@MustBeOpen
-	public Page readPage(int pageId) throws IOException {
+	public RawPage readPage(int pageId) throws IOException {
 		ByteBuffer buf = ByteBuffer.wrap(new byte[getPageSize()]);
 		ioChannel.read(buf, (pageId - 1) * getPageSize());
-		return new Page(buf, pageId, this);
+		return new RawPage(buf, pageId, this);
 	}
 
 	/* (non-Javadoc)

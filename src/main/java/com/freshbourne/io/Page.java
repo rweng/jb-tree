@@ -1,79 +1,37 @@
 /**
+ * Copyright (C) 2010 Robin Wenglewski <robin@wenglewski.de>
+ *
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
- * For alternative conditions contact the author.
- * 
- * (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
+ * For alternative conditions contact the author. 
  */
 package com.freshbourne.io;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 /**
- * A Page is wraped around a {@link ByteBuffer} from a {@link ResourceManager}.
+ * Every class implementing thins interface wraps around a <code>byte[]</code>.
  * 
- * @author "Robin Wenglewski <robin@wenglewski.de>"
+ * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public class Page {
-	
-	private ByteBuffer buffer;
-	private int id;
-	private ResourceManager resourceManager;
-	private final PageHeader header;
-	private final PageBody body;
-	private boolean valid = false;
-	
-	
-	Page(ByteBuffer buffer, int id, ResourceManager rm){
-		this.buffer = buffer;
-		this.id = id;
-		this.resourceManager = rm;
-		
-		buffer.position(0);
-		buffer.limit(PageHeader.bufferSize());
-		this.header = new PageHeader(this, buffer.slice());
-		buffer.limit(buffer.capacity());
-		buffer.position(PageHeader.bufferSize());
-		this.body = new PageBody(this, buffer.slice());
-		buffer.limit(buffer.capacity());
-	}
+public interface Page {
+	/**
+	 * writes the header to the <code>byte[]</code> and makes the page valid
+	 */
+	public void initialize();
 	
 	/**
-	 * writes the header to the buffer.
-	 * Requires the buffer to be uninitialized.
+	 * @return the complete <code>byte[]</code> underneath this page.
 	 */
-	void initialize(){
-		header.bodyHash(body.hashCode());
-		valid = true;
-	}
+	public byte[] buffer();
 	
-	PageHeader getHeader(){
-		return header;
-	}
+	/**
+	 * @return the <code>byte[]</code> underneath this page without the header.
+	 */
+	public byte[] body();
 	
-	PageBody body(){
-		return body;
-	}
-	
-	boolean valid(){
-		return valid || header.bodyHash() == body.hashCode();
-	}
-	
-	ByteBuffer getBuffer(){
-		buffer.position(0);
-		return buffer.duplicate();
-	}
-	
-	public int size(){
-		return buffer.capacity();
-	}
-	
-	int getId(){return id;}
-	
-	ResourceManager getResourceManager(){return resourceManager;}
-	void save() throws IOException{
-		resourceManager.writePage(this);
-	}
+	/**
+	 * @return true if the <code>byte[]</code> is valid (e.g. header is written).
+	 */
+	public boolean valid();
+
 }

@@ -24,14 +24,14 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	private final ResourceManager rm;
 	private final int cacheSize;
 	
-	private ArrayBlockingQueue<Page> cache;
+	private ArrayBlockingQueue<RawPage> cache;
 	
 	
 	public BufferPoolManagerImpl(ResourceManager rm, int cacheSize) {
 		this.rm = rm;
 		this.cacheSize = cacheSize;
 		
-		cache = new ArrayBlockingQueue<Page>(cacheSize);
+		cache = new ArrayBlockingQueue<RawPage>(cacheSize);
 	}
 
 	/* (non-Javadoc)
@@ -46,7 +46,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	 * @see com.freshbourne.io.ResourceManager#newPage()
 	 */
 	@Override
-	public Page newPage() throws IOException {
+	public RawPage newPage() throws IOException {
 		return addToCache(rm.newPage());
 	}
 
@@ -54,7 +54,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	 * @see com.freshbourne.io.ResourceManager#writePage(com.freshbourne.io.Page)
 	 */
 	@Override
-	public void writePage(Page page) throws IOException {
+	public void writePage(RawPage page) throws IOException {
 		rm.writePage(page);
 	}
 
@@ -62,7 +62,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	 * @see com.freshbourne.io.ResourceManager#readPage(int)
 	 */
 	@Override
-	public Page readPage(int pageId) throws IOException {
+	public RawPage readPage(int pageId) throws IOException {
 		return addToCache(rm.readPage(pageId));
 	}
 
@@ -99,7 +99,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	}
 	
 	
-	private Page addToCache(Page p) throws IOException{
+	private RawPage addToCache(RawPage p) throws IOException{
 		if(cache.remainingCapacity() == 0){
 			rm.writePage(cache.poll());
 		}

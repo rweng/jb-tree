@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.freshbourne.io.FileResourceManager;
-import com.freshbourne.io.Page;
+import com.freshbourne.io.RawPage;
 import com.freshbourne.io.ResourceManager;
 import com.freshbourne.io.FileResourceManagerModule;
 import com.google.inject.Guice;
@@ -50,11 +50,11 @@ public class FileResourceManagerTest extends TestCase {
 	}
 	
 	public void testPageCreation() throws IOException{
-		Page p = rm.newPage();
+		RawPage p = rm.newPage();
 		
 		// test created page
-		assertTrue(p instanceof Page);
-		assertEquals(PageSize.DEFAULT_PAGE_SIZE, p.size());
+		assertTrue(p instanceof RawPage);
+		assertEquals(PageSize.DEFAULT_PAGE_SIZE, p.buffer().length);
 		assertEquals(1, p.getId());
 		assertEquals(rm, p.getResourceManager());
 		
