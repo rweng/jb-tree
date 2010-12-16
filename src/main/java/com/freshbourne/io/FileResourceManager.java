@@ -15,6 +15,9 @@ import java.nio.channels.FileLock;
 import java.nio.channels.FileChannel;
 import java.nio.channels.OverlappingFileLockException;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 
 /**
  * Provides access to Pages stored in a RandomAccessFile.
@@ -33,7 +36,8 @@ public class FileResourceManager implements ResourceManager {
 	private FileLock fileLock;
 	private FileChannel ioChannel;
 
-	FileResourceManager(File f, int pageSize){
+	@Inject
+	FileResourceManager(@ResourceFile File f, @PageSize int pageSize){
 		this.file = f;
 		this.pageSize = pageSize;
 	}

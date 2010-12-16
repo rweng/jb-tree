@@ -7,14 +7,26 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.io.File;
+
+import com.freshbourne.io.FileResourceManagerModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
 import junit.framework.TestCase;
 
 public class BTreeTest extends TestCase {
 	
-	BTree<String, String> tree;
+	private BTree<String, String> tree;
+	private final Injector injector;
+	
+	public BTreeTest(){
+		super();
+		injector = Guice.createInjector(new FileResourceManagerModule(new File("/tmp/btree_test_file")));
+	}
 	
 	public void setUp(){
-		tree = new BTree<String, String>();
+		tree = injector.getInstance(BTree.class);
 	}
 	
 	public void testInitState(){

@@ -9,12 +9,11 @@ package com.freshbourne.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 import com.freshbourne.io.FileResourceManager;
 import com.freshbourne.io.Page;
 import com.freshbourne.io.ResourceManager;
-import com.freshbourne.io.ResourceManagerModule;
+import com.freshbourne.io.FileResourceManagerModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -23,18 +22,21 @@ import junit.framework.TestCase;
 public class FileResourceManagerTest extends TestCase {
 	
 	private ResourceManager rm;
-	private int pageSize = 4048;
-	private File file;
-	private String path = "/tmp/frm_test";
+	private final File file;
+	private final Injector injector;
+	
+	public FileResourceManagerTest(){
+		super();
+		file = new File("/tmp/frm_test");
+		injector = Guice.createInjector(new FileResourceManagerModule(file));
+	}
 	
 	public void setUp() throws IOException {
-		file = new File(path);
 		if(file.exists()){
 			file.delete();
 		}
-		rm = new FileResourceManager(file, pageSize);
+		rm = injector.getInstance(FileResourceManager.class);
 		rm.open();
-		
 	}
 	
 	public void tearDown() throws IOException{
@@ -43,7 +45,7 @@ public class FileResourceManagerTest extends TestCase {
 	
 	public void testCreation() throws IOException{
 		assertTrue(rm instanceof ResourceManager);
-		assertEquals(pageSize,rm.getPageSize());
+		assertEquals(PageSize.DEFAULT_PAGE_SIZE,rm.getPageSize());
 		assertEquals(0, rm.getNumberOfPages());
 	}
 	
@@ -52,7 +54,7 @@ public class FileResourceManagerTest extends TestCase {
 		
 		// test created page
 		assertTrue(p instanceof Page);
-		assertEquals(pageSize, p.size());
+		assertEquals(PageSize.DEFAULT_PAGE_SIZE, p.size());
 		assertEquals(1, p.getId());
 		assertEquals(rm, p.getResourceManager());
 		
@@ -66,7 +68,7 @@ public class FileResourceManagerTest extends TestCase {
 				
 		// test saving the page
 		p.save();
-		assertEquals(pageSize, file.length());
+		assertEquals(PageSize.DEFAULT_PAGE_SIZE, file.length());
 		
 		rm.close();
 		rm.open();
@@ -75,10 +77,10 @@ public class FileResourceManagerTest extends TestCase {
 		
 		// altering the page size should throw an error
 		rm.close();
-		rm = new FileResourceManager(file, pageSize * 2);
+		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE * 2);
 		try{
 			rm.open();
-			fail("this should throw an error");
+			fail("opening a file with wrong pagesize should throw an error");
 		} catch (Exception e) {
 		}
 	}
