@@ -10,8 +10,10 @@ package com.freshbourne.multimap.btree;
 import java.io.File;
 
 import com.freshbourne.io.FileResourceManagerModule;
+import com.freshbourne.io.Serializer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.TypeLiteral;
 
 import junit.framework.TestCase;
 
@@ -23,10 +25,11 @@ public class BTreeTest extends TestCase {
 	public BTreeTest(){
 		super();
 		injector = Guice.createInjector(new FileResourceManagerModule(new File("/tmp/btree_test_file")));
+		//SerializerProvider<String, byte[]> p = injector.getProvider(TypeLiteral<Serializer<String,byte[]>>(){});
 	}
 	
 	public void setUp(){
-		tree = injector.getInstance(BTree.class);
+		//tree = injector.getInstance(BTree.class);
 	}
 	
 	public void testInitState(){
