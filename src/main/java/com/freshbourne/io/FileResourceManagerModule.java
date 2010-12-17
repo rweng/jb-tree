@@ -10,16 +10,22 @@ package com.freshbourne.io;
 import java.io.File;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.matcher.Matchers;
 
 public class FileResourceManagerModule extends AbstractModule{
 	
+	// ***** CONFIGURATION (CONSTRUCTURS) *****
 	private final File file;
 	private final int pageSize;
 	
 	public FileResourceManagerModule(File file){
 		this(file, PageSize.DEFAULT_PAGE_SIZE);
+	}
+	
+	public FileResourceManagerModule(String path){
+		this(new File(path));
 	}
 	
 	public FileResourceManagerModule(File file, int pageSize){
@@ -28,6 +34,9 @@ public class FileResourceManagerModule extends AbstractModule{
 		this.pageSize = pageSize;
 	}
 
+	
+	// ***** CONFIGURE *****
+	
 	/* (non-Javadoc)
 	 * @see com.google.inject.AbstractModule#configure()
 	 */
@@ -39,6 +48,11 @@ public class FileResourceManagerModule extends AbstractModule{
 		bind(File.class).annotatedWith(ResourceFile.class).toInstance(file);
 		
 		bind(ResourceManager.class).to(FileResourceManager.class).in(Singleton.class);
+	}
+	
+	@Provides
+	<T> DynamicDataPage<T> provideDataPage(ResourceManager rm){
+		return null;
 	}
 	
 }

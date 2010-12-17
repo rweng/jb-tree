@@ -23,7 +23,7 @@ public class BTreeTestModule extends AbstractModule {
 	 */
 	@Override
 	protected void configure() {
-		bind(LeafNode.class);
+		bind(LeafNodeImpl.class);
 		bind(new TypeLiteral<Serializer<String, byte[]>>(){}).to(StringSerializer.class);
 		bind(new TypeLiteral<Serializer<Integer, byte[]>>(){}).to(IntegerSerializer.class);
 		bind(new TypeLiteral<FixLengthSerializer<PagePointer, byte[]>>(){}).to(PagePointSerializer.class);	

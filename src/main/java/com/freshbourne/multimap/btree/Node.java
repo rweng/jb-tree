@@ -15,7 +15,7 @@ import com.freshbourne.multimap.MultiMap;
  * @author "Robin Wenglewski <robin@wenglewski.de>"
  *
  */
-public interface Node<K extends Comparable<? super K>,V> extends MultiMap<K, V> {
+public interface Node<K, V> extends MultiMap<K, V> {
 	
 	/**
 	 * @return the number of values in or under this node

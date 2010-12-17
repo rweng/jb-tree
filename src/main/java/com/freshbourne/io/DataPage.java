@@ -5,11 +5,10 @@
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author. 
  */
-package com.freshbourne.multimap.btree;
+package com.freshbourne.io;
 
 import java.nio.ByteBuffer;
 
-import com.freshbourne.io.Page;
 
 /**
  * Pages implementing this interface use the provided buffer to store data.
@@ -19,7 +18,7 @@ import com.freshbourne.io.Page;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public interface DataPage extends Page{
+public interface DataPage<T> extends Page{
 	
 	/**
 	 * adds some bytes to the underlying body. It is possible that the header
@@ -28,14 +27,14 @@ public interface DataPage extends Page{
 	 * @param bytes array to be written
 	 * @return id of the entry/byte[] within this page
 	 */
-	public int add(byte[] bytes) throws Exception;
+	public int add(T bytes) throws Exception;
 	
 	
 	/**
 	 * @param id within this page
 	 * @return byte array with this id
 	 */
-	public byte[] get(int id) throws Exception;
+	public T get(int id) throws Exception;
 	
 	
 	/**

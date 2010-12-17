@@ -5,7 +5,7 @@
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author. 
  */
-package com.freshbourne.multimap.btree;
+package com.freshbourne.io;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -13,9 +13,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
-import com.freshbourne.io.FixLengthSerializer;
-import com.freshbourne.io.Page;
-import com.freshbourne.io.PagePointer;
+import com.google.inject.Inject;
 
 /**
  * Wraps around a <code>byte[]</code> and can hold values.
@@ -28,7 +26,7 @@ import com.freshbourne.io.PagePointer;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public class DynamicDataPage implements DataPage{
+public class DynamicDataPage<T> implements DataPage<T>{
 	
 	private static final int intSize = 4;
 	
@@ -37,37 +35,39 @@ public class DynamicDataPage implements DataPage{
 	private final ByteBuffer buffer;
 	
 	private final FixLengthSerializer<PagePointer, byte[]> pointSerializer;
+	private final Serializer<T, byte[]> entrySerializer;
 	
 	/**
 	 * ByteBuffer.getInt returns 0 if no int could be read. To avoid thinking we already initialized the buffer,
 	 * we write down this number instead of 0 if we have no entries.
 	 */
 	private final int NO_ENTRIES_INT = 345234345;
+	private final Map<Integer, PagePointer> entries;
 	
 	private boolean valid = false;
 	
-	private Map<Integer, PagePointer> entries;
-	
-	DynamicDataPage(byte[] p, FixLengthSerializer<PagePointer, byte[]> pointSerializer){
-		this(ByteBuffer.wrap(p), pointSerializer);
-	}
-	DynamicDataPage(ByteBuffer p, FixLengthSerializer<PagePointer, byte[]> pointSerializer){
-		this.buffer = p;
-		this.pointSerializer = pointSerializer;
-		this.entries = new TreeMap<Integer, PagePointer>();
-		
+	@Inject
+	DynamicDataPage(
+			byte[] bytes, 
+			FixLengthSerializer<PagePointer, byte[]> pointSerializer, 
+			Serializer<T, byte[]> dataSerializer){
+		this.buffer = ByteBuffer.wrap(bytes);
 		this.header = buffer.duplicate();
 		this.body = buffer.duplicate();
+		this.pointSerializer = pointSerializer;
+		this.entrySerializer = dataSerializer;
 		
+		this.entries = new TreeMap<Integer, PagePointer>();
 		body.position(body.capacity());
 		
-		adjustHeader();
-		
+		adjustHeaderSize();
 	}
-	
-	private void adjustHeader(){
-		// we always (except the buffer is full) reserve space for one element
-		// + one element right on start for the number of elements in the page
+	/**
+	 * sets the size of the header dependent of the size of the entries array,
+	 * the size of a serialized entry and the size of an serialized Integer for the first
+	 * space (stating how many elements to read from the header-buffer)
+	 */
+	private void adjustHeaderSize(){
 		this.header.limit(pointSerializer.serializedLength(PagePointer.class) * (entries.size() + 1) + intSize );
 	}
 	
@@ -145,7 +145,9 @@ public class DynamicDataPage implements DataPage{
 	 * @see com.freshbourne.multimap.btree.DataPage#add(byte[])
 	 */
 	@Override
-	public int add(byte[] bytes) throws NoSpaceException {
+	public int add(T entry) throws NoSpaceException {
+		byte[] bytes = entrySerializer.serialize(entry);
+		
 		if(bytes.length > remaining())
 			throw new NoSpaceException();
 		
@@ -224,7 +226,7 @@ public class DynamicDataPage implements DataPage{
 	 * @see com.freshbourne.multimap.btree.DataPage#get(int)
 	 */
 	@Override
-	public byte[] get(int id) throws Exception {
+	public T get(int id) throws Exception {
 		PagePointer p = entries.get(id);
 		if( p == null){
 			throw new ElementNotFoundException();
@@ -235,7 +237,8 @@ public class DynamicDataPage implements DataPage{
 		byte[] bytes = new byte[size];
 		body.get(bytes);
 		body.position(pos);
-		return bytes;
+		
+		return entrySerializer.deserialize(bytes);
 	}
 	
 	private int sizeOfEntry(PagePointer p){
