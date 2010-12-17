@@ -92,7 +92,8 @@ public class FileResourceManager implements ResourceManager {
 	@Override
 	@MustBeOpen
 	public void writePage(RawPage page) throws IOException {
-		ByteBuffer buffer = ByteBuffer.wrap(page.buffer());
+		ByteBuffer buffer = page.buffer();
+		buffer.rewind();
 		ioChannel.write(buffer, (page.getId() - 1) * pageSize);
 	}
 

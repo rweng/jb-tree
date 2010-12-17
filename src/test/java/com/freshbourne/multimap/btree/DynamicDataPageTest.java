@@ -7,6 +7,8 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.nio.ByteBuffer;
+
 import com.freshbourne.io.FixLengthSerializer;
 import com.freshbourne.io.PagePointSerializer;
 import com.freshbourne.io.PagePointer;
@@ -26,35 +28,39 @@ public class DynamicDataPageTest extends TestCase {
 	
 	public void testCreation() throws Exception{
 		assertFalse(page.valid());
-		assertEquals(1000, page.buffer().length);
-		assertEquals(1000 - 4, page.body().length);
+		assertEquals(1000, page.buffer().capacity());
+		int ex =(1000 - 4 - serializer.serializedLength(PagePointer.class));
+		assertEquals(ex, page.body().capacity());
+		assertEquals(ex, page.remaining());
+		assertEquals(0, page.bodyUsed().capacity());
 		
 		page.initialize();
 		assertTrue(page.valid());
-		assertEquals(1000, page.buffer().length);
-		assertEquals(1000 - 8, page.body().length);
+		assertEquals(1000, page.buffer().capacity());
+		assertEquals(ex, page.body().capacity());
 		
-		Float f = new Float(1.4);
-		byte[] fbytes = {f.byteValue()};
+		Integer f = new Integer(55);
+		byte[] fbytes = new byte[4];
+		ByteBuffer.wrap(fbytes).putInt(f);
 		int fbytesId = page.add(fbytes);
 		
 		final String s = "blast";
 		int sId = page.add(s.getBytes());
 		
 		final String s2 = "blastsdfds";
-		int s2Id = page.add(s.getBytes());
+		int s2Id = page.add(s2.getBytes());
 		
-		assertEquals(fbytes, page.get(fbytesId) );
-		assertEquals(s2, page.get(s2Id) );
-		assertEquals(s, page.get(sId) );
+		assertEquals(fbytes.length, page.get(fbytesId).length );
+		String s2result = new String(page.get(s2Id));
+		assertEquals(s2, s2result  );
+		assertEquals(s, new String(page.get(sId)) );
 		
 		page.remove(sId);
-		
-		assertEquals(fbytes, page.get(fbytesId) );
-		assertEquals(s2, page.get(s2Id) );
+		assertEquals(f, (Integer) ByteBuffer.wrap(page.get(fbytesId)).getInt() );
+		assertEquals(s2, new String(page.get(s2Id)) );
 		
 		try{
-			page.get(s2Id);
+			page.get(sId);
 			fail("getting data with a removed id should fail");
 		} catch (Exception expected) {
 		}
@@ -68,11 +74,11 @@ public class DynamicDataPageTest extends TestCase {
 		
 		page = new DynamicDataPage(bytes, serializer);
 		assertTrue(page.valid());
-		assertEquals(fbytes, page.get(fbytesId) );
-		assertEquals(s2, page.get(s2Id) );
+		assertEquals(f, (Integer)ByteBuffer.wrap(page.get(fbytesId)).getInt() );
+		assertEquals(s2, new String(page.get(s2Id)) );
 		
 		try{
-			page.get(s2Id);
+			page.get(sId);
 			fail("getting data with a removed id should fail");
 		} catch (Exception expected) {
 		}		

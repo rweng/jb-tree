@@ -27,7 +27,6 @@ import com.freshbourne.io.PagePointer;
  * 
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
- * @param <T>
  */
 public class DynamicDataPage implements DataPage{
 	
@@ -38,20 +37,32 @@ public class DynamicDataPage implements DataPage{
 	private final ByteBuffer buffer;
 	
 	private final FixLengthSerializer<PagePointer, byte[]> pointSerializer;
-	private boolean valid = true;
+	
+	/**
+	 * ByteBuffer.getInt returns 0 if no int could be read. To avoid thinking we already initialized the buffer,
+	 * we write down this number instead of 0 if we have no entries.
+	 */
+	private final int NO_ENTRIES_INT = 345234345;
+	
+	private boolean valid = false;
 	
 	private Map<Integer, PagePointer> entries;
 	
-	
 	DynamicDataPage(byte[] p, FixLengthSerializer<PagePointer, byte[]> pointSerializer){
-		this.buffer = ByteBuffer.wrap(p);
+		this(ByteBuffer.wrap(p), pointSerializer);
+	}
+	DynamicDataPage(ByteBuffer p, FixLengthSerializer<PagePointer, byte[]> pointSerializer){
+		this.buffer = p;
 		this.pointSerializer = pointSerializer;
 		this.entries = new TreeMap<Integer, PagePointer>();
 		
 		this.header = buffer.duplicate();
 		this.body = buffer.duplicate();
 		
+		body.position(body.capacity());
+		
 		adjustHeader();
+		
 	}
 	
 	private void adjustHeader(){
@@ -66,24 +77,27 @@ public class DynamicDataPage implements DataPage{
 	@Override
 	public void initialize() {
 		header.position(0);
-		header.putInt(0);
+		header.putInt(NO_ENTRIES_INT);
 	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.Page#buffer()
 	 */
 	@Override
-	public byte[] buffer() {
-		return buffer.array();
+	public ByteBuffer buffer() {
+		return buffer.asReadOnlyBuffer();
 	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.Page#body()
 	 */
 	@Override
-	public byte[] body() {
-		body.reset();
-		return body.slice().array();
+	public ByteBuffer body() {
+		int pos = body.position();
+		body.position(header.limit());
+		ByteBuffer result = body.slice();
+		body.position(pos);
+		return result;
 	}
 
 	/* (non-Javadoc)
@@ -103,12 +117,22 @@ public class DynamicDataPage implements DataPage{
 			header.position(0);
 
 			int elements = header.getInt();
+			
+			// 0 is never written
+			if(elements == 0)
+				return valid = false;
+			if(elements == NO_ENTRIES_INT)
+				return valid = true;
+			
 			for (int i = 0; i < elements; i++) {
 				byte[] bytes = new byte[pointSerializer
 						.serializedLength(PagePointer.class)];
 				header.get(bytes);
 				PagePointer p = pointSerializer.deserialize(bytes);
 				entries.put(p.getId(), p);
+				header.limit(header.position() + pointSerializer
+						.serializedLength(PagePointer.class));
+				
 			}
 		} catch (Exception e) {
 			return valid = false;
@@ -122,16 +146,14 @@ public class DynamicDataPage implements DataPage{
 	 */
 	@Override
 	public int add(byte[] bytes) throws NoSpaceException {
-		body.reset();
-		int remaining = buffer.capacity() - header.limit() - body.position();
-		if(bytes.length > remaining)
+		if(bytes.length > remaining())
 			throw new NoSpaceException();
 		
 		body.position(body.position() - bytes.length);
-		body.mark();
+		int pos = body.position();
 		body.put(bytes);
 		
-		body.reset();
+		body.position(pos);
 		int id = generateId();
 		PagePointer p = new PagePointer(id, body.position());
 		entries.put(p.getId(), p);
@@ -155,7 +177,7 @@ public class DynamicDataPage implements DataPage{
 		header.position(header.limit()-size);
 		header.put(pointSerializer.serialize(p));
 		
-		if(buffer.capacity() - header.position() - body().length > size)
+		if(buffer.capacity() - header.position() - bodyUsed().capacity() > size)
 			header.limit(header.position() + size);
 	}
 
@@ -164,14 +186,14 @@ public class DynamicDataPage implements DataPage{
 	 */
 	@Override
 	public void remove(int id) throws ElementNotFoundException {
+		
 		PagePointer p = entries.remove(id);
 		if(p == null)
 			throw new ElementNotFoundException();
 		
-		
+		// move all body elements
 		int size = sizeOfEntry(p);
-		body.reset();
-		System.arraycopy(buffer.array(), body.position(), buffer.array(), body.position() + size, size);
+		System.arraycopy(buffer.array(), body.position(), buffer.array(), body.position() + size, p.getOffset() - body.position() );
 		
 		// adjust the entries in the entries array
 		for(PagePointer c : entries.values()){
@@ -188,7 +210,7 @@ public class DynamicDataPage implements DataPage{
 	 */
 	private void writeAndAdjustHeader() {
 		header.position(0);
-		header.putInt(entries.size());
+		header.putInt(entries.size() == 0 ? NO_ENTRIES_INT : entries.size());
 		
 		int size = pointSerializer.serializedLength(PagePointer.class);
 		for(PagePointer p : entries.values()){
@@ -207,26 +229,46 @@ public class DynamicDataPage implements DataPage{
 		if( p == null){
 			throw new ElementNotFoundException();
 		}
-		
+		int pos = body.position();
 		body.position(p.getOffset());
 		int size = sizeOfEntry(p);
 		byte[] bytes = new byte[size];
 		body.get(bytes);
+		body.position(pos);
 		return bytes;
 	}
 	
 	private int sizeOfEntry(PagePointer p){
-		return nextEntry(p).getOffset() - p.getOffset();
+		PagePointer next = nextEntry(p);
+		int capacity =body.capacity();
+		int pos = body.position();
+		return next == null ? capacity - pos : next.getOffset() - p.getOffset();
 	}
 	
 	private PagePointer nextEntry(PagePointer p){
 		PagePointer next = null;
 		for(PagePointer current : entries.values()){
 			if(current.getOffset() > p.getOffset()){
-				if(next == null || next.getOffset() < current.getOffset())
+				if(next == null || next.getOffset() > current.getOffset())
 					next = current;
 			}
 		}
 		return next;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.DataPage#bodyUsed()
+	 */
+	@Override
+	public ByteBuffer bodyUsed() {
+		return body.slice();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.DataPage#remaining()
+	 */
+	@Override
+	public int remaining() {
+		return buffer.capacity() - header.limit() - bodyUsed().capacity();
 	}
 }

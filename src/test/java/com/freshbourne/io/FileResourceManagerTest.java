@@ -9,6 +9,7 @@ package com.freshbourne.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import com.freshbourne.io.FileResourceManager;
 import com.freshbourne.io.RawPage;
@@ -54,7 +55,7 @@ public class FileResourceManagerTest extends TestCase {
 		
 		// test created page
 		assertTrue(p instanceof RawPage);
-		assertEquals(PageSize.DEFAULT_PAGE_SIZE, p.buffer().length);
+		assertEquals(PageSize.DEFAULT_PAGE_SIZE, p.buffer().capacity());
 		assertEquals(1, p.getId());
 		assertEquals(rm, p.getResourceManager());
 		
@@ -74,6 +75,8 @@ public class FileResourceManagerTest extends TestCase {
 		rm.open();
 		p = rm.readPage(1);
 		assertTrue(p.valid());
+		assertEquals(PageSize.DEFAULT_PAGE_SIZE, p.buffer().capacity());
+		assertEquals(PageSize.DEFAULT_PAGE_SIZE - 4, p.body().capacity());
 		
 		// altering the page size should throw an error
 		rm.close();
@@ -85,6 +88,20 @@ public class FileResourceManagerTest extends TestCase {
 		}
 	}
 	
-	
-	
+	public void testByteBuffer(){
+		ByteBuffer b = ByteBuffer.allocate(100);
+		int pos = 10;
+		b.position(pos);
+		b.mark();
+		b.position(100);
+		b.reset();
+		assertEquals(pos, b.position());
+		
+		b.slice();
+		assertEquals(pos, b.position());
+		b.reset();
+		assertEquals(pos, b.position());
+		
+		
+	}
 }

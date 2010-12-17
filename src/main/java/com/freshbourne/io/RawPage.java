@@ -71,14 +71,14 @@ public class RawPage implements Page {
 	/**
 	 * @return complete buffer under the page, with random position and limit
 	 */
-	public byte[] buffer() {
-		return buffer.array();
+	public ByteBuffer buffer() {
+		return buffer.asReadOnlyBuffer();
 	}
 
 	/**
 	 * @return buffer without the header with random position and limit
 	 */
-	public byte[] body() {
-		return body.array();
+	public ByteBuffer body() {
+		return body;
 	}
 }

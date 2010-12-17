@@ -7,8 +7,14 @@
  */
 package com.freshbourne.io;
 
+import java.nio.ByteBuffer;
+
 /**
  * Every class implementing thins interface wraps around a <code>byte[]</code>.
+ * 
+ * ByteBuffer is used instead of <code>byte[]</code> since it is not possible to slice a byte
+ * array in smaller pieces. Thus, also for example body returns a ByteBuffer over the body,
+ * the Array backing the ByteBuffer is still the full page byte array!
  * 
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
@@ -20,14 +26,14 @@ public interface Page {
 	public void initialize();
 	
 	/**
-	 * @return the complete <code>byte[]</code> underneath this page.
+	 * @return a readOnly ByteBuffer over the complete <code>byte[]</code> underneath this page
 	 */
-	public byte[] buffer();
+	public ByteBuffer buffer();
 	
 	/**
-	 * @return the <code>byte[]</code> underneath this page without the header.
+	 * @return a ByteBuffer over the<code>byte[]</code> underneath this page without the header.
 	 */
-	public byte[] body();
+	public ByteBuffer body();
 	
 	/**
 	 * @return true if the <code>byte[]</code> is valid (e.g. header is written).
