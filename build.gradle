@@ -4,7 +4,7 @@ apply plugin: 'eclipse'
 repositories {
     mavenCentral()
 	mavenRepo urls: "http://guice-maven.googlecode.com/svn/trunk"
-	// mavenRepo urls: 
+	mavenRepo urls: "http://repository.codehaus.org"
 }
 
 dependencies {
@@ -14,9 +14,23 @@ dependencies {
 	compile "com.google.code.guice:guice:2.0.1@jar"
 	compile "aopalliance:aopalliance:1.0@jar"
 	compile "junit:junit:4.8.2@jar"
+	compile "org.jbehave:jbehave:3.1.2@jar"
 	
 }
 
 //************* java plugin configuration ********************
 sourceCompatibility = 1.6
 version = '0.01'
+
+
+// cuke4duke
+apply plugin:com.smokejumperit.gradle.ExecPlugin
+
+buildscript {
+  repositories {
+	mavenRepo urls:'http://repo.smokejumperit.com'
+  }
+  dependencies {
+	classpath 'com.smokejumperit:gradle-plugins:0.6.7'
+  }
+}

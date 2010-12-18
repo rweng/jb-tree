@@ -50,9 +50,9 @@ public class FileResourceManagerModule extends AbstractModule{
 		bind(ResourceManager.class).to(FileResourceManager.class).in(Singleton.class);
 	}
 	
-	@Provides
-	<T> DynamicDataPage<T> provideDataPage(ResourceManager rm){
-		return null;
-	}
+//	@Provides
+//	<T> DynamicDataPage<T> provideDataPage(ResourceManager rm){
+//		return null;
+//	}
 	
 }

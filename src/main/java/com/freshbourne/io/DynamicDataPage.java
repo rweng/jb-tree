@@ -21,7 +21,7 @@ import com.google.inject.Inject;
  * Since its a dynamic data page, values are written first at the end of the body to allow
  * the header to grow.
  * 
- * The PagePointer of the header are kept in Memory
+ * The header is kept in memory.
  * 
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
@@ -244,7 +244,7 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	private int sizeOfEntry(PagePointer p){
 		PagePointer next = nextEntry(p);
 		int capacity =body.capacity();
-		int pos = body.position();
+		int pos = p.getOffset();
 		return next == null ? capacity - pos : next.getOffset() - p.getOffset();
 	}
 	

@@ -8,24 +8,19 @@
 package com.freshbourne.io;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.freshbourne.multimap.btree.BTreeModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
-import com.sun.tools.corba.se.idl.constExpr.GreaterThan;
-import com.sun.tools.corba.se.idl.constExpr.LessThan;
-
 import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
-
 
 public class DynamicDataPageSpec {
 	
 	private DynamicDataPage<String> page;
+	
+	// some test strings to insert
+	private String s1 = "blubla";
+	private String s2 = "blast";
+	private String s3 = "ups";
+	
 	
 	@Before
 	public void setUp(){
@@ -51,7 +46,29 @@ public class DynamicDataPageSpec {
 	public void shouldGetSmallerWhenInsertingSomething() throws NoSpaceException{
 		int rest = page.remaining();
 		page.add("bla");
-		//assertThat(is(rest), gre(page.remaining()));
+		assertTrue(rest > page.remaining());
+	}
+	
+	@Test
+	public void shouldBeAbleToReturnInsertedItems() throws Exception{
+		
+		int id1 = page.add(s1);
+		int id2 = page.add(s2);
+		int id3 = page.add(s3);
+		
+		assertEquals(s1, page.get(id1));
+		assertEquals(s3, page.get(id3));
+		
+		page.remove(id1);
+		assertEquals(s2, page.get(id2));
+		assertEquals(s3, page.get(id3));
+	}
+	
+	@Test(expected= Exception.class)
+	public void shouldThrowAnExceptionWhenEntryWasRemoved() throws Exception {
+		int id = page.add(s3);
+		page.remove(id);
+		page.get(id);
 	}
 	
 }
