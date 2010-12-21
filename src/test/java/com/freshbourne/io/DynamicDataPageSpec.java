@@ -7,10 +7,13 @@
  */
 package com.freshbourne.io;
 
+import java.util.Observer;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class DynamicDataPageSpec {
 	
@@ -32,9 +35,13 @@ public class DynamicDataPageSpec {
 	
 	@Test
 	public void shouldHaveToInitialize(){
+		Observer mockObserver = mock(Observer.class);
+		page.addObserver(mockObserver);
+		
 		assertFalse(page.valid());
 		page.initialize();
 		assertTrue(page.valid());
+		verify(mockObserver).update(page, null);
 	}
 	
 	@Test(expected= Exception.class)
@@ -69,6 +76,26 @@ public class DynamicDataPageSpec {
 		int id = page.add(s3);
 		page.remove(id);
 		page.get(id);
+	}
+	
+	@Test
+	public void shouldNotifyObservers() throws NoSpaceException, ElementNotFoundException{
+		Observer mockObserver = mock(Observer.class);
+		page.addObserver(mockObserver);
+		
+		int id = page.add("blast");
+		verify(mockObserver).update(page, null);
+		
+		page.remove(id);
+		verify(mockObserver, times(2)).update(page, null);
+	}
+	
+	@Test
+	public void shouldHaveSameSizeAfterInsertAndRemove() throws NoSpaceException, ElementNotFoundException{
+		int size = page.remaining();
+		int id = page.add("blast");
+		page.remove(id);
+		assertEquals(size, page.remaining());
 	}
 	
 }

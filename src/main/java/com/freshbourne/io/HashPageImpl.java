@@ -7,32 +7,23 @@
  */
 package com.freshbourne.io;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Observable;
 
 
 /**
- * A page is wrapped around a {@link ByteBuffer}. 
- * 
- * The page is provided by the {@link ResourceManager} and has a for this manager unique pageId.
- * 
  * @author Robin Wenglewski <robin@wenglewski.de>
- *
  */
-public class RawPage implements Page {
+public class HashPageImpl extends Observable implements HashPage {
 	
 	private ByteBuffer buffer;
-	private int id;
-	private ResourceManager resourceManager;
 	private final PageHeader header;
 	private final ByteBuffer body;
 	private boolean valid = false;
 	
 	
-	RawPage(ByteBuffer buffer, int id, ResourceManager rm){
+	HashPageImpl(ByteBuffer buffer){
 		this.buffer = buffer;
-		this.id = id;
-		this.resourceManager = rm;
 		
 		// create the header
 		buffer.position(0);
@@ -61,13 +52,6 @@ public class RawPage implements Page {
 		return valid || header.bodyHash() == body.hashCode();
 	}
 	
-	int getId(){return id;}
-	
-	ResourceManager getResourceManager(){return resourceManager;}
-	void save() throws IOException{
-		resourceManager.writePage(this);
-	}
-
 	/**
 	 * @return complete buffer under the page, with random position and limit
 	 */

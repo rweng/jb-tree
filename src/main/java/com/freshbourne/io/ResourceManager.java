@@ -18,9 +18,9 @@ import java.io.IOException;
 public interface ResourceManager {
 	
 	void open() throws IOException;
-	RawPage newPage() throws IOException;
-	void writePage(RawPage page) throws IOException;
-	RawPage readPage(int pageId) throws IOException;
+	HashPageImpl newPage() throws IOException;
+	void writePage(HashPageImpl page) throws IOException;
+	HashPageImpl readPage(int pageId) throws IOException;
 	void close();
 	int getPageSize();
 	int getNumberOfPages() throws IOException;

@@ -10,10 +10,10 @@ package com.freshbourne.io;
 import java.nio.ByteBuffer;
 
 public class PageHeader {
-	private final RawPage page;
+	private final HashPageImpl page;
 	private final ByteBuffer buffer;
 	
-	PageHeader(RawPage page, ByteBuffer buffer){
+	PageHeader(HashPageImpl page, ByteBuffer buffer){
 		this.page = page;
 		this.buffer = buffer;
 	}

@@ -67,23 +67,24 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	@MustBeOpen
-	public RawPage newPage() throws IOException {
-		byte[] bytes = new byte[pageSize];
-		ByteBuffer buffer = ByteBuffer.wrap(bytes);
-		
-		if(file.length() > Integer.MAX_VALUE){
-			//TODO: enable this!
-			throw new IOException("Cannot write to a file larger than Integer.MAX_VALUE bytes. TODO: enable this. ");
-		}
-		
-		// when creating a new Page, the buffer array provided to the page
-		// should be initialized by the Page constructor.
-		// The page header should be written to the buffer
-		RawPage page = new RawPage(buffer, getNumberOfPages() + 1 , this);
-		
-		numberOfPages++;
-		
-		return page;
+	public HashPageImpl newPage() throws IOException {
+		return null;
+//		byte[] bytes = new byte[pageSize];
+//		ByteBuffer buffer = ByteBuffer.wrap(bytes);
+//		
+//		if(file.length() > Integer.MAX_VALUE){
+//			//TODO: enable this!
+//			throw new IOException("Cannot write to a file larger than Integer.MAX_VALUE bytes. TODO: enable this. ");
+//		}
+//		
+//		// when creating a new Page, the buffer array provided to the page
+//		// should be initialized by the Page constructor.
+//		// The page header should be written to the buffer
+//		RawPage page = new RawPage(buffer, getNumberOfPages() + 1 , this);
+//		
+//		numberOfPages++;
+//		
+//		return page;
 	}
 
 	/* (non-Javadoc)
@@ -91,10 +92,10 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	@MustBeOpen
-	public void writePage(RawPage page) throws IOException {
+	public void writePage(HashPageImpl page) throws IOException {
 		ByteBuffer buffer = page.buffer();
 		buffer.rewind();
-		ioChannel.write(buffer, (page.getId() - 1) * pageSize);
+		//ioChannel.write(buffer, (page.getId() - 1) * pageSize);
 	}
 
 	/* (non-Javadoc)
@@ -102,10 +103,11 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	@MustBeOpen
-	public RawPage readPage(int pageId) throws IOException {
-		ByteBuffer buf = ByteBuffer.wrap(new byte[getPageSize()]);
-		ioChannel.read(buf, (pageId - 1) * getPageSize());
-		return new RawPage(buf, pageId, this);
+	public HashPageImpl readPage(int pageId) throws IOException {
+		return null;
+//		ByteBuffer buf = ByteBuffer.wrap(new byte[getPageSize()]);
+//		ioChannel.read(buf, (pageId - 1) * getPageSize());
+//		return new HashPageImpl(buf, pageId, this);
 	}
 
 	/* (non-Javadoc)

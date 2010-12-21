@@ -5,6 +5,7 @@ repositories {
     mavenCentral()
 	mavenRepo urls: "http://guice-maven.googlecode.com/svn/trunk"
 	mavenRepo urls: "http://repository.codehaus.org"
+	mavenRepo urls: "http://perfectjpattern.sourceforge.net/m2repo"
 }
 
 dependencies {
@@ -13,8 +14,15 @@ dependencies {
 	
 	compile "com.google.code.guice:guice:2.0.1@jar"
 	compile "aopalliance:aopalliance:1.0@jar"
+	
 	compile "junit:junit:4.8.2@jar"
-	compile "org.jbehave:jbehave:3.1.2@jar"
+	compile "org.mockito:mockito-all:1.8.5@jar"
+	
+	compile "perfectjpattern:perfectjpattern-core:1.0.2@jar"
+	compile "perfectjpattern:perfectjpattern-api:1.0.2@jar"
+	
+	
+	// compile "org.jbehave:jbehave:3.1.2@jar"
 	
 }
 

@@ -14,7 +14,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * 
- * provides access to pages
+ * provides access to pages. Whereas the ResourceManager only reads and writes
+ * Pages, the BufferPoolManager also caches them and makes sure old pages
+ * are written to disk.
  * 
  * @author "Robin Wenglewski <robin@wenglewski.de>"
  *
@@ -24,14 +26,14 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	private final ResourceManager rm;
 	private final int cacheSize;
 	
-	private ArrayBlockingQueue<RawPage> cache;
+	private ArrayBlockingQueue<HashPageImpl> cache;
 	
 	
 	public BufferPoolManagerImpl(ResourceManager rm, int cacheSize) {
 		this.rm = rm;
 		this.cacheSize = cacheSize;
 		
-		cache = new ArrayBlockingQueue<RawPage>(cacheSize);
+		cache = new ArrayBlockingQueue<HashPageImpl>(cacheSize);
 	}
 
 	/* (non-Javadoc)
@@ -46,7 +48,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	 * @see com.freshbourne.io.ResourceManager#newPage()
 	 */
 	@Override
-	public RawPage newPage() throws IOException {
+	public HashPageImpl newPage() throws IOException {
 		return addToCache(rm.newPage());
 	}
 
@@ -54,7 +56,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	 * @see com.freshbourne.io.ResourceManager#writePage(com.freshbourne.io.Page)
 	 */
 	@Override
-	public void writePage(RawPage page) throws IOException {
+	public void writePage(HashPageImpl page) throws IOException {
 		rm.writePage(page);
 	}
 
@@ -62,7 +64,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	 * @see com.freshbourne.io.ResourceManager#readPage(int)
 	 */
 	@Override
-	public RawPage readPage(int pageId) throws IOException {
+	public HashPageImpl readPage(int pageId) throws IOException {
 		return addToCache(rm.readPage(pageId));
 	}
 
@@ -99,7 +101,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	}
 	
 	
-	private RawPage addToCache(RawPage p) throws IOException{
+	private HashPageImpl addToCache(HashPageImpl p) throws IOException{
 		if(cache.remainingCapacity() == 0){
 			rm.writePage(cache.poll());
 		}

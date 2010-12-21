@@ -10,6 +10,8 @@ package com.freshbourne.io;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -26,7 +28,7 @@ import com.google.inject.Inject;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public class DynamicDataPage<T> implements DataPage<T>{
+public class DynamicDataPage<T> extends Observable implements DataPage<T>{
 	
 	private static final int intSize = 4;
 	
@@ -36,6 +38,7 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	
 	private final FixLengthSerializer<PagePointer, byte[]> pointSerializer;
 	private final Serializer<T, byte[]> entrySerializer;
+	
 	
 	/**
 	 * ByteBuffer.getInt returns 0 if no int could be read. To avoid thinking we already initialized the buffer,
@@ -74,16 +77,17 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.Page#initialize()
 	 */
-	@Override
 	public void initialize() {
 		header.position(0);
 		header.putInt(NO_ENTRIES_INT);
+		
+		setChanged();
+		notifyObservers();
 	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.Page#buffer()
 	 */
-	@Override
 	public ByteBuffer buffer() {
 		return buffer.asReadOnlyBuffer();
 	}
@@ -91,7 +95,6 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.Page#body()
 	 */
-	@Override
 	public ByteBuffer body() {
 		int pos = body.position();
 		body.position(header.limit());
@@ -103,7 +106,6 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.Page#valid()
 	 */
-	@Override
 	public boolean valid(){
 		return valid(false);
 	}
@@ -133,6 +135,9 @@ public class DynamicDataPage<T> implements DataPage<T>{
 				header.limit(header.position() + pointSerializer
 						.serializedLength(PagePointer.class));
 				
+				setChanged();
+				notifyObservers();
+				
 			}
 		} catch (Exception e) {
 			return valid = false;
@@ -160,6 +165,9 @@ public class DynamicDataPage<T> implements DataPage<T>{
 		PagePointer p = new PagePointer(id, body.position());
 		entries.put(p.getId(), p);
 		addToHeader(p);
+		
+		setChanged();
+		notifyObservers();
 		return id;
 	}
 	
@@ -193,6 +201,8 @@ public class DynamicDataPage<T> implements DataPage<T>{
 		if(p == null)
 			throw new ElementNotFoundException();
 		
+		int pos = body.position();
+		
 		// move all body elements
 		int size = sizeOfEntry(p);
 		System.arraycopy(buffer.array(), body.position(), buffer.array(), body.position() + size, p.getOffset() - body.position() );
@@ -203,8 +213,14 @@ public class DynamicDataPage<T> implements DataPage<T>{
 				c.setOffset(c.getOffset() + size);
 		}
 		
+		
+		body.position(pos + size);
+		
 		// write the adjustments to byte array
-		writeAndAdjustHeader();		
+		writeAndAdjustHeader();
+		
+		setChanged();
+		notifyObservers();
 	}
 
 	/**
