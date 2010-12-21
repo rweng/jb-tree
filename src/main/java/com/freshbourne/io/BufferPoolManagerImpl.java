@@ -8,6 +8,8 @@
 package com.freshbourne.io;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -26,87 +28,56 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	private final ResourceManager rm;
 	private final int cacheSize;
 	
-	private ArrayBlockingQueue<HashPageImpl> cache;
+	private ArrayBlockingQueue<HashPage> cacheQueue;
+	private HashMap<Integer, HashPage> cache;
 	
 	
 	public BufferPoolManagerImpl(ResourceManager rm, int cacheSize) {
 		this.rm = rm;
 		this.cacheSize = cacheSize;
 		
-		cache = new ArrayBlockingQueue<HashPageImpl>(cacheSize);
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#open()
-	 */
-	@Override
-	public void open() throws IOException {
-		rm.open();
+		cacheQueue = new ArrayBlockingQueue<HashPage>(cacheSize);
 	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ResourceManager#newPage()
 	 */
 	@Override
-	public HashPageImpl newPage() throws IOException {
-		return addToCache(rm.newPage());
+	public HashPage newPage() {
+		HashPage p = new HashPage(ByteBuffer.allocate(rm.pageSize()), rm, 0);
+		p.initialize();
+		return p;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#writePage(com.freshbourne.io.Page)
-	 */
+	
 	@Override
-	public void writePage(HashPageImpl page) throws IOException {
-		rm.writePage(page);
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#readPage(int)
-	 */
-	@Override
-	public HashPageImpl readPage(int pageId) throws IOException {
+	public HashPage getPage(int pageId) throws IOException {
+		if(cache.get(pageId) != null)
+			return cache.get(pageId);
+		
 		return addToCache(rm.readPage(pageId));
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#close()
-	 */
-	@Override
-	public void close() {
-		rm.close();
-	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#getPageSize()
-	 */
-	@Override
-	public int getPageSize() {
-		return rm.getPageSize();
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#getNumberOfPages()
-	 */
-	@Override
-	public int getNumberOfPages() throws IOException {
-		return rm.getNumberOfPages();
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#isOpen()
-	 */
-	@Override
-	public boolean isOpen() {
-		return rm.isOpen();
-	}
-	
-	
-	private HashPageImpl addToCache(HashPageImpl p) throws IOException{
-		if(cache.remainingCapacity() == 0){
-			rm.writePage(cache.poll());
+	private HashPage addToCache(HashPage p) throws IOException{
+		if(cacheQueue.remainingCapacity() == 0){
+			HashPage toRemove = cacheQueue.poll();
+			rm.writePage(toRemove);
+			cache.remove(toRemove);
 		}
 		
-		cache.add(p);
+		cacheQueue.add(p);
+		cache.put(p.id(), p);
 		return p;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.BufferPoolManager#createPage()
+	 */
+	@Override
+	public HashPage createPage() throws IOException {
+		HashPage p = newPage();
+		p = rm.addPage(p);
+		return addToCache(p);
 	}
 }

@@ -11,54 +11,51 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.freshbourne.io.FileResourceManager;
-import com.freshbourne.io.HashPageImpl;
 import com.freshbourne.io.ResourceManager;
-import com.freshbourne.io.FileResourceManagerModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
-import junit.framework.TestCase;
+import  static org.junit.Assert.*;
 
-public class FileResourceManagerTest extends TestCase {
+public class FileResourceManagerSpec {
 	
 	private ResourceManager rm;
 	private final File file;
-	private final Injector injector;
 	
-	public FileResourceManagerTest(){
+	public FileResourceManagerSpec(){
 		super();
+		System.out.println("creating FileResourceManagerSpec");
 		file = new File("/tmp/frm_test");
-		injector = Guice.createInjector(new FileResourceManagerModule(file));
 	}
 	
+	@Before
 	public void setUp() throws IOException {
 		if(file.exists()){
 			file.delete();
 		}
-		rm = injector.getInstance(FileResourceManager.class);
+		
+		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE);
 		rm.open();
 	}
 	
+	@After
 	public void tearDown() throws IOException{
 		rm.close();
 	}
 	
-	public void testCreation() throws IOException{
+	@Test
+	public void shouldBeEmptyAtFirst() throws IOException{
 		assertTrue(rm instanceof ResourceManager);
-		assertEquals(PageSize.DEFAULT_PAGE_SIZE,rm.getPageSize());
-		assertEquals(0, rm.getNumberOfPages());
+		assertEquals(PageSize.DEFAULT_PAGE_SIZE,rm.pageSize());
+		assertEquals(0, file.length());
 	}
 	
-	public void testPageCreation() throws IOException{
-//		HashPageImpl p = rm.newPage();
-//		
-//		// test created page
-//		assertTrue(p instanceof HashPageImpl);
-//		assertEquals(PageSize.DEFAULT_PAGE_SIZE, p.buffer().capacity());
-//		assertEquals(1, p.getId());
-//		assertEquals(rm, p.getResourceManager());
-//		
+	
+	
+		
 //		// test rm
 //		assertEquals(1, rm.getNumberOfPages());
 //		
@@ -86,7 +83,7 @@ public class FileResourceManagerTest extends TestCase {
 //			fail("opening a file with wrong pagesize should throw an error");
 //		} catch (Exception e) {
 //		}
-	}
+	
 	
 	public void testByteBuffer(){
 		ByteBuffer b = ByteBuffer.allocate(100);

@@ -12,8 +12,8 @@ import java.nio.ByteBuffer;
 
 import com.freshbourne.io.DynamicDataPage;
 import com.freshbourne.io.FixLengthSerializer;
+import com.freshbourne.io.HashPage;
 import com.freshbourne.io.NoSpaceException;
-import com.freshbourne.io.HashPageImpl;
 import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.ResourceManager;
 import com.freshbourne.io.Serializer;
@@ -30,7 +30,7 @@ import com.google.inject.Provider;
  */
 public class LeafNodeImpl<K extends Comparable<? super K>,V> implements LeafNode<K,V> {
 	
-	private final HashPageImpl page;
+	private final HashPage page;
 	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	
 	// right now, we always store key/value pairs. If the entries are not unique,
@@ -50,7 +50,7 @@ public class LeafNodeImpl<K extends Comparable<? super K>,V> implements LeafNode
 	
 	//TODO: ensure that the pointerSerializer always creates the same (buffer-)size!
 	LeafNodeImpl(
-			HashPageImpl page, // the LeafNodes uses this Body for storing links to the pageids & offsets
+			HashPage page, // the LeafNodes uses this Body for storing links to the pageids & offsets
 			Provider<DynamicDataPage<K>> keyProvider,
 			Provider<DynamicDataPage<V>> valueProvider,
 			FixLengthSerializer<PagePointer, byte[]> pointSerializer){

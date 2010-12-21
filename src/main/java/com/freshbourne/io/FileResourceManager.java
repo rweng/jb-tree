@@ -25,6 +25,8 @@ import com.google.inject.name.Named;
  * The FileResourceManager itself has no Header. The header resides in the Pages. 
  * The ResourceManager just checks is the Page read is valid.
  * 
+ * It returns initialized HashPages.
+ * 
  * @author "Robin Wenglewski <robin@wenglewski.de>"
  *
  */
@@ -63,36 +65,13 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#newPage()
-	 */
-	@Override
-	@MustBeOpen
-	public HashPageImpl newPage() throws IOException {
-		return null;
-//		byte[] bytes = new byte[pageSize];
-//		ByteBuffer buffer = ByteBuffer.wrap(bytes);
-//		
-//		if(file.length() > Integer.MAX_VALUE){
-//			//TODO: enable this!
-//			throw new IOException("Cannot write to a file larger than Integer.MAX_VALUE bytes. TODO: enable this. ");
-//		}
-//		
-//		// when creating a new Page, the buffer array provided to the page
-//		// should be initialized by the Page constructor.
-//		// The page header should be written to the buffer
-//		RawPage page = new RawPage(buffer, getNumberOfPages() + 1 , this);
-//		
-//		numberOfPages++;
-//		
-//		return page;
-	}
-
-	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ResourceManager#writePage(com.freshbourne.io.Page)
 	 */
 	@Override
-	@MustBeOpen
-	public void writePage(HashPageImpl page) throws IOException {
+	public void writePage(HashPage page) throws IOException {
+		if(!isOpen())
+			throw new ResourceNotOpenException(this);
+		
 		ByteBuffer buffer = page.buffer();
 		buffer.rewind();
 		//ioChannel.write(buffer, (page.getId() - 1) * pageSize);
@@ -103,7 +82,7 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	@MustBeOpen
-	public HashPageImpl readPage(int pageId) throws IOException {
+	public HashPage readPage(int pageId) throws IOException {
 		return null;
 //		ByteBuffer buf = ByteBuffer.wrap(new byte[getPageSize()]);
 //		ioChannel.read(buf, (pageId - 1) * getPageSize());
@@ -139,20 +118,10 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#getPageSize()
 	 */
 	@Override
-	public int getPageSize() {
+	public int pageSize() {
 		return pageSize;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#numberOfPages()
-	 */
-	@Override
-	@MustBeOpen
-	public int getNumberOfPages() throws IOException {
-		return numberOfPages;
-	}
-
-	
 	/**
 	 * Generic private initializer that takes the random access file and initializes
 	 * the I/O channel and locks it for exclusive use by this instance.
@@ -195,5 +164,25 @@ public class FileResourceManager implements ResourceManager {
 	
 	public boolean isOpen() {
 		return !(ioChannel == null || !ioChannel.isOpen());
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString(){
+		return "Resource: " + file.getAbsolutePath();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ResourceManager#addPage(com.freshbourne.io.HashPage)
+	 */
+	@Override
+	public HashPage addPage(HashPage page) throws IOException {
+		return new HashPage(page.buffer(), this, generateId());
+	}
+	
+	private int generateId(){
+		return 1;
 	}
 }
