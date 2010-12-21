@@ -16,10 +16,5 @@ import com.freshbourne.multimap.MultiMap;
  *
  */
 public interface Node<K, V> extends MultiMap<K, V> {
-	
-	/**
-	 * @return the number of values in or under this node
-	 */
-	public abstract int size();
 
 }

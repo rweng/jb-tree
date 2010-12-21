@@ -69,12 +69,11 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void writePage(HashPage page) throws IOException {
-		if(!isOpen())
-			throw new ResourceNotOpenException(this);
+		ensureOpen();
 		
 		ByteBuffer buffer = page.buffer();
 		buffer.rewind();
-		//ioChannel.write(buffer, (page.getId() - 1) * pageSize);
+		ioChannel.write(buffer, (page.id() - 1) * pageSize);
 	}
 
 	/* (non-Javadoc)
@@ -179,10 +178,17 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public HashPage addPage(HashPage page) throws IOException {
+		ensureOpen();
+		
 		return new HashPage(page.buffer(), this, generateId());
 	}
 	
 	private int generateId(){
 		return 1;
+	}
+	
+	private void ensureOpen() throws ResourceNotOpenException{
+		if(!isOpen())
+			throw new ResourceNotOpenException(this);
 	}
 }

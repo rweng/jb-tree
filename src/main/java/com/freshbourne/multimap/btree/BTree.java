@@ -7,15 +7,22 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.io.IOException;
 import java.util.Comparator;
 
-public class BTree<K extends Comparable<? super K>, V> implements Node<K,V> {
+import com.freshbourne.io.BufferPoolManager;
+
+public class BTree<K, V> implements Node<K,V> {
 
 	private Node<K,V> root;
 	private final Comparator<K> comparator;
+	private final BufferPoolManager bm;
 	
-	BTree(Comparator<K> comparator){
+	BTree(BufferPoolManager bm, Comparator<K> comparator) 
+	throws IOException{
 		this.comparator = comparator;
+		this.bm = bm;
+		//root = bm.createPage();
 	}
 	
 	/* (non-Javadoc)

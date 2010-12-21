@@ -24,6 +24,7 @@ public class FileResourceManagerSpec {
 	
 	private ResourceManager rm;
 	private final File file;
+	private HashPage page;
 	
 	public FileResourceManagerSpec(){
 		super();
@@ -39,6 +40,9 @@ public class FileResourceManagerSpec {
 		
 		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE);
 		rm.open();
+		page = new HashPage(
+				ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 
+				rm, 44);
 	}
 	
 	@After
@@ -53,12 +57,18 @@ public class FileResourceManagerSpec {
 		assertEquals(0, file.length());
 	}
 	
+	@Test(expected= ResourceNotOpenException.class)
+	public void shouldThrowExceptionIfResourceClosed() throws IOException{
+		rm.close();
+		rm.addPage(page);
+	}
 	
+	@Test(expected= ElementNotFoundException.class)
+	public void shouldThrowExceptionIfPageToWriteDoesNotExist() throws IOException{
+		rm.writePage(page);
+	}
 	
 		
-//		// test rm
-//		assertEquals(1, rm.getNumberOfPages());
-//		
 //		// test the page
 //		assertFalse(p.valid());
 //		p.initialize();
