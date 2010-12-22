@@ -8,18 +8,16 @@
 package com.freshbourne.io;
 
 /**
- * Every class implementing thins interface wraps around a <code>byte[]</code>.
- * 
- * ByteBuffer is used instead of <code>byte[]</code> since it is not possible to slice a byte
- * array in smaller pieces. Thus, also for example body returns a ByteBuffer over the body,
- * the Array backing the ByteBuffer is still the full page byte array!
- * 
- * The Page interface is only for definition.
+ * Every class implementing this interface wraps around a HashPage body.
  * 
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
 public interface Page {
 	
+	/**
+	 * @return the to this page belonging hashPage
+	 */
+	public HashPage hashPage();
 
 }

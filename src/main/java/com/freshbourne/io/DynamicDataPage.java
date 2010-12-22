@@ -28,13 +28,14 @@ import com.google.inject.Inject;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public class DynamicDataPage<T> extends Observable implements DataPage<T>{
+public class DynamicDataPage<T> implements DataPage<T>{
 	
 	private static final int intSize = 4;
 	
 	private final ByteBuffer header;
 	private final ByteBuffer body;
 	private final ByteBuffer buffer;
+	private final HashPage hashPage;
 	
 	private final FixLengthSerializer<PagePointer, byte[]> pointSerializer;
 	private final Serializer<T, byte[]> entrySerializer;
@@ -51,10 +52,11 @@ public class DynamicDataPage<T> extends Observable implements DataPage<T>{
 	
 	@Inject
 	DynamicDataPage(
-			ByteBuffer bytes, 
+			HashPage hashPage, 
 			FixLengthSerializer<PagePointer, byte[]> pointSerializer, 
 			Serializer<T, byte[]> dataSerializer){
-		this.buffer = bytes;
+		this.hashPage = hashPage;
+		this.buffer = hashPage.body();
 		this.header = buffer.duplicate();
 		this.body = buffer.duplicate();
 		this.pointSerializer = pointSerializer;
@@ -81,8 +83,7 @@ public class DynamicDataPage<T> extends Observable implements DataPage<T>{
 		header.position(0);
 		header.putInt(NO_ENTRIES_INT);
 		
-		setChanged();
-		notifyObservers();
+		hashPage.update();
 	}
 
 	/* (non-Javadoc)
@@ -135,9 +136,8 @@ public class DynamicDataPage<T> extends Observable implements DataPage<T>{
 				header.limit(header.position() + pointSerializer
 						.serializedLength(PagePointer.class));
 				
-				setChanged();
-				notifyObservers();
-				
+
+				hashPage.update();
 			}
 		} catch (Exception e) {
 			return valid = false;
@@ -166,8 +166,8 @@ public class DynamicDataPage<T> extends Observable implements DataPage<T>{
 		entries.put(p.getId(), p);
 		addToHeader(p);
 		
-		setChanged();
-		notifyObservers();
+		hashPage.update();
+		
 		return id;
 	}
 	
@@ -218,9 +218,7 @@ public class DynamicDataPage<T> extends Observable implements DataPage<T>{
 		
 		// write the adjustments to byte array
 		writeAndAdjustHeader();
-		
-		setChanged();
-		notifyObservers();
+		hashPage.update();
 	}
 
 	/**
@@ -289,5 +287,12 @@ public class DynamicDataPage<T> extends Observable implements DataPage<T>{
 	@Override
 	public int remaining() {
 		return buffer.capacity() - header.limit() - bodyUsed().capacity();
+	}
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.Page#hashPage()
+	 */
+	@Override
+	public HashPage hashPage() {
+		return hashPage;
 	}
 }

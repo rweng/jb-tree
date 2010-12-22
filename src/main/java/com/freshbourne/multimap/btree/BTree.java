@@ -20,7 +20,7 @@ public class BTree<K, V> implements Node<K,V> {
 	
 	
 	@Inject
-	BTree(@Nullable LeafPageManager<K,V> leafPageManager) throws IOException {
+	BTree(LeafPageManager<K,V> leafPageManager) throws IOException {
 		this.leafPageManager = leafPageManager;
 		root = leafPageManager.createPage();
 	}

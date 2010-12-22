@@ -10,17 +10,28 @@ package com.freshbourne.multimap.btree;
 import java.io.IOException;
 
 import com.freshbourne.io.BufferPoolManager;
+import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.HashPage;
 import com.freshbourne.io.PageManager;
+import com.freshbourne.io.PagePointSerializer;
 import com.google.inject.Inject;
 
 public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 
 	private final BufferPoolManager bpm;
+	private final PagePointSerializer ppSerializer;
+	
+	private DataPageManager<K> keyPageManager;
+	private DataPageManager<V> valuePageManager;
 	
 	@Inject
-	public LeafPageManager(BufferPoolManager bpm) {
+	public LeafPageManager(
+			BufferPoolManager bpm, 
+			DataPageManager<K> keyPageManager,
+			DataPageManager<V> valuePageManager,
+			PagePointSerializer ppSerializer) {
 		this.bpm = bpm;
+		this.ppSerializer = ppSerializer;
 	}
 	
 	/* (non-Javadoc)
@@ -29,8 +40,11 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	@Override
 	public LeafPage<K, V> createPage() throws IOException {
 		HashPage p = bpm.createPage();
-		LeafPage<K, V> result = new LeafPage<K, V>();
-		result.addObserver(p);
+		LeafPage<K, V> result = new LeafPage<K, V>(
+				p,
+				keyPageManager,
+				valuePageManager,
+				ppSerializer);
 		return result;
 	}
 

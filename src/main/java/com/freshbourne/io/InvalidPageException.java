@@ -15,7 +15,7 @@ public class InvalidPageException extends Exception {
 		super("The page is invalid!");
 	}
 	
-	public InvalidPageException(Page p){
+	public InvalidPageException(Object p){
 		super("Page " + p.toString() + " is invalid!");
 	}
 

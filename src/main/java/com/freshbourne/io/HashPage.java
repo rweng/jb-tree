@@ -20,7 +20,7 @@ import java.util.Observer;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public class HashPage implements Page, Observer {
+public class HashPage {
 	private final ResourceManager source;
 	private final int id;
 	
@@ -97,11 +97,10 @@ public class HashPage implements Page, Observer {
 		return buffer.getInt();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	/**
+	 * updates the hash and makes the page valid
 	 */
-	@Override
-	public void update(Observable o, Object arg) {
+	public void update() {
 		try {
 			ensureValid();
 			updateHash();

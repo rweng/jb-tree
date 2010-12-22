@@ -25,10 +25,10 @@ public interface DataPage<T> extends Page{
 	 * adds some bytes to the underlying body. It is possible that the header
 	 * also grows through this process.
 	 * 
-	 * @param bytes array to be written
+	 * @param value array to be written
 	 * @return id of the entry/byte[] within this page
 	 */
-	public int add(T bytes) throws Exception;
+	public int add(T value) throws Exception;
 	
 	
 	/**
