@@ -7,6 +7,8 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.lang.reflect.ParameterizedType;
+
 import com.freshbourne.io.DynamicDataPage;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -20,5 +22,15 @@ public class BTreeModule extends AbstractModule {
 	protected void configure() {
 		bind(new TypeLiteral<DynamicDataPage<String>>(){});
 	}
+	
+	protected void bindDynamicPageImpl(Class<?> clazz) { 
+		//bind(new TypeLiteral<DynamicDataPage<clazz>>(){});
+//		  ParameterizedType daoType = 
+//		       Types.newParameterizedType(DynamicDataPage.class, clazz); 
+//		  ParameterizedType daoImplType = 
+//		       Types.newParameterizedType(DynamicDataPage.class, clazz); 
+//		  bind(Key.get(daoType)).to(Key.get(daoImplType)); 
+
+		} 
 
 }

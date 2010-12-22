@@ -17,6 +17,7 @@ import com.freshbourne.io.NoSpaceException;
 import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.ResourceManager;
 import com.freshbourne.io.Serializer;
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
@@ -28,16 +29,16 @@ import com.google.inject.Provider;
  * @param <K> KeyType
  * @param <V> ValueType
  */
-public class LeafNodeImpl<K extends Comparable<? super K>,V> implements LeafNode<K,V> {
+public class LeafPageImpl<K extends Comparable<? super K>,V> implements LeafPage<K,V> {
 	
-	private final HashPage page;
-	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
+	private  ByteBuffer buffer;
+	private  FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	
 	// right now, we always store key/value pairs. If the entries are not unique,
 	// it could make sense to store the key once with references to all values
 	//TODO: investigate if we should do this
-	private final int serializedPointerSize;
-	private final int maxEntries;
+	private  int serializedPointerSize;
+	private  int maxEntries;
 	
 	// counters
 	private int numberOfEntries = 0;
@@ -49,17 +50,19 @@ public class LeafNodeImpl<K extends Comparable<? super K>,V> implements LeafNode
 	private int lastValuePageRemainingBytes = -1;	
 	
 	//TODO: ensure that the pointerSerializer always creates the same (buffer-)size!
-	LeafNodeImpl(
-			HashPage page, // the LeafNodes uses this Body for storing links to the pageids & offsets
-			Provider<DynamicDataPage<K>> keyProvider,
-			Provider<DynamicDataPage<V>> valueProvider,
-			FixLengthSerializer<PagePointer, byte[]> pointSerializer){
+	@Inject
+	LeafPageImpl(
+			// ByteBuffer buffer, // the LeafNodes uses this Body for storing links to the pageids & offsets
+			Provider<DynamicDataPage<K>> keyProvider
+			//Provider<DynamicDataPage<V>> valueProvider,
+			// FixLengthSerializer<PagePointer, byte[]> pointSerializer
+			){
 		
-		this.page = page;
-		this.pointerSerializer = pointSerializer;
-		
-		this.serializedPointerSize = pointerSerializer.serializedLength(PagePointer.class);
-		maxEntries = page.body().capacity() / serializedPointerSize;
+//		this.buffer = buffer;
+//		this.pointerSerializer = pointSerializer;
+//		
+//		this.serializedPointerSize = pointerSerializer.serializedLength(PagePointer.class);
+//		maxEntries = buffer.capacity() / serializedPointerSize;
 	}
 	
 	/* (non-Javadoc)

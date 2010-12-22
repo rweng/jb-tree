@@ -7,6 +7,8 @@
  */
 package com.freshbourne.multimap.btree;
 
-public interface LeafNode<K, V> extends Node<K,V> {
+import com.freshbourne.io.Page;
+
+public interface LeafPage<K, V> extends Node<K,V>, Page {
 	
 }

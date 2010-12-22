@@ -16,7 +16,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.OverlappingFileLockException;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 
 /**
@@ -34,9 +33,9 @@ public class FileResourceManager implements ResourceManager {
 	private RandomAccessFile handle;
 	private final File file;
 	private final int pageSize;
-	private int numberOfPages = 0;
 	private FileLock fileLock;
 	private FileChannel ioChannel;
+	private DataPage<Integer> headerPage;
 
 	@Inject
 	FileResourceManager(@ResourceFile File f, @PageSize int pageSize){
@@ -62,6 +61,12 @@ public class FileResourceManager implements ResourceManager {
 		if(handle.length() > 0 && !readPage(1).valid()){
 			throw new IOException("File exists but Pages are not valid");
 		}
+		
+		// if new file, initialize by writing header
+		if(handle.length() > 0)
+			return;
+		
+		//new HashPage(ByteBuffer.allocate(pageSize()), this, 0);
 	}
 
 	/* (non-Javadoc)
@@ -80,8 +85,8 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#readPage(int)
 	 */
 	@Override
-	@MustBeOpen
 	public HashPage readPage(int pageId) throws IOException {
+		ensureOpen();
 		return null;
 //		ByteBuffer buf = ByteBuffer.wrap(new byte[getPageSize()]);
 //		ioChannel.read(buf, (pageId - 1) * getPageSize());

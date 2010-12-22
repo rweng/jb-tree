@@ -20,25 +20,25 @@ import com.google.inject.TypeLiteral;
 
 import static org.junit.Assert.*;
 
-public class LeafNodeSpec {
+public class LeafPageSpec {
 	
-	LeafNode<Integer, String> leaf;
+	LeafPage<Integer, String> leaf;
 	Injector injector;
 	
 	@Before
-	public void createLeaf(){
+	public void setUp(){
 		this.injector = Guice.createInjector(
 				new FileResourceManagerModule(new File("/tmp/leafnodespec")),
 				new BTreeModule()
 				);
 		
-		
-		leaf = injector.getInstance(Key.get(new TypeLiteral<LeafNodeImpl<Integer, String>>(){}));
+		leaf = injector.getInstance(Key.get(new TypeLiteral<LeafPage<Integer,String>>(){}));
 	}
 	
+	
 	@Test
-	public void shouldWork(){
-		assertTrue(true);
+	public void setUpShouldHaveWorked(){
+		assertNotNull(leaf);
 	}
 
 }
