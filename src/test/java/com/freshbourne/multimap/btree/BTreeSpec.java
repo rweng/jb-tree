@@ -7,13 +7,20 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 
-import com.freshbourne.comparator.IntegerComparator;
-import com.freshbourne.io.BufferPoolManagerImpl;
-import com.freshbourne.io.ResourceManager;
+import com.freshbourne.io.BufferPoolManager;
+import com.freshbourne.io.FileResourceManagerModule;
 import com.freshbourne.multimap.MultiMap;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 
 import static org.junit.Assert.*;
 
@@ -22,10 +29,17 @@ public class BTreeSpec {
 	private MultiMap<Integer, String> tree;
 	private String s = "testString";
 
+	private final static Injector injector;
+	
+	static {
+		injector = Guice.createInjector(
+				new FileResourceManagerModule("/tmp/test"),
+				new BTreeModule());
+	}
+	
 	@Before
-	public void setUp(){
-		
-		//TODO: tree = new BTree<Integer, String>(IntegerComparator.INSTANCE);
+	public void setUp() throws IOException{
+		tree = injector.getInstance(Key.get(new TypeLiteral<BTree<Integer,String>>(){}));
 	}
 	
 	
@@ -40,5 +54,28 @@ public class BTreeSpec {
 		assertTrue(tree.containsKey(1));
 		assertEquals(s, tree.get(1));
 	}
-
+	
+	@Test
+	public void shouldBeAbleToRemoveInsertedEntries(){
+		fail();
+	}
+	
+	@Test
+	public void shouldThrowExceptionIfTryingToAccessNonexistantElements(){fail();}
+	
+	@Test
+	public void clearShouldRemoveAllElements(){fail();}
+	
+	@Test
+	public void getFirstShouldReturnFirstElement(){fail();}
+	
+	@Test
+	public void getShouldReturnAllElements(){fail();}
+	
+	@Test
+	public void removeWithValueArgumentShouldRemoveOnlyThisValue(){fail();}
+	
+	@Test
+	public void removeWithOnlyKeyArgumentShouldRemoveAllValues(){fail();}
+	
 }

@@ -9,6 +9,7 @@ package com.freshbourne.io;
 
 import java.nio.ByteBuffer;
 import java.util.Observable;
+import java.util.Observer;
 
 
 /**
@@ -19,7 +20,7 @@ import java.util.Observable;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public class HashPage extends Observable implements Page {
+public class HashPage implements Page, Observer {
 	private final ResourceManager source;
 	private final int id;
 	
@@ -55,9 +56,7 @@ public class HashPage extends Observable implements Page {
 	 * writes the header to the <code>byte[]</code> and makes the page valid
 	 */
 	public void initialize(){
-		header.position(0);
-		header.putInt(body.hashCode());
-		valid = true;
+		updateHash();
 	}
 	
 	/**
@@ -96,5 +95,34 @@ public class HashPage extends Observable implements Page {
 	private int bodyHash(){
 		buffer.position(0);
 		return buffer.getInt();
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 */
+	@Override
+	public void update(Observable o, Object arg) {
+		try {
+			ensureValid();
+			updateHash();
+		} catch (InvalidPageException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void updateHash(){
+		header.position(0);
+		header.putInt(body.hashCode());
+		valid = true;
+	}
+	
+	private void ensureValid() throws InvalidPageException{
+		if(!valid())
+			throw new InvalidPageException(this);
+	}
+	
+	public String toString(){
+		String result = "HashPage with id: " + id();
+		return result;
 	}
 }

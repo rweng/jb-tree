@@ -7,6 +7,16 @@
  */
 package com.freshbourne.io;
 
-public interface BufferPoolManager extends PageManager<HashPage> {
+public class InvalidPageException extends Exception {
+	
+	private static final long serialVersionUID = 1L;
+
+	public InvalidPageException() {
+		super("The page is invalid!");
+	}
+	
+	public InvalidPageException(Page p){
+		super("Page " + p.toString() + " is invalid!");
+	}
 
 }

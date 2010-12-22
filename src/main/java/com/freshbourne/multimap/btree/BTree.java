@@ -8,21 +8,21 @@
 package com.freshbourne.multimap.btree;
 
 import java.io.IOException;
-import java.util.Comparator;
 
-import com.freshbourne.io.BufferPoolManager;
+import com.google.inject.Inject;
+import com.google.inject.internal.Nullable;
 
 public class BTree<K, V> implements Node<K,V> {
 
-	private Node<K,V> root;
-	private final Comparator<K> comparator;
-	private final BufferPoolManager bm;
+	private final LeafPageManager<K,V> leafPageManager;
 	
-	BTree(BufferPoolManager bm, Comparator<K> comparator) 
-	throws IOException{
-		this.comparator = comparator;
-		this.bm = bm;
-		//root = bm.createPage();
+	private LeafPage<K, V> root;
+	
+	
+	@Inject
+	BTree(@Nullable LeafPageManager<K,V> leafPageManager) throws IOException {
+		this.leafPageManager = leafPageManager;
+		root = leafPageManager.createPage();
 	}
 	
 	/* (non-Javadoc)

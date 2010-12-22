@@ -13,6 +13,7 @@ import java.lang.reflect.Type;
 import com.freshbourne.io.DynamicDataPage;
 import com.freshbourne.io.FixLengthSerializer;
 import com.freshbourne.io.IntegerSerializer;
+import com.freshbourne.io.PagePointSerializer;
 import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.Serializer;
 import com.freshbourne.io.StringSerializer;
@@ -26,13 +27,14 @@ public class BTreeModule extends AbstractModule {
 	 */
 	@Override
 	protected void configure() {
-		bind(pageOf(String.class));
-		bind(pageOf(Integer.class));
-		bind(new TypeLiteral<FixLengthSerializer<PagePointer, byte[]>>(){});
+		bind(new TypeLiteral<FixLengthSerializer<PagePointer, byte[]>>(){}).
+			to(PagePointSerializer.class);
 		bind(new TypeLiteral<Serializer<Integer, byte[]>>(){}).to(
 				IntegerSerializer.class);
 		bind(new TypeLiteral<Serializer<String, byte[]>>(){}).to(
 				StringSerializer.class);
+		
+		bind(new TypeLiteral<BTree<Integer,String>>(){});
 		
 	}
 	

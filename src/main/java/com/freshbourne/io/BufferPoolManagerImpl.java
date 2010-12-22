@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 /**
  * 
  * provides access to pages. Whereas the ResourceManager only reads and writes
@@ -31,19 +34,21 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	private ArrayBlockingQueue<HashPage> cacheQueue;
 	private HashMap<Integer, HashPage> cache;
 	
-	
-	public BufferPoolManagerImpl(ResourceManager rm, int cacheSize) {
+	@Inject
+	public BufferPoolManagerImpl(ResourceManager rm,@Named("cacheSize") int cacheSize) {
 		this.rm = rm;
 		this.cacheSize = cacheSize;
+		this.cache = new HashMap<Integer, HashPage>();
 		
 		cacheQueue = new ArrayBlockingQueue<HashPage>(cacheSize);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#newPage()
+	
+	/**
+	 * creates an in-memory page
+	 * @return
 	 */
-	@Override
-	public HashPage newPage() {
+	private HashPage newPage() {
 		HashPage p = new HashPage(ByteBuffer.allocate(rm.pageSize()), rm, 0);
 		p.initialize();
 		return p;
@@ -79,5 +84,14 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 		HashPage p = newPage();
 		p = rm.addPage(p);
 		return addToCache(p);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.PageManager#removePage(int)
+	 */
+	@Override
+	public void removePage(int id) {
+		// TODO Auto-generated method stub
+		
 	}
 }

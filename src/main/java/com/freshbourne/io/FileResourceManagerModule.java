@@ -8,11 +8,13 @@
 package com.freshbourne.io;
 
 import java.io.File;
+import java.io.IOException;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.matcher.Matchers;
+import com.google.inject.name.Names;
 
 public class FileResourceManagerModule extends AbstractModule{
 	
@@ -47,7 +49,17 @@ public class FileResourceManagerModule extends AbstractModule{
 		bind(Integer.class).annotatedWith(PageSize.class).toInstance(pageSize);
 		bind(File.class).annotatedWith(ResourceFile.class).toInstance(file);
 		
-		bind(ResourceManager.class).to(FileResourceManager.class).in(Singleton.class);
+		//bind(ResourceManager.class).to(FileResourceManager.class).in(Singleton.class);
+		bind(BufferPoolManager.class).to(BufferPoolManagerImpl.class);
+		
+		bindConstant().annotatedWith(Names.named("cacheSize")).to(30);
+	}
+	
+	@Provides @Singleton
+	public ResourceManager provideFileResourceManager() throws IOException{
+		ResourceManager result = new FileResourceManager(file, pageSize);
+		result.open();
+		return result;
 	}
 	
 //	@Provides
