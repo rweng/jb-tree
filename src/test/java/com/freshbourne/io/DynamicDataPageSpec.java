@@ -7,6 +7,7 @@
  */
 package com.freshbourne.io;
 
+import java.nio.ByteBuffer;
 import java.util.Observer;
 
 import org.junit.Before;
@@ -28,7 +29,7 @@ public class DynamicDataPageSpec {
 	@Before
 	public void setUp(){
 		page = new DynamicDataPage<String>(
-				new byte[1000], 
+				ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 
 				new PagePointSerializer(), 
 				new StringSerializer());
 	}

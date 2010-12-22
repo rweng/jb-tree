@@ -12,6 +12,7 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.freshbourne.io.DynamicDataPage;
 import com.freshbourne.io.FileResourceManagerModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -23,6 +24,9 @@ import static org.junit.Assert.*;
 public class LeafPageSpec {
 	
 	LeafPage<Integer, String> leaf;
+	DynamicDataPage<String> stringData;
+	DynamicDataPage<Integer> intData;
+	
 	Injector injector;
 	
 	@Before
@@ -32,7 +36,8 @@ public class LeafPageSpec {
 				new BTreeModule()
 				);
 		
-		leaf = injector.getInstance(Key.get(new TypeLiteral<LeafPage<Integer,String>>(){}));
+		stringData = injector.getInstance(DynamicDataPage.class);
+		
 	}
 	
 	

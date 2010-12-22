@@ -51,10 +51,10 @@ public class DynamicDataPage<T> extends Observable implements DataPage<T>{
 	
 	@Inject
 	DynamicDataPage(
-			byte[] bytes, 
+			ByteBuffer bytes, 
 			FixLengthSerializer<PagePointer, byte[]> pointSerializer, 
 			Serializer<T, byte[]> dataSerializer){
-		this.buffer = ByteBuffer.wrap(bytes);
+		this.buffer = bytes;
 		this.header = buffer.duplicate();
 		this.body = buffer.duplicate();
 		this.pointSerializer = pointSerializer;
