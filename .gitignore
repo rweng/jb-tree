@@ -9,3 +9,5 @@ bin/
 target/
 .gradle/
 libs/
+*.iml
+*.ipr

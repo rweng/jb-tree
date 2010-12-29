@@ -20,7 +20,7 @@ import java.util.Observer;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public class HashPage {
+public class HashPage implements Page {
 	private final ResourceManager source;
 	private final int id;
 	
@@ -124,4 +124,8 @@ public class HashPage {
 		String result = "HashPage with id: " + id();
 		return result;
 	}
+
+    public HashPage hashPage() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

@@ -1,5 +1,5 @@
 apply plugin: 'java'
-apply plugin: 'eclipse'
+apply plugin: 'idea'
 
 repositories {
     mavenCentral()
@@ -24,21 +24,4 @@ dependencies {
 	
 	// compile "org.jbehave:jbehave:3.1.2@jar"
 	
-}
-
-//************* java plugin configuration ********************
-sourceCompatibility = 1.6
-version = '0.01'
-
-
-// cuke4duke
-apply plugin:com.smokejumperit.gradle.ExecPlugin
-
-buildscript {
-  repositories {
-	mavenRepo urls:'http://repo.smokejumperit.com'
-  }
-  dependencies {
-	classpath 'com.smokejumperit:gradle-plugins:0.6.7'
-  }
 }

@@ -28,21 +28,16 @@ public class DynamicDataPageSpec {
 	
 	@Before
 	public void setUp(){
-		page = new DynamicDataPage<String>(
-				ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 
-				new PagePointSerializer(), 
-				new StringSerializer());
+		page = null;
 	}
 	
 	@Test
 	public void shouldHaveToInitialize(){
 		Observer mockObserver = mock(Observer.class);
-		page.addObserver(mockObserver);
-		
+
 		assertFalse(page.valid());
 		page.initialize();
 		assertTrue(page.valid());
-		verify(mockObserver).update(page, null);
 	}
 	
 	@Test(expected= Exception.class)
@@ -82,13 +77,10 @@ public class DynamicDataPageSpec {
 	@Test
 	public void shouldNotifyObservers() throws NoSpaceException, ElementNotFoundException{
 		Observer mockObserver = mock(Observer.class);
-		page.addObserver(mockObserver);
-		
+
 		int id = page.add("blast");
-		verify(mockObserver).update(page, null);
-		
+
 		page.remove(id);
-		verify(mockObserver, times(2)).update(page, null);
 	}
 	
 	@Test
