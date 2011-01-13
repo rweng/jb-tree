@@ -7,15 +7,26 @@
  */
 package com.freshbourne.io;
 
+import com.google.inject.Inject;
+
 import java.io.IOException;
 
 public class DataPageManager<K> implements PageManager<DataPage<K>> {
+
+    private BufferPoolManager bpm;
+
+    @Inject
+    DataPageManager(BufferPoolManager bpm){
+        this.bpm = bpm;
+    }
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.PageManager#createPage()
 	 */
 	@Override
 	public DataPage<K> createPage() throws IOException {
+		bpm.createPage();
+
 		// TODO Auto-generated method stub
 		return null;
 	}

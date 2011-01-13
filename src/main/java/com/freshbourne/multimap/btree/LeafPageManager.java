@@ -19,8 +19,8 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	private final BufferPoolManager bpm;
 	private final PagePointSerializer ppSerializer;
 	
-	private DataPageManager<K> keyPageManager;
-	private DataPageManager<V> valuePageManager;
+	private final DataPageManager<K> keyPageManager;
+	private final DataPageManager<V> valuePageManager;
 	
 	@Inject
 	public LeafPageManager(
@@ -30,6 +30,8 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 			PagePointSerializer ppSerializer) {
 		this.bpm = bpm;
 		this.ppSerializer = ppSerializer;
+        this.keyPageManager = keyPageManager;
+        this.valuePageManager = valuePageManager;
 	}
 	
 	/* (non-Javadoc)
