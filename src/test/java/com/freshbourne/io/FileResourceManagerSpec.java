@@ -39,6 +39,9 @@ public class FileResourceManagerSpec {
 	public void tearDown() throws IOException{
 		rm.close();
 	}
+
+
+    // ******** TESTS **********
 	
 	@Test
 	public void shouldBeEmptyAtFirst() throws IOException{
