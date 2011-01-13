@@ -21,25 +21,28 @@ import com.google.inject.name.Names;
 
 import java.io.File;
 
-public class FileResourceManagerModule extends AbstractModule{
+public class IOModule extends AbstractModule{
 	
 	// ***** CONFIGURATION (CONSTRUCTURS) *****
-	private final File file;
-	private final int pageSize;
+	private File file;
+	private int pageSize = -1;
 	
-	public FileResourceManagerModule(File file){
+	public IOModule(File file){
 		this(file, PageSize.DEFAULT_PAGE_SIZE);
 	}
 	
-	public FileResourceManagerModule(String path){
+	public IOModule(String path){
 		this(new File(path));
 	}
 	
-	public FileResourceManagerModule(File file, int pageSize){
+	public IOModule(File file, int pageSize){
 		super();
 		this.file = file;
 		this.pageSize = pageSize;
 	}
+
+    public void resourceFile(File file){this.file = file;};
+    public void pageSize(int i){pageSize = i;}
 
 	
 	// ***** CONFIGURE *****
@@ -49,9 +52,11 @@ public class FileResourceManagerModule extends AbstractModule{
 	 */
 	@Override
 	protected void configure() {
+        if(pageSize != -1)
+		    bind(Integer.class).annotatedWith(PageSize.class).toInstance(pageSize);
 
-		bind(Integer.class).annotatedWith(PageSize.class).toInstance(pageSize);
-		bind(File.class).annotatedWith(ResourceFile.class).toInstance(file);
+        if(file != null)
+		    bind(File.class).annotatedWith(ResourceFile.class).toInstance(file);
 		
 		bind(ResourceManager.class).to(FileResourceManager.class).in(Singleton.class);
 		bind(BufferPoolManager.class).to(BufferPoolManagerImpl.class);

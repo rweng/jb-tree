@@ -15,7 +15,7 @@
  */
 package com.freshbourne.multimap.btree;
 
-import com.freshbourne.io.FileResourceManagerModule;
+import com.freshbourne.io.IOModule;
 import com.freshbourne.multimap.MultiMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -37,7 +37,7 @@ public class BTreeSpec {
 	
 	static {
 		injector = Guice.createInjector(
-				new FileResourceManagerModule("/tmp/test"),
+				new IOModule("/tmp/test"),
 				new BTreeModule());
 	}
 	

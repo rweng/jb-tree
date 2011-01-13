@@ -9,7 +9,6 @@ package com.freshbourne.io;
 
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.Serializer;
-import com.google.inject.Inject;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -48,7 +47,6 @@ public class DynamicDataPage<T> extends DataPage<T>{
 	
 	private boolean valid = false;
 	
-	@Inject
 	DynamicDataPage(
 			ByteBuffer buffer,
             ResourceManager rm,
