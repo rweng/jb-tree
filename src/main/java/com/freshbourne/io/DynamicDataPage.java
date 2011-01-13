@@ -32,7 +32,6 @@ public class DynamicDataPage<T> extends DataPage<T>{
 	
 	private final ByteBuffer header;
 	private final ByteBuffer body;
-	private final ByteBuffer buffer;
 	
 	private final FixLengthSerializer<PagePointer, byte[]> pointSerializer;
 	private final Serializer<T, byte[]> entrySerializer;
@@ -46,6 +45,14 @@ public class DynamicDataPage<T> extends DataPage<T>{
 	private final Map<Integer, PagePointer> entries;
 	
 	private boolean valid = false;
+
+
+	DynamicDataPage(
+			RawPage p,
+			FixLengthSerializer<PagePointer, byte[]> pointSerializer,
+			Serializer<T, byte[]> dataSerializer){
+        this(p.buffer(), p.resourceManager() , p.id(), pointSerializer, dataSerializer);
+    }
 	
 	DynamicDataPage(
 			ByteBuffer buffer,
@@ -55,7 +62,6 @@ public class DynamicDataPage<T> extends DataPage<T>{
 			Serializer<T, byte[]> dataSerializer){
 
         super(buffer, rm, pageId);
-		this.buffer = buffer();
 		this.header = buffer.duplicate();
 		this.body = buffer.duplicate();
 		this.pointSerializer = pointSerializer;
@@ -78,10 +84,6 @@ public class DynamicDataPage<T> extends DataPage<T>{
 	public void initialize() {
 		header.position(0);
 		header.putInt(NO_ENTRIES_INT);
-	}
-
-	public ByteBuffer buffer() {
-		return buffer.asReadOnlyBuffer();
 	}
 
 	public ByteBuffer body() {
@@ -166,7 +168,7 @@ public class DynamicDataPage<T> extends DataPage<T>{
 		header.position(header.limit()-size);
 		header.put(pointSerializer.serialize(p));
 		
-		if(buffer.capacity() - header.position() - bodyUsed().capacity() > size)
+		if(buffer().capacity() - header.position() - bodyUsed().capacity() > size)
 			header.limit(header.position() + size);
 	}
 
@@ -183,7 +185,7 @@ public class DynamicDataPage<T> extends DataPage<T>{
 		
 		// move all body elements
 		int size = sizeOfEntry(p);
-		System.arraycopy(buffer.array(), body.position(), buffer.array(), body.position() + size, p.getOffset() - body.position() );
+		System.arraycopy(buffer().array(), body.position(), buffer().array(), body.position() + size, p.getOffset() - body.position() );
 		
 		// adjust the entries in the entries array
 		for(PagePointer c : entries.values()){
@@ -260,7 +262,7 @@ public class DynamicDataPage<T> extends DataPage<T>{
 	 * @see com.freshbourne.multimap.btree.DataPage#remaining()
 	 */
 	public int remaining() {
-		return buffer.capacity() - header.limit() - bodyUsed().capacity();
+		return buffer().capacity() - header.limit() - bodyUsed().capacity();
 	}
 	
 }

@@ -5,48 +5,44 @@
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author.
  */
+
 package com.freshbourne.io;
 
+import com.freshbourne.serializer.FixLengthSerializer;
+import com.freshbourne.serializer.Serializer;
 import com.google.inject.Inject;
 
 import java.io.IOException;
 
-public class DataPageManager<K> implements PageManager<DataPage<K>> {
+public class DataPageManager<T> implements PageManager<DataPage<T>> {
 
-    private BufferPoolManager bpm;
+    private final BufferPoolManager bpm;
+    private final FixLengthSerializer<PagePointer, byte[]> pointSerializer;
+    private final Serializer<T, byte[]> dataSerializer;
 
     @Inject
-    DataPageManager(BufferPoolManager bpm){
+    DataPageManager(
+            BufferPoolManager bpm,
+            FixLengthSerializer<PagePointer, byte[]> pointSerializer,
+			Serializer<T, byte[]> dataSerializer
+            ){
         this.bpm = bpm;
+        this.pointSerializer = pointSerializer;
+        this.dataSerializer = dataSerializer;
     }
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#createPage()
-	 */
-	@Override
-	public DataPage<K> createPage() throws IOException {
-		bpm.createPage();
+    @Override
+    public DataPage<T> createPage() throws IOException {
+        return new DynamicDataPage<T>(bpm.createPage(), pointSerializer, dataSerializer);
+    }
 
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public DataPage<T> getPage(int id) throws IOException {
+        return new DynamicDataPage<T>(bpm.getPage(id), pointSerializer, dataSerializer);
+    }
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#getPage(int)
-	 */
-	@Override
-	public DataPage<K> getPage(int id) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#removePage(int)
-	 */
-	@Override
-	public void removePage(int id) {
-		// TODO Auto-generated method stub
-		
-	}
-
+    @Override
+    public void removePage(int id) {
+        bpm.removePage(id);
+    }
 }
