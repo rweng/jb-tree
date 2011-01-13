@@ -49,8 +49,8 @@ public class FileResourceManagerModule extends AbstractModule{
 		bind(Integer.class).annotatedWith(PageSize.class).toInstance(pageSize);
 		bind(File.class).annotatedWith(ResourceFile.class).toInstance(file);
 		
-		//bind(ResourceManager.class).to(FileResourceManager.class).in(Singleton.class);
-		//bind(BufferPoolManager.class).to(BufferPoolManagerImpl.class);
+		bind(ResourceManager.class).to(FileResourceManager.class).in(Singleton.class);
+		bind(BufferPoolManager.class).to(BufferPoolManagerImpl.class);
 		
 		bindConstant().annotatedWith(Names.named("cacheSize")).to(30);
 	}

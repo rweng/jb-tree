@@ -7,6 +7,6 @@
  */
 package com.freshbourne.io;
 
-public interface BufferPoolManager extends PageManager<HashPage> {
+public interface BufferPoolManager extends PageManager<RawPage> {
 
 }

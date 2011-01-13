@@ -7,22 +7,11 @@
  */
 package com.freshbourne.multimap.btree;
 
+import com.freshbourne.io.*;
+import com.google.inject.Inject;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Observable;
-
-import com.freshbourne.io.DataPage;
-import com.freshbourne.io.DataPageManager;
-import com.freshbourne.io.DynamicDataPage;
-import com.freshbourne.io.FixLengthSerializer;
-import com.freshbourne.io.HashPage;
-import com.freshbourne.io.NoSpaceException;
-import com.freshbourne.io.Page;
-import com.freshbourne.io.PagePointer;
-import com.freshbourne.io.ResourceManager;
-import com.freshbourne.io.Serializer;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 /**
  * This B-Tree-Leaf stores entries by storing the keys and values in seperate pages
@@ -33,12 +22,9 @@ import com.google.inject.Provider;
  * @param <K> KeyType
  * @param <V> ValueType
  */
-public class LeafPage<K,V> extends Observable implements Node<K,V>, Page {
+public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 	
-	private  ByteBuffer buffer;
 	private  FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
-	
-	private final HashPage hashPage;
 	
 	private DataPageManager<K> keyPageManager;
 	private DataPageManager<V> valuePageManager;
@@ -61,14 +47,14 @@ public class LeafPage<K,V> extends Observable implements Node<K,V>, Page {
 	//TODO: ensure that the pointerSerializer always creates the same (buffer-)size!
 	@Inject
 	LeafPage(
-			HashPage hashPage,
-			DataPageManager<K> keyPageManager,
+			ByteBuffer buffer,
+            ResourceManager rm,
+            Integer pageId,
+            DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
 			FixLengthSerializer<PagePointer, byte[]> pointerSerializer
 			){
-		
-		this.hashPage = hashPage;
-		this.buffer = hashPage.body();
+		super(buffer, rm, pageId);
 		this.keyPageManager = keyPageManager;
 		this.valuePageManager = valuePageManager;
 		this.pointerSerializer = pointerSerializer;
@@ -217,19 +203,11 @@ public class LeafPage<K,V> extends Observable implements Node<K,V>, Page {
 
 	private PagePointer storeKey(K key) throws Exception{
 		DataPage<K> page = keyPageManager.createPage();
-		new PagePointer(page.hashPage().id(),page.add(key));
+		new PagePointer(id(),page.add(key));
 		return null;
 	}
 	
 	private PagePointer storeValue(V value){
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.Page#hashPage()
-	 */
-	@Override
-	public HashPage hashPage() {
 		return null;
 	}
 }

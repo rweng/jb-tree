@@ -7,15 +7,12 @@
  */
 package com.freshbourne.io;
 
+import com.google.inject.Inject;
+
 import java.nio.ByteBuffer;
-import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Random;
 import java.util.TreeMap;
-
-import com.google.inject.Inject;
 
 /**
  * Wraps around a <code>byte[]</code> and can hold values.
@@ -28,14 +25,13 @@ import com.google.inject.Inject;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public class DynamicDataPage<T> implements DataPage<T>{
+public class DynamicDataPage<T> extends DataPage<T>{
 	
 	private static final int intSize = 4;
 	
 	private final ByteBuffer header;
 	private final ByteBuffer body;
 	private final ByteBuffer buffer;
-	private final HashPage hashPage;
 	
 	private final FixLengthSerializer<PagePointer, byte[]> pointSerializer;
 	private final Serializer<T, byte[]> entrySerializer;
@@ -52,11 +48,14 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	
 	@Inject
 	DynamicDataPage(
-			HashPage hashPage, 
+			ByteBuffer buffer,
+            ResourceManager rm,
+            Integer pageId,
 			FixLengthSerializer<PagePointer, byte[]> pointSerializer, 
 			Serializer<T, byte[]> dataSerializer){
-		this.hashPage = hashPage;
-		this.buffer = hashPage.body();
+
+        super(buffer, rm, pageId);
+		this.buffer = buffer();
 		this.header = buffer.duplicate();
 		this.body = buffer.duplicate();
 		this.pointSerializer = pointSerializer;
@@ -76,26 +75,15 @@ public class DynamicDataPage<T> implements DataPage<T>{
 		this.header.limit(pointSerializer.serializedLength(PagePointer.class) * (entries.size() + 1) + intSize );
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.Page#initialize()
-	 */
 	public void initialize() {
 		header.position(0);
 		header.putInt(NO_ENTRIES_INT);
-		
-		hashPage.update();
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.Page#buffer()
-	 */
 	public ByteBuffer buffer() {
 		return buffer.asReadOnlyBuffer();
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.Page#body()
-	 */
 	public ByteBuffer body() {
 		int pos = body.position();
 		body.position(header.limit());
@@ -104,9 +92,6 @@ public class DynamicDataPage<T> implements DataPage<T>{
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.Page#valid()
-	 */
 	public boolean valid(){
 		return valid(false);
 	}
@@ -135,9 +120,6 @@ public class DynamicDataPage<T> implements DataPage<T>{
 				entries.put(p.getId(), p);
 				header.limit(header.position() + pointSerializer
 						.serializedLength(PagePointer.class));
-				
-
-				hashPage.update();
 			}
 		} catch (Exception e) {
 			return valid = false;
@@ -164,8 +146,6 @@ public class DynamicDataPage<T> implements DataPage<T>{
 		PagePointer p = new PagePointer(id, body.position());
 		entries.put(p.getId(), p);
 		addToHeader(p);
-		
-		hashPage.update();
 		
 		return id;
 	}
@@ -216,7 +196,6 @@ public class DynamicDataPage<T> implements DataPage<T>{
 		
 		// write the adjustments to byte array
 		writeAndAdjustHeader();
-		hashPage.update();
 	}
 
 	/**
@@ -283,10 +262,5 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	public int remaining() {
 		return buffer.capacity() - header.limit() - bodyUsed().capacity();
 	}
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.Page#hashPage()
-	 */
-	public HashPage hashPage() {
-		return hashPage;
-	}
+	
 }

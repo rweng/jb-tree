@@ -19,8 +19,12 @@ import java.nio.ByteBuffer;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public interface DataPage<T> extends Page{
-	
+public abstract class DataPage<T> extends RawPage {
+
+    public DataPage(ByteBuffer buffer, ResourceManager rm, Integer pageId){
+        super(buffer, rm, pageId);
+    }
+
 	/**
 	 * adds some bytes to the underlying body. It is possible that the header
 	 * also grows through this process.
@@ -28,14 +32,14 @@ public interface DataPage<T> extends Page{
 	 * @param value array to be written
 	 * @return id of the entry/byte[] within this page
 	 */
-	public int add(T value) throws Exception;
+	public abstract int add(T value) throws Exception;
 	
 	
 	/**
 	 * @param id within this page
 	 * @return byte array with this id
 	 */
-	public T get(int id) throws Exception;
+	public abstract T get(int id) throws Exception;
 	
 	
 	/**
@@ -43,15 +47,15 @@ public interface DataPage<T> extends Page{
 	 * @param id of the byte array to be removed
 	 * @throws ElementNotFoundException 
 	 */
-	public void remove(int id) throws ElementNotFoundException;
+	public abstract void remove(int id) throws ElementNotFoundException;
 	
 	/**
 	 * @return the part of the body which is actually used up with data
 	 */
-	public ByteBuffer bodyUsed();
+	public abstract ByteBuffer bodyUsed();
 	
 	/**
 	 * @return the remaining number Of bytes that can be used by the body or header
 	 */
-	public int remaining();
+	public abstract int remaining();
 }

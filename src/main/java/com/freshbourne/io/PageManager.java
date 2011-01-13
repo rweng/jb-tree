@@ -16,7 +16,7 @@ import java.io.IOException;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public interface PageManager<T extends Page> {
+public interface PageManager<T extends RawPage> {
 	/**
 	 * creates a new valid Page whith a valid id for which space has been reserved in
 	 * the resource.
@@ -27,14 +27,15 @@ public interface PageManager<T extends Page> {
 	public T createPage() throws IOException;
 	
 	/**
-	 * @param id
+	 * @param id of the page to be fetched
 	 * @return page with given id from resource or cache
+     * @throws IOException
 	 */
 	public T getPage(int id) throws IOException;
 	
 	/**
 	 * removes the Page with the given id
-	 * @param id
+	 * @param id of the Page to be removed
 	 */
 	public void removePage(int id);
 }

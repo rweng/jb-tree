@@ -61,9 +61,6 @@ public class FileResourceManager implements ResourceManager {
 		//new HashPage(ByteBuffer.allocate(pageSize()), this, 0);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#writePage(com.freshbourne.io.Page)
-	 */
 	@Override
 	public void writePage(RawPage page) throws IOException {
 

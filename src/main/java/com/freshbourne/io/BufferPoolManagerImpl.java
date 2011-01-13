@@ -7,15 +7,13 @@
  */
 package com.freshbourne.io;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
-
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 /**
  * 
@@ -26,33 +24,32 @@ import com.google.inject.name.Named;
  * @author "Robin Wenglewski <robin@wenglewski.de>"
  *
  */
-public class BufferPoolManagerImpl { /*implements BufferPoolManager {
+public class BufferPoolManagerImpl implements BufferPoolManager {
 	
 	private final ResourceManager rm;
 	private final int cacheSize;
 	
-	private ArrayBlockingQueue<HashPage> cacheQueue;
-	private HashMap<Integer, HashPage> cache;
+	private ArrayBlockingQueue<RawPage> cacheQueue;
+	private HashMap<Integer, RawPage> cache;
 	
 	@Inject
 	public BufferPoolManagerImpl(ResourceManager rm,@Named("cacheSize") int cacheSize) {
 		this.rm = rm;
 		this.cacheSize = cacheSize;
-		this.cache = new HashMap<Integer, HashPage>();
+		this.cache = new HashMap<Integer, RawPage>();
 		
-		cacheQueue = new ArrayBlockingQueue<HashPage>(cacheSize);
+		cacheQueue = new ArrayBlockingQueue<RawPage>(cacheSize);
 	}
 
 	
-	private HashPage newPage() {
-		HashPage p = new HashPage(ByteBuffer.allocate(rm.pageSize()), rm, 0);
-		p.initialize();
+	private RawPage newPage() {
+		RawPage p = new RawPage(ByteBuffer.allocate(rm.pageSize()), rm, null);
 		return p;
 	}
 
 	
 	@Override
-	public HashPage getPage(int pageId) throws IOException {
+	public RawPage getPage(int pageId) throws IOException {
 		if(cache.get(pageId) != null)
 			return cache.get(pageId);
 		
@@ -60,9 +57,9 @@ public class BufferPoolManagerImpl { /*implements BufferPoolManager {
 	}
 
 
-	private HashPage addToCache(HashPage p) throws IOException{
+	private RawPage addToCache(RawPage p) throws IOException{
 		if(cacheQueue.remainingCapacity() == 0){
-			HashPage toRemove = cacheQueue.poll();
+			RawPage toRemove = cacheQueue.poll();
 			rm.writePage(toRemove);
 			cache.remove(toRemove);
 		}
@@ -73,8 +70,8 @@ public class BufferPoolManagerImpl { /*implements BufferPoolManager {
 	}
 
 	@Override
-	public HashPage createPage() throws IOException {
-		HashPage p = newPage();
+	public RawPage createPage() throws IOException {
+		RawPage p = newPage();
 		p = rm.addPage(p);
 		return addToCache(p);
 	}
@@ -84,5 +81,4 @@ public class BufferPoolManagerImpl { /*implements BufferPoolManager {
 		// TODO Auto-generated method stub
 		
 	}
-    */
 }

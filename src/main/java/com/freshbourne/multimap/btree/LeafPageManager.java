@@ -1,20 +1,16 @@
-/**
- * Copyright (C) 2010 Robin Wenglewski <robin@wenglewski.de>
+/*
+ * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
  *
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
- * For alternative conditions contact the author. 
+ * For alternative conditions contact the author.
  */
 package com.freshbourne.multimap.btree;
 
-import java.io.IOException;
-
-import com.freshbourne.io.BufferPoolManager;
-import com.freshbourne.io.DataPageManager;
-import com.freshbourne.io.HashPage;
-import com.freshbourne.io.PageManager;
-import com.freshbourne.io.PagePointSerializer;
+import com.freshbourne.io.*;
 import com.google.inject.Inject;
+
+import java.io.IOException;
 
 public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 
@@ -39,12 +35,8 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	 */
 	@Override
 	public LeafPage<K, V> createPage() throws IOException {
-		HashPage p = bpm.createPage();
-		LeafPage<K, V> result = new LeafPage<K, V>(
-				p,
-				keyPageManager,
-				valuePageManager,
-				ppSerializer);
+		RawPage p = bpm.createPage();
+		LeafPage<K, V> result = null;
 		return result;
 	}
 

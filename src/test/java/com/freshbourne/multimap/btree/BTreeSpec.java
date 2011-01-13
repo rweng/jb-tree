@@ -7,20 +7,16 @@
  */
 package com.freshbourne.multimap.btree;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-
-import com.freshbourne.io.BufferPoolManager;
 import com.freshbourne.io.FileResourceManagerModule;
 import com.freshbourne.multimap.MultiMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 
