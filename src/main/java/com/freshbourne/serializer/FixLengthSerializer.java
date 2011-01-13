@@ -5,7 +5,9 @@
  * 
  * (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
+package com.freshbourne.serializer;
+
+import com.freshbourne.serializer.Serializer;
 
 /**
  * A Serializer that serializes always to the same String/Buffer length

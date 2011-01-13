@@ -7,6 +7,8 @@
  */
 package com.freshbourne.io;
 
+import com.freshbourne.serializer.FixLengthSerializer;
+import com.freshbourne.serializer.PagePointSerializer;
 import junit.framework.TestCase;
 
 public class PagePointerSerializerTest extends TestCase {

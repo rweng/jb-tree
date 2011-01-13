@@ -8,6 +8,7 @@
 package com.freshbourne.multimap.btree;
 
 import com.freshbourne.io.*;
+import com.freshbourne.serializer.PagePointSerializer;
 import com.google.inject.Inject;
 
 import java.io.IOException;

@@ -8,6 +8,7 @@
 package com.freshbourne.multimap.btree;
 
 import com.freshbourne.io.*;
+import com.freshbourne.serializer.FixLengthSerializer;
 import com.google.inject.Inject;
 
 import java.io.IOException;
@@ -24,7 +25,7 @@ import java.nio.ByteBuffer;
  */
 public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 	
-	private  FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
+	private FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	
 	private DataPageManager<K> keyPageManager;
 	private DataPageManager<V> valuePageManager;

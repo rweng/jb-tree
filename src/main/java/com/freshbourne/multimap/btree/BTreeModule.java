@@ -11,12 +11,12 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import com.freshbourne.io.DynamicDataPage;
-import com.freshbourne.io.FixLengthSerializer;
-import com.freshbourne.io.IntegerSerializer;
-import com.freshbourne.io.PagePointSerializer;
+import com.freshbourne.serializer.FixLengthSerializer;
+import com.freshbourne.serializer.IntegerSerializer;
+import com.freshbourne.serializer.PagePointSerializer;
 import com.freshbourne.io.PagePointer;
-import com.freshbourne.io.Serializer;
-import com.freshbourne.io.StringSerializer;
+import com.freshbourne.serializer.Serializer;
+import com.freshbourne.serializer.StringSerializer;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 

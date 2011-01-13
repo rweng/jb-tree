@@ -5,7 +5,7 @@
  * 
  * (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
+package com.freshbourne.serializer;
 
 /**
  * Classes implementing this interface can encode and decoded the InputType to and from the ResultType

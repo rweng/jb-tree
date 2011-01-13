@@ -7,6 +7,8 @@
  */
 package com.freshbourne.io;
 
+import com.freshbourne.serializer.FixLengthSerializer;
+import com.freshbourne.serializer.Serializer;
 import com.google.inject.Inject;
 
 import java.nio.ByteBuffer;
