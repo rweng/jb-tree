@@ -213,11 +213,11 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 
 	private PagePointer storeKey(K key) throws Exception{
 		DataPage<K> page = keyPageManager.createPage();
-		new PagePointer(id(),page.add(key));
-		return null;
+		return new PagePointer(id(),page.add(key));
 	}
 	
-	private PagePointer storeValue(V value){
-		return null;
+	private PagePointer storeValue(V value) throws Exception {
+        DataPage<V> page = valuePageManager.createPage();
+		return new PagePointer(id(),page.add(value));
 	}
 }
