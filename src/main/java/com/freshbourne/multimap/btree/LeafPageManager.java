@@ -38,8 +38,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	@Override
 	public LeafPage<K, V> createPage() throws IOException {
 		RawPage p = bpm.createPage();
-		LeafPage<K, V> result = null;
-		return result;
+		return new LeafPage<K, V>(p, keyPageManager, valuePageManager, ppSerializer);
 	}
 
 	/* (non-Javadoc)

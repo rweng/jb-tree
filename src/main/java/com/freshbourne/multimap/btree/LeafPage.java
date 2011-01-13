@@ -17,7 +17,6 @@ package com.freshbourne.multimap.btree;
 
 import com.freshbourne.io.*;
 import com.freshbourne.serializer.FixLengthSerializer;
-import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -52,9 +51,18 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 	
 	private int lastValuePageId = -1;
 	private int lastValuePageRemainingBytes = -1;	
-	
+
+    LeafPage(
+			RawPage page,
+            DataPageManager<K> keyPageManager,
+			DataPageManager<V> valuePageManager,
+			FixLengthSerializer<PagePointer, byte[]> pointerSerializer
+			){
+    this(page.buffer(), page.resourceManager(), page.id(), keyPageManager, valuePageManager, pointerSerializer);
+}
+
+
 	//TODO: ensure that the pointerSerializer always creates the same (buffer-)size!
-	@Inject
 	LeafPage(
 			ByteBuffer buffer,
             ResourceManager rm,
