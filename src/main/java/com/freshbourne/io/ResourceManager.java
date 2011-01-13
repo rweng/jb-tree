@@ -10,7 +10,7 @@ package com.freshbourne.io;
 import java.io.IOException;
 
 /**
- * ResourceManager reads and writes pages from and to a resource.
+ * ResourceManager reads and writes RawPage from and to a resource.
  * 
  * @author "Robin Wenglewski <robin@wenglewski.de>"
  *
@@ -19,12 +19,12 @@ public interface ResourceManager {
 	
 	
 	/**
-	 * write the provided HashPage to the resource. 
+	 * write the provided RawPage to the resource.
 	 * 
-	 * @param page
-	 * @throws IOException if the page id not found
+	 * @param page RawPage to write to the Resource. The ResourceManager and Id of the RawPage must be set.
+	 * @throws IOException if the page id was not found or the ResourceManager was not equal to this ResourceManager
 	 */
-	public void writePage(HashPage page) throws IOException;
+	public void writePage(RawPage page) throws IOException;
 	
 	
 	/**
@@ -32,19 +32,20 @@ public interface ResourceManager {
 	 * a new HashPage with the same backing buffer, but with id set.
 	 * A new Page must be created since the id is immutable.
 	 * 
-	 * @param page
+	 * @param page page to add
+     * @return new instance of page with ResourceManager and id set
 	 * @throws IOException
 	 */
-	public HashPage addPage(HashPage page) throws IOException;
+	public RawPage addPage(RawPage page) throws IOException;
 	
 	/**
 	 * read the page with the given id
 	 * 
-	 * @param pageId
+	 * @param pageId of the page to look up
 	 * @return Page
 	 * @throws IOException
 	 */
-	public HashPage readPage(int pageId) throws IOException;
+	public RawPage readPage(int pageId) throws IOException;
 	
 	/**
 	 * @return size of the pages in this resource

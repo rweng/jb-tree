@@ -7,27 +7,20 @@
  */
 package com.freshbourne.io;
 
+import com.google.inject.Inject;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileLock;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-
-import com.google.inject.Inject;
+import java.util.HashMap;
 
 
 /**
  * Provides access to Pages stored in a RandomAccessFile.
- * 
- * The FileResourceManager itself has no Header. The header resides in the Pages. 
- * The ResourceManager just checks is the Page read is valid.
- * 
- * It returns initialized HashPages.
- * 
- * @author "Robin Wenglewski <robin@wenglewski.de>"
- *
  */
 public class FileResourceManager implements ResourceManager {
 	private RandomAccessFile handle;
@@ -36,6 +29,8 @@ public class FileResourceManager implements ResourceManager {
 	private FileLock fileLock;
 	private FileChannel ioChannel;
 	private DataPage<Integer> headerPage;
+
+    private final HashMap<Integer, Integer> pageDirectory = new HashMap<Integer, Integer>();
 
 	@Inject
 	FileResourceManager(@ResourceFile File f, @PageSize int pageSize){
@@ -58,9 +53,6 @@ public class FileResourceManager implements ResourceManager {
 		
 		handle = new RandomAccessFile(file, "rw");
 		initIOChannel(handle);
-		if(handle.length() > 0 && !readPage(1).valid()){
-			throw new IOException("File exists but Pages are not valid");
-		}
 		
 		// if new file, initialize by writing header
 		if(handle.length() > 0)
@@ -73,19 +65,27 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#writePage(com.freshbourne.io.Page)
 	 */
 	@Override
-	public void writePage(HashPage page) throws IOException {
-		ensureOpen();
-		
-		ByteBuffer buffer = page.buffer();
+	public void writePage(RawPage page) throws IOException {
+
+        if(page.resourceManager() != this)
+            throw new WrongResourceManagerException(this, page);
+
+        if(!pageDirectory.containsKey(page.id()))
+            throw new PageNotFoundException(this, page);
+
+        ensureOpen();
+
+        ByteBuffer buffer = page.buffer();
 		buffer.rewind();
-		ioChannel.write(buffer, (page.id() - 1) * pageSize);
+
+        ioChannel.write(buffer, pageDirectory.get(page.id()));
 	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ResourceManager#readPage(int)
 	 */
 	@Override
-	public HashPage readPage(int pageId) throws IOException {
+	public RawPage readPage(int pageId) throws IOException {
 		ensureOpen();
 		return null;
 //		ByteBuffer buf = ByteBuffer.wrap(new byte[getPageSize()]);
@@ -182,10 +182,10 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#addPage(com.freshbourne.io.HashPage)
 	 */
 	@Override
-	public HashPage addPage(HashPage page) throws IOException {
+	public RawPage addPage(RawPage page) throws IOException {
 		ensureOpen();
 		
-		return new HashPage(page.buffer(), this, generateId());
+		return new RawPage(page.buffer(), this, generateId());
 	}
 	
 	private int generateId(){

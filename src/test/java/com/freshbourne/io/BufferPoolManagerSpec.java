@@ -7,16 +7,14 @@
  */
 package com.freshbourne.io;
 
-import java.io.IOException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.IOException;
 
 import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
 
 public class BufferPoolManagerSpec {
 	private PageManager<HashPage> bpm;
@@ -24,8 +22,8 @@ public class BufferPoolManagerSpec {
 	private final int cacheSize = 30;
 	
 	@Mock private ResourceManager mockRM;
-	@Mock private HashPage mockPageWithoutId;
-	@Mock private HashPage mockPageWithId;
+	@Mock private RawPage mockPageWithoutId;
+	@Mock private RawPage mockPageWithId;
 	
 	@Before
 	public void setUp() throws IOException{
@@ -34,9 +32,9 @@ public class BufferPoolManagerSpec {
 		when(mockRM.pageSize()).thenReturn(PageSize.DEFAULT_PAGE_SIZE);
 		
 		when(mockPageWithId.id()).thenReturn(1);
-		when(mockRM.addPage(any(HashPage.class))).thenReturn(mockPageWithId);
+		when(mockRM.addPage(any(RawPage.class))).thenReturn(mockPageWithId);
 		
-		bpm = new BufferPoolManagerImpl(mockRM, cacheSize);
+		//bpm = new BufferPoolManagerImpl(mockRM, cacheSize);
 	}
 	
 	@Test
@@ -63,7 +61,7 @@ public class BufferPoolManagerSpec {
 	@Test
 	public void shouldPersistCreatedPages() throws IOException{
 		bpm.createPage();
-		verify(mockRM).writePage(any(HashPage.class));
+		verify(mockRM).writePage(any(RawPage.class));
 	}
 	
 	

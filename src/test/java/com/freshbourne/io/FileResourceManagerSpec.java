@@ -22,8 +22,8 @@ public class FileResourceManagerSpec {
 	
 	private ResourceManager rm;
 	private final File file = new File("/tmp/frm_test");
-	private HashPage page;
-	
+	private RawPage page;
+
 	@Before
 	public void setUp() throws IOException {
 		if(file.exists()){
@@ -32,9 +32,7 @@ public class FileResourceManagerSpec {
 		
 		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE);
 		rm.open();
-		page = new HashPage(
-				ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 
-				rm, 44);
+		page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE));
 	}
 	
 	@After
@@ -54,9 +52,15 @@ public class FileResourceManagerSpec {
 		rm.close();
 		rm.addPage(page);
 	}
+
+    @Test(expected = WrongResourceManagerException.class)
+    public void shouldThrowExceptionOnWriteIfResourceManagerNotSet() throws IOException{
+        rm.writePage(page);
+    }
 	
-	@Test(expected= ElementNotFoundException.class)
+	@Test(expected= PageNotFoundException.class)
 	public void shouldThrowExceptionIfPageToWriteDoesNotExist() throws IOException{
-		rm.writePage(page);
+        page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), rm, null);
+        rm.writePage(page);
 	}
 }

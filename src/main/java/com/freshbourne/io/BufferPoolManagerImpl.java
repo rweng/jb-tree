@@ -26,7 +26,7 @@ import com.google.inject.name.Named;
  * @author "Robin Wenglewski <robin@wenglewski.de>"
  *
  */
-public class BufferPoolManagerImpl implements BufferPoolManager {
+public class BufferPoolManagerImpl { /*implements BufferPoolManager {
 	
 	private final ResourceManager rm;
 	private final int cacheSize;
@@ -44,10 +44,6 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	}
 
 	
-	/**
-	 * creates an in-memory page
-	 * @return
-	 */
 	private HashPage newPage() {
 		HashPage p = new HashPage(ByteBuffer.allocate(rm.pageSize()), rm, 0);
 		p.initialize();
@@ -76,9 +72,6 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 		return p;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.BufferPoolManager#createPage()
-	 */
 	@Override
 	public HashPage createPage() throws IOException {
 		HashPage p = newPage();
@@ -86,12 +79,10 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 		return addToCache(p);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#removePage(int)
-	 */
 	@Override
 	public void removePage(int id) {
 		// TODO Auto-generated method stub
 		
 	}
+    */
 }
