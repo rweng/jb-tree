@@ -41,9 +41,12 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	private HashMap<Integer, RawPage> cache;
 	
 	@Inject
-	public BufferPoolManagerImpl(ResourceManager rm,@Named("cacheSize") int cacheSize) {
-		this.rm = rm;
-		this.cacheSize = cacheSize;
+	public BufferPoolManagerImpl(ResourceManager rm,@Named("cacheSize") int cacheSize) throws IOException {
+		if(!rm.isOpen())
+            rm.open();
+
+        this.rm = rm;
+        this.cacheSize = cacheSize;
 		this.cache = new HashMap<Integer, RawPage>();
 		
 		cacheQueue = new ArrayBlockingQueue<RawPage>(cacheSize);
