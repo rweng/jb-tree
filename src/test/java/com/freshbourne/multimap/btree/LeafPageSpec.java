@@ -20,18 +20,21 @@ import static org.junit.Assert.assertNotNull;
 
 public class LeafPageSpec {
 	
-	LeafPage<Integer, String> leaf;
-	DynamicDataPage<String> stringData;
-	DynamicDataPage<Integer> intData;
+	private LeafPage<Integer, String> leaf;
+	private DynamicDataPage<String> stringData;
+	private DynamicDataPage<Integer> intData;
 	
-	Injector injector;
+	private static final Injector injector;
+
+    static {
+        injector = Guice.createInjector(
+                new FileResourceManagerModule(new File("/tmp/leafnodespec")),
+                new BTreeModule()
+        );
+    }
 	
 	@Before
 	public void setUp(){
-		this.injector = Guice.createInjector(
-				new FileResourceManagerModule(new File("/tmp/leafnodespec")),
-				new BTreeModule()
-				);
 		
 		stringData = injector.getInstance(DynamicDataPage.class);
 		

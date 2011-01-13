@@ -16,12 +16,10 @@
 package com.freshbourne.io;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
 import java.io.File;
-import java.io.IOException;
 
 public class FileResourceManagerModule extends AbstractModule{
 	
@@ -60,17 +58,14 @@ public class FileResourceManagerModule extends AbstractModule{
 		
 		bindConstant().annotatedWith(Names.named("cacheSize")).to(30);
 	}
-	
-	@Provides @Singleton
-	public ResourceManager provideFileResourceManager() throws IOException{
-		ResourceManager result = new FileResourceManager(file, pageSize);
-		result.open();
-		return result;
-	}
-	
-//	@Provides
-//	<T> DynamicDataPage<T> provideDataPage(ResourceManager rm){
-//		return null;
+
+    // this worked
+//	@Provides @Singleton
+//	public ResourceManager provideFileResourceManager() throws IOException{
+//		ResourceManager result = new FileResourceManager(file, pageSize);
+//		result.open();
+//		return result;
 //	}
+
 	
 }
