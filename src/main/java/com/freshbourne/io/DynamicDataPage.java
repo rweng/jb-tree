@@ -68,6 +68,9 @@ public class DynamicDataPage<T> extends DataPage<T>{
 		this.entrySerializer = dataSerializer;
 		
 		this.entries = new TreeMap<Integer, PagePointer>();
+
+        //TODO: try to load buffer here? or seperate function load?
+
 		body.position(body.capacity());
 		
 		adjustHeaderSize();

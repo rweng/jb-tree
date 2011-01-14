@@ -153,9 +153,23 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 	 * @see com.freshbourne.multimap.MultiMap#containsKey(java.lang.Object)
 	 */
 	@Override
-	public boolean containsKey(K key) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean containsKey(K key) throws Exception {
+        // iterate over the entries
+		for(int i = 0; i < numberOfEntries; i++){
+
+            // fetch the pagepoint binery
+            buffer().position(i * serializedPointerSize * 2);
+            ByteBuffer p = ByteBuffer.allocate(serializedPointerSize);
+            buffer().get(p.array());
+
+            // get the key where the pagepointer is pointing to
+            PagePointer pointer = pointerSerializer.deserialize(p.array());
+            DataPage<K> page = keyPageManager.getPage(pointer.getId());
+            K currentKey = page.get(pointer.getOffset());
+            if(key.equals(currentKey))
+                return true;
+        }
+        return false;
 	}
 
 	/* (non-Javadoc)

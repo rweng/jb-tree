@@ -15,10 +15,9 @@
  */
 package com.freshbourne.multimap.btree;
 
-import java.io.IOException;
-
 import com.google.inject.Inject;
-import com.google.inject.internal.Nullable;
+
+import java.io.IOException;
 
 public class BTree<K, V> implements Node<K,V> {
 
@@ -45,7 +44,7 @@ public class BTree<K, V> implements Node<K,V> {
 	 * @see com.freshbourne.multimap.MultiMap#containsKey(java.lang.Object)
 	 */
 	@Override
-	public boolean containsKey(K key) {
+	public boolean containsKey(K key) throws Exception {
 		return root.containsKey(key);
 	}
 
