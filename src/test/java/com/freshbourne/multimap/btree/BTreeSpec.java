@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
+ *
+ * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ * http://creativecommons.org/licenses/by-nc/3.0/
+ * For alternative conditions contact the author.
+ */
+
 /**
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
@@ -7,20 +15,16 @@
  */
 package com.freshbourne.multimap.btree;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-
-import com.freshbourne.io.BufferPoolManager;
-import com.freshbourne.io.FileResourceManagerModule;
+import com.freshbourne.io.IOModule;
 import com.freshbourne.multimap.MultiMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 
@@ -33,7 +37,7 @@ public class BTreeSpec {
 	
 	static {
 		injector = Guice.createInjector(
-				new FileResourceManagerModule("/tmp/test"),
+				new IOModule("/tmp/test"),
 				new BTreeModule());
 	}
 	

@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
+ *
+ * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ * http://creativecommons.org/licenses/by-nc/3.0/
+ * For alternative conditions contact the author.
+ */
+
 /**
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
@@ -5,7 +13,9 @@
  * 
  * (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
+package com.freshbourne.serializer;
+
+import com.freshbourne.serializer.Serializer;
 
 /**
  * A Serializer that serializes always to the same String/Buffer length

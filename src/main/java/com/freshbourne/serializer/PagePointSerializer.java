@@ -1,11 +1,13 @@
-/**
- * Copyright (C) 2010 Robin Wenglewski <robin@wenglewski.de>
+/*
+ * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
  *
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
- * For alternative conditions contact the author. 
+ * For alternative conditions contact the author.
  */
-package com.freshbourne.io;
+package com.freshbourne.serializer;
+
+import com.freshbourne.io.PagePointer;
 
 import java.nio.ByteBuffer;
 
@@ -18,7 +20,7 @@ import java.nio.ByteBuffer;
 public class PagePointSerializer implements FixLengthSerializer<PagePointer, byte[]> {
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.Serializer#serialize(java.lang.Object)
+	 * @see com.freshbourne.serializer.Serializer#serialize(java.lang.Object)
 	 */
 	@Override
 	public byte[] serialize(PagePointer o) {
@@ -29,7 +31,7 @@ public class PagePointSerializer implements FixLengthSerializer<PagePointer, byt
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.Serializer#deserialize(java.lang.Object)
+	 * @see com.freshbourne.serializer.Serializer#deserialize(java.lang.Object)
 	 */
 	@Override
 	public PagePointer deserialize(byte[] o) {
@@ -40,7 +42,7 @@ public class PagePointSerializer implements FixLengthSerializer<PagePointer, byt
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.FixLengthSerializer#serializedLength(java.lang.Class)
+	 * @see com.freshbourne.serializer.FixLengthSerializer#serializedLength(java.lang.Class)
 	 */
 	@Override
 	public int serializedLength(Class<PagePointer> c) {

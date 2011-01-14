@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
+ *
+ * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ * http://creativecommons.org/licenses/by-nc/3.0/
+ * For alternative conditions contact the author.
+ */
+
 /**
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
@@ -6,6 +14,8 @@
  */
 package com.freshbourne.multimap;
 
+
+import java.io.IOException;
 
 /**
  * This is an Interface like the <a href="http://download.oracle.com/javase/6/docs/api/java/util/Map.html">Map</a> interface, except that
@@ -35,7 +45,7 @@ public interface MultiMap<K, V> {
 	/**
 	 * @return boolean if the key is contained in the map
 	 */
-	public boolean containsKey(K key);
+	public boolean containsKey(K key) throws Exception;
     
 	/**
      * @return the first value of key or <code>null</code> if key not found

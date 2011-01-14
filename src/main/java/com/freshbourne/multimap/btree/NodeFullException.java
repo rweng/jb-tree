@@ -5,14 +5,11 @@
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author.
  */
-package com.freshbourne.io;
 
-public class ElementNotFoundException extends Exception {
-	
-	private static final long serialVersionUID = 1L;
+package com.freshbourne.multimap.btree;
 
-	ElementNotFoundException(){
-		super("Element not found");
-	}
-
+public class NodeFullException extends Exception {
+    public NodeFullException(Node n){
+        super("Node is full: " + n.toString());
+    }
 }

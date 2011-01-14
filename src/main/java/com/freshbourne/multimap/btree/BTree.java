@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
+ *
+ * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ * http://creativecommons.org/licenses/by-nc/3.0/
+ * For alternative conditions contact the author.
+ */
+
 /**
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
@@ -7,10 +15,9 @@
  */
 package com.freshbourne.multimap.btree;
 
-import java.io.IOException;
-
 import com.google.inject.Inject;
-import com.google.inject.internal.Nullable;
+
+import java.io.IOException;
 
 public class BTree<K, V> implements Node<K,V> {
 
@@ -37,7 +44,7 @@ public class BTree<K, V> implements Node<K,V> {
 	 * @see com.freshbourne.multimap.MultiMap#containsKey(java.lang.Object)
 	 */
 	@Override
-	public boolean containsKey(K key) {
+	public boolean containsKey(K key) throws Exception {
 		return root.containsKey(key);
 	}
 
