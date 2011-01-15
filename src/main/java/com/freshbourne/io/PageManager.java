@@ -16,7 +16,7 @@ import java.io.IOException;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public interface PageManager<T extends RawPage> {
+public interface PageManager<T> {
 	/**
 	 * creates a new valid Page whith a valid id for which space has been reserved in
 	 * the resource.

@@ -16,7 +16,7 @@ import java.util.Random;
 import java.util.TreeMap;
 
 /**
- * Wraps around a <code>byte[]</code> and can hold values.
+ * Wraps around a <code>byte[]</code> and can hold values of variable serialized length.
  * 
  * Since its a dynamic data page, values are written first at the end of the body to allow
  * the header to grow.
@@ -26,12 +26,14 @@ import java.util.TreeMap;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public class DynamicDataPage<T> extends DataPage<T>{
+public class DynamicDataPage<T> implements DataPage<T>{
 	
 	private static final int intSize = 4;
 	
 	private final ByteBuffer header;
 	private final ByteBuffer body;
+	
+	private final RawPage rawPage;
 	
 	private final FixLengthSerializer<PagePointer, byte[]> pointSerializer;
 	private final Serializer<T, byte[]> entrySerializer;
@@ -48,22 +50,14 @@ public class DynamicDataPage<T> extends DataPage<T>{
 
 
 	DynamicDataPage(
-			RawPage p,
-			FixLengthSerializer<PagePointer, byte[]> pointSerializer,
-			Serializer<T, byte[]> dataSerializer){
-        this(p.buffer(), p.resourceManager() , p.id(), pointSerializer, dataSerializer);
-    }
-	
-	DynamicDataPage(
-			ByteBuffer buffer,
-            ResourceManager rm,
-            Integer pageId,
+			RawPage rawPage,
 			FixLengthSerializer<PagePointer, byte[]> pointSerializer, 
 			Serializer<T, byte[]> dataSerializer){
 
-        super(buffer, rm, pageId);
-		this.header = buffer.duplicate();
-		this.body = buffer.duplicate();
+		this.rawPage = rawPage;
+		
+        this.header = rawPage.buffer().duplicate();
+		this.body = rawPage.buffer().duplicate();
 		this.pointSerializer = pointSerializer;
 		this.entrySerializer = dataSerializer;
 		
@@ -95,42 +89,6 @@ public class DynamicDataPage<T> extends DataPage<T>{
 		ByteBuffer result = body.slice();
 		body.position(pos);
 		return result;
-	}
-
-	public boolean valid(){
-		return valid(false);
-	}
-	
-	public boolean valid(boolean force) {
-		if(valid && !force)
-			return true;
-		
-		try {
-			entries.clear();
-			header.position(0);
-
-			int elements = header.getInt();
-			
-			// 0 is never written
-			if(elements == 0)
-				return valid = false;
-			if(elements == NO_ENTRIES_INT)
-				return valid = true;
-			
-			for (int i = 0; i < elements; i++) {
-				byte[] bytes = new byte[pointSerializer
-						.serializedLength(PagePointer.class)];
-				header.get(bytes);
-				PagePointer p = pointSerializer.deserialize(bytes);
-				entries.put(p.getId(), p);
-				header.limit(header.position() + pointSerializer
-						.serializedLength(PagePointer.class));
-			}
-		} catch (Exception e) {
-			return valid = false;
-		}
-		
-		return valid = true;
 	}
 
 	/* (non-Javadoc)
@@ -171,7 +129,7 @@ public class DynamicDataPage<T> extends DataPage<T>{
 		header.position(header.limit()-size);
 		header.put(pointSerializer.serialize(p));
 		
-		if(buffer().capacity() - header.position() - bodyUsed().capacity() > size)
+		if(rawPage.buffer().capacity() - header.position() - bodyUsed().capacity() > size)
 			header.limit(header.position() + size);
 	}
 
@@ -188,7 +146,7 @@ public class DynamicDataPage<T> extends DataPage<T>{
 		
 		// move all body elements
 		int size = sizeOfEntry(p);
-		System.arraycopy(buffer().array(), body.position(), buffer().array(), body.position() + size, p.getOffset() - body.position() );
+		System.arraycopy(rawPage.buffer().array(), body.position(), rawPage.buffer().array(), body.position() + size, p.getOffset() - body.position() );
 		
 		// adjust the entries in the entries array
 		for(PagePointer c : entries.values()){
@@ -265,7 +223,31 @@ public class DynamicDataPage<T> extends DataPage<T>{
 	 * @see com.freshbourne.multimap.btree.DataPage#remaining()
 	 */
 	public int remaining() {
-		return buffer().capacity() - header.limit() - bodyUsed().capacity();
+		return rawPage.buffer().capacity() - header.limit() - bodyUsed().capacity();
+	}
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ComplexPage#load()
+	 */
+	@Override
+	public void load() {
+		// TODO Auto-generated method stub
+		
+	}
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ComplexPage#isValid()
+	 */
+	@Override
+	public boolean isValid() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.DataPage#numberOfEntries()
+	 */
+	@Override
+	public int numberOfEntries() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 }

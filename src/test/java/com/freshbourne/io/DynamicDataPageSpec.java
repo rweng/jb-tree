@@ -13,6 +13,11 @@ import java.util.Observer;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.freshbourne.serializer.PagePointSerializer;
+import com.freshbourne.serializer.StringSerializer;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -25,20 +30,25 @@ public class DynamicDataPageSpec {
 	private String s2 = "blast";
 	private String s3 = "ups";
 	
-	
 	@Before
 	public void setUp(){
-		page = null;
+		page = new DynamicDataPage<String>(new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE)), new PagePointSerializer(), new StringSerializer());
 	}
 	
 	@Test
 	public void shouldHaveToInitialize(){
-		Observer mockObserver = mock(Observer.class);
-
-		assertFalse(page.valid());
+		assertFalse(page.isValid());
 		page.initialize();
-		assertTrue(page.valid());
+		assertTrue(page.isValid());
 	}
+	
+	@Test
+	public void shouldBeEmptyAfterInitialize(){
+		page.initialize();
+		assertEquals(0, page.numberOfEntries());
+	}
+	
+	
 	
 	@Test(expected= Exception.class)
 	public void shouldThrowAnExceptionIfInvalidEntryId() throws Exception{
@@ -72,15 +82,6 @@ public class DynamicDataPageSpec {
 		int id = page.add(s3);
 		page.remove(id);
 		page.get(id);
-	}
-	
-	@Test
-	public void shouldNotifyObservers() throws NoSpaceException, ElementNotFoundException{
-		Observer mockObserver = mock(Observer.class);
-
-		int id = page.add("blast");
-
-		page.remove(id);
 	}
 	
 	@Test
