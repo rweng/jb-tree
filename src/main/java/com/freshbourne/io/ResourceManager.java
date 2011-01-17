@@ -63,5 +63,6 @@ public interface ResourceManager {
 	public void open() throws IOException;
 	public boolean isOpen();
 	public void close();
+	public int numberOfPages();
 	
 }

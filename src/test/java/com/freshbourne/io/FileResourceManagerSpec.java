@@ -55,6 +55,7 @@ public class FileResourceManagerSpec {
 	public void shouldBeEmptyAtFirst() throws IOException{
 		assertTrue(rm != null);
 		assertEquals(PageSize.DEFAULT_PAGE_SIZE, rm.pageSize());
+		assertEquals(0, rm.numberOfPages());
 	}
 	
 	@Test
@@ -89,6 +90,13 @@ public class FileResourceManagerSpec {
 	public void shouldReadWrittenPages() throws IOException{
 		RawPage newPage = rm.addPage(page);
 		assertEquals(rm.readPage(newPage.id()).buffer(), page.buffer());
+	}
+	
+	@Test
+	public void addingAPageShouldIncreaseNumberOfPages() throws IOException{
+		int num = rm.numberOfPages();
+		rm.addPage(page);
+		assertEquals(num + 1, rm.numberOfPages());
 	}
 	
 	@Test

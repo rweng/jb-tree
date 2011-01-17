@@ -75,7 +75,7 @@ public class FileResourceManager implements ResourceManager {
 			
 		}
 	}
-
+	
 	@Override
 	public void writePage(RawPage page) throws IOException {
 
@@ -223,5 +223,13 @@ public class FileResourceManager implements ResourceManager {
 	private void ensureOpen() throws ResourceNotOpenException{
 		if(!isOpen())
 			throw new ResourceNotOpenException(this);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ResourceManager#numberOfPages()
+	 */
+	@Override
+	public int numberOfPages() {
+		return pageDirectory.size();
 	}
 }
