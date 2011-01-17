@@ -57,11 +57,16 @@ public class BTreeSpec {
 		tree.add(1, s);
 		assertTrue(tree.containsKey(1));
 		assertEquals(s, tree.get(1).get(0));
+		assertEquals(1, tree.size());
 	}
 	
 	@Test
-	public void shouldBeAbleToRemoveInsertedEntries(){
-		fail();
+	public void shouldBeAbleToRemoveInsertedEntries() throws Exception{
+		tree.add(1, s);
+		assertTrue(tree.containsKey(1));
+		tree.remove(1);
+		assertFalse(tree.containsKey(1));
+		assertEquals(0, tree.size());
 	}
 	
 	@Test
