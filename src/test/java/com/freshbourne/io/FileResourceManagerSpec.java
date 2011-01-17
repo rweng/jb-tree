@@ -55,7 +55,12 @@ public class FileResourceManagerSpec {
 	public void shouldBeEmptyAtFirst() throws IOException{
 		assertTrue(rm != null);
 		assertEquals(PageSize.DEFAULT_PAGE_SIZE, rm.pageSize());
-		assertEquals(0, file.length());
+	}
+	
+	@Test
+	public void firstPageShouldBeWrittenAfterOpen(){
+		rm.close();
+		assertEquals(PageSize.DEFAULT_PAGE_SIZE, file.length());
 	}
 	
 	@Test(expected= ResourceNotOpenException.class)
@@ -88,12 +93,16 @@ public class FileResourceManagerSpec {
 	
 	@Test
 	public void shouldBeAbleToReadPagesAfterReopen() throws IOException{
-		RawPage newPage = rm.addPage(page);
+		RawPage newPage = rm.addPage(new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE)));
+		RawPage newPage2 = rm.addPage(page);
 		
 		rm.close();
+		
+		// throw away all local variables
+		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE);
 		rm.open();
 		
-		assertEquals(rm.readPage(newPage.id()).buffer(), page.buffer());
+		assertEquals(rm.readPage(newPage2.id()).buffer(), page.buffer());
 	}
 	
 	@Test(expected= WrongPageSizeException.class)

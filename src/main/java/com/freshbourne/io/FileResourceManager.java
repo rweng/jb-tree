@@ -40,7 +40,6 @@ public class FileResourceManager implements ResourceManager {
 	private FileLock fileLock;
 	private FileChannel ioChannel;
 	private DataPage<Integer> headerPage;
-
 	
     private final HashMap<Long, Long> pageDirectory = new HashMap<Long, Long>();
 
@@ -67,10 +66,14 @@ public class FileResourceManager implements ResourceManager {
 		initIOChannel(handle);
 		
 		// if new file, initialize by writing header
-		if(handle.length() > 0)
-			return;
-		
-		//new HashPage(ByteBuffer.allocate(pageSize()), this, 0);
+		if(handle.length() == 0){
+			ByteBuffer buf = ByteBuffer.allocate(pageSize); // default Integer size
+			buf.putInt(0); // 0 pages in this file
+			buf.rewind();
+			ioChannel.write(buf);
+		} else { // if the file already existed
+			
+		}
 	}
 
 	@Override
