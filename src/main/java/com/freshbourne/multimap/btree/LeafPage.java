@@ -119,23 +119,31 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 	 */
 	@Override
 	public boolean containsKey(K key) throws Exception {
-        // iterate over the entries
+        byte[] buf = new byte[serializedPointerSize];
+		
+		// iterate over the entries
 		for(int i = 0; i < numberOfEntries; i++){
 
             // fetch the pagepoint binery
-            buffer().position(i * serializedPointerSize * 2);
-            ByteBuffer p = ByteBuffer.allocate(serializedPointerSize);
-            buffer().get(p.array());
+            buffer().position(posOfKey(i));
+            buffer().get(buf);
 
             // get the key where the pagepointer is pointing to
-            PagePointer pointer = pointerSerializer.deserialize(p.array());
+            PagePointer pointer = pointerSerializer.deserialize(buf);
             DataPage<K> page = keyPageManager.getPage(pointer.getId());
-            page.load();
             K currentKey = page.get(pointer.getOffset());
             if(key.equals(currentKey))
                 return true;
         }
         return false;
+	}
+	
+	private int posOfKey(int i){
+		return i * serializedPointerSize * 2;
+	}
+	
+	private int posOfValue(int i){
+		return posOfKey(i) + serializedPointerSize;
 	}
 
 	/* (non-Javadoc)
