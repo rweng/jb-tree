@@ -81,6 +81,7 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	public void initialize() {
 		header.position(0);
 		header.putInt(NO_ENTRIES_INT);
+		this.valid = true;
 	}
 
 	public ByteBuffer body() {
@@ -238,16 +239,14 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	 */
 	@Override
 	public boolean isValid() {
-		// TODO Auto-generated method stub
-		return false;
+		return valid;
 	}
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.DataPage#numberOfEntries()
 	 */
 	@Override
 	public int numberOfEntries() {
-		// TODO Auto-generated method stub
-		return 0;
+		return entries.size();
 	}
 	
 }
