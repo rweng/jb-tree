@@ -32,6 +32,8 @@ public class BTreeSpec {
 	
 	private MultiMap<Integer, String> tree;
 	private String s = "testString";
+	private String s2 = "string 2";
+	
 
 	private final static Injector injector;
 	
@@ -53,11 +55,25 @@ public class BTreeSpec {
 	}
 	
 	@Test
-	public void shouldContainAnAddedEntry() throws Exception{
+	public void shouldContainAddedEntries() throws Exception{
 		tree.add(1, s);
 		assertTrue(tree.containsKey(1));
+		assertEquals(1, tree.get(1).size());
 		assertEquals(s, tree.get(1).get(0));
 		assertEquals(1, tree.size());
+		
+		tree.add(1, s2);
+		assertTrue(tree.containsKey(1));
+		assertEquals(2, tree.get(1).size());
+		assertEquals(s, tree.get(1).get(0));
+		assertEquals(s2, tree.get(1).get(1));
+		assertEquals(2, tree.size());
+		
+		tree.add(2, s2);
+		assertTrue(tree.containsKey(2));
+		assertEquals(1, tree.get(2).size());
+		assertEquals(s2, tree.get(1).get(0));
+		assertEquals(3, tree.size());
 	}
 	
 	@Test
