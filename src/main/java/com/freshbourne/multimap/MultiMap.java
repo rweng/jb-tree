@@ -80,8 +80,9 @@ public interface MultiMap<K, V> {
      * 
      * @param key
      * @return array of the removed values
+     * @throws Exception 
      */
-    List<V> remove(K key);
+    List<V> remove(K key) throws Exception;
     
     /**
      * Removes the value under key.

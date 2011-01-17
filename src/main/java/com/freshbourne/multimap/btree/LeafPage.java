@@ -182,9 +182,14 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
 	 */
 	@Override
-	public List<V> remove(K key) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<V> remove(K key) throws Exception {
+		List<V> result = new ArrayList<V>();
+		
+		for(V value : get(key)){
+			result.add(remove(key, value));
+		}
+		
+		return result;
 	}
 
 	/* (non-Javadoc)
