@@ -56,7 +56,7 @@ public class BTreeSpec {
 	public void shouldContainAnAddedEntry() throws Exception{
 		tree.add(1, s);
 		assertTrue(tree.containsKey(1));
-		assertEquals(s, tree.get(1));
+		assertEquals(s, tree.get(1).get(0));
 	}
 	
 	@Test

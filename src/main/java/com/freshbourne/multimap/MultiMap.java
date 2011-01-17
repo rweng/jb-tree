@@ -16,6 +16,7 @@ package com.freshbourne.multimap;
 
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * This is an Interface like the <a href="http://download.oracle.com/javase/6/docs/api/java/util/Map.html">Map</a> interface, except that
@@ -55,8 +56,10 @@ public interface MultiMap<K, V> {
 	/**
 	 * @param key
 	 * @return array of values associated with the key or an empty array if the key does not exist
+	 * @throws IOException 
+	 * @throws Exception 
 	 */
-	public V[] get(K key);
+	public List<V> get(K key) throws IOException, Exception;
 	
 	
 	
@@ -78,7 +81,7 @@ public interface MultiMap<K, V> {
      * @param key
      * @return array of the removed values
      */
-    V[] remove(K key);
+    List<V> remove(K key);
     
     /**
      * Removes the value under key.

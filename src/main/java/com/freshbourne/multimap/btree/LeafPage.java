@@ -19,7 +19,10 @@ import com.freshbourne.io.*;
 import com.freshbourne.serializer.FixLengthSerializer;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This B-Tree-Leaf stores entries by storing the keys and values in seperate pages
@@ -103,44 +106,6 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
         numberOfEntries++;
 	}
 
-	/**
-	 * @param keyBytes
-	 * @param valueBytes
-	 * @throws IOException 
-	 */
-	private void storeKeyAndValueBytes(byte[] keyBytes,
-			byte[] valueBytes) throws IOException {
-//		RawPage keyPage;
-//		RawPage valuePage;
-//		
-//		if(keyBytes.length > lastKeyPageRemainingBytes){
-//			keyPage = resourceManager.newPage();
-//		}  else {
-//			keyPage = resourceManager.readPage(lastKeyPageId);
-//		}
-//		
-//		if(valueBytes.length > lastValuePageRemainingBytes){
-//			try{
-//				valuePage = resourceManager.newPage();
-//			} finally {
-//				//TODO: unfortunately, we dont have this yet.
-//				//if(newKeyPage != null)
-//					// resourceManager.removePage()
-//			}
-//		} else {
-//			valuePage = resourceManager.readPage(lastValuePageId);
-//		}
-//		
-//		DataPage keyDataPage = new DynamicDataPage(keyPage.body(), pointerSerializer);
-//		DataPage valueDataPage = new DynamicDataPage(valuePage.body(), pointerSerializer);
-//		
-//		// int keyPos = keyDataPage.add(keyBytes);
-//		
-//		// pagepointer, we use it different: offset is number of the value
-//		
-		
-	}
-
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.Node#size()
 	 */
@@ -185,9 +150,30 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#get(java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public V[] get(K key) {
-		// TODO Auto-generated method stub
+	public List<V> get(K key) throws Exception {
+		ByteBuffer buf = buffer();
+		byte[] bytebuf = new byte[pointerSerializer.serializedLength(PagePointer.class)];
+		
+		buf.position(0);
+		
+		for(int i = 0; i < numberOfEntries; i++){
+			buf.get(bytebuf);
+			PagePointer p = pointerSerializer.deserialize(bytebuf);
+			DataPage<K> dataPage = keyPageManager.getPage(p.getId());
+			if(dataPage.get(p.getOffset()).equals(key)){
+				buf.get(bytebuf);
+				p = pointerSerializer.deserialize(bytebuf);
+				DataPage<V> valueDataPage = valuePageManager.getPage(p.getId());
+				
+				// due to type erasure of generics, a V[] is in memory only an Object[]
+				
+				List<V> result = new ArrayList<V>();
+				result.add(valueDataPage.get(p.getOffset()));
+				return result;
+			}
+		}
 		return null;
 	}
 
@@ -196,7 +182,7 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
 	 */
 	@Override
-	public V[] remove(K key) {
+	public List<V> remove(K key) {
 		// TODO Auto-generated method stub
 		return null;
 	}

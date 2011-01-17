@@ -18,6 +18,7 @@ package com.freshbourne.multimap.btree;
 import com.google.inject.Inject;
 
 import java.io.IOException;
+import java.util.List;
 
 public class BTree<K, V> implements Node<K,V> {
 
@@ -60,7 +61,7 @@ public class BTree<K, V> implements Node<K,V> {
 	 * @see com.freshbourne.multimap.MultiMap#get(java.lang.Object)
 	 */
 	@Override
-	public V[] get(K key) {
+	public List<V> get(K key) throws Exception {
 		return root.get(key);
 	}
 
@@ -76,7 +77,7 @@ public class BTree<K, V> implements Node<K,V> {
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
 	 */
 	@Override
-	public V[] remove(K key) {
+	public List<V> remove(K key) {
 		return root.remove(key);
 	}
 
