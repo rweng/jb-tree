@@ -121,7 +121,8 @@ public class DynamicDataPage<T> implements DataPage<T>{
 		int id = generateId();
 		PagePointer p = new PagePointer(id, body.position());
 		entries.put(p.getId(), p);
-		addToHeader(p);
+		
+		writeAndAdjustHeader();
 		
 		return id;
 	}
@@ -288,8 +289,6 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	 */
 	@Override
 	public RawPage rawPage() {
-		writeAndAdjustHeader();
-		
 		return rawPage;
 	}
 	
