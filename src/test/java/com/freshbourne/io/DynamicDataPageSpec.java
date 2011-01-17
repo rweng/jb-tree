@@ -43,7 +43,7 @@ public class DynamicDataPageSpec {
 	}
 	
 	@Test
-	public void shouldBeEmptyAfterInitialize(){
+	public void shouldBeEmptyAfterInitialize() throws InvalidPageException{
 		page.initialize();
 		assertEquals(0, page.numberOfEntries());
 	}
@@ -56,14 +56,33 @@ public class DynamicDataPageSpec {
 	}
 	
 	@Test
-	public void shouldGetSmallerWhenInsertingSomething() throws NoSpaceException{
+	public void shouldGetSmallerWhenInsertingSomething() throws NoSpaceException, InvalidPageException{
+		page.initialize();
+		
 		int rest = page.remaining();
 		page.add("bla");
 		assertTrue(rest > page.remaining());
 	}
 	
+	@Test(expected= InvalidPageException.class)
+	public void shouldThrowAnExceptionOnAddIfNotValid() throws NoSpaceException, InvalidPageException{
+		page.add(s1);
+	}
+	
+	@Test(expected= InvalidPageException.class)
+	public void shouldThrowAnExceptionOnGetIfNotValid() throws Exception{
+		page.get(0);
+	}
+	
+	@Test(expected= InvalidPageException.class)
+	public void shouldThrowAnExceptionOnNumberOfEntriesIfNotValid() throws Exception{
+		page.numberOfEntries();
+	}
+	
 	@Test
 	public void shouldBeAbleToReturnInsertedItems() throws Exception{
+		
+		page.initialize();
 		
 		int id1 = page.add(s1);
 		int id2 = page.add(s2);
@@ -85,11 +104,26 @@ public class DynamicDataPageSpec {
 	}
 	
 	@Test
-	public void shouldHaveSameSizeAfterInsertAndRemove() throws NoSpaceException, ElementNotFoundException{
+	public void shouldHaveSameSizeAfterInsertAndRemove() throws NoSpaceException, ElementNotFoundException, InvalidPageException{
+		page.initialize();
+		
 		int size = page.remaining();
 		int id = page.add("blast");
 		page.remove(id);
 		assertEquals(size, page.remaining());
 	}
 	
+	@Test
+	public void shouldLoadCorrectly() throws NoSpaceException, InvalidPageException{
+		assertFalse(page.isValid());
+		page.initialize();
+		assertTrue(page.isValid());
+		page.add(s1);
+		assertEquals(1, page.numberOfEntries());
+		page = new DynamicDataPage<String>(page.rawPage(), page.pagePointSerializer(), page.dataSerializer());
+		assertFalse(page.isValid());
+		page.load();
+		assertTrue(page.isValid());
+		assertEquals(1, page.numberOfEntries());
+	}
 }

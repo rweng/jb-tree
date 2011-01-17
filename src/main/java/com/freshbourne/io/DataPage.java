@@ -9,6 +9,10 @@ package com.freshbourne.io;
 
 import java.nio.ByteBuffer;
 
+import com.freshbourne.serializer.FixLengthSerializer;
+import com.freshbourne.serializer.PagePointSerializer;
+import com.freshbourne.serializer.Serializer;
+
 
 /**
  * Pages implementing this interface use the provided buffer to store data.
@@ -57,6 +61,17 @@ public interface DataPage<T> extends ComplexPage {
 	
 	/**
 	 * @return number of entries stored in the DataPage
+	 * @throws InvalidPageException 
 	 */
-	public int numberOfEntries();
+	public int numberOfEntries() throws InvalidPageException;
+	
+	/**
+	 * @return the serializer object used to serialize PagePoints
+	 */
+	public FixLengthSerializer<PagePointer, byte[]> pagePointSerializer();
+	
+	/**
+	 * @return the serializer object used to serialize the data
+	 */
+	public Serializer<T, byte[]> dataSerializer();
 }

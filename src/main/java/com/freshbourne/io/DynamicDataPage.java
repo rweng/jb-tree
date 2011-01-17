@@ -8,6 +8,7 @@
 package com.freshbourne.io;
 
 import com.freshbourne.serializer.FixLengthSerializer;
+import com.freshbourne.serializer.PagePointSerializer;
 import com.freshbourne.serializer.Serializer;
 
 import java.nio.ByteBuffer;
@@ -95,7 +96,9 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.DataPage#add(byte[])
 	 */
-	public int add(T entry) throws NoSpaceException {
+	public int add(T entry) throws NoSpaceException, InvalidPageException {
+		ensureValid();
+		
 		byte[] bytes = entrySerializer.serialize(entry);
 		
 		if(bytes.length > remaining())
@@ -181,6 +184,8 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	 * @see com.freshbourne.multimap.btree.DataPage#get(int)
 	 */
 	public T get(int id) throws Exception {
+		ensureValid();
+		
 		PagePointer p = entries.get(id);
 		if( p == null){
 			throw new ElementNotFoundException();
@@ -193,6 +198,11 @@ public class DynamicDataPage<T> implements DataPage<T>{
 		body.position(pos);
 		
 		return entrySerializer.deserialize(bytes);
+	}
+	
+	private void ensureValid() throws InvalidPageException {
+		if( !isValid() )
+			throw new InvalidPageException(this);
 	}
 	
 	private int sizeOfEntry(PagePointer p){
@@ -234,6 +244,7 @@ public class DynamicDataPage<T> implements DataPage<T>{
 		// TODO Auto-generated method stub
 		
 	}
+	
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ComplexPage#isValid()
 	 */
@@ -241,12 +252,39 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	public boolean isValid() {
 		return valid;
 	}
+	
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.DataPage#numberOfEntries()
 	 */
 	@Override
-	public int numberOfEntries() {
+	public int numberOfEntries() throws InvalidPageException {
+		ensureValid();
+		
 		return entries.size();
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ComplexPage#rawPage()
+	 */
+	@Override
+	public RawPage rawPage() {
+		return rawPage;
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.DataPage#pagePointSerializer()
+	 */
+	@Override
+	public FixLengthSerializer<PagePointer, byte[]> pagePointSerializer() {
+		return pointSerializer;
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.DataPage#dataSerializer()
+	 */
+	@Override
+	public Serializer<T, byte[]> dataSerializer() {
+		return entrySerializer;
 	}
 	
 }

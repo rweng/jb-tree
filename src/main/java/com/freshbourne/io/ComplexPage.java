@@ -23,5 +23,11 @@ public interface ComplexPage {
 	 * @return if the page has been initialized or loaded
 	 */
 	public boolean isValid();
+	
+	
+	/**
+	 * @return the underlying RawPage
+	 */
+	public RawPage rawPage();
 
 }

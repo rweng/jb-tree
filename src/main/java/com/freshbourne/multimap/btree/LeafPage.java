@@ -165,6 +165,7 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
             // get the key where the pagepointer is pointing to
             PagePointer pointer = pointerSerializer.deserialize(p.array());
             DataPage<K> page = keyPageManager.getPage(pointer.getId());
+            page.load();
             K currentKey = page.get(pointer.getOffset());
             if(key.equals(currentKey))
                 return true;
