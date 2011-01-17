@@ -18,19 +18,19 @@ public class RawPage {
 
     private final ByteBuffer buffer;
     private final ResourceManager rm;
-    private final Integer id;
+    private final Long id;
 
     public RawPage(ByteBuffer buffer){
         this(buffer, null, null);
     }
 
-    public RawPage(ByteBuffer buffer, ResourceManager rm, Integer pageId){
+    public RawPage(ByteBuffer buffer, ResourceManager rm, Long pageId){
         this.buffer = buffer;
         this.rm = rm;
         this.id = pageId;
     }
 
     public ByteBuffer buffer(){return buffer;}
-    public Integer id(){return id;}
+    public Long id(){return id;}
     public ResourceManager resourceManager(){return rm;}
 }

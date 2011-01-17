@@ -69,7 +69,7 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 	LeafPage(
 			ByteBuffer buffer,
             ResourceManager rm,
-            Integer pageId,
+            Long pageId,
             DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
 			FixLengthSerializer<PagePointer, byte[]> pointerSerializer

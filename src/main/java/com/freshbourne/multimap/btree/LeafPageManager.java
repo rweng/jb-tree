@@ -47,7 +47,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	 * @see com.freshbourne.io.PageManager#getPage(int)
 	 */
 	@Override
-	public LeafPage<K, V> getPage(int id) throws IOException {
+	public LeafPage<K, V> getPage(long id) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -56,7 +56,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	 * @see com.freshbourne.io.PageManager#removePage(int)
 	 */
 	@Override
-	public void removePage(int id) {
+	public void removePage(long id) {
 		// TODO Auto-generated method stub
 		
 	}

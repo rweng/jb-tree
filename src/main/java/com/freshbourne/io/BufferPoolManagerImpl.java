@@ -38,7 +38,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	private final int cacheSize;
 	
 	private ArrayBlockingQueue<RawPage> cacheQueue;
-	private HashMap<Integer, RawPage> cache;
+	private HashMap<Long, RawPage> cache;
 	
 	@Inject
 	public BufferPoolManagerImpl(ResourceManager rm,@Named("cacheSize") int cacheSize) throws IOException {
@@ -47,7 +47,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 
         this.rm = rm;
         this.cacheSize = cacheSize;
-		this.cache = new HashMap<Integer, RawPage>();
+		this.cache = new HashMap<Long, RawPage>();
 		
 		cacheQueue = new ArrayBlockingQueue<RawPage>(cacheSize);
 	}
@@ -60,7 +60,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 
 	
 	@Override
-	public RawPage getPage(int pageId) throws IOException {
+	public RawPage getPage(long pageId) throws IOException {
 		if(cache.get(pageId) != null)
 			return cache.get(pageId);
 		
@@ -88,7 +88,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	}
 
 	@Override
-	public void removePage(int id) {
+	public void removePage(long id) {
 		// TODO Auto-generated method stub
 		
 	}

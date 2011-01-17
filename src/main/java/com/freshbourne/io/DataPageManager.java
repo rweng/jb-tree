@@ -39,14 +39,14 @@ public class DataPageManager<T> implements PageManager<DataPage<T>> {
     }
 
     @Override
-    public DataPage<T> getPage(int id) throws IOException {
+    public DataPage<T> getPage(long id) throws IOException {
     	DataPage<T> result = new DynamicDataPage<T>(bpm.getPage(id), pointSerializer, dataSerializer);
     	result.load();
         return result;
     }
 
     @Override
-    public void removePage(int id) {
+    public void removePage(long id) {
         bpm.removePage(id);
     }
 }

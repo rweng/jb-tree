@@ -24,7 +24,7 @@ package com.freshbourne.io;
 public class PagePointer {
 	
 	private int offset;
-	private int id;
+	private long id;
 	
 	
 	
@@ -32,7 +32,7 @@ public class PagePointer {
 	 * @param offset
 	 * @param id
 	 */
-	public PagePointer(int id, int offset) {
+	public PagePointer(long id, int offset) {
 		super();
 		this.offset = offset;
 		this.id = id;
@@ -59,7 +59,7 @@ public class PagePointer {
 	/**
 	 * @return the pageId
 	 */
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 	

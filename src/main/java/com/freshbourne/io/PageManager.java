@@ -31,11 +31,11 @@ public interface PageManager<T> {
 	 * @return page with given id from resource or cache
      * @throws IOException
 	 */
-	public T getPage(int id) throws IOException;
+	public T getPage(long id) throws IOException;
 	
 	/**
 	 * removes the Page with the given id
 	 * @param id of the Page to be removed
 	 */
-	public void removePage(int id);
+	public void removePage(long id);
 }

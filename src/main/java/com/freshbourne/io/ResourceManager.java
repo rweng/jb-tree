@@ -53,7 +53,7 @@ public interface ResourceManager {
 	 * @return Page
 	 * @throws IOException
 	 */
-	public RawPage readPage(int pageId) throws IOException;
+	public RawPage readPage(long pageId) throws IOException;
 	
 	/**
 	 * @return size of the pages in this resource

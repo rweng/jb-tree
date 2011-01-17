@@ -54,7 +54,7 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	 * we write down this number instead of 0 if we have no entries.
 	 */
 	private final int NO_ENTRIES_INT = 345234345;
-	private final Map<Integer, PagePointer> entries;
+	private final Map<Long, PagePointer> entries;
 	
 	private boolean valid = false;
 
@@ -71,7 +71,7 @@ public class DynamicDataPage<T> implements DataPage<T>{
 		this.pointSerializer = pointSerializer;
 		this.entrySerializer = dataSerializer;
 		
-		this.entries = new TreeMap<Integer, PagePointer>();
+		this.entries = new TreeMap<Long, PagePointer>();
 
         //TODO: try to load buffer here? or seperate function load?
 
@@ -193,7 +193,7 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.DataPage#get(int)
 	 */
-	public T get(int id) throws Exception {
+	public T get(long id) throws Exception {
 		ensureValid();
 		
 		PagePointer p = entries.get(id);

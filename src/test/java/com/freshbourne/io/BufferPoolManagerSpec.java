@@ -39,7 +39,7 @@ public class BufferPoolManagerSpec {
 		
 		when(mockRM.pageSize()).thenReturn(PageSize.DEFAULT_PAGE_SIZE);
 		
-		when(mockPageWithId.id()).thenReturn(1);
+		when(mockPageWithId.id()).thenReturn(1L);
 		when(mockRM.addPage(any(RawPage.class))).thenReturn(mockPageWithId);
 		
 		//bpm = new BufferPoolManagerImpl(mockRM, cacheSize);

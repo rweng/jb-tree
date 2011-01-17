@@ -39,7 +39,7 @@ public interface DataPage<T> extends ComplexPage {
 	 * @param id within this page
 	 * @return byte array with this id
 	 */
-	public T get(int id) throws Exception;
+	public T get(long id) throws Exception;
 	
 	
 	/**

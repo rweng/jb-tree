@@ -24,12 +24,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Random;
 
 
 /**
  * Provides access to Pages stored in a RandomAccessFile.
+ * 
  */
 public class FileResourceManager implements ResourceManager {
 	private RandomAccessFile handle;
@@ -39,6 +41,7 @@ public class FileResourceManager implements ResourceManager {
 	private FileChannel ioChannel;
 	private DataPage<Integer> headerPage;
 
+	
     private final HashMap<Integer, Integer> pageDirectory = new HashMap<Integer, Integer>();
 
 	@Inject
@@ -91,7 +94,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#readPage(int)
 	 */
 	@Override
-	public RawPage readPage(int pageId) throws IOException {
+	public RawPage readPage(long pageId) throws IOException {
 		ensureOpen();
 		return null;
 //		ByteBuffer buf = ByteBuffer.wrap(new byte[getPageSize()]);
@@ -190,13 +193,12 @@ public class FileResourceManager implements ResourceManager {
 	@Override
 	public RawPage addPage(RawPage page) throws IOException {
 		ensureOpen();
-		
 		return new RawPage(page.buffer(), this, generateId());
 	}
 	
-	private int generateId(){
-		Random r = new Random();
-		return r.nextInt();
+	private long generateId(){
+		return (new GregorianCalendar()).getTimeInMillis();
+		
 	}
 	
 	private void ensureOpen() throws ResourceNotOpenException{
