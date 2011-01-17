@@ -24,7 +24,7 @@ public class PagePointSerializer implements FixLengthSerializer<PagePointer, byt
 	 */
 	@Override
 	public byte[] serialize(PagePointer o) {
-		ByteBuffer b = ByteBuffer.allocate(8);
+		ByteBuffer b = ByteBuffer.allocate(12);
 		b.putLong(o.getId());
 		b.putInt(o.getOffset());
 		return b.array();
@@ -46,7 +46,7 @@ public class PagePointSerializer implements FixLengthSerializer<PagePointer, byt
 	 */
 	@Override
 	public int serializedLength(Class<PagePointer> c) {
-		return 8;
+		return 12;
 	}
 
 }
