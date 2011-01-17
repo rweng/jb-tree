@@ -78,6 +78,11 @@ public class FileResourceManagerSpec {
 	@Test
 	public void shouldGenerateDifferentIdsForEachPage() throws IOException{
 		assertTrue(rm.addPage(page).id() != rm.addPage(page).id());
-        
+	}
+	
+	@Test
+	public void shouldReadWrittenPages() throws IOException{
+		RawPage newPage = rm.addPage(page);
+		assertEquals(rm.readPage(newPage.id()).buffer(), page.buffer());
 	}
 }
