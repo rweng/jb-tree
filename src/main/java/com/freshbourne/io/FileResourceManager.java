@@ -42,7 +42,7 @@ public class FileResourceManager implements ResourceManager {
 	private DataPage<Integer> headerPage;
 
 	
-    private final HashMap<Integer, Integer> pageDirectory = new HashMap<Integer, Integer>();
+    private final HashMap<Long, Long> pageDirectory = new HashMap<Long, Long>();
 
 	@Inject
 	FileResourceManager(@ResourceFile File f, @PageSize int pageSize){
@@ -96,10 +96,10 @@ public class FileResourceManager implements ResourceManager {
 	@Override
 	public RawPage readPage(long pageId) throws IOException {
 		ensureOpen();
-		return null;
-//		ByteBuffer buf = ByteBuffer.wrap(new byte[getPageSize()]);
-//		ioChannel.read(buf, (pageId - 1) * getPageSize());
-//		return new HashPageImpl(buf, pageId, this);
+
+		ByteBuffer buf = ByteBuffer.allocate(pageSize);
+		ioChannel.read(buf, pageDirectory.get(pageId));
+		return new RawPage(buf, this, pageId);
 	}
 
 	/* (non-Javadoc)
@@ -193,9 +193,25 @@ public class FileResourceManager implements ResourceManager {
 	@Override
 	public RawPage addPage(RawPage page) throws IOException {
 		ensureOpen();
-		return new RawPage(page.buffer(), this, generateId());
+		ensureCorrectPageSize(page);
+		
+		RawPage result = new RawPage(page.buffer(), this, generateId());
+		page.buffer().position(0);
+		ioChannel.write(page.buffer(), ioChannel.size());
+		pageDirectory.put(result.id(), ioChannel.position());
+		
+		return result;
 	}
 	
+	/**
+	 * @param page
+	 * @throws WrongPageSizeException 
+	 */
+	private void ensureCorrectPageSize(RawPage page) throws WrongPageSizeException {
+		if(page.buffer().limit() != pageSize)
+			throw new WrongPageSizeException(page, pageSize);
+	}
+
 	private long generateId(){
 		return (new GregorianCalendar()).getTimeInMillis();
 		

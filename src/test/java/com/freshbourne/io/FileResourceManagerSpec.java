@@ -95,4 +95,10 @@ public class FileResourceManagerSpec {
 		
 		assertEquals(rm.readPage(newPage.id()).buffer(), page.buffer());
 	}
+	
+	@Test(expected= WrongPageSizeException.class)
+	public void shouldThrowExceptionIfWrongPageSize() throws IOException{
+		page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE + 1), null, null);
+        rm.addPage(page);
+	}
 }
