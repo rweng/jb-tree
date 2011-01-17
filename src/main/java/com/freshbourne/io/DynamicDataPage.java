@@ -31,6 +31,15 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	
 	private static final int intSize = 4;
 	
+	
+	/*
+	 * build up like this:
+	 * NO_ENTRIES_INT | PAGE_POINTER_OFFSETS | DATA
+	 * 
+	 * the pagepointer in this page contain 
+	 * 	id: id of the data element inserted
+	 *  offset: in the current page where the data ist stored
+	 */
 	private final ByteBuffer header;
 	private final ByteBuffer body;
 	
@@ -241,8 +250,19 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	 */
 	@Override
 	public void load() {
-		// TODO Auto-generated method stub
+		entries.clear();
 		
+		header.position(0);
+		int numberOfEntries = header.getInt();
+		
+		for(int i = 0; i < numberOfEntries; i++){
+			byte[] buf = new byte[pointSerializer.serializedLength(PagePointer.class)];
+			header.get(buf);
+			PagePointer p = pointSerializer.deserialize(buf);
+			entries.put(p.getId(), p);
+		}
+		
+		valid = true;
 	}
 	
 	/* (non-Javadoc)
@@ -268,6 +288,8 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	 */
 	@Override
 	public RawPage rawPage() {
+		writeAndAdjustHeader();
+		
 		return rawPage;
 	}
 	

@@ -114,16 +114,17 @@ public class DynamicDataPageSpec {
 	}
 	
 	@Test
-	public void shouldLoadCorrectly() throws NoSpaceException, InvalidPageException{
+	public void shouldLoadCorrectly() throws Exception{
 		assertFalse(page.isValid());
 		page.initialize();
 		assertTrue(page.isValid());
-		page.add(s1);
+		int id = page.add(s1);
 		assertEquals(1, page.numberOfEntries());
 		page = new DynamicDataPage<String>(page.rawPage(), page.pagePointSerializer(), page.dataSerializer());
 		assertFalse(page.isValid());
 		page.load();
 		assertTrue(page.isValid());
 		assertEquals(1, page.numberOfEntries());
+		assertEquals(s1, page.get(id));
 	}
 }
