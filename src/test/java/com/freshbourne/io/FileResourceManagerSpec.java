@@ -85,4 +85,14 @@ public class FileResourceManagerSpec {
 		RawPage newPage = rm.addPage(page);
 		assertEquals(rm.readPage(newPage.id()).buffer(), page.buffer());
 	}
+	
+	@Test
+	public void shouldBeAbleToReadPagesAfterReopen() throws IOException{
+		RawPage newPage = rm.addPage(page);
+		
+		rm.close();
+		rm.open();
+		
+		assertEquals(rm.readPage(newPage.id()).buffer(), page.buffer());
+	}
 }
