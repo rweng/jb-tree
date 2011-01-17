@@ -153,8 +153,49 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<V> get(K key) throws Exception {
+		List<V> result = new ArrayList<V>();
+		
 		ByteBuffer buf = buffer();
 		byte[] bytebuf = new byte[pointerSerializer.serializedLength(PagePointer.class)];
+		
+		int pos = posOfKey(key);
+		if( pos == -1)
+			return result;
+		buf.position(pos);
+		
+		// read first
+		buf.get(bytebuf);
+		PagePointer p = pointerSerializer.deserialize(bytebuf);
+		DataPage<K> dataPage = keyPageManager.getPage(p.getId());
+		
+		while (dataPage.get(p.getOffset()).equals(key)) {
+			buf.get(bytebuf);
+			p = pointerSerializer.deserialize(bytebuf);
+			DataPage<V> valueDataPage = valuePageManager.getPage(p.getId());
+
+			result.add(valueDataPage.get(p.getOffset()));
+			
+			// TODO: read next, if next
+			if(true)
+				return result;
+			
+			buf.get(bytebuf);
+			p = pointerSerializer.deserialize(bytebuf);
+			dataPage = keyPageManager.getPage(p.getId());
+			
+		}
+		return result;
+	}
+	
+	/**
+	 * @param key
+	 * @return position to set the buffer to, where the key starts, -1 if key not found 
+	 * @throws Exception 
+	 */
+	private int posOfKey(K key) throws Exception{
+		ByteBuffer buf = buffer();
+		int pSize = pointerSerializer.serializedLength(PagePointer.class);
+		byte[] bytebuf = new byte[pSize];
 		
 		buf.position(0);
 		
@@ -163,18 +204,10 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 			PagePointer p = pointerSerializer.deserialize(bytebuf);
 			DataPage<K> dataPage = keyPageManager.getPage(p.getId());
 			if(dataPage.get(p.getOffset()).equals(key)){
-				buf.get(bytebuf);
-				p = pointerSerializer.deserialize(bytebuf);
-				DataPage<V> valueDataPage = valuePageManager.getPage(p.getId());
-				
-				// due to type erasure of generics, a V[] is in memory only an Object[]
-				
-				List<V> result = new ArrayList<V>();
-				result.add(valueDataPage.get(p.getOffset()));
-				return result;
+				return buf.position() - pSize;
 			}
 		}
-		return null;
+		return -1;
 	}
 
 
@@ -197,9 +230,32 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 	 */
 	@Override
 	public V remove(K key, V value) {
+		DataPage<K> kPage = getKeyDataPage(key);
+		DataPage<V> vPage = getValueDataPage(key);
+		
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	/**
+	 * @param key
+	 * @return
+	 */
+	private DataPage<V> getValueDataPage(K key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	/**
+	 * @param key
+	 * @return
+	 */
+	private DataPage<K> getKeyDataPage(K key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#clear()

@@ -77,7 +77,7 @@ public class BTree<K, V> implements Node<K,V> {
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
 	 */
 	@Override
-	public List<V> remove(K key) {
+	public List<V> remove(K key) throws Exception {
 		return root.remove(key);
 	}
 
