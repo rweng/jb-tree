@@ -25,6 +25,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.util.HashMap;
+import java.util.Random;
 
 
 /**
@@ -194,7 +195,8 @@ public class FileResourceManager implements ResourceManager {
 	}
 	
 	private int generateId(){
-		return 1;
+		Random r = new Random();
+		return r.nextInt();
 	}
 	
 	private void ensureOpen() throws ResourceNotOpenException{

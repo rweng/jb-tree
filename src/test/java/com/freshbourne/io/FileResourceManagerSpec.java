@@ -74,4 +74,10 @@ public class FileResourceManagerSpec {
         page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), rm, null);
         rm.writePage(page);
 	}
+	
+	@Test
+	public void shouldGenerateDifferentIdsForEachPage() throws IOException{
+		assertTrue(rm.addPage(page).id() != rm.addPage(page).id());
+        
+	}
 }
