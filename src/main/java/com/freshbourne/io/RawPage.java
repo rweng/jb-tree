@@ -8,6 +8,7 @@
 
 package com.freshbourne.io;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 
@@ -33,4 +34,11 @@ public class RawPage {
     public ByteBuffer buffer(){return buffer;}
     public Long id(){return id;}
     public ResourceManager resourceManager(){return rm;}
+    public void writeToResource() throws IOException{
+    	if(rm == null){
+    		throw new IOException("Resource Manager not set");
+    	}
+    	
+    	rm.writePage(this);
+    }
 }

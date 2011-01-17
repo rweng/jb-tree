@@ -55,11 +55,11 @@ public class FileResourceManagerSpec {
 	public void shouldBeEmptyAtFirst() throws IOException{
 		assertTrue(rm != null);
 		assertEquals(PageSize.DEFAULT_PAGE_SIZE, rm.pageSize());
-		assertEquals(0, rm.numberOfPages());
+		assertEquals(1, rm.numberOfPages()); // header page
 	}
 	
 	@Test
-	public void firstPageShouldBeWrittenAfterOpen(){
+	public void firstPageShouldBeWrittenAfterOpen() throws IOException{
 		rm.close();
 		assertEquals(PageSize.DEFAULT_PAGE_SIZE, file.length());
 	}
@@ -77,7 +77,7 @@ public class FileResourceManagerSpec {
 	
 	@Test(expected= PageNotFoundException.class)
 	public void shouldThrowExceptionIfPageToWriteDoesNotExist() throws IOException{
-        page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), rm, null);
+        page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), rm, 3423L);
         rm.writePage(page);
 	}
 	
@@ -109,7 +109,7 @@ public class FileResourceManagerSpec {
 		// throw away all local variables
 		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE);
 		rm.open();
-		
+		assertEquals(2, rm.numberOfPages());
 		assertEquals(rm.readPage(newPage2.id()).buffer(), page.buffer());
 	}
 	

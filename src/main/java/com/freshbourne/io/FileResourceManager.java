@@ -39,11 +39,10 @@ public class FileResourceManager implements ResourceManager {
 	private final int pageSize;
 	private FileLock fileLock;
 	private FileChannel ioChannel;
-	private DataPage<Integer> headerPage;
+	private ResourceHeaderPage header;
+	private static final Long FIRST_PAGE_ID = 1L;
 	
-    private final HashMap<Long, Long> pageDirectory = new HashMap<Long, Long>();
-
-	@Inject
+    @Inject
 	FileResourceManager(@ResourceFile File f, @PageSize int pageSize){
 		this.file = f;
 		this.pageSize = pageSize;
@@ -67,12 +66,15 @@ public class FileResourceManager implements ResourceManager {
 		
 		// if new file, initialize by writing header
 		if(handle.length() == 0){
-			ByteBuffer buf = ByteBuffer.allocate(pageSize); // default Integer size
-			buf.putInt(0); // 0 pages in this file
-			buf.rewind();
-			ioChannel.write(buf);
+			header = new ResourceHeaderPage(new RawPage(ByteBuffer.allocate(pageSize), this, FIRST_PAGE_ID));
+			header.initialize();
 		} else { // if the file already existed
 			
+			ByteBuffer buf = ByteBuffer.allocate(pageSize);
+			ioChannel.read(buf);
+			header = new ResourceHeaderPage(new RawPage(buf, this, FIRST_PAGE_ID));
+			//int numOfPages = handle.readInt();
+			//handle.readLong()
 		}
 	}
 	
@@ -82,7 +84,7 @@ public class FileResourceManager implements ResourceManager {
         if(page.resourceManager() != this)
             throw new WrongResourceManagerException(this, page);
 
-        if(!pageDirectory.containsKey(page.id()))
+        if(!header.contains(page.id()))
             throw new PageNotFoundException(this, page);
 
         ensureOpen();
@@ -90,7 +92,7 @@ public class FileResourceManager implements ResourceManager {
         ByteBuffer buffer = page.buffer();
 		buffer.rewind();
 
-        ioChannel.write(buffer, pageDirectory.get(page.id()));
+        ioChannel.write(buffer, header.getRealPageNr(page.id()));
 	}
 
 	/* (non-Javadoc)
@@ -101,7 +103,7 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
-		ioChannel.read(buf, pageDirectory.get(pageId));
+		ioChannel.read(buf, header.getRealPageNr(pageId));
 		return new RawPage(buf, this, pageId);
 	}
 
@@ -109,25 +111,31 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#close()
 	 */
 	@Override
-	public void close() {
+	public void close() throws IOException {
+		if(header != null){
+			header.writeToResource();
+			header = null;
+		}
+		
 		try{
-		if(ioChannel != null){
-			ioChannel.close();
-			ioChannel = null;
-			fileLock = null;
-		}
-		
-		if(fileLock != null && fileLock.isValid()){
-			fileLock.release();
-			fileLock = null;
-		}
-		
-		if(handle != null){
-			handle.close();
-			handle = null;
-		}
+			if(ioChannel != null){
+				ioChannel.close();
+				ioChannel = null;
+				fileLock = null;
+			}
+
+			if (fileLock != null && fileLock.isValid()) {
+				fileLock.release();
+				fileLock = null;
+			}
+
+			if (handle != null) {
+				handle.close();
+				handle = null;
+			}
 		} catch (Exception ignored) {
 		}
+		
 	}
 
 	/* (non-Javadoc)
@@ -201,7 +209,7 @@ public class FileResourceManager implements ResourceManager {
 		RawPage result = new RawPage(page.buffer(), this, generateId());
 		page.buffer().position(0);
 		ioChannel.write(page.buffer(), ioChannel.size());
-		pageDirectory.put(result.id(), ioChannel.position());
+		header.add(result.id());
 		
 		return result;
 	}
@@ -230,6 +238,19 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public int numberOfPages() {
-		return pageDirectory.size();
+		return header.getNumberOfPages();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ResourceManager#createPage()
+	 */
+	@Override
+	public RawPage createPage() throws IOException {
+		ensureOpen();
+		
+		ByteBuffer buf = ByteBuffer.allocate(pageSize);
+		RawPage result = new RawPage(buf, this, generateId());
+		header.add(result.id());
+		return result;
 	}
 }

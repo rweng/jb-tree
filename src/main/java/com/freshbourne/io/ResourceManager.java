@@ -56,13 +56,20 @@ public interface ResourceManager {
 	public RawPage readPage(long pageId) throws IOException;
 	
 	/**
+	 * @return a new added RawPage
+	 * @throws IOException 
+	 */
+	public RawPage createPage() throws IOException;
+	
+	
+	/**
 	 * @return size of the pages in this resource
 	 */
 	public int pageSize();
 	
 	public void open() throws IOException;
 	public boolean isOpen();
-	public void close();
+	public void close() throws IOException;
 	public int numberOfPages();
 	
 }
