@@ -101,15 +101,18 @@ public class FileResourceManagerSpec {
 	
 	@Test
 	public void shouldBeAbleToReadPagesAfterReopen() throws IOException{
+		assertEquals(0 + 1, rm.numberOfPages());
 		RawPage newPage = rm.addPage(new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE)));
+		assertEquals(1 + 1, rm.numberOfPages());
 		RawPage newPage2 = rm.addPage(page);
+		assertEquals(2 + 1, rm.numberOfPages());
 		
 		rm.close();
 		
 		// throw away all local variables
 		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE);
 		rm.open();
-		assertEquals(2, rm.numberOfPages());
+		assertEquals(2 + 1, rm.numberOfPages());
 		assertEquals(rm.readPage(newPage2.id()).buffer(), page.buffer());
 	}
 	

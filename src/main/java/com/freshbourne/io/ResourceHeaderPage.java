@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class ResourceHeaderPage implements ComplexPage {
 	private final RawPage rawPage;
-	private final List<Long> directory = new ArrayList<Long>();
+	private final List<Long> dictionary = new ArrayList<Long>();
 	private boolean valid = false;
 
 	ResourceHeaderPage(RawPage rawPage){
@@ -31,7 +31,7 @@ public class ResourceHeaderPage implements ComplexPage {
 		rawPage.buffer().position(0);
 		rawPage.buffer().putInt(1); // 1 pages in this file, the header page
 		rawPage.buffer().putLong(rawPage.id());
-		directory.add(rawPage.id());
+		dictionary.add(rawPage.id());
 		valid = true;
 	}
 
@@ -43,7 +43,7 @@ public class ResourceHeaderPage implements ComplexPage {
 		rawPage.buffer().position(0);
 		int numberOfpages = rawPage.buffer().getInt();
 		for( int i = 0; i < numberOfpages; i++){
-			directory.add(rawPage.buffer().getLong());
+			dictionary.add(rawPage.buffer().getLong());
 		}
 		valid = true;
 	}
@@ -65,19 +65,24 @@ public class ResourceHeaderPage implements ComplexPage {
 	}
 	
 	public void add(Long pageId){
-		directory.add(pageId);
+		rawPage.buffer().position( dictionary.size() * Long.SIZE);
+		rawPage.buffer().putLong(pageId);
+		dictionary.add(pageId);
+		
+		rawPage.buffer().position(0);
+		rawPage.buffer().putInt(dictionary.size());
 	}
 	
 	public boolean contains(Long id){
-		return directory.contains(id);
+		return dictionary.contains(id);
 	}
 	
 	public int getRealPageNr(Long id){
-		return directory.indexOf(id);
+		return dictionary.indexOf(id);
 	}
 	
 	public int getNumberOfPages(){
-		return directory.size();
+		return dictionary.size();
 	}
 
 	public void writeToResource() throws IOException {

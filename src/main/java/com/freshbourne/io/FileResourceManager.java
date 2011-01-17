@@ -69,10 +69,10 @@ public class FileResourceManager implements ResourceManager {
 			header = new ResourceHeaderPage(new RawPage(ByteBuffer.allocate(pageSize), this, FIRST_PAGE_ID));
 			header.initialize();
 		} else { // if the file already existed
-			
 			ByteBuffer buf = ByteBuffer.allocate(pageSize);
 			ioChannel.read(buf);
 			header = new ResourceHeaderPage(new RawPage(buf, this, FIRST_PAGE_ID));
+			header.load();
 			//int numOfPages = handle.readInt();
 			//handle.readLong()
 		}
@@ -103,7 +103,7 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
-		ioChannel.read(buf, header.getRealPageNr(pageId));
+		ioChannel.read(buf, 0);
 		return new RawPage(buf, this, pageId);
 	}
 
