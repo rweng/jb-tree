@@ -27,6 +27,7 @@ import java.nio.channels.OverlappingFileLockException;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.UUID;
 
 
 /**
@@ -84,11 +85,9 @@ public class FileResourceManager implements ResourceManager {
         if(page.resourceManager() != this)
             throw new WrongResourceManagerException(this, page);
 
-        if(!header.contains(page.id()))
-            throw new PageNotFoundException(this, page);
-
         ensureOpen();
-
+        ensurePageExists(page.id());
+        
         ByteBuffer buffer = page.buffer();
 		buffer.rewind();
 
@@ -100,11 +99,22 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public RawPage readPage(long pageId) throws IOException {
+		
 		ensureOpen();
+		ensurePageExists(pageId);
 
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 		ioChannel.read(buf, 0);
 		return new RawPage(buf, this, pageId);
+	}
+
+	/**
+	 * @param pageId
+	 * @throws PageNotFoundException 
+	 */
+	private void ensurePageExists(long pageId) throws PageNotFoundException {
+		if(!header.contains(pageId))
+            throw new PageNotFoundException(this, pageId);
 	}
 
 	/* (non-Javadoc)
@@ -209,7 +219,13 @@ public class FileResourceManager implements ResourceManager {
 		RawPage result = new RawPage(page.buffer(), this, generateId());
 		page.buffer().position(0);
 		ioChannel.write(page.buffer(), ioChannel.size());
-		header.add(result.id());
+		try {
+			header.add(result.id());
+		} catch (DuplicatePageIdException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		}
 		
 		return result;
 	}
@@ -224,7 +240,11 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	private long generateId(){
-		return (new GregorianCalendar()).getTimeInMillis();
+		long result;
+		do{
+			result = (new Random()).nextLong();
+		} while (header.contains(result));
+		return result;
 		
 	}
 	
@@ -250,7 +270,33 @@ public class FileResourceManager implements ResourceManager {
 		
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 		RawPage result = new RawPage(buf, this, generateId());
-		header.add(result.id());
+		try {
+			header.add(result.id());
+		} catch (DuplicatePageIdException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ResourceManager#removePage(long)
+	 */
+	@Override
+	public void removePage(long pageId) throws IOException, DuplicatePageIdException {
+		int pos = header.getRealPageNr(pageId);
+		Long lastPageId = header.getLastPageId();
+		
+		// copy the last entry to this position
+		if(pos == header.getRealPageNr(lastPageId)){ // last page?
+			header.remove(pageId);
+			ioChannel.truncate(header.getNumberOfPages() * pageSize);
+		} else {
+			RawPage last = readPage(lastPageId);
+			header.remove(pageId);
+			writePage(last);
+			
+			ioChannel.truncate(header.getNumberOfPages() * pageSize);
+		}
 	}
 }

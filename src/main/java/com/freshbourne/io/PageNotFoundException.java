@@ -12,7 +12,11 @@ import java.io.IOException;
 
 public class PageNotFoundException extends IOException {
 
-    public PageNotFoundException(ResourceManager rm, RawPage page){
-        super("The Page with the id " + page.id() + " could not be found in the ResourceManager " + rm.toString());
+	public PageNotFoundException(ResourceManager rm, RawPage page){
+		this(rm, page.id());
+	}
+	
+    public PageNotFoundException(ResourceManager rm, Long pageId){
+        super("The Page with the id " + pageId + " could not be found in the ResourceManager " + rm.toString());
     }
 }

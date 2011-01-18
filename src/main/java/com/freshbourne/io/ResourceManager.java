@@ -63,6 +63,12 @@ public interface ResourceManager {
 	
 	
 	/**
+	 * @param pageId of the page to remove
+	 */
+	public void removePage(long pageId) throws Exception;
+	
+	
+	/**
 	 * @return size of the pages in this resource
 	 */
 	public int pageSize();

@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class FileResourceManagerSpec {
 	
@@ -106,6 +107,7 @@ public class FileResourceManagerSpec {
 		assertEquals(1 + 1, rm.numberOfPages());
 		RawPage newPage2 = rm.addPage(page);
 		assertEquals(2 + 1, rm.numberOfPages());
+		assertEquals(rm.readPage(newPage2.id()).buffer(), page.buffer());
 		
 		rm.close();
 		
@@ -120,5 +122,26 @@ public class FileResourceManagerSpec {
 	public void shouldThrowExceptionIfWrongPageSize() throws IOException{
 		page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE + 1), null, null);
         rm.addPage(page);
+	}
+	
+	@Test
+	public void shouldBeAbleToRemovePages() throws Exception{
+		RawPage p1 = rm.addPage(page);
+		RawPage p2 = rm.addPage(page);
+		int i = rm.numberOfPages();
+		long p1Id = p1.id();
+		
+		rm.removePage(p1Id);
+		assertEquals(i - 1, rm.numberOfPages());
+		try{
+			rm.readPage(p1Id);
+			fail("reading a non-existent page should throw an exeption");
+		} catch( Exception expected){
+		}
+		
+		RawPage p3 = rm.addPage(page);
+		assertEquals(i, rm.numberOfPages());
+		rm.removePage(p3.id());
+		assertEquals(i - 1, rm.numberOfPages());
 	}
 }
