@@ -223,7 +223,7 @@ public class DynamicDataPage<T> implements DataPage<T>{
 	private int sizeOfEntryAt(int offset){
 		int smallestLarger = nextEntry(offset);
 		
-		if(smallestLarger == 0)
+		if(smallestLarger == -1)
 			smallestLarger = rawPage.buffer().capacity();
 		
 		return smallestLarger - offset;
