@@ -235,10 +235,8 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 		int numberOfEntries = header.getInt();
 		
 		for(int i = 0; i < numberOfEntries; i++){
-			byte[] buf = new byte[pointSerializer.serializedLength(PagePointer.class)];
-			header.get(buf);
-			PagePointer p = pointSerializer.deserialize(buf);
-			//entries.put(p.getOffset(), p);
+			int key = header.getInt();
+			entries.put(key, header.getInt());
 		}
 		
 		valid = true;
