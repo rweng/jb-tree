@@ -39,7 +39,7 @@ public interface DataPage<T> extends ComplexPage {
 	 * @param id within this page
 	 * @return byte array with this id
 	 */
-	public T get(long id) throws Exception;
+	public T get(int id) throws Exception;
 	
 	
 	/**
@@ -48,11 +48,6 @@ public interface DataPage<T> extends ComplexPage {
 	 * @throws ElementNotFoundException 
 	 */
 	public void remove(int id) throws ElementNotFoundException;
-	
-	/**
-	 * @return the part of the body which is actually used up with data
-	 */
-	public ByteBuffer bodyUsed();
 	
 	/**
 	 * @return the remaining number Of bytes that can be used by the body or header
