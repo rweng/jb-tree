@@ -27,7 +27,7 @@ import java.util.TreeMap;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public class DynamicDataPage<T> implements DataPage<T>{
+public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	
 	private static final int intSize = 4;
 	
@@ -75,13 +75,10 @@ public class DynamicDataPage<T> implements DataPage<T>{
 		this.entrySerializer = dataSerializer;
 		
 		this.entries = new TreeMap<Integer, Integer>();
-
-        writeAndAdjustHeader();
 	}
 	
 	public void initialize() {
-		header.position(0);
-		header.putInt(NO_ENTRIES_INT);
+		writeAndAdjustHeader();
 		this.valid = true;
 	}
 
