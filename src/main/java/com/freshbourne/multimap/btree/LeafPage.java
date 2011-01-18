@@ -33,18 +33,23 @@ import java.util.List;
  * @param <K> KeyType
  * @param <V> ValueType
  */
-public class LeafPage<K,V> extends RawPage implements Node<K,V> {
+public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	
 	private FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	
 	private DataPageManager<K> keyPageManager;
 	private DataPageManager<V> valuePageManager;
 	
+	private boolean valid = false;
+	
 	// right now, we always store key/value pairs. If the entries are not unique,
 	// it could make sense to store the key once with references to all values
 	//TODO: investigate if we should do this
 	private  int serializedPointerSize;
 	private  int maxEntries;
+	
+	
+	private final RawPage rawPage;
 	
 	// counters
 	private int numberOfEntries = 0;
@@ -61,20 +66,8 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 			DataPageManager<V> valuePageManager,
 			FixLengthSerializer<PagePointer, byte[]> pointerSerializer
 			){
-    this(page.buffer(), page.resourceManager(), page.id(), keyPageManager, valuePageManager, pointerSerializer);
-}
-
-
-	//TODO: ensure that the pointerSerializer always creates the same (buffer-)size!
-	LeafPage(
-			ByteBuffer buffer,
-            ResourceManager rm,
-            Long pageId,
-            DataPageManager<K> keyPageManager,
-			DataPageManager<V> valuePageManager,
-			FixLengthSerializer<PagePointer, byte[]> pointerSerializer
-			){
-		super(buffer, rm, pageId);
+    	
+    	this.rawPage = page;
 		this.keyPageManager = keyPageManager;
 		this.valuePageManager = valuePageManager;
 		this.pointerSerializer = pointerSerializer;
@@ -82,7 +75,7 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 		this.serializedPointerSize = pointerSerializer.serializedLength(PagePointer.class);
 		
 		// one pointer to key, one to value
-		maxEntries = buffer.capacity() / (serializedPointerSize * 2); 
+		maxEntries = rawPage.buffer().capacity() / (serializedPointerSize * 2); 
 	}
 	
 	/* (non-Javadoc)
@@ -100,9 +93,9 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 		
 
         // serialize Pointers
-        buffer().position(numberOfEntries * serializedPointerSize * 2);
-        buffer().put(pointerSerializer.serialize(keyPointer));
-        buffer().put(pointerSerializer.serialize(valuePointer));
+		rawPage.buffer().position(numberOfEntries * serializedPointerSize * 2);
+		rawPage.buffer().put(pointerSerializer.serialize(keyPointer));
+		rawPage.buffer().put(pointerSerializer.serialize(valuePointer));
         numberOfEntries++;
 	}
 
@@ -125,8 +118,8 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 		for(int i = 0; i < numberOfEntries; i++){
 
             // fetch the pagepoint binery
-            buffer().position(posOfKey(i));
-            buffer().get(buf);
+			rawPage.buffer().position(posOfKey(i));
+			rawPage.buffer().get(buf);
 
             // get the key where the pagepointer is pointing to
             PagePointer pointer = pointerSerializer.deserialize(buf);
@@ -194,6 +187,8 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 		}
 		return result;
 	}
+	
+	private ByteBuffer buffer(){return rawPage.buffer();}
 	
 	/**
 	 * @param key
@@ -284,12 +279,53 @@ public class LeafPage<K,V> extends RawPage implements Node<K,V> {
 	private PagePointer storeKey(K key) throws Exception{
 		DataPage<K> page = keyPageManager.createPage();
 		page.initialize();
-		return new PagePointer(id(),page.add(key));
+		return new PagePointer(rawPage.id(),page.add(key));
 	}
 	
 	private PagePointer storeValue(V value) throws Exception {
         DataPage<V> page = valuePageManager.createPage();
         page.initialize();
-        return new PagePointer(id(),page.add(value));
+        return new PagePointer(rawPage.id(),page.add(value));
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ComplexPage#initialize()
+	 */
+	@Override
+	public void initialize() {
+		buffer().position(0);
+		numberOfEntries = 0;
+		buffer().putInt(numberOfEntries);
+		valid = true;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ComplexPage#load()
+	 */
+	@Override
+	public void load() {
+		buffer().position(0);
+		numberOfEntries = buffer().getInt();
+		valid = true;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ComplexPage#isValid()
+	 */
+	@Override
+	public boolean isValid() {
+		return valid;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ComplexPage#rawPage()
+	 */
+	@Override
+	public RawPage rawPage() {
+		return rawPage;
 	}
 }
