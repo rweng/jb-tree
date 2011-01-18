@@ -49,6 +49,8 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	private  int maxEntries;
 	
 	
+	private static final int NOT_FOUND = -1;
+	
 	private final RawPage rawPage;
 	
 	// counters
@@ -181,21 +183,21 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	public List<V> get(K key) throws Exception {
 		List<V> result = new ArrayList<V>();
 		
-		ByteBuffer buf = buffer();
 		byte[] bytebuf = new byte[pointerSerializer.serializedLength(PagePointer.class)];
 		
 		int pos = posOfKey(key);
-		if( pos == -1)
+		if( pos == NOT_FOUND)
 			return result;
-		buf.position(pos);
+		
+		buffer().position(pos);
 		
 		// read first
-		buf.get(bytebuf);
+		buffer().get(bytebuf);
 		PagePointer p = pointerSerializer.deserialize(bytebuf);
 		DataPage<K> dataPage = keyPageManager.getPage(p.getId());
 		
 		while (dataPage.get(p.getOffset()).equals(key)) {
-			buf.get(bytebuf);
+			buffer().get(bytebuf);
 			p = pointerSerializer.deserialize(bytebuf);
 			DataPage<V> valueDataPage = valuePageManager.getPage(p.getId());
 
@@ -205,7 +207,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 			if(true)
 				return result;
 			
-			buf.get(bytebuf);
+			buffer().get(bytebuf);
 			p = pointerSerializer.deserialize(bytebuf);
 			dataPage = keyPageManager.getPage(p.getId());
 			
@@ -225,7 +227,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		int pSize = pointerSerializer.serializedLength(PagePointer.class);
 		byte[] bytebuf = new byte[pSize];
 		
-		buf.position(0);
+		buf.position(headerSize());
 		
 		for(int i = 0; i < numberOfEntries; i++){
 			buf.get(bytebuf);
@@ -235,7 +237,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 				return buf.position() - pSize;
 			}
 		}
-		return -1;
+		return NOT_FOUND;
 	}
 
 
