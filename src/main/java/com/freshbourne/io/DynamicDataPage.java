@@ -76,15 +76,7 @@ public class DynamicDataPage<T> implements DataPage<T>{
 		
 		this.entries = new TreeMap<Integer, Integer>();
 
-        adjustHeaderSize();
-	}
-	/**
-	 * sets the size of the header dependent of the size of the entries array,
-	 * the size of a serialized entry and the size of an serialized Integer for the first
-	 * space (stating how many elements to read from the header-buffer)
-	 */
-	private void adjustHeaderSize(){
-		this.header.limit(pointSerializer.serializedLength(PagePointer.class) * (entries.size() + 1) + intSize );
+        writeAndAdjustHeader();
 	}
 	
 	public void initialize() {
