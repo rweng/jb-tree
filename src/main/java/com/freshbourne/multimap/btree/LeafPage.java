@@ -75,7 +75,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		this.serializedPointerSize = pointerSerializer.serializedLength(PagePointer.class);
 		
 		// one pointer to key, one to value
-		maxEntries = rawPage.buffer().capacity() / (serializedPointerSize * 2); 
+		maxEntries = (rawPage.buffer().capacity() - headerSize()) / (serializedPointerSize * 2); 
 	}
 	
 	/* (non-Javadoc)
@@ -93,10 +93,31 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		
 
         // serialize Pointers
-		rawPage.buffer().position(numberOfEntries * serializedPointerSize * 2);
+		addEntry(keyPointer, valuePointer);
+		
+		writeHeader();
+	}
+
+	/**
+	 * @param keyPointer
+	 * @param valuePointer
+	 */
+	private void addEntry(PagePointer keyPointer, PagePointer valuePointer) {
+		rawPage.buffer().position(posBehindLastEntry());
+		
 		rawPage.buffer().put(pointerSerializer.serialize(keyPointer));
 		rawPage.buffer().put(pointerSerializer.serialize(valuePointer));
-        numberOfEntries++;
+        
+		numberOfEntries++;
+	}
+	
+	private int headerSize(){
+		return Integer.SIZE / 8;
+	}
+
+	private void writeHeader() {
+		buffer().position(0);
+		buffer().putInt(numberOfEntries);
 	}
 
 	/* (non-Javadoc)
@@ -132,11 +153,15 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private int posOfKey(int i){
-		return i * serializedPointerSize * 2;
+		return headerSize() + i * serializedPointerSize * 2;
 	}
 	
 	private int posOfValue(int i){
 		return posOfKey(i) + serializedPointerSize;
+	}
+	
+	private int posBehindLastEntry(){
+		return headerSize() + numberOfEntries * serializedPointerSize * 2;
 	}
 
 	/* (non-Javadoc)
@@ -278,14 +303,12 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 
 	private PagePointer storeKey(K key) throws Exception{
 		DataPage<K> page = keyPageManager.createPage();
-		page.initialize();
-		return new PagePointer(rawPage.id(),page.add(key));
+		return new PagePointer(page.rawPage().id(),page.add(key));
 	}
 	
 	private PagePointer storeValue(V value) throws Exception {
         DataPage<V> page = valuePageManager.createPage();
-        page.initialize();
-        return new PagePointer(rawPage.id(),page.add(value));
+        return new PagePointer(page.rawPage().id(),page.add(value));
 	}
 
 
@@ -294,9 +317,8 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void initialize() {
-		buffer().position(0);
 		numberOfEntries = 0;
-		buffer().putInt(numberOfEntries);
+		writeHeader();
 		valid = true;
 	}
 
