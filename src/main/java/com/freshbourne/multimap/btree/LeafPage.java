@@ -203,10 +203,11 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 
 			result.add(valueDataPage.get(p.getOffset()));
 			
-			// TODO: read next, if next
-			if(true)
-				return result;
+			// if no other entries are available, return
+			if(buffer().position() >= posBehindLastEntry())
+				break;
 			
+			// otherwise check, if the next entry also has this key
 			buffer().get(bytebuf);
 			p = pointerSerializer.deserialize(bytebuf);
 			dataPage = keyPageManager.getPage(p.getId());
