@@ -61,7 +61,7 @@ public class IOModule extends AbstractModule{
 		bind(ResourceManager.class).to(FileResourceManager.class).in(Singleton.class);
 		bind(BufferPoolManager.class).to(BufferPoolManagerImpl.class);
 		
-		bindConstant().annotatedWith(Names.named("cacheSize")).to(30);
+		bindConstant().annotatedWith(Names.named("cacheSize")).to(300);
 	}
 
     // this worked

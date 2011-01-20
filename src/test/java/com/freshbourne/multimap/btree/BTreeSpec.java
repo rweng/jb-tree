@@ -77,6 +77,11 @@ public class BTreeSpec {
 	}
 	
 	@Test
+	public void shouldReturnEmptyArrayIfKeyNotFound() throws IOException, Exception{
+		assertEquals(0, tree.get(1).size());
+	}
+	
+	@Test
 	public void shouldBeAbleToRemoveInsertedEntries() throws Exception{
 		tree.add(1, s);
 		assertTrue(tree.containsKey(1));

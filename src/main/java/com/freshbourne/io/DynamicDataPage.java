@@ -137,7 +137,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 		
 		Integer offset = entries.remove(id);
 		if(offset == null)
-			throw new ElementNotFoundException();
+			throw new ElementNotFoundException(id);
 		
 		// move all body elements
 		int size = sizeOfEntryAt(offset);
@@ -180,7 +180,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 		
 		Integer offset = entries.get(id);
 		if( offset == null){
-			throw new ElementNotFoundException();
+			throw new ElementNotFoundException(id);
 		}
 		
 		rawPage.buffer().position(offset);

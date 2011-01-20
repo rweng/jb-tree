@@ -11,8 +11,8 @@ public class ElementNotFoundException extends Exception {
 	
 	private static final long serialVersionUID = 1L;
 
-	ElementNotFoundException(){
-		super("Element not found");
+	ElementNotFoundException(int id){
+		super("Element with id + " + id + " not found");
 	}
 
 }

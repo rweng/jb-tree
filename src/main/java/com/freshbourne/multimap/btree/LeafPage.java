@@ -85,6 +85,8 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void add(K key, V value) throws Exception {
+		ensureValid();
+		
 		if(numberOfEntries == maxEntries) {
             throw new NodeFullException(this);
         }
@@ -98,6 +100,11 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		addEntry(keyPointer, valuePointer);
 		
 		writeHeader();
+	}
+	
+	private void ensureValid() throws InvalidPageException {
+		if( !isValid() )
+			throw new InvalidPageException(this);
 	}
 
 	/**
@@ -135,23 +142,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public boolean containsKey(K key) throws Exception {
-        byte[] buf = new byte[serializedPointerSize];
-		
-		// iterate over the entries
-		for(int i = 0; i < numberOfEntries; i++){
-
-            // fetch the pagepoint binery
-			rawPage.buffer().position(posOfKey(i));
-			rawPage.buffer().get(buf);
-
-            // get the key where the pagepointer is pointing to
-            PagePointer pointer = pointerSerializer.deserialize(buf);
-            DataPage<K> page = keyPageManager.getPage(pointer.getId());
-            K currentKey = page.get(pointer.getOffset());
-            if(key.equals(currentKey))
-                return true;
-        }
-        return false;
+        return posOfKey(key) != NOT_FOUND;
 	}
 	
 	private int posOfKey(int i){
@@ -224,19 +215,22 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 * @throws Exception 
 	 */
 	private int posOfKey(K key) throws Exception{
-		ByteBuffer buf = buffer();
 		int pSize = pointerSerializer.serializedLength(PagePointer.class);
 		byte[] bytebuf = new byte[pSize];
 		
-		buf.position(headerSize());
+		buffer().position(headerSize());
 		
 		for(int i = 0; i < numberOfEntries; i++){
-			buf.get(bytebuf);
+			
+			buffer().get(bytebuf);
 			PagePointer p = pointerSerializer.deserialize(bytebuf);
 			DataPage<K> dataPage = keyPageManager.getPage(p.getId());
 			if(dataPage.get(p.getOffset()).equals(key)){
-				return buf.position() - pSize;
+				return buffer().position() - pSize;
 			}
+			
+			// get the data pointer but do nothing with it
+			buffer().get(bytebuf);
 		}
 		return NOT_FOUND;
 	}
