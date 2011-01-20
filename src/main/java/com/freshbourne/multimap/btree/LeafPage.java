@@ -217,18 +217,18 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	private int posOfKey(K key) throws Exception{
 		int pSize = pointerSerializer.serializedLength(PagePointer.class);
 		byte[] bytebuf = new byte[pSize];
-		
+
 		buffer().position(headerSize());
-		
+
 		for(int i = 0; i < numberOfEntries; i++){
-			
+
 			buffer().get(bytebuf);
 			PagePointer p = pointerSerializer.deserialize(bytebuf);
 			DataPage<K> dataPage = keyPageManager.getPage(p.getId());
 			if(dataPage.get(p.getOffset()).equals(key)){
 				return buffer().position() - pSize;
 			}
-			
+
 			// get the data pointer but do nothing with it
 			buffer().get(bytebuf);
 		}
@@ -236,30 +236,48 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	}
 
 
+	/**
+	 * @param currentPos
+	 * @return a valid position to read the next key from, or NOT_FOUND
+	 */
+	private int getPosWhereNextKeyStarts(int currentPos) {
+		if(currentPos < headerSize())
+			currentPos = headerSize();
+		
+		currentPos -= headerSize();
+		currentPos /= (serializedPointerSize * 2);
+		if(currentPos >= numberOfEntries)
+			return NOT_FOUND;
+		
+		currentPos *= (serializedPointerSize * 2);
+		return currentPos + headerSize();
+	}
+
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
 	 */
 	@Override
-	public List<V> remove(K key) throws Exception {
+	public void remove(K key) throws Exception {
 		List<V> result = new ArrayList<V>();
+		int pos = posOfKey(key);
+		if(pos == NOT_FOUND)
+			return;
 		
-		for(V value : get(key)){
-			result.add(remove(key, value));
-		}
+		int numberOfValues = get(key).size();
+		int sizeOfValues = numberOfValues * serializedPointerSize * 2;
 		
-		return result;
+		// shift the pointers after key
+		System.arraycopy(buffer().array(), pos + sizeOfValues , buffer().array(), pos , buffer().array().length - pos - sizeOfValues);
+		numberOfEntries -= numberOfValues;
 	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public V remove(K key, V value) {
-		DataPage<K> kPage = getKeyDataPage(key);
-		DataPage<V> vPage = getValueDataPage(key);
+	public void remove(K key, V value) throws Exception {
+		int pos = posOfKey(key);
 		
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	/**

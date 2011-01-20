@@ -77,16 +77,16 @@ public class BTree<K, V> implements Node<K,V> {
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
 	 */
 	@Override
-	public List<V> remove(K key) throws Exception {
-		return root.remove(key);
+	public void remove(K key) throws Exception {
+		root.remove(key);
 	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public V remove(K key, V value) {
-		return root.remove(key, value);
+	public void remove(K key, V value) throws Exception {
+		root.remove(key, value);
 	}
 
 	/* (non-Javadoc)

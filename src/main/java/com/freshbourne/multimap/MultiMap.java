@@ -79,10 +79,9 @@ public interface MultiMap<K, V> {
      * If the key was not found, an empty array is returned.
      * 
      * @param key
-     * @return array of the removed values
      * @throws Exception 
      */
-    List<V> remove(K key) throws Exception;
+    void remove(K key) throws Exception;
     
     /**
      * Removes the value under key.
@@ -90,9 +89,9 @@ public interface MultiMap<K, V> {
      * 
      * @param key
      * @param value
-     * @return the removed key or null
+     * @throws Exception 
      */
-    V remove(K key, V value);
+    void remove(K key, V value) throws Exception;
     
     /**
      * removes all keys and values
