@@ -93,10 +93,13 @@ public class BTreeSpec {
 	}
 	
 	@Test
-	public void shouldThrowExceptionIfTryingToAccessNonexistantElements(){fail();}
-	
-	@Test
-	public void clearShouldRemoveAllElements(){fail();}
+	public void clearShouldRemoveAllElements() throws Exception{
+		tree.add(1, s);
+		tree.add(2, s2);
+		assertEquals(2, tree.size());
+		tree.clear();
+		assertEquals(0, tree.size());
+	}
 	
 	@Test
 	public void getFirstShouldReturnFirstElement(){fail();}
