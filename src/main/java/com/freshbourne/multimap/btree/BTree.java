@@ -50,14 +50,6 @@ public class BTree<K, V> implements Node<K,V> {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMap#getFirst(java.lang.Object)
-	 */
-	@Override
-	public V getFirst(K key) {
-		return root.getFirst(key);
-	}
-
-	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#get(java.lang.Object)
 	 */
 	@Override

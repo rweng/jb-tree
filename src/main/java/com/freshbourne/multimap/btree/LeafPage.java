@@ -158,15 +158,6 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMap#getFirst(java.lang.Object)
-	 */
-	@Override
-	public V getFirst(K key) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#get(java.lang.Object)
 	 */
 	@SuppressWarnings("unchecked")

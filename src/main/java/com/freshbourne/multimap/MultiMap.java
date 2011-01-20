@@ -49,11 +49,6 @@ public interface MultiMap<K, V> {
 	public boolean containsKey(K key) throws Exception;
     
 	/**
-     * @return the first value of key or <code>null</code> if key not found
-     */
-	public V getFirst(K key);
-	
-	/**
 	 * @param key
 	 * @return array of values associated with the key or an empty array if the key does not exist
 	 * @throws IOException 

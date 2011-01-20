@@ -102,9 +102,6 @@ public class BTreeSpec {
 	}
 	
 	@Test
-	public void getFirstShouldReturnFirstElement(){fail();}
-	
-	@Test
 	public void getShouldReturnAllElements(){fail();}
 	
 	@Test
