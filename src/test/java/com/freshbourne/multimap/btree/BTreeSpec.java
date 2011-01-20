@@ -72,7 +72,9 @@ public class BTreeSpec {
 		tree.add(2, s2);
 		assertTrue(tree.containsKey(2));
 		assertEquals(1, tree.get(2).size());
-		assertEquals(s2, tree.get(1).get(0));
+		assertTrue(tree.get(1).contains(s2));
+		assertTrue(tree.get(1).contains(s));
+		assertTrue(tree.get(1).size() == 2);
 		assertEquals(3, tree.size());
 	}
 	
