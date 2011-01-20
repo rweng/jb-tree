@@ -116,6 +116,15 @@ public class BTreeSpec {
 	}
 	
 	@Test
-	public void removeWithOnlyKeyArgumentShouldRemoveAllValues(){fail();}
+	public void removeWithOnlyKeyArgumentShouldRemoveAllValues() throws Exception{
+		tree.add(1, s);
+		tree.add(1, s2);
+		tree.add(2, s2);
+		
+		assertEquals(3, tree.size());
+		tree.remove(1);
+		assertEquals(1, tree.size());
+		assertEquals(0, tree.get(1).size());
+	}
 	
 }
