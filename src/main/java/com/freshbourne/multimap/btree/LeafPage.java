@@ -153,6 +153,10 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		return posOfKey(i) + serializedPointerSize;
 	}
 	
+	/**
+	 * does not alter the header bytebuffer
+	 * @return
+	 */
 	private int posBehindLastEntry(){
 		return headerSize() + numberOfEntries * serializedPointerSize * 2;
 	}
@@ -171,6 +175,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		if( pos == NOT_FOUND)
 			return result;
 		
+		int oldPos = buffer().position();
 		buffer().position(pos);
 		
 		// read first
@@ -195,6 +200,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 			dataPage = keyPageManager.getPage(p.getId());
 			
 		}
+		buffer().position(oldPos);
 		return result;
 	}
 	
@@ -249,13 +255,14 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void remove(K key) throws Exception {
-		List<V> result = new ArrayList<V>();
 		int pos = posOfKey(key);
 		if(pos == NOT_FOUND)
 			return;
 		
 		int numberOfValues = get(key).size();
 		int sizeOfValues = numberOfValues * serializedPointerSize * 2;
+		
+		//TODO: free key and value pages
 		
 		// shift the pointers after key
 		System.arraycopy(buffer().array(), pos + sizeOfValues , buffer().array(), pos , buffer().array().length - pos - sizeOfValues);
@@ -268,6 +275,46 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	@Override
 	public void remove(K key, V value) throws Exception {
 		int pos = posOfKey(key);
+		if(pos == NOT_FOUND)
+			return;
+		
+		
+		int numberOfValues = get(key).size();
+		
+		buffer().position(pos);
+		int sizeOfValues = numberOfValues * serializedPointerSize * 2;
+		byte[] buf1 = new byte[serializedPointerSize];
+		byte[] buf2 = new byte[serializedPointerSize];
+		
+		List<Integer> toRemove = new ArrayList<Integer>();
+		for(int i = 0; i < numberOfValues; i++){
+			buffer().get(buf1);
+			buffer().get(buf2); // load only the value
+			PagePointer p = pointerSerializer.deserialize(buf2);
+			DataPage<V> vPage = valuePageManager.getPage(p.getId());
+			V val = vPage.get(p.getOffset());
+			if( val != null && val.equals(value)){
+				vPage.remove(p.getOffset());
+				if(vPage.numberOfEntries() == 0)
+					valuePageManager.removePage(vPage.rawPage().id());
+				
+				// also free value page
+				p = pointerSerializer.deserialize(buf2);
+				DataPage <K> kPage = keyPageManager.getPage(p.getId());
+				kPage.remove(p.getOffset());
+				if(kPage.numberOfEntries() == 0)
+					keyPageManager.removePage(p.getId());
+				
+				// move pointers forward and reset buffer
+				int startingPos = buffer().position() - buf1.length - buf2.length;
+				System.arraycopy(buffer().array(), buffer().position(), buffer().array(), startingPos, posBehindLastEntry() - buffer().position());
+				
+				buffer().position(startingPos);
+				
+			}
+			
+		}
+		
 		
 	}
 

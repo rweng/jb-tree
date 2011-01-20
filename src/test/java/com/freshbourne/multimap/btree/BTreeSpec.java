@@ -102,10 +102,18 @@ public class BTreeSpec {
 	}
 	
 	@Test
-	public void getShouldReturnAllElements(){fail();}
-	
-	@Test
-	public void removeWithValueArgumentShouldRemoveOnlyThisValue(){fail();}
+	public void removeWithValueArgumentShouldRemoveOnlyThisValue() throws Exception{
+		tree.add(1, s);
+		tree.add(1, s2);
+		tree.add(2, s2);
+		
+		assertEquals(3, tree.size());
+		tree.remove(1, s2);
+		assertEquals(1, tree.get(1).size());
+		assertEquals(s, tree.get(1).get(0));
+		assertEquals(s2, tree.get(2).get(0));
+		
+	}
 	
 	@Test
 	public void removeWithOnlyKeyArgumentShouldRemoveAllValues(){fail();}
