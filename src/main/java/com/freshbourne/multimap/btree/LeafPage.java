@@ -304,9 +304,33 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#clear()
 	 */
 	@Override
-	public void clear() {
-		// TODO Auto-generated method stub
+	public void clear() throws Exception {
+		byte[] buf = new byte[serializedPointerSize];
 		
+		//TODO: free pages
+		for(int i = 0; i < numberOfEntries; i++){
+			
+			// key page
+			buffer().position(posOfKey(i));
+			buffer().get(buf);
+			PagePointer p = pointerSerializer.deserialize(buf);
+			DataPage<K> keyPage = keyPageManager.getPage(p.getId());
+			keyPage.remove(p.getOffset());
+			if(keyPage.numberOfEntries() == 0)
+				keyPageManager.removePage(keyPage.rawPage().id());
+			
+			// data page
+			buffer().get(buf);
+			p = pointerSerializer.deserialize(buf);
+			DataPage<V> valuePage = valuePageManager.getPage(p.getId());
+			valuePage.remove(p.getOffset());
+			if(valuePage.numberOfEntries() == 0)
+				valuePageManager.removePage(valuePage.rawPage().id());
+			
+		}
+		
+		numberOfEntries = 0;
+		writeHeader();
 	}
 
 	/**

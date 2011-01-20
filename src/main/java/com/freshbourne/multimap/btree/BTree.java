@@ -93,7 +93,7 @@ public class BTree<K, V> implements Node<K,V> {
 	 * @see com.freshbourne.multimap.MultiMap#clear()
 	 */
 	@Override
-	public void clear() {
+	public void clear() throws Exception {
 		root.clear();
 	}
 

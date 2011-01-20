@@ -47,7 +47,7 @@ public interface DataPage<T> extends ComplexPage {
 	 * @param id of the byte array to be removed
 	 * @throws ElementNotFoundException 
 	 */
-	public void remove(int id) throws ElementNotFoundException;
+	public void remove(int id);
 	
 	/**
 	 * @return the remaining number Of bytes that can be used by the body or header

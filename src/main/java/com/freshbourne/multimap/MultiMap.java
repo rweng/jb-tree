@@ -95,6 +95,7 @@ public interface MultiMap<K, V> {
     
     /**
      * removes all keys and values
+     * @throws Exception 
      */
-    void clear();
+    void clear() throws Exception;
 }

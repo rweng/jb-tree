@@ -96,21 +96,55 @@ public class DynamicDataPageSpec {
 		assertEquals(s3, page.get(id3));
 	}
 	
-	@Test(expected= Exception.class)
-	public void shouldThrowAnExceptionWhenEntryWasRemoved() throws Exception {
+	@Test
+	public void shouldReturnNullIfEntryWasRemoved() throws Exception {
+		
+		page.initialize();
+		
 		int id = page.add(s3);
 		page.remove(id);
-		page.get(id);
+		assertEquals(null, page.get(id));
+		assertEquals(null, page.get(id + 5));
+		
 	}
 	
 	@Test
-	public void shouldHaveSameSizeAfterInsertAndRemove() throws NoSpaceException, ElementNotFoundException, InvalidPageException{
+	public void remainingMethodShouldAdjustWhenInsertingOrRemovingEntries() throws NoSpaceException, InvalidPageException{
 		page.initialize();
 		
-		int size = page.remaining();
+		int r1 = page.remaining();
+		int id1 = page.add(s1);
+		int r2 = page.remaining();
+		assertTrue(r1 > r2);
+		int id2 = page.add(s2);
+		int r3 = page.remaining();
+		assertTrue(r2 > r3);
+		page.remove(id1);
+		assertEquals(r1 - (r2 - r3), page.remaining());
+		page.remove(id2);
+		assertEquals(r1, page.remaining());
+	}
+	
+	@Test public void remainingValueShouldBeCorrectAfterReload() throws NoSpaceException, InvalidPageException{
+		page.initialize();
+		
+		page.add(s1);
+		page.add(s2);
+		int r = page.remaining();
+		page = new DynamicDataPage<String>(page.rawPage(), page.pagePointSerializer(), page.dataSerializer());
+		page.load();
+		assertEquals(r, page.remaining());
+	}
+	
+	@Test
+	public void shouldHaveSameSizeAfterInsertAndRemove() throws NoSpaceException, InvalidPageException{
+		page.initialize();
+		
+		int remaining = page.remaining();
 		int id = page.add("blast");
+		assertTrue(remaining > page.remaining());
 		page.remove(id);
-		assertEquals(size, page.remaining());
+		assertEquals(remaining, page.remaining());
 	}
 	
 	@Test

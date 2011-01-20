@@ -133,11 +133,11 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.DataPage#remove(int)
 	 */
-	public void remove(int id) throws ElementNotFoundException {
+	public void remove(int id)  {
 		
 		Integer offset = entries.remove(id);
 		if(offset == null)
-			throw new ElementNotFoundException(id);
+			return;
 		
 		// move all body elements
 		int size = sizeOfEntryAt(offset);
@@ -160,16 +160,21 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	 * Creates a valid header by writing the entries in memory to the header and adjusts the header limit.
 	 */
 	private void writeAndAdjustHeader() {
+		adjustHeaderLimit();
+		
 		header.position(0);
 		header.putInt(entries.size() == 0 ? NO_ENTRIES_INT : entries.size());
 		
-		int size = Integer.SIZE * 2 / 8;
 		for(int key : entries.keySet()){
 			header.putInt(key);
 			header.putInt(entries.get(key));
-		}
-		
-		header.limit(header.position() + size);
+		}	
+	}
+	
+	private void adjustHeaderLimit(){
+		header.limit( (Integer.SIZE + (Integer.SIZE) * 2 * entries.size()) / 8 );
+		if(remaining() > Integer.SIZE / 8)
+			header.limit(header.limit() + Integer.SIZE / 8);
 	}
 
 	/* (non-Javadoc)
@@ -180,7 +185,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 		
 		Integer offset = entries.get(id);
 		if( offset == null){
-			throw new ElementNotFoundException(id);
+			return null;
 		}
 		
 		rawPage.buffer().position(offset);
@@ -222,7 +227,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	 * @see com.freshbourne.multimap.btree.DataPage#remaining()
 	 */
 	public int remaining() {
-		return rawPage.buffer().capacity() - header.limit() - bodyUsedBytes();
+		return rawPage.buffer().limit() - header.limit() - bodyUsedBytes();
 	}
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ComplexPage#load()
@@ -238,6 +243,14 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 			int key = header.getInt();
 			entries.put(key, header.getInt());
 		}
+		
+		bodyOffset = rawPage.buffer().limit();
+		for(int i : entries.values()){
+			if(i < bodyOffset)
+				bodyOffset = i;
+		}
+		
+		adjustHeaderLimit();
 		
 		valid = true;
 	}
