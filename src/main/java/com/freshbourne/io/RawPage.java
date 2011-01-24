@@ -8,12 +8,11 @@
 
 package com.freshbourne.io;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 
 /**
- * This class is a byte array, eventually from a resource manager and eventually with an id.
+ * This class is a byte array, eventually from a resource manager and always with an id != null and != 0L
  */
 public class RawPage {
 
@@ -26,7 +25,10 @@ public class RawPage {
     }
 
     public RawPage(ByteBuffer buffer, ResourceManager rm, Long pageId){
-        this.buffer = buffer;
+        if(pageId == null || pageId == 0L)
+        	throw new IllegalArgumentException("A RawPage id must not be null or 0L");
+    	
+    	this.buffer = buffer;
         this.rm = rm;
         this.id = pageId;
     }

@@ -258,7 +258,7 @@ public class FileResourceManager implements ResourceManager {
 		long result;
 		do{
 			result = (new Random()).nextLong();
-		} while (header.contains(result));
+		} while (header.contains(result) || result == 0L);
 		return result;
 		
 	}
