@@ -1,7 +1,5 @@
-=TODO
-* finish FileResourceManager & Pages
-* test FileResourceManager & Pages
-...
-* done
+
+you can easily order your tree by providing a different comparator for the keys.
+
 
 for FileResourceManager and IOChannel look at: [[http://www.yaldex.com/java_tutorial/0600410861.htm]]
