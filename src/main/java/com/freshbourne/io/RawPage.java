@@ -19,6 +19,11 @@ public class RawPage {
 
     private final ByteBuffer buffer;
     private final Long id;
+    
+    /**
+     * buffer has been modified since RawPage was created?
+     */
+    private boolean modified = false;
 
 
     public RawPage(ByteBuffer buffer, Long pageId){
@@ -39,4 +44,20 @@ public class RawPage {
 		} while (result == 0L);
 		return result;
     }
+
+	/**
+	 * @param modified the modified to set
+	 */
+	public void setModified(boolean modified) {
+		this.modified = modified;
+	}
+
+	/**
+	 * @return the modified
+	 */
+	public boolean isModified() {
+		return modified;
+	}
+    
+    
 }

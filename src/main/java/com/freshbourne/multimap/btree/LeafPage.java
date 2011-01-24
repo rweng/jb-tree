@@ -130,7 +130,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		// copy from other to us
 		System.arraycopy(source.rawPage().buffer().array(), source.posOfKey(source.getNumberOfEntries() - num), buffer().array(), headerSize(), totalSize);
 		
-		// update headers
+		// update headers, also sets modified
 		source.setNumberOfEntries(source.getNumberOfEntries() - num);
 		setNumberOfEntries(getNumberOfEntries() + num);
 		
@@ -186,6 +186,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	private void writeNumberOfEntries() {
 		buffer().position(0);
 		buffer().putInt(numberOfEntries);
+		rawPage.setModified(true);
 	}
 
 	/* (non-Javadoc)
