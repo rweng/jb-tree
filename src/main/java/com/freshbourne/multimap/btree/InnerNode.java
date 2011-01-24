@@ -173,4 +173,12 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#getId()
+	 */
+	@Override
+	public Long getId() {
+		return rawPage.id();
+	}
+
 }

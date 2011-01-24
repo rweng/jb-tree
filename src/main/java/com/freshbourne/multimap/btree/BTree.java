@@ -30,7 +30,14 @@ public class BTree<K, V> implements MultiMap<K, V> {
 	private final InnerNodeManager<K, V> innerNodeManager;
 	private final Comparator<K> comparator;
 	
-	private LeafPage<K, V> root;
+	private Node<K, V> root;
+	
+	/**
+	 * If a leaf page has at least that many free slots left, we can move pointers to it
+	 * from another node. This number is computed from the
+	 * <tt>MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE</tt> constant.
+	 */
+	private final int minFreeLeafEntriesToMove;
 	
 	
 	@Inject
@@ -39,6 +46,9 @@ public class BTree<K, V> implements MultiMap<K, V> {
 		this.innerNodeManager = innerNodeManager;
 		this.comparator = comparator;
 		root = leafPageManager.createPage();
+		
+		this.minFreeLeafEntriesToMove = (int) (((LeafPage<K, V>)root).getMaximalNumberOfEntries() *
+                (1 - MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE)) + 2;
 	}
 	
 	/* (non-Javadoc)
@@ -70,7 +80,7 @@ public class BTree<K, V> implements MultiMap<K, V> {
 	 */
 	@Override
 	public boolean add(K key, V value) {
-		AdjustmentAction<K, V> result = recursivelyInsert(key, value);
+		AdjustmentAction<K, V> result = recursivelyInsert(root, key, value, 0);
 		
 		if(result == null)
 			return true;
@@ -79,46 +89,80 @@ public class BTree<K, V> implements MultiMap<K, V> {
 			// new root
 			InnerNode<K, V> newRoot = innerNodeManager.createPage();
 			
-			newRoot.initRootState(result.getKeyPointer(), root.rawPage().id(), result.getPageId());
+			newRoot.initRootState(result.getKeyPointer(), root.getId(), result.getPageId());
 			
+			root = newRoot;
 			
 		}
 		
 		return false;
 	}
 	
-	private AdjustmentAction<K, V> recursivelyInsert(K key, V value){
-		if (root instanceof LeafPage) {
-			if (!root.isFull()) {
-				root.add(key, value);
-				return null;
-			} else if (root instanceof LeafPage && root.getNextLeafId() != null) {
-				throw new UnsupportedOperationException(
-						"push some entries to next leaf");
-			} else {
-				// allocate new leaf
-				LeafPage<K,V> newLeaf = leafPageManager.createPage();
-				newLeaf.setNextLeafId(root.rawPage().id());
-				root.setNextLeafId(newLeaf.rawPage().id());
-				
-				// newLeaf.setLastKeyContinuesOnNextPage(root.isLastKeyContinuingOnNextPage());
-				
-				// move half of the keys to new page
-				newLeaf.prependEntriesFromOtherPage(root, root.getNumberOfEntries() >> 1);
+	private AdjustmentAction<K, V> recursivelyInsert(Node<K, V> node, K key, V value, int depth){
+		if(depth > MAX_BTREE_DEPTH)
+			throw new RuntimeException("The depth of the B-Tree should not be greater then MAX_BTREE_DEPTH (" + MAX_BTREE_DEPTH + ")");
+		
+		if (node instanceof LeafPage) {
+			return insertInLeaf((LeafPage<K, V>) node, key, value);
+		}
+		
+		if( node instanceof InnerNode){
+			throw new UnsupportedOperationException("innernodes not yet supported");
+		}
+		
+		
+		throw new IllegalArgumentException("node must be of type Leaf or InnerNode!");
+	}
+
+	private AdjustmentAction<K, V> insertInLeaf(LeafPage<K, V> thisLeaf, K key, V value) {
+		
+		// if leaf has enough space
+		if (!thisLeaf.isFull()) {
+			thisLeaf.add(key, value);
+			return null;
+		} 
+		
+		// if leaf does not have enough space but we can move some data to the next leaf
+		if (thisLeaf.getNextLeafId() != null) {
+			LeafPage<K, V> nextLeaf = leafPageManager.getPage(thisLeaf.getNextLeafId());
+			
+			if(nextLeaf.getRemainingEntries() >= minFreeLeafEntriesToMove){
+				nextLeaf.prependEntriesFromOtherPage(thisLeaf, nextLeaf.getRemainingEntries() >> 1);
 				
 				// see on which page we will insert the value
-				if(comparator.compare(key, root.getLastKey()) > 0){
-					newLeaf.insert(key, value);
+				if(comparator.compare(key, thisLeaf.getLastKey()) > 0){
+					nextLeaf.insert(key, value);
 				} else {
-					root.insert(key, value);
+					thisLeaf.insert(key, value);
 				}
 				
-				return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, root.getLastKeyPointer(), newLeaf.rawPage().id());
+				return new AdjustmentAction<K, V>(ACTION.UPDATE_KEY, thisLeaf.getLastKeyPointer(), null);
 			}
-		} else {
-			throw new UnsupportedOperationException(
-					"innernodes not supported yet");
 		}
+		
+		
+		// if we have to allocate a new leaf
+		
+		// allocate new leaf
+		LeafPage<K,V> newLeaf = leafPageManager.createPage();
+		newLeaf.setNextLeafId(thisLeaf.getId());
+		thisLeaf.setNextLeafId(newLeaf.rawPage().id());
+			
+		// newLeaf.setLastKeyContinuesOnNextPage(root.isLastKeyContinuingOnNextPage());
+			
+		// move half of the keys to new page
+		newLeaf.prependEntriesFromOtherPage(thisLeaf,
+				root.getNumberOfEntries() >> 1);
+
+		// see on which page we will insert the value
+		if (comparator.compare(key, thisLeaf.getLastKey()) > 0) {
+			newLeaf.insert(key, value);
+		} else {
+			thisLeaf.insert(key, value);
+		}
+
+		return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE,
+				thisLeaf.getLastKeyPointer(), newLeaf.rawPage().id());
 	}
 
 	/* (non-Javadoc)
@@ -149,7 +193,7 @@ public class BTree<K, V> implements MultiMap<K, V> {
 	 * The maximum number of levels in the B-Tree. Used to prevent infinite loops when
 	 * the structure is corrupted.
 	 */
-	private static final int MAX_BTREE_LEVELS = 50;
+	private static final int MAX_BTREE_DEPTH = 50;
 	
 	/**
 	 * If a leaf page is less full than this factor, it may be target of operations

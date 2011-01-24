@@ -40,4 +40,10 @@ public interface Node<K, V> extends MultiMap<K, V> {
 	 * @return
 	 */
 	public PagePointer getKeyPointer(int pos);
+	
+	
+	/**
+	 * @return id of this node
+	 */
+	public Long getId();
 }

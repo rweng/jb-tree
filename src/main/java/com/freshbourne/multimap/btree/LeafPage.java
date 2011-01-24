@@ -567,4 +567,20 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		
 		return null;
 	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#getId()
+	 */
+	@Override
+	public Long getId() {
+		return rawPage.id();
+	}
+
+	public int getRemainingEntries() {
+		return getMaxEntries() - getNumberOfEntries();
+	}
+
+	public int getMaximalNumberOfEntries() {
+		return maxEntries;
+	}
 }
