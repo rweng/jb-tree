@@ -52,6 +52,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	private static final int NOT_FOUND = -1;
 	
 	private final RawPage rawPage;
+	private Long nextLeafId;
 	
 	// counters
 	private int numberOfEntries = 0;
@@ -442,5 +443,23 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		
 		writeHeader();
 		return null;
+	}
+
+	
+	public Long getNextLeafId() {
+		return nextLeafId;
+	}
+
+	public void setNextLeafId(Long id) {
+		this.nextLeafId = id;
+	}
+
+	public void setLastKeyContinuesOnNextPage(boolean b) {
+		//TODO: implement
+		
+	}
+
+	public boolean isLastKeyContinuingOnNextPage() {
+		return false;
 	}
 }

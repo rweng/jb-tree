@@ -63,13 +63,28 @@ public class BTree<K, V> implements MultiMap<K, V> {
 	 */
 	@Override
 	public boolean add(K key, V value) {
-		 if(root.add(key, value)){
-			 return true;
-		 } else {
-			 // no space in root
-		 }
-		 
-		 return false;
+		if (root instanceof LeafPage) {
+			if (root.add(key, value)) {
+				return true;
+			} else if (root instanceof LeafPage && root.getNextLeafId() != null) {
+				throw new UnsupportedOperationException(
+						"push some entries to next leaf");
+			} else {
+				// allocate new leaf
+				LeafPage<K,V> newLeaf = leafPageManager.createPage();
+				newLeaf.setNextLeafId(root.rawPage().id());
+				root.setNextLeafId(newLeaf.rawPage().id());
+				newLeaf.setLastKeyContinuesOnNextPage(root.isLastKeyContinuingOnNextPage());
+				
+				// move half of the keys to new page
+				
+				// see on which page we will insert the value
+			}
+		} else {
+			throw new UnsupportedOperationException(
+					"innernodes not supported yet");
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
