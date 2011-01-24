@@ -7,7 +7,7 @@
  */
 package com.freshbourne.io;
 
-public class InvalidPageException extends Exception {
+public class InvalidPageException extends RuntimeException {
 	
 	private static final long serialVersionUID = 1L;
 

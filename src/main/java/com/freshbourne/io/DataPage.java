@@ -32,14 +32,14 @@ public interface DataPage<T> extends ComplexPage {
 	 * @param value array to be written
 	 * @return id of the entry/byte[] within this page
 	 */
-	public int add(T value) throws Exception;
+	public int add(T value);
 	
 	
 	/**
 	 * @param id within this page
 	 * @return byte array with this id
 	 */
-	public T get(int id) throws Exception;
+	public T get(int id);
 	
 	
 	/**
@@ -56,9 +56,8 @@ public interface DataPage<T> extends ComplexPage {
 	
 	/**
 	 * @return number of entries stored in the DataPage
-	 * @throws InvalidPageException 
 	 */
-	public int numberOfEntries() throws InvalidPageException;
+	public int numberOfEntries();
 	
 	/**
 	 * @return the serializer object used to serialize PagePoints

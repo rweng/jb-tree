@@ -7,7 +7,7 @@
  */
 package com.freshbourne.io;
 
-public class DuplicatePageIdException extends Exception {
+public class DuplicatePageIdException extends RuntimeException {
 	
 	private static final long serialVersionUID = 1L;
 

@@ -93,7 +93,7 @@ public class ResourceHeaderPage implements ComplexPage {
 		return dictionary.size();
 	}
 
-	public void writeToResource() throws IOException {
+	public void writeToResource() {
 		rawPage.writeToResource();
 	}
 
@@ -104,7 +104,7 @@ public class ResourceHeaderPage implements ComplexPage {
 	 * @param pos
 	 * @throws DuplicatePageIdException 
 	 */
-	private void setRealPageNr(Long id, int pos) throws DuplicatePageIdException, IndexOutOfBoundsException {
+	private void setRealPageNr(Long id, int pos) {
 		if(dictionary.contains(id))
 			throw new DuplicatePageIdException(id);
 		

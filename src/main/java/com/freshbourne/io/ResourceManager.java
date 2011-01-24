@@ -32,7 +32,7 @@ public interface ResourceManager {
 	 * @param page RawPage to write to the Resource. The ResourceManager and Id of the RawPage must be set.
 	 * @throws IOException if the page id was not found or the ResourceManager was not equal to this ResourceManager
 	 */
-	public void writePage(RawPage page) throws IOException;
+	public void writePage(RawPage page);
 	
 	
 	/**
@@ -44,7 +44,7 @@ public interface ResourceManager {
      * @return new instance of page with ResourceManager and id set
 	 * @throws IOException
 	 */
-	public RawPage addPage(RawPage page) throws IOException;
+	public RawPage addPage(RawPage page);
 	
 	/**
 	 * read the page with the given id
@@ -53,19 +53,19 @@ public interface ResourceManager {
 	 * @return Page
 	 * @throws IOException
 	 */
-	public RawPage readPage(long pageId) throws IOException;
+	public RawPage readPage(long pageId);
 	
 	/**
 	 * @return a new added RawPage
 	 * @throws IOException 
 	 */
-	public RawPage createPage() throws IOException;
+	public RawPage createPage();
 	
 	
 	/**
 	 * @param pageId of the page to remove
 	 */
-	public void removePage(long pageId) throws Exception;
+	public void removePage(long pageId);
 	
 	
 	/**
@@ -75,7 +75,7 @@ public interface ResourceManager {
 	
 	public void open() throws IOException;
 	public boolean isOpen();
-	public void close() throws IOException;
+	public void close();
 	public int numberOfPages();
 	
 }

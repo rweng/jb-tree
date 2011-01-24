@@ -80,7 +80,7 @@ public class FileResourceManager implements ResourceManager {
 	}
 	
 	@Override
-	public void writePage(RawPage page) throws IOException {
+	public void writePage(RawPage page) {
 
         if(page.resourceManager() != this)
             throw new WrongResourceManagerException(this, page);
@@ -91,20 +91,32 @@ public class FileResourceManager implements ResourceManager {
         ByteBuffer buffer = page.buffer();
 		buffer.rewind();
 
-        ioChannel.write(buffer, header.getRealPageNr(page.id()));
+		try{
+			ioChannel.write(buffer, header.getRealPageNr(page.id()));
+		} catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ResourceManager#readPage(int)
 	 */
 	@Override
-	public RawPage readPage(long pageId) throws IOException {
+	public RawPage readPage(long pageId) {
 		
 		ensureOpen();
 		ensurePageExists(pageId);
 
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
-		ioChannel.read(buf, 0);
+		
+		try{
+			ioChannel.read(buf, 0);
+		} catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
 		return new RawPage(buf, this, pageId);
 	}
 
@@ -121,7 +133,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#close()
 	 */
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		if(header != null){
 			header.writeToResource();
 			header = null;
@@ -212,17 +224,20 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#addPage(com.freshbourne.io.HashPage)
 	 */
 	@Override
-	public RawPage addPage(RawPage page) throws IOException {
+	public RawPage addPage(RawPage page) {
 		ensureOpen();
 		ensureCorrectPageSize(page);
 		
 		RawPage result = new RawPage(page.buffer(), this, generateId());
 		page.buffer().position(0);
-		ioChannel.write(page.buffer(), ioChannel.size());
+		
 		try {
+			ioChannel.write(page.buffer(), ioChannel.size());
 			header.add(result.id());
 		} catch (DuplicatePageIdException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
@@ -234,7 +249,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @param page
 	 * @throws WrongPageSizeException 
 	 */
-	private void ensureCorrectPageSize(RawPage page) throws WrongPageSizeException {
+	private void ensureCorrectPageSize(RawPage page) {
 		if(page.buffer().limit() != pageSize)
 			throw new WrongPageSizeException(page, pageSize);
 	}
@@ -248,7 +263,7 @@ public class FileResourceManager implements ResourceManager {
 		
 	}
 	
-	private void ensureOpen() throws ResourceNotOpenException{
+	private void ensureOpen() {
 		if(!isOpen())
 			throw new ResourceNotOpenException(this);
 	}
@@ -265,7 +280,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#createPage()
 	 */
 	@Override
-	public RawPage createPage() throws IOException {
+	public RawPage createPage() {
 		ensureOpen();
 		
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
@@ -283,11 +298,12 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#removePage(long)
 	 */
 	@Override
-	public void removePage(long pageId) throws IOException, DuplicatePageIdException {
+	public void removePage(long pageId) {
 		int pos = header.getRealPageNr(pageId);
 		Long lastPageId = header.getLastPageId();
 		
 		// copy the last entry to this position
+		try{
 		if(pos == header.getRealPageNr(lastPageId)){ // last page?
 			header.remove(pageId);
 			ioChannel.truncate(header.getNumberOfPages() * pageSize);
@@ -297,6 +313,10 @@ public class FileResourceManager implements ResourceManager {
 			writePage(last);
 			
 			ioChannel.truncate(header.getNumberOfPages() * pageSize);
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
 		}
 	}
 }

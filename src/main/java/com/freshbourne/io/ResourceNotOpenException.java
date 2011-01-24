@@ -15,7 +15,7 @@ import java.io.IOException;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public class ResourceNotOpenException extends IOException{
+public class ResourceNotOpenException extends IllegalStateException{
 	
 	private static final long serialVersionUID = 1L;
 	

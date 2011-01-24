@@ -24,14 +24,14 @@ public interface PageManager<T> {
 	 * @return HashPage
 	 * @throws IOException
 	 */
-	public T createPage() throws IOException;
+	public T createPage();
 	
 	/**
 	 * @param id of the page to be fetched
 	 * @return page with given id from resource or cache
      * @throws IOException
 	 */
-	public T getPage(long id) throws IOException;
+	public T getPage(long id);
 	
 	/**
 	 * removes the Page with the given id

@@ -61,8 +61,8 @@ public class BTree<K, V> implements Node<K,V> {
 	 * @see com.freshbourne.multimap.MultiMap#add(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public void add(K key, V value) throws Exception {
-		root.add(key, value);
+	public boolean add(K key, V value) {
+		return root.add(key, value);
 	}
 
 	/* (non-Javadoc)

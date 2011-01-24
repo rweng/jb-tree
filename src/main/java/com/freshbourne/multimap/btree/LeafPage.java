@@ -79,17 +79,19 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		// one pointer to key, one to value
 		maxEntries = (rawPage.buffer().capacity() - headerSize()) / (serializedPointerSize * 2); 
 	}
+    
+    public boolean isFull(){
+    	return numberOfEntries == maxEntries;
+    }
 	
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#add(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public void add(K key, V value) throws Exception {
+	public boolean add(K key, V value) {
 		ensureValid();
-		
-		if(numberOfEntries == maxEntries) {
-            throw new NodeFullException(this);
-        }
+		if(isFull())
+			return false;
 		
 		// add to data_page
 		PagePointer keyPointer = storeKey(key);
@@ -100,11 +102,15 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		addEntry(keyPointer, valuePointer);
 		
 		writeHeader();
+		return true;
 	}
 	
-	private void ensureValid() throws InvalidPageException {
-		if( !isValid() )
-			throw new InvalidPageException(this);
+	private void ensureValid() {
+		if( isValid() )
+			return;
+		
+		System.err.println("The current LeafPage with the id " + rawPage.id() + " is not valid");
+		System.exit(1);
 	}
 
 	/**
@@ -378,12 +384,12 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		return maxEntries;
 	}
 
-	private PagePointer storeKey(K key) throws Exception{
+	private PagePointer storeKey(K key) {
 		DataPage<K> page = keyPageManager.createPage();
 		return new PagePointer(page.rawPage().id(),page.add(key));
 	}
 	
-	private PagePointer storeValue(V value) throws Exception {
+	private PagePointer storeValue(V value) {
         DataPage<V> page = valuePageManager.createPage();
         return new PagePointer(page.rawPage().id(),page.add(value));
 	}

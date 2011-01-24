@@ -8,10 +8,12 @@
 
 package com.freshbourne.io;
 
-import java.io.IOException;
 
-public class WrongResourceManagerException extends IOException {
-    public WrongResourceManagerException(ResourceManager thisRM, RawPage page){
+public class WrongResourceManagerException extends RuntimeException {
+    
+	private static final long serialVersionUID = 1L;
+
+	public WrongResourceManagerException(ResourceManager thisRM, RawPage page){
         super("The Page with the id " + page.id() + " of ResourceManager " + page.resourceManager() +
                 " cannot be writting to ResourceManager " + thisRM);
     }

@@ -60,7 +60,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 
 	
 	@Override
-	public RawPage getPage(long pageId) throws IOException {
+	public RawPage getPage(long pageId) {
 		if(cache.get(pageId) != null)
 			return cache.get(pageId);
 		
@@ -68,7 +68,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	}
 
 
-	private RawPage addToCache(RawPage p) throws IOException{
+	private RawPage addToCache(RawPage p) {
 		if(cacheQueue.remainingCapacity() == 0){
 			RawPage toRemove = cacheQueue.poll();
 			rm.writePage(toRemove);
@@ -81,7 +81,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	}
 
 	@Override
-	public RawPage createPage() throws IOException {
+	public RawPage createPage() {
 		RawPage p = newPage();
 		p = rm.addPage(p);
 		return addToCache(p);

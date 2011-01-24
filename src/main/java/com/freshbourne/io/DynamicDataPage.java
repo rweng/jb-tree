@@ -85,7 +85,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.DataPage#add(byte[])
 	 */
-	public int add(T entry) throws NoSpaceException, InvalidPageException {
+	public int add(T entry) {
 		ensureValid();
 		
 		byte[] bytes = entrySerializer.serialize(entry);
@@ -180,7 +180,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.DataPage#get(int)
 	 */
-	public T get(int id) throws Exception {
+	public T get(int id) {
 		ensureValid();
 		
 		Integer offset = entries.get(id);

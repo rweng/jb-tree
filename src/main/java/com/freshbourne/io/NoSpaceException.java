@@ -15,7 +15,7 @@
  */
 package com.freshbourne.io;
 
-public class NoSpaceException extends Exception {
+public class NoSpaceException extends RuntimeException {
 	
 	private static final long serialVersionUID = 1L;
 

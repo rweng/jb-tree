@@ -32,14 +32,14 @@ public class DataPageManager<T> implements PageManager<DataPage<T>> {
     }
 
     @Override
-    public DataPage<T> createPage() throws IOException {
+    public DataPage<T> createPage() {
     	DataPage<T> result = new DynamicDataPage<T>(bpm.createPage(), pointSerializer, dataSerializer);
     	result.initialize();
     	return result;
     }
 
     @Override
-    public DataPage<T> getPage(long id) throws IOException {
+    public DataPage<T> getPage(long id) {
     	DataPage<T> result = new DynamicDataPage<T>(bpm.getPage(id), pointSerializer, dataSerializer);
     	result.load();
         return result;

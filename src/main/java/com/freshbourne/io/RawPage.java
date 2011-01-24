@@ -34,9 +34,9 @@ public class RawPage {
     public ByteBuffer buffer(){return buffer;}
     public Long id(){return id;}
     public ResourceManager resourceManager(){return rm;}
-    public void writeToResource() throws IOException{
+    public void writeToResource() {
     	if(rm == null){
-    		throw new IOException("Resource Manager not set");
+    		throw new IllegalStateException("Resource Manager not set");
     	}
     	
     	rm.writePage(this);

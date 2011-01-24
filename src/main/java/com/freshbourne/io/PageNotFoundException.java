@@ -8,9 +8,9 @@
 
 package com.freshbourne.io;
 
-import java.io.IOException;
+public class PageNotFoundException extends RuntimeException {
 
-public class PageNotFoundException extends IOException {
+	private static final long serialVersionUID = 1L;
 
 	public PageNotFoundException(ResourceManager rm, RawPage page){
 		this(rm, page.id());

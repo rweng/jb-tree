@@ -38,7 +38,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	 * @see com.freshbourne.io.PageManager#createPage()
 	 */
 	@Override
-	public LeafPage<K, V> createPage() throws IOException {
+	public LeafPage<K, V> createPage() {
 		RawPage p = bpm.createPage();
 		LeafPage<K, V> l = new LeafPage<K, V>(p, keyPageManager, valuePageManager, ppSerializer);
 		l.initialize();
@@ -49,7 +49,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	 * @see com.freshbourne.io.PageManager#getPage(int)
 	 */
 	@Override
-	public LeafPage<K, V> getPage(long id) throws IOException {
+	public LeafPage<K, V> getPage(long id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
