@@ -50,9 +50,9 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	
 	
 	private static final int NOT_FOUND = -1;
+	private static final Long NO_NEXT_LEAF = 0L;
 	
 	private final RawPage rawPage;
-	private Long nextLeafId;
 	
 	// counters
 	private int numberOfEntries = 0;
@@ -117,10 +117,11 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private int headerSize(){
-		return Integer.SIZE / 8;
+		// number of entries + next leaf id
+		return (Integer.SIZE + Long.SIZE) / 8;
 	}
 
-	private void writeHeader() {
+	private void writeNumberOfEntries() {
 		buffer().position(0);
 		buffer().putInt(numberOfEntries);
 	}
@@ -364,7 +365,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		}
 		
 		numberOfEntries = 0;
-		writeHeader();
+		writeNumberOfEntries();
 	}
 
 	/**
@@ -391,7 +392,8 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	@Override
 	public void initialize() {
 		numberOfEntries = 0;
-		writeHeader();
+		setNextLeafId(NO_NEXT_LEAF);
+		writeNumberOfEntries();
 		valid = true;
 	}
 
@@ -441,25 +443,22 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
         // serialize Pointers
 		addEntry(keyPointer, valuePointer);
 		
-		writeHeader();
+		writeNumberOfEntries();
 		return null;
 	}
 
 	
 	public Long getNextLeafId() {
-		return nextLeafId;
+		buffer().position(posOfNextLeafId());
+		return buffer().getLong();
+	}
+	
+	private int posOfNextLeafId(){
+		return Integer.SIZE / 8;
 	}
 
 	public void setNextLeafId(Long id) {
-		this.nextLeafId = id;
-	}
-
-	public void setLastKeyContinuesOnNextPage(boolean b) {
-		//TODO: implement
-		
-	}
-
-	public boolean isLastKeyContinuingOnNextPage() {
-		return false;
+		buffer().position(posOfNextLeafId());
+		buffer().putLong(id);
 	}
 }

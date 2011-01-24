@@ -32,7 +32,7 @@ public class DynamicDataPageSpec {
 	
 	@Before
 	public void setUp(){
-		page = new DynamicDataPage<String>(new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE)), new PagePointSerializer(), new StringSerializer());
+		page = new DynamicDataPage<String>(new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 1L), new PagePointSerializer(), new StringSerializer());
 	}
 	
 	@Test

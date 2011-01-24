@@ -41,7 +41,7 @@ public class FileResourceManagerSpec {
 		
 		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE);
 		rm.open();
-		page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE));
+		page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 1L);
 	}
 	
 	@After
@@ -70,15 +70,10 @@ public class FileResourceManagerSpec {
 		rm.close();
 		rm.addPage(page);
 	}
-
-    @Test(expected = WrongResourceManagerException.class)
-    public void shouldThrowExceptionOnWriteIfResourceManagerNotSet() throws IOException{
-        rm.writePage(page);
-    }
 	
 	@Test(expected= PageNotFoundException.class)
 	public void shouldThrowExceptionIfPageToWriteDoesNotExist() throws IOException{
-        page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), rm, 3423L);
+        page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 3423L);
         rm.writePage(page);
 	}
 	
@@ -103,7 +98,7 @@ public class FileResourceManagerSpec {
 	@Test
 	public void shouldBeAbleToReadPagesAfterReopen() throws IOException{
 		assertEquals(0 + 1, rm.numberOfPages());
-		RawPage newPage = rm.addPage(new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE)));
+		RawPage newPage = rm.addPage(new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 1L));
 		assertEquals(1 + 1, rm.numberOfPages());
 		RawPage newPage2 = rm.addPage(page);
 		assertEquals(2 + 1, rm.numberOfPages());
@@ -120,7 +115,7 @@ public class FileResourceManagerSpec {
 	
 	@Test(expected= WrongPageSizeException.class)
 	public void shouldThrowExceptionIfWrongPageSize() throws IOException{
-		page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE + 1), null, null);
+		page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE + 1), 1L);
         rm.addPage(page);
 	}
 	

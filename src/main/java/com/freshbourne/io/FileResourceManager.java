@@ -24,10 +24,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.UUID;
 
 
 /**
@@ -67,12 +63,12 @@ public class FileResourceManager implements ResourceManager {
 		
 		// if new file, initialize by writing header
 		if(handle.length() == 0){
-			header = new ResourceHeaderPage(new RawPage(ByteBuffer.allocate(pageSize), this, FIRST_PAGE_ID));
+			header = new ResourceHeaderPage(new RawPage(ByteBuffer.allocate(pageSize), FIRST_PAGE_ID));
 			header.initialize();
 		} else { // if the file already existed
 			ByteBuffer buf = ByteBuffer.allocate(pageSize);
 			ioChannel.read(buf);
-			header = new ResourceHeaderPage(new RawPage(buf, this, FIRST_PAGE_ID));
+			header = new ResourceHeaderPage(new RawPage(buf, FIRST_PAGE_ID));
 			header.load();
 			//int numOfPages = handle.readInt();
 			//handle.readLong()
@@ -81,9 +77,6 @@ public class FileResourceManager implements ResourceManager {
 	
 	@Override
 	public void writePage(RawPage page) {
-
-        if(page.resourceManager() != this)
-            throw new WrongResourceManagerException(this, page);
 
         ensureOpen();
         ensurePageExists(page.id());
@@ -117,7 +110,7 @@ public class FileResourceManager implements ResourceManager {
 			System.exit(1);
 		}
 		
-		return new RawPage(buf, this, pageId);
+		return new RawPage(buf, pageId);
 	}
 
 	/**
@@ -135,7 +128,7 @@ public class FileResourceManager implements ResourceManager {
 	@Override
 	public void close() {
 		if(header != null){
-			header.writeToResource();
+			this.writePage(header.rawPage());
 			header = null;
 		}
 		
@@ -228,7 +221,7 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 		ensureCorrectPageSize(page);
 		
-		RawPage result = new RawPage(page.buffer(), this, generateId());
+		RawPage result = new RawPage(page.buffer(), RawPage.generateId());
 		page.buffer().position(0);
 		
 		try {
@@ -254,15 +247,6 @@ public class FileResourceManager implements ResourceManager {
 			throw new WrongPageSizeException(page, pageSize);
 	}
 
-	private long generateId(){
-		long result;
-		do{
-			result = (new Random()).nextLong();
-		} while (header.contains(result) || result == 0L);
-		return result;
-		
-	}
-	
 	private void ensureOpen() {
 		if(!isOpen())
 			throw new ResourceNotOpenException(this);
@@ -284,7 +268,7 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 		
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
-		RawPage result = new RawPage(buf, this, generateId());
+		RawPage result = new RawPage(buf, RawPage.generateId());
 		try {
 			header.add(result.id());
 		} catch (DuplicatePageIdException e) {

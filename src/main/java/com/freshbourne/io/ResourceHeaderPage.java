@@ -93,10 +93,6 @@ public class ResourceHeaderPage implements ComplexPage {
 		return dictionary.size();
 	}
 
-	public void writeToResource() {
-		rawPage.writeToResource();
-	}
-
 	/**
 	 * sets the location of the virtual id to be pos, meaning that the offset in the File where the page is stored is pageSize * pos
 	 * 

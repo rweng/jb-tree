@@ -53,13 +53,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	}
 
 	
-	private RawPage newPage() {
-		RawPage p = new RawPage(ByteBuffer.allocate(rm.pageSize()), rm, null);
-		return p;
-	}
-
-	
-	@Override
+		@Override
 	public RawPage getPage(long pageId) {
 		if(cache.get(pageId) != null)
 			return cache.get(pageId);
@@ -82,8 +76,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 
 	@Override
 	public RawPage createPage() {
-		RawPage p = newPage();
-		p = rm.addPage(p);
+		RawPage p = rm.createPage();
 		return addToCache(p);
 	}
 
