@@ -91,7 +91,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public boolean add(K key, V value) {
-		throw new UnsupportedOperationException("in leafs and innerNodes, add is replaced by insert() to have more specific return values");
+		return insert(key, value) == null;
 	}
 	
 	private void ensureValid() {
