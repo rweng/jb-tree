@@ -36,7 +36,7 @@ import java.util.List;
  */
 public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	
-	private FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
+	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	
 	private DataPageManager<K> keyPageManager;
 	private DataPageManager<V> valuePageManager;
@@ -148,6 +148,13 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		return getKeyOfPos(pos);
 	}
 	
+	public PagePointer getLastKeyPointer(){
+		buffer().position(posOfKey(-1));
+		byte[] buf = new byte[serializedPointerSize];
+		buffer().get(buf);
+		return pointerSerializer.deserialize(buf);
+	}
+	
 	public K getKeyOfPos(int pos){
 		buffer().position(pos);
 		byte[] buf = new byte[serializedPointerSize];
@@ -206,7 +213,10 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private int posOfKey(int i){
-		return headerSize() + i * serializedPointerSize * 2;
+		if(!((i >= 0 && i < getNumberOfEntries()) || (i < 0 && i >= -1 * getNumberOfEntries())))
+			throw new IllegalArgumentException("i must be between -numberOfEntries and +(numberOfEntries - 1)");
+		
+		return ( i >= 0 ) ? headerSize() + i * serializedPointerSize * 2 : posOfKey(getNumberOfEntries() + i);
 	}
 	
 	private int posOfValue(int i){
@@ -493,7 +503,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.btree.Node#insert(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public AdjustmentAction insert(K key, V value) {
+	public AdjustmentAction<K, V> insert(K key, V value) {
 		ensureValid();
 		if(isFull())
 			throw new IllegalStateException("node full");
@@ -509,11 +519,15 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		writeNumberOfEntries();
 		return null;
 	}
-
 	
+	
+	/**
+	 * @return id of the next leaf or null
+	 */
 	public Long getNextLeafId() {
 		buffer().position(posOfNextLeafId());
-		return buffer().getLong();
+		Long result = buffer().getLong();
+		return result == NO_NEXT_LEAF ? null : result;
 	}
 	
 	private int posOfNextLeafId(){
@@ -523,5 +537,18 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	public void setNextLeafId(Long id) {
 		buffer().position(posOfNextLeafId());
 		buffer().putLong(id);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#getKeyPointer(int)
+	 */
+	@Override
+	public PagePointer getKeyPointer(int pos) {
+		
+		if(pos >= 0){
+			posOfKey(pos);
+		}
+		
+		return null;
 	}
 }

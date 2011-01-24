@@ -15,6 +15,7 @@
  */
 package com.freshbourne.multimap.btree;
 
+import com.freshbourne.io.PagePointer;
 import com.freshbourne.multimap.MultiMap;
 
 /**
@@ -31,5 +32,12 @@ public interface Node<K, V> extends MultiMap<K, V> {
 	 * @param value
 	 * @return
 	 */
-	public AdjustmentAction insert(K key, V value);
+	public AdjustmentAction<K, V> insert(K key, V value);
+	
+	
+	/**
+	 * @param pos of the key, can also be e.g. -1, which returns the last key
+	 * @return
+	 */
+	public PagePointer getKeyPointer(int pos);
 }

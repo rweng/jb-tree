@@ -7,17 +7,19 @@
  */
 package com.freshbourne.multimap.btree;
 
+import com.freshbourne.io.PagePointer;
+
 public class AdjustmentAction<K,V> {
 	public enum ACTION {INSERT_NEW_NODE, UPDATE_KEY}
 	
 	private ACTION action;
-	private K key;
-	private Long node;
+	private PagePointer keyPointer;
+	private Long pageId;
 	
-	protected AdjustmentAction(ACTION action, K key, Long pageId){
+	protected AdjustmentAction(ACTION action, PagePointer keyPointer, Long pageId){
 		this.setAction(action);
-		this.setKey(key);
-		this.setNode(node);
+		this.setKey(keyPointer);
+		this.setPageId(pageId);
 	}
 
 	/**
@@ -37,29 +39,29 @@ public class AdjustmentAction<K,V> {
 	/**
 	 * @param key the key to set
 	 */
-	public void setKey(K key) {
-		this.key = key;
+	public void setKey(PagePointer key) {
+		this.keyPointer = key;
 	}
 
 	/**
 	 * @return the key
 	 */
-	public K getKey() {
-		return key;
+	public PagePointer getKeyPointer() {
+		return keyPointer;
 	}
 
 	/**
-	 * @param node the node to set
+	 * @param pageId the node to set
 	 */
-	public void setNode(Long node) {
-		this.node = node;
+	public void setPageId(Long pageId) {
+		this.pageId = pageId;
 	}
 
 	/**
-	 * @return the node
+	 * @return the pageId
 	 */
-	public Long getNode() {
-		return node;
+	public Long getPageId() {
+		return pageId;
 	}
 
 }

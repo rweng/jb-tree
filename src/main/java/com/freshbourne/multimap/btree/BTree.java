@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
+
 public class BTree<K, V> implements MultiMap<K, V> {
 
 	private final LeafPageManager<K,V> leafPageManager;
@@ -78,7 +79,7 @@ public class BTree<K, V> implements MultiMap<K, V> {
 			// new root
 			InnerNode<K, V> newRoot = innerNodeManager.createPage();
 			
-			newRoot.initRootState(result.getKey(), root.rawPage().id(), result.getNode());
+			newRoot.initRootState(result.getKeyPointer(), root.rawPage().id(), result.getPageId());
 			
 			
 		}
@@ -88,7 +89,8 @@ public class BTree<K, V> implements MultiMap<K, V> {
 	
 	private AdjustmentAction<K, V> recursivelyInsert(K key, V value){
 		if (root instanceof LeafPage) {
-			if (root.add(key, value)) {
+			if (!root.isFull()) {
+				root.add(key, value);
 				return null;
 			} else if (root instanceof LeafPage && root.getNextLeafId() != null) {
 				throw new UnsupportedOperationException(
@@ -111,7 +113,7 @@ public class BTree<K, V> implements MultiMap<K, V> {
 					root.insert(key, value);
 				}
 				
-				return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, root.getLastKey(), newLeaf.rawPage().id());
+				return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, root.getLastKeyPointer(), newLeaf.rawPage().id());
 			}
 		} else {
 			throw new UnsupportedOperationException(

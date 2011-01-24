@@ -32,7 +32,7 @@ public class BTreeSpec {
 	
 	static {
 		injector = Guice.createInjector(
-				new IOModule("/tmp/test"),
+				new IOModule("/tmp/btreetest"),
 				new BTreeModule());
 	}
 	
@@ -121,9 +121,10 @@ public class BTreeSpec {
 	}
 	
 	@Test public void shouldWorkWithANumberOfValues(){
-		for(int i = 0; i < 1000; i++)
+		for(int i = 0; i < 1000; i++){
+			System.out.println(i);
 			tree.add(i, s);
-		
+		}
 		assertEquals(1000, tree.getNumberOfEntries());
 	}
 	

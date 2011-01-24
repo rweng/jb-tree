@@ -8,17 +8,45 @@
 package com.freshbourne.multimap.btree;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Comparator;
 import java.util.List;
 
 import com.freshbourne.io.ComplexPage;
+import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.RawPage;
+import com.freshbourne.serializer.FixLengthSerializer;
 
 public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 
-	public void initRootState(K key, Long pageId1, Long pageId2){
-		
+	
+	private final RawPage rawPage;
+	private final Comparator<K> comperator;
+	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
+	
+	private int numberOfKeys = 0;
+	
+	InnerNode(RawPage rawPage, FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
+			Comparator<K> comparator){
+		this.rawPage = rawPage;
+		this.comperator = comparator;
+		this.pointerSerializer = pointerSerializer;
 	}
 	
+	public void initRootState(PagePointer keyPointer, Long pageId1, Long pageId2){
+		buffer().position(headerSize());
+		buffer().putLong(pageId1);
+		buffer().put(pointerSerializer.serialize(keyPointer));
+		buffer().putLong(pageId2);
+		
+		numberOfKeys = 1;
+		writeNumberOfKeys();
+	}
+	
+	private static int headerSize() {
+		return Integer.SIZE / 8;
+	}
+
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#getNumberOfEntries()
 	 */
@@ -87,8 +115,17 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
-		
+		numberOfKeys = 0;
+		writeNumberOfKeys();
+	}
+	
+	private void writeNumberOfKeys(){
+		buffer().position(0);
+		buffer().putInt(numberOfKeys);
+	}
+	
+	private ByteBuffer buffer(){
+		return rawPage.buffer();
 	}
 
 	/* (non-Javadoc)
@@ -123,6 +160,15 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public AdjustmentAction insert(K key, V value) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#getKeyPointer(int)
+	 */
+	@Override
+	public PagePointer getKeyPointer(int pos) {
 		// TODO Auto-generated method stub
 		return null;
 	}
