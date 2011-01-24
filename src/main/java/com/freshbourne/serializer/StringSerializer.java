@@ -7,8 +7,9 @@
  */
 package com.freshbourne.serializer;
 
-public class StringSerializer implements Serializer<String, byte[]> {
-
+public enum StringSerializer implements Serializer<String, byte[]> {
+	INSTANCE;
+	
 	/* (non-Javadoc)
 	 * @see com.freshbourne.serializer.Serializer#serialize(java.lang.Object)
 	 */

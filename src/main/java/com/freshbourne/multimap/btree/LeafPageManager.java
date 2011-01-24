@@ -8,18 +8,16 @@
 
 package com.freshbourne.multimap.btree;
 
-import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.*;
-import com.freshbourne.serializer.PagePointSerializer;
+import com.freshbourne.serializer.FixLengthSerializer;
 import com.google.inject.Inject;
 
-import java.io.IOException;
 import java.util.Comparator;
 
 public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 
 	private final BufferPoolManager bpm;
-	private final PagePointSerializer ppSerializer;
+	private final FixLengthSerializer<PagePointer, byte[]> ppSerializer;
 	
 	private final DataPageManager<K> keyPageManager;
 	private final DataPageManager<V> valuePageManager;
@@ -31,7 +29,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 			BufferPoolManager bpm, 
 			DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
-			PagePointSerializer ppSerializer,
+			FixLengthSerializer<PagePointer, byte[]> ppSerializer,
 			Comparator<K> comparator) {
 		this.bpm = bpm;
 		this.ppSerializer = ppSerializer;

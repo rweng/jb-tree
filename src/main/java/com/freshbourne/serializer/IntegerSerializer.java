@@ -11,8 +11,9 @@ import com.freshbourne.serializer.Serializer;
 
 import java.nio.ByteBuffer;
 
-public class IntegerSerializer implements Serializer<Integer, byte[]> {
-
+public enum IntegerSerializer implements Serializer<Integer, byte[]> {
+	INSTANCE;
+	
 	/* (non-Javadoc)
 	 * @see com.freshbourne.serializer.Serializer#serialize(java.lang.Object)
 	 */

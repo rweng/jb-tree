@@ -19,7 +19,7 @@ public class PagePointerSerializerTest extends TestCase {
 	public void setUp(){
 		p1 = new PagePointer(5, 10);
 		p2 = new PagePointer(50, 100);
-		serializer = new PagePointSerializer();
+		serializer = PagePointSerializer.INSTANCE;
 	}
 	
 	public void testSerializer(){

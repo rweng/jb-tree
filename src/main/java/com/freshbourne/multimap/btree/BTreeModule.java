@@ -9,7 +9,9 @@ package com.freshbourne.multimap.btree;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Comparator;
 
+import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.DynamicDataPage;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
@@ -28,13 +30,16 @@ public class BTreeModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		bind(new TypeLiteral<FixLengthSerializer<PagePointer, byte[]>>(){}).
-			to(PagePointSerializer.class);
-		bind(new TypeLiteral<Serializer<Integer, byte[]>>(){}).to(
-				IntegerSerializer.class);
-		bind(new TypeLiteral<Serializer<String, byte[]>>(){}).to(
-				StringSerializer.class);
+			toInstance(PagePointSerializer.INSTANCE);
+		
+		bind(new TypeLiteral<Serializer<Integer, byte[]>>(){}).
+			toInstance(IntegerSerializer.INSTANCE);
+		
+		bind(new TypeLiteral<Serializer<String, byte[]>>(){}).toInstance(StringSerializer.INSTANCE);
 		
 		bind(new TypeLiteral<BTree<Integer,String>>(){});
+		
+		bind(new TypeLiteral<Comparator<Integer>>(){}).toInstance(IntegerComparator.INSTANCE);
 		
 	}
 	

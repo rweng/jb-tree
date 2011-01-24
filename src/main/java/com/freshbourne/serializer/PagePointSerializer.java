@@ -17,8 +17,9 @@ import java.nio.ByteBuffer;
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  */
-public class PagePointSerializer implements FixLengthSerializer<PagePointer, byte[]> {
-
+public enum PagePointSerializer implements FixLengthSerializer<PagePointer, byte[]> {
+	INSTANCE;
+	
 	/* (non-Javadoc)
 	 * @see com.freshbourne.serializer.Serializer#serialize(java.lang.Object)
 	 */
