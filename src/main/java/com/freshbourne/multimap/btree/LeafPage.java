@@ -114,17 +114,32 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		if(num < 0)
 			throw new IllegalArgumentException("num must be > 0");
 		
-		if(num > source.size())
+		if(num > source.getNumberOfEntries())
 			throw new IllegalArgumentException("the source leaf has not enough entries");
 		
-		if(size() + num > maxEntries)
+		if(getNumberOfEntries() + num > maxEntries)
 			throw new IllegalArgumentException("not enough space in this leaf to prepend " + num + " entries from other leaf");
 		
-		if(size() > 0 && comperator.compare(source.getLastKey(), getFirstKey()) > 0)
+		if(getNumberOfEntries() > 0 && comperator.compare(source.getLastKey(), getFirstKey()) > 0)
 			throw new IllegalArgumentException("the last key of the provided source leaf is larger than this leafs first key");
 		
+		// make space in this leaf, move all elements to the right
+		int totalSize = num * (serializedPointerSize * 2);
+		System.arraycopy(buffer().array(), headerSize(), buffer().array(), headerSize() + totalSize, totalSize);
+		
+		// copy from other to us
+		System.arraycopy(source.rawPage().buffer().array(), source.posOfKey(source.getNumberOfEntries() - num), buffer().array(), headerSize(), totalSize);
+		
+		// update headers
+		source.setNumberOfEntries(source.getNumberOfEntries() - num);
+		setNumberOfEntries(getNumberOfEntries() + num);
 		
 		
+	}
+	
+	private void setNumberOfEntries(int num){
+		numberOfEntries = num;
+		writeNumberOfEntries();
 	}
 	
 	public K getLastKey(){
@@ -143,7 +158,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	}
 	
 	public K getFirstKey(){
-		if(size() == 0)
+		if(getNumberOfEntries() == 0)
 			return null;
 		
 		int pos = posOfKey(0);
@@ -174,10 +189,10 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.btree.Node#size()
+	 * @see com.freshbourne.multimap.btree.Node#getNumberOfEntries()
 	 */
 	@Override
-	public int size() {
+	public int getNumberOfEntries() {
 		return numberOfEntries;
 	}
 

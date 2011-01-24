@@ -38,8 +38,8 @@ public class BTree<K, V> implements MultiMap<K, V> {
 	 * @see com.freshbourne.multimap.MultiMap#size()
 	 */
 	@Override
-	public int size() {
-		return root.size();
+	public int getNumberOfEntries() {
+		return root.getNumberOfEntries();
 	}
 
 	/* (non-Javadoc)
@@ -78,7 +78,7 @@ public class BTree<K, V> implements MultiMap<K, V> {
 				// newLeaf.setLastKeyContinuesOnNextPage(root.isLastKeyContinuingOnNextPage());
 				
 				// move half of the keys to new page
-				newLeaf.prependEntriesFromOtherPage(root, root.size() >> 1);
+				newLeaf.prependEntriesFromOtherPage(root, root.getNumberOfEntries() >> 1);
 				// see on which page we will insert the value
 			}
 		} else {

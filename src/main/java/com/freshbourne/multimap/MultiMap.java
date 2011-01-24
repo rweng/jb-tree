@@ -41,7 +41,7 @@ public interface MultiMap<K, V> {
 	/**
 	 * @return number of values
 	 */
-	public int size();
+	public int getNumberOfEntries();
 	
 	/**
 	 * @return boolean if the key is contained in the map

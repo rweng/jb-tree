@@ -44,7 +44,7 @@ public class BTreeSpec {
 	
 	@Test
 	public void shouldBeEmptyAfterCreation(){
-		assertEquals(0, tree.size());
+		assertEquals(0, tree.getNumberOfEntries());
 	}
 	
 	@Test
@@ -53,14 +53,14 @@ public class BTreeSpec {
 		assertTrue(tree.containsKey(1));
 		assertEquals(1, tree.get(1).size());
 		assertEquals(s, tree.get(1).get(0));
-		assertEquals(1, tree.size());
+		assertEquals(1, tree.getNumberOfEntries());
 		
 		tree.add(1, s2);
 		assertTrue(tree.containsKey(1));
 		assertEquals(2, tree.get(1).size());
 		assertEquals(s, tree.get(1).get(0));
 		assertEquals(s2, tree.get(1).get(1));
-		assertEquals(2, tree.size());
+		assertEquals(2, tree.getNumberOfEntries());
 		
 		tree.add(2, s2);
 		assertTrue(tree.containsKey(2));
@@ -68,7 +68,7 @@ public class BTreeSpec {
 		assertTrue(tree.get(1).contains(s2));
 		assertTrue(tree.get(1).contains(s));
 		assertTrue(tree.get(1).size() == 2);
-		assertEquals(3, tree.size());
+		assertEquals(3, tree.getNumberOfEntries());
 	}
 	
 	@Test
@@ -82,16 +82,16 @@ public class BTreeSpec {
 		assertTrue(tree.containsKey(1));
 		tree.remove(1);
 		assertFalse(tree.containsKey(1));
-		assertEquals(0, tree.size());
+		assertEquals(0, tree.getNumberOfEntries());
 	}
 	
 	@Test
 	public void clearShouldRemoveAllElements() throws Exception{
 		tree.add(1, s);
 		tree.add(2, s2);
-		assertEquals(2, tree.size());
+		assertEquals(2, tree.getNumberOfEntries());
 		tree.clear();
-		assertEquals(0, tree.size());
+		assertEquals(0, tree.getNumberOfEntries());
 	}
 	
 	@Test
@@ -100,7 +100,7 @@ public class BTreeSpec {
 		tree.add(1, s2);
 		tree.add(2, s2);
 		
-		assertEquals(3, tree.size());
+		assertEquals(3, tree.getNumberOfEntries());
 		tree.remove(1, s2);
 		assertEquals(1, tree.get(1).size());
 		assertEquals(s, tree.get(1).get(0));
@@ -114,9 +114,9 @@ public class BTreeSpec {
 		tree.add(1, s2);
 		tree.add(2, s2);
 		
-		assertEquals(3, tree.size());
+		assertEquals(3, tree.getNumberOfEntries());
 		tree.remove(1);
-		assertEquals(1, tree.size());
+		assertEquals(1, tree.getNumberOfEntries());
 		assertEquals(0, tree.get(1).size());
 	}
 	
@@ -124,7 +124,7 @@ public class BTreeSpec {
 		for(int i = 0; i < 1000; i++)
 			tree.add(i, s);
 		
-		assertEquals(1000, tree.size());
+		assertEquals(1000, tree.getNumberOfEntries());
 	}
 	
 }
