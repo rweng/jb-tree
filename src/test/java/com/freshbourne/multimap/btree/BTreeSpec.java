@@ -6,13 +6,6 @@
  * For alternative conditions contact the author.
  */
 
-/**
- * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
- * http://creativecommons.org/licenses/by-nc/3.0/
- * For alternative conditions contact the author.
- * 
- * (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
- */
 package com.freshbourne.multimap.btree;
 
 import com.freshbourne.io.IOModule;
@@ -125,6 +118,13 @@ public class BTreeSpec {
 		tree.remove(1);
 		assertEquals(1, tree.size());
 		assertEquals(0, tree.get(1).size());
+	}
+	
+	@Test public void shouldWorkWithANumberOfValues(){
+		for(int i = 0; i < 1000; i++)
+			tree.add(i, s);
+		
+		assertEquals(1000, tree.size());
 	}
 	
 }
