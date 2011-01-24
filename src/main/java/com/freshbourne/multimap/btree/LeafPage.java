@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -39,6 +40,8 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	
 	private DataPageManager<K> keyPageManager;
 	private DataPageManager<V> valuePageManager;
+	
+	private final Comparator<K> comperator;
 	
 	private boolean valid = false;
 	
@@ -67,13 +70,15 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 			RawPage page,
             DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
-			FixLengthSerializer<PagePointer, byte[]> pointerSerializer
+			FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
+			Comparator<K> comparator
 			){
     	
     	this.rawPage = page;
 		this.keyPageManager = keyPageManager;
 		this.valuePageManager = valuePageManager;
 		this.pointerSerializer = pointerSerializer;
+		this.comperator = comparator;
 		
 		this.serializedPointerSize = pointerSerializer.serializedLength(PagePointer.class);
 		
@@ -101,6 +106,48 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		
 		System.err.println("The current LeafPage with the id " + rawPage.id() + " is not valid");
 		System.exit(1);
+	}
+	
+	public void prependEntriesFromOtherPage(LeafPage<K, V> source, int num){
+		
+		// checks
+		if(num < 0)
+			throw new IllegalArgumentException("num must be > 0");
+		
+		if(num > source.size())
+			throw new IllegalArgumentException("the source leaf has not enough entries");
+		
+		if(size() + num > maxEntries)
+			throw new IllegalArgumentException("not enough space in this leaf to prepend " + num + " entries from other leaf");
+		
+		if(size() > 0 && comperator.compare(source.getLastKey(), getFirstKey()) > 0)
+			throw new IllegalArgumentException("the last key of the provided source leaf is larger than this leafs first key");
+		
+		
+		
+	}
+	
+	public K getLastKey(){
+		int pos = posBehindLastEntry();
+		pos -= 2 * serializedPointerSize;
+		return getKeyOfPos(pos);
+	}
+	
+	public K getKeyOfPos(int pos){
+		buffer().position(pos);
+		byte[] buf = new byte[serializedPointerSize];
+		buffer().get(buf);
+		
+		PagePointer p = pointerSerializer.deserialize(buf);
+		return keyPageManager.getPage(p.getId()).get(p.getOffset());
+	}
+	
+	public K getFirstKey(){
+		if(size() == 0)
+			return null;
+		
+		int pos = posOfKey(0);
+		return getKeyOfPos(pos);
 	}
 
 	/**

@@ -8,11 +8,13 @@
 
 package com.freshbourne.multimap.btree;
 
+import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.*;
 import com.freshbourne.serializer.PagePointSerializer;
 import com.google.inject.Inject;
 
 import java.io.IOException;
+import java.util.Comparator;
 
 public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 
@@ -22,16 +24,20 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	private final DataPageManager<K> keyPageManager;
 	private final DataPageManager<V> valuePageManager;
 	
+	private final Comparator<K> comparator;
+	
 	@Inject
 	public LeafPageManager(
 			BufferPoolManager bpm, 
 			DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
-			PagePointSerializer ppSerializer) {
+			PagePointSerializer ppSerializer,
+			Comparator<K> comparator) {
 		this.bpm = bpm;
 		this.ppSerializer = ppSerializer;
         this.keyPageManager = keyPageManager;
         this.valuePageManager = valuePageManager;
+        this.comparator = comparator;
 	}
 	
 	/* (non-Javadoc)
@@ -40,7 +46,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	@Override
 	public LeafPage<K, V> createPage() {
 		RawPage p = bpm.createPage();
-		LeafPage<K, V> l = new LeafPage<K, V>(p, keyPageManager, valuePageManager, ppSerializer);
+		LeafPage<K, V> l = new LeafPage<K, V>(p, keyPageManager, valuePageManager, ppSerializer, comparator);
 		l.initialize();
 		return l;
 	}

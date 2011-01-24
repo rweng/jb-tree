@@ -78,7 +78,7 @@ public class BTree<K, V> implements MultiMap<K, V> {
 				// newLeaf.setLastKeyContinuesOnNextPage(root.isLastKeyContinuingOnNextPage());
 				
 				// move half of the keys to new page
-				
+				newLeaf.prependEntriesFromOtherPage(root, root.size() >> 1);
 				// see on which page we will insert the value
 			}
 		} else {
