@@ -60,10 +60,10 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	// counters
 	private int numberOfEntries = 0;
 	
-	private int lastKeyPageId = -1;
+	private Long lastKeyPageId = null;
 	private int lastKeyPageRemainingBytes = -1;
 	
-	private int lastValuePageId = -1;
+	private Long lastValuePageId = null;
 	private int lastValuePageRemainingBytes = -1;	
 
     LeafPage(
@@ -449,9 +449,25 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	}
 
 	private PagePointer storeKey(K key) {
-		DataPage<K> page = keyPageManager.createPage();
-		return new PagePointer(page.rawPage().id(),page.add(key));
+		DataPage<K> page = null;
+		Integer entryId = null;
+		
+		if(lastKeyPageId != null){
+			page = keyPageManager.getPage(lastKeyPageId);
+			entryId = page.add(key);
+		}
+		
+		if(entryId == null){
+			page = keyPageManager.createPage();
+			entryId = page.add(key);
+		}
+		
+		lastKeyPageId = page.rawPage().id();
+		lastKeyPageRemainingBytes = page.remaining();
+		
+		return new PagePointer(page.rawPage().id(), entryId);
 	}
+	
 	
 	private PagePointer storeValue(V value) {
         DataPage<V> page = valuePageManager.createPage();

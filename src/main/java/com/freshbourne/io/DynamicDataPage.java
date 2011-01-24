@@ -85,13 +85,13 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.DataPage#add(byte[])
 	 */
-	public int add(T entry) {
+	public Integer add(T entry) {
 		ensureValid();
 		
 		byte[] bytes = entrySerializer.serialize(entry);
 		
 		if(bytes.length > remaining())
-			throw new NoSpaceException();
+			return null;
 		
 		bodyOffset -= bytes.length;
 		rawPage.buffer().position(bodyOffset);

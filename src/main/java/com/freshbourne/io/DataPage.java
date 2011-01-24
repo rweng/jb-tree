@@ -30,9 +30,9 @@ public interface DataPage<T> extends ComplexPage {
 	 * also grows through this process.
 	 * 
 	 * @param value array to be written
-	 * @return id of the entry/byte[] within this page
+	 * @return id of the entry/byte[] within this page, or null if the page could not be added (e.g. page is full)
 	 */
-	public int add(T value);
+	public Integer add(T value);
 	
 	
 	/**
