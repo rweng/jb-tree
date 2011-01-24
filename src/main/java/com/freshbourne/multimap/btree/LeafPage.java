@@ -83,26 +83,15 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
     public boolean isFull(){
     	return numberOfEntries == maxEntries;
     }
+    
+    
 	
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#add(java.lang.Object, java.lang.Object)
 	 */
 	@Override
 	public boolean add(K key, V value) {
-		ensureValid();
-		if(isFull())
-			return false;
-		
-		// add to data_page
-		PagePointer keyPointer = storeKey(key);
-		PagePointer valuePointer = storeValue(value);
-		
-
-        // serialize Pointers
-		addEntry(keyPointer, valuePointer);
-		
-		writeHeader();
-		return true;
+		throw new UnsupportedOperationException("in leafs and innerNodes, add is replaced by insert() to have more specific return values");
 	}
 	
 	private void ensureValid() {
@@ -432,5 +421,26 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	@Override
 	public RawPage rawPage() {
 		return rawPage;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#insert(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public AdjustmentAction insert(K key, V value) {
+		ensureValid();
+		if(isFull())
+			throw new IllegalStateException("node full");
+		
+		// add to data_page
+		PagePointer keyPointer = storeKey(key);
+		PagePointer valuePointer = storeValue(value);
+		
+
+        // serialize Pointers
+		addEntry(keyPointer, valuePointer);
+		
+		writeHeader();
+		return null;
 	}
 }

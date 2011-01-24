@@ -15,12 +15,13 @@
  */
 package com.freshbourne.multimap.btree;
 
+import com.freshbourne.multimap.MultiMap;
 import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.util.List;
 
-public class BTree<K, V> implements Node<K,V> {
+public class BTree<K, V> implements MultiMap<K, V> {
 
 	private final LeafPageManager<K,V> leafPageManager;
 	
@@ -62,7 +63,13 @@ public class BTree<K, V> implements Node<K,V> {
 	 */
 	@Override
 	public boolean add(K key, V value) {
-		return root.add(key, value);
+		 if(root.add(key, value)){
+			 return true;
+		 } else {
+			 // no space in root
+		 }
+		 
+		 return false;
 	}
 
 	/* (non-Javadoc)

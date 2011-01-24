@@ -24,5 +24,12 @@ import com.freshbourne.multimap.MultiMap;
  *
  */
 public interface Node<K, V> extends MultiMap<K, V> {
-
+	/**
+	 * replaces the add method for Leafs and InnerNodes
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public AdjustmentAction insert(K key, V value);
 }
