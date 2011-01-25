@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * organizes the underlying byte[] like this:
  * 
- * (int) TOTAL_NUM_OF_PAGES_OVER_ALL_HEADER_PAGES (this only in first headerpage) | (Long) OFFSET_TO_NEXT_HEADER_PAGE (or -1) | virtual_page_id 1 | virtual_page_id 2 | ..
+ * (int) TOTAL_NUM_OF_PAGES_OVER_ALL_HEADER_PAGES (this only in first headerpage) | (int) NUMBER_OF_ADITIONAL_HEADER_PAGES | virtual_page_id 1 | virtual_page_id 2 | ..
  * 
  * The real offset is calculated. All pages are read into memory when the page is loaded.
  * 
@@ -27,15 +27,15 @@ import java.util.List;
  * header pages at the end of the index can be removed to continue appending real pages.
  * 
  */
-public class ResourceHeaderPage implements ComplexPage {
+public class ResourceHeader implements ComplexPage {
 	private final RawPage rawPage;
 	private final List<Long> dictionary = new ArrayList<Long>();
 	private boolean valid = false;
 	
 	private static final Long NO_NEXT_HEADER = -1L;
 	
-	ResourceHeaderPage(RawPage rawPage){
-		this.rawPage = rawPage;
+	ResourceHeader(RawPage rawpage){
+		this.rawPage = rawpage;
 	}
 
 	/* (non-Javadoc)
@@ -43,9 +43,7 @@ public class ResourceHeaderPage implements ComplexPage {
 	 */
 	@Override
 	public void initialize() {
-		ByteBuffer buf = rawPage.bufferAtZero();
-		buf.putInt(1); // 1 pages in this file, this page
-		buf.putLong(NO_NEXT_HEADER); // offset to next header page, 
+		dictionary.clear();
 		valid = true;
 	}
 

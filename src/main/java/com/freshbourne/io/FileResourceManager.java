@@ -16,6 +16,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -28,7 +30,9 @@ public class FileResourceManager implements ResourceManager {
 	private final int pageSize;
 	private FileLock fileLock;
 	private FileChannel ioChannel;
-	private ResourceHeaderPage header;
+	private ResourceHeader header;
+	private final List<Long> dictionary = new ArrayList<Long>();
+	
 	
     @Inject
 	FileResourceManager(@ResourceFile File f, @PageSize int pageSize){
@@ -56,13 +60,11 @@ public class FileResourceManager implements ResourceManager {
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 		
 		if(handle.length() == 0){
-			header = new ResourceHeaderPage(new RawPage(buf, null, this));
-			header.initialize();
-			ioChannel.write(header.rawPage().bufferAtZero());
+			// do nothing
+			
 		} else { // if the file already existed
 			ioChannel.read(buf);
-			header = new ResourceHeaderPage(new RawPage(buf, null, this));
-			header.load();
+			
 		}
 	}
 	
