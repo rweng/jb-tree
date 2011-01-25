@@ -5,14 +5,6 @@
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author.
  */
-
-/**
- * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
- * http://creativecommons.org/licenses/by-nc/3.0/
- * For alternative conditions contact the author.
- * 
- * (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
- */
 package com.freshbourne.io;
 
 import com.google.inject.Inject;
@@ -37,7 +29,6 @@ public class FileResourceManager implements ResourceManager {
 	private FileLock fileLock;
 	private FileChannel ioChannel;
 	private ResourceHeaderPage header;
-	private static final Long FIRST_PAGE_ID = 1L;
 	
     @Inject
 	FileResourceManager(@ResourceFile File f, @PageSize int pageSize){
@@ -58,20 +49,20 @@ public class FileResourceManager implements ResourceManager {
 			file.createNewFile();
 		}
 		
-		handle = new RandomAccessFile(file, "rw");
-		initIOChannel(handle);
+		initIOChannel(file);
+		
 		
 		// if new file, initialize by writing header
+		ByteBuffer buf = ByteBuffer.allocate(pageSize);
+		
 		if(handle.length() == 0){
-			header = new ResourceHeaderPage(new RawPage(ByteBuffer.allocate(pageSize), FIRST_PAGE_ID));
+			header = new ResourceHeaderPage(new RawPage(buf, null, this));
 			header.initialize();
+			ioChannel.write(header.rawPage().bufferAtZero());
 		} else { // if the file already existed
-			ByteBuffer buf = ByteBuffer.allocate(pageSize);
 			ioChannel.read(buf);
-			header = new ResourceHeaderPage(new RawPage(buf, FIRST_PAGE_ID));
+			header = new ResourceHeaderPage(new RawPage(buf, null, this));
 			header.load();
-			//int numOfPages = handle.readInt();
-			//handle.readLong()
 		}
 	}
 	
@@ -110,7 +101,7 @@ public class FileResourceManager implements ResourceManager {
 			System.exit(1);
 		}
 		
-		return new RawPage(buf, pageId);
+		return new RawPage(buf, pageId, this);
 	}
 
 	/**
@@ -170,12 +161,13 @@ public class FileResourceManager implements ResourceManager {
 	 * @param fileHandle The random access file representing the index.
 	 * @throws IOException Thrown, when the I/O channel could not be opened.
 	 */
-	private void initIOChannel(RandomAccessFile fileHandle)
-	throws IOException
-	{
+	private void initIOChannel(File file)
+	throws IOException {
+		handle = new RandomAccessFile(file, "rw");
+		
 		// Open the channel. If anything fails, make sure we close it again
 		try {
-			ioChannel = fileHandle.getChannel();
+			ioChannel = handle.getChannel();
 			try {
 				fileLock = ioChannel.tryLock();
 			}
@@ -221,7 +213,7 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 		ensureCorrectPageSize(page);
 		
-		RawPage result = new RawPage(page.buffer(), RawPage.generateId());
+		RawPage result = new RawPage(page.buffer(), RawPage.generateId(), this);
 		page.buffer().position(0);
 		
 		try {
@@ -268,7 +260,7 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 		
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
-		RawPage result = new RawPage(buf, RawPage.generateId());
+		RawPage result = new RawPage(buf, RawPage.generateId(), this);
 		try {
 			header.add(result.id());
 		} catch (DuplicatePageIdException e) {
@@ -296,6 +288,7 @@ public class FileResourceManager implements ResourceManager {
 			RawPage last = readPage(lastPageId);
 			header.remove(pageId);
 			writePage(last);
+			
 			
 			ioChannel.truncate(header.getNumberOfPages() * pageSize);
 		}

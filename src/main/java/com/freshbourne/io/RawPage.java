@@ -13,12 +13,17 @@ import java.util.Random;
 
 
 /**
- * This class is a byte array, eventually from a resource manager and always with an id != null and != 0L
+ * This class wraps a byte array and usually has an id and a source
+ * 
+ * Long is chosen as id, although in most scenarios Integer should be sufficient. However, Long can be used in more cases.
+ * Maybe this class gets refactored to enable also Integer ids.
+ * 
  */
 public class RawPage {
 
-    private final ByteBuffer buffer;
-    private final Long id;
+    private ByteBuffer buffer;
+    private Long id;
+    private ResourceManager resourceManager;
     
     /**
      * buffer has been modified since RawPage was created?
@@ -26,15 +31,17 @@ public class RawPage {
     private boolean modified = false;
 
 
-    public RawPage(ByteBuffer buffer, Long pageId){
-        if(pageId == null || pageId == 0L)
-        	throw new IllegalArgumentException("A RawPage id must not be null or 0L");
-    	
-    	this.buffer = buffer;
+    public RawPage(ByteBuffer buffer, Long pageId, ResourceManager rm){
+        this.buffer = buffer;
         this.id = pageId;
+        this.resourceManager = rm;
     }
 
+    /**
+     * @return ByteBuffer backing this RawPage
+     */
     public ByteBuffer buffer(){return buffer;}
+    public ByteBuffer bufferAtZero(){buffer.position(0); return buffer;}
     public Long id(){return id;}
     
     /**
@@ -60,6 +67,13 @@ public class RawPage {
 	 */
 	public boolean isModified() {
 		return modified;
+	}
+
+	/**
+	 * @return the resourceManager
+	 */
+	public ResourceManager getResourceManager() {
+		return resourceManager;
 	}
     
     
