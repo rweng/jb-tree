@@ -45,7 +45,7 @@ public abstract class ResourceManagerSpec {
 	
 	
 	
-	@Test(expected= ResourceNotOpenException.class)
+	@Test(expected= IllegalStateException.class)
 	public void shouldThrowExceptionIfResourceClosed() throws IOException{
 		rm.close();
 		rm.createPage();

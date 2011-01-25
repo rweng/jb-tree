@@ -249,7 +249,7 @@ public class FileResourceManager implements ResourceManager {
 
 	private void ensureOpen() {
 		if(!isOpen())
-			throw new ResourceNotOpenException(this);
+			throw new IllegalStateException("Resource is not open: " + toString());
 	}
 
 	/* (non-Javadoc)
