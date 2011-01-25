@@ -275,6 +275,7 @@ public class FileResourceManager implements ResourceManager {
 			e.printStackTrace();
 			System.exit(1);
 		}
+		
 		return result;
 	}
 
