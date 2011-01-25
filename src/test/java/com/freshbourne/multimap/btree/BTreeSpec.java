@@ -22,14 +22,17 @@ import com.google.inject.TypeLiteral;
 public class BTreeSpec extends MultiMapSpec<Integer, String> {
 
 	private final static Injector injector;
-	private final static Random rand;
-	private final static SecureRandom srand;
+	private static SecureRandom srand;
 	
 	static {
-		injector = Guice.createInjector(new BTreeModule("/tmp/btree_spec"));
+		injector = Guice.createInjector(new BTreeModule("/tmp/btree_spec")); 
+	}
+	
+	private static SecureRandom srand(){
+		if(srand == null)
+			srand = new SecureRandom(); 
 		
-		rand = new Random();
-		srand = new SecureRandom();
+		return srand;
 	}
 	
 	
@@ -46,7 +49,7 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	 */
 	@Override
 	protected Integer createRandomKey() {
-		return rand.nextInt();
+		return srand().nextInt();
 	}
 
 	/* (non-Javadoc)
@@ -54,7 +57,7 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	 */
 	@Override
 	protected String createRandomValue() {
-		return (new BigInteger(130, srand)).toString(32);
+		return (new BigInteger(130, srand())).toString(32);
 	}
 
 }
