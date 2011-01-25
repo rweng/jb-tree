@@ -27,6 +27,9 @@ import java.util.List;
 /**
  * An implementation of a Map that can hold more that one value for each key.
  * 
+ * This class does all the rotating and balancing of the BTree so that Leafs and InnerNodes are not polluted by having
+ * to create new nodes. This is done exclusively in this class.
+ * 
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
  * @param <K>
@@ -87,23 +90,22 @@ public class BTree<K, V> implements MultiMap<K, V> {
 	 * @see com.freshbourne.multimap.MultiMap#add(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public boolean add(K key, V value) {
+	public void add(K key, V value) {
 		AdjustmentAction<K, V> result = recursivelyInsert(root, key, value, 0);
 		
+		// insert was successful
 		if(result == null)
-			return true;
+			return;
 		
+		// a new root must be created
 		if(result.getAction() == ACTION.INSERT_NEW_NODE){
+			
 			// new root
 			InnerNode<K, V> newRoot = innerNodeManager.createPage();
-			
 			newRoot.initRootState(result.getKeyPointer(), root.getId(), result.getPageId());
-			
 			root = newRoot;
-			
 		}
 		
-		return false;
 	}
 	
 	private AdjustmentAction<K, V> recursivelyInsert(Node<K, V> node, K key, V value, int depth){

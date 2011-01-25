@@ -67,7 +67,7 @@ public interface MultiMap<K, V> {
      * @param value
      * 
      */
-    public boolean add(K key, V value);
+    public void add(K key, V value);
     
     /**
      * Removes the key with all its associated values from the map.

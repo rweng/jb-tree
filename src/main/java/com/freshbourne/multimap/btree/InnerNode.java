@@ -84,9 +84,9 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#add(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public boolean add(K key, V value) {
+	public void add(K key, V value) {
 		// TODO Auto-generated method stub
-		return false;
+		return;
 	}
 
 	/* (non-Javadoc)
