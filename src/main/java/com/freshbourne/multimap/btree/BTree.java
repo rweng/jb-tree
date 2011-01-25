@@ -15,13 +15,17 @@
  */
 package com.freshbourne.multimap.btree;
 
+import com.freshbourne.io.BufferPoolManager;
 import com.freshbourne.io.ComplexPage;
 import com.freshbourne.io.RawPage;
+import com.freshbourne.io.ResourceManager;
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.InnerNode.PagePointerAndKey;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
+import java.nio.ByteBuffer;
 import java.util.Comparator;
 import java.util.List;
 
@@ -42,7 +46,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	private final LeafPageManager<K,V> leafPageManager;
 	private final InnerNodeManager<K, V> innerNodeManager;
 	private final Comparator<K> comparator;
-	private final RawPage rawPage;
+	private final BufferPoolManager bpm;
+	private RawPage rawPage;
 	
 	private Node<K, V> root;
 	
@@ -53,6 +58,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	private int minFreeLeafEntriesToMove;
 	private boolean valid = false;
+	private int numberOfEntries = 0;
 	
 	
 	/**
@@ -62,14 +68,11 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @param comparator
 	 */
 	@Inject
-	BTree(LeafPageManager<K,V> leafPageManager, InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
+	BTree(BufferPoolManager bpm, LeafPageManager<K,V> leafPageManager, InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
 		this.leafPageManager = leafPageManager;
 		this.innerNodeManager = innerNodeManager;
 		this.comparator = comparator;
-		this.rawPage = null;
-		
-		initialize();
-		
+		this.bpm = bpm;
 	}
 	
 	/* (non-Javadoc)
@@ -77,7 +80,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public int getNumberOfEntries() {
-		return root.getNumberOfEntries();
+		return numberOfEntries;
 	}
 
 	/* (non-Javadoc)
@@ -235,18 +238,32 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public void initialize() {
-		root = leafPageManager.createPage();
+		numberOfEntries = 0;
+		valid = true;
 		
+		rawPage = bpm.createPage();
+		root = leafPageManager.createPage();
 		this.minFreeLeafEntriesToMove = (int) (((LeafPage<K, V>)root).getMaximalNumberOfEntries() *
                 (1 - MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE)) + 2;
+		
+		writeHeader();
 	}
+	
+	private void writeHeader(){
+		buffer().position(0);
+		buffer().putInt(numberOfEntries);
+		buffer().putLong(root.getId());
+	}
+	
+	private ByteBuffer buffer(){return rawPage.buffer();}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ComplexPage#load()
 	 */
 	@Override
 	public void load() {
-		// TODO Auto-generated method stub
+		buffer().position(0);
+		numberOfEntries = buffer().getInt();
 		
 	}
 
