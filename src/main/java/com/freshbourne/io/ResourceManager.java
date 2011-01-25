@@ -77,6 +77,10 @@ public interface ResourceManager {
 	public void open() throws IOException;
 	public boolean isOpen();
 	public void close();
+	
+	/**
+	 * @return the number of real pages, not header pages
+	 */
 	public int numberOfPages();
 	
 }

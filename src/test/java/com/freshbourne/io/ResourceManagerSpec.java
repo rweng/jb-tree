@@ -81,12 +81,11 @@ public abstract class ResourceManagerSpec {
 	
 	@Test
 	public void shouldBeAbleToReadPagesAfterReopen() throws IOException{
+		assertEquals(0, rm.numberOfPages());
 		page = rm.createPage();
-		assertEquals(0 + 1, rm.numberOfPages());
-		page = rm.createPage();
-		assertEquals(1 + 1, rm.numberOfPages());
+		assertEquals(1, rm.numberOfPages());
 		RawPage newPage2 = rm.createPage();
-		assertEquals(2 + 1, rm.numberOfPages());
+		assertEquals(2, rm.numberOfPages());
 		assertEquals(rm.readPage(newPage2.id()).buffer(), page.buffer());
 		
 		rm.close();
@@ -94,7 +93,7 @@ public abstract class ResourceManagerSpec {
 		// throw away all local variables
 		rm = createOpenResourceManager();
 		
-		assertEquals(2 + 1, rm.numberOfPages());
+		assertEquals(2, rm.numberOfPages());
 		assertEquals(rm.readPage(newPage2.id()).buffer(), page.buffer());
 	}
 	
