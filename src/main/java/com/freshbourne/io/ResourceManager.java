@@ -37,7 +37,8 @@ public interface ResourceManager {
 	
 	/**
 	 * create a new Page in the Resource. The method returns
-	 * a new HashPage with the same backing buffer, but with id set.
+	 * a new RawPage with the same backing buffer, but eventually with a different id.
+	 * 
 	 * A new Page must be created since the id is immutable.
 	 * 
 	 * @param page page to add
