@@ -95,10 +95,49 @@ public class ResourceHeader {
 	}
 
 	/**
-	 * 
+	 * @throws IOException 
 	 */
-	public void writeToFile() {
-		// TODO Auto-generated method stub
+	public void writeToFile() throws IOException {
 		
+		
+		ByteBuffer firstPageBuf = ByteBuffer.allocate(pageSize);
+		firstPageBuf.putInt(0); // number of pages, we fill this value later
+		firstPageBuf.putInt(0); // number of additional header pages, we fill this value later
+		
+		
+		
+		int longSize = Long.SIZE / 8;
+		int additionalHeaderPages = 0;
+		
+		ByteBuffer nextPage = ByteBuffer.allocate(pageSize);
+		ioChannel.position(ioChannel.size());
+		for(Long id : dictionary){
+			if(firstPageBuf.remaining() >= longSize){
+				firstPageBuf.putLong(id);
+			} else {
+				if(nextPage.remaining() >= longSize){
+					nextPage.putLong(id);
+				} else {
+					nextPage.position(0);
+					ioChannel.write(nextPage);
+					additionalHeaderPages++;
+					nextPage.position(0);
+					nextPage.putLong(id);
+				}
+			}
+		}
+		
+		if(nextPage.position() > 0){
+			nextPage.position(0);
+			ioChannel.write(nextPage);
+			additionalHeaderPages++;
+		}
+		
+		firstPageBuf.position(0);
+		firstPageBuf.putInt(dictionary.size());
+		firstPageBuf.putInt(additionalHeaderPages);
+		
+		ioChannel.position(0);
+		ioChannel.write(firstPageBuf);		
 	}
 }

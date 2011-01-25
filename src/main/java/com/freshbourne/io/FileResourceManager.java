@@ -113,7 +113,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#close()
 	 */
 	@Override
-	public void close() {
+	public void close() throws IOException {
 		if(header != null){
 			header.writeToFile();
 			header = null;

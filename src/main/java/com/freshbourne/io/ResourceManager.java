@@ -76,7 +76,7 @@ public interface ResourceManager {
 	
 	public void open() throws IOException;
 	public boolean isOpen();
-	public void close();
+	public void close() throws IOException;
 	
 	/**
 	 * @return the number of real pages, not header pages
