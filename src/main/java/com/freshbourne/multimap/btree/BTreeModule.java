@@ -21,14 +21,21 @@ import com.freshbourne.io.PagePointer;
 import com.freshbourne.serializer.Serializer;
 import com.freshbourne.serializer.StringSerializer;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 
 public class BTreeModule extends AbstractModule {
 	
 	private final String indexFile;
+	private Long bTreePageId;
 	
 	public BTreeModule(String indexFile){
+		this(indexFile, null);
+	}
+	
+	public BTreeModule(String indexFile, Long bTreePageId){
 		this.indexFile = indexFile;
+		this.bTreePageId = bTreePageId;
 	}
 
 	/* (non-Javadoc)
@@ -51,6 +58,7 @@ public class BTreeModule extends AbstractModule {
 		binder().install(new IOModule(indexFile));
 		
 	}
+	
 	
 	@SuppressWarnings("unchecked")
 	static <T> TypeLiteral<DynamicDataPage<T>> pageOf(final Class<T> parameterType){

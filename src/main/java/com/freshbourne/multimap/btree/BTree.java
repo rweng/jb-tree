@@ -62,7 +62,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	
 	
 	/**
-	 * @param rawPage for storing meta-information like size and depth of the tree and root page
+	 * @param bpm for getting a rawPage for storing meta-information like size and depth of the tree and root page
 	 * @param leafPageManager
 	 * @param innerNodeManager
 	 * @param comparator
