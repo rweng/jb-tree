@@ -37,6 +37,9 @@ public class RawPage {
     public ByteBuffer buffer(){return buffer;}
     public Long id(){return id;}
     
+    /**
+     * @return a random Long but 0L
+     */
     public static Long generateId(){
 		long result;
 		do{
