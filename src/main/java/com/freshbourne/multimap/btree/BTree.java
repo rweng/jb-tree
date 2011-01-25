@@ -17,13 +17,21 @@ package com.freshbourne.multimap.btree;
 
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
+import com.freshbourne.multimap.btree.InnerNode.PagePointerAndKey;
 import com.google.inject.Inject;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
 
+/**
+ * An implementation of a Map that can hold more that one value for each key.
+ * 
+ * @author Robin Wenglewski <robin@wenglewski.de>
+ *
+ * @param <K>
+ * @param <V>
+ */
 public class BTree<K, V> implements MultiMap<K, V> {
 
 	private final LeafPageManager<K,V> leafPageManager;
@@ -102,16 +110,24 @@ public class BTree<K, V> implements MultiMap<K, V> {
 		if(depth > MAX_BTREE_DEPTH)
 			throw new RuntimeException("The depth of the B-Tree should not be greater then MAX_BTREE_DEPTH (" + MAX_BTREE_DEPTH + ")");
 		
+		// handle final case
 		if (node instanceof LeafPage) {
 			return insertInLeaf((LeafPage<K, V>) node, key, value);
 		}
 		
-		if( node instanceof InnerNode){
-			throw new UnsupportedOperationException("innernodes not yet supported");
+		// make sure node is right type
+		if (!(node instanceof InnerNode)){
+			throw new IllegalArgumentException("node must be of type Leaf or InnerNode!");
 		}
 		
+		// handle normal InnerNodes
+		InnerNode<K, V> thisInnerNode = (InnerNode<K, V>) node;
 		
-		throw new IllegalArgumentException("node must be of type Leaf or InnerNode!");
+		// get a marker for the point where we descended
+		PagePointerAndKey pos = thisInnerNode.getChildWithKeyAndPosition(key);
+		
+		
+		return null;
 	}
 
 	private AdjustmentAction<K, V> insertInLeaf(LeafPage<K, V> thisLeaf, K key, V value) {

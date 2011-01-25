@@ -43,6 +43,12 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		writeNumberOfKeys();
 	}
 	
+	public PagePointerAndKey getChildWithKeyAndPosition(K key){
+		// int pos = getPointerPositionForKey(key);
+		
+		return null;
+	}
+	
 	private static int headerSize() {
 		return Integer.SIZE / 8;
 	}
@@ -179,6 +185,34 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public Long getId() {
 		return rawPage.id();
+	}
+	
+	class PagePointerAndKey {
+		
+		private final PagePointer pagePointer;
+		private final K key;
+		/**
+		 * @param pagePointer
+		 * @param key
+		 */
+		public PagePointerAndKey(PagePointer pagePointer, K key) {
+			super();
+			this.pagePointer = pagePointer;
+			this.key = key;
+		}
+		
+		/**
+		 * @return the pagePointer
+		 */
+		public PagePointer getPagePointer() {
+			return pagePointer;
+		}
+		/**
+		 * @return the key
+		 */
+		public K getKey() {
+			return key;
+		}
 	}
 
 }
