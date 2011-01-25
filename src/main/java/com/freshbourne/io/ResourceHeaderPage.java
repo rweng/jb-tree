@@ -15,20 +15,24 @@ import java.util.List;
 /**
  * organizes the underlying byte[] like this:
  * 
- * TOTAL_NUM_OF_PAGES | virtual_page_id 1 | real_offset 1 | virtual_page_id 2 | real_offset 2 | ..
+ * (int) TOTAL_NUM_OF_PAGES_OVER_ALL_HEADER_PAGES (this only in first headerpage) | (Long) OFFSET_TO_NEXT_HEADER_PAGE (or -1) | virtual_page_id 1 | virtual_page_id 2 | ..
  * 
- * The virtual page ids are kept in order.
+ * The real offset is calculated. All pages are read into memory when the page is loaded.
  * 
- * An alternative to this design would be to only store the virtual page_id and the real_offset is calculated though the pos * page_size.
- * However, this would force a decision when deleting pages, either to destroy the order by copying the last virtual id and its byte[] in the spot of the deleted page,
- * or to preserve the order on high costs by moving all pages behind the deleted page one page backwards (which essentially means, rewriting everything behind the
- * deleted page since deleting in the middle of a file is not supported in most FS).
+ * This way seems superior compared to keeping only the first page in memory and reading the others over and over again, 
+ * and compared to keeping a sort order either in an environment where we also
+ * store the realoffset in the header (| virtual_page_id 1 | real_offset 1 | ...) or by rewriting the end of the file on deletes.
+ * 
+ * The header is completely rewritten when the Resource is closed. This is done at the end of the file (except the first page). Thus, when loading the header, the 
+ * header pages at the end of the index can be removed to continue appending real pages.
  * 
  */
 public class ResourceHeaderPage implements ComplexPage {
 	private final RawPage rawPage;
 	private final List<Long> dictionary = new ArrayList<Long>();
 	private boolean valid = false;
+	
+	private static final Long NO_NEXT_HEADER = -1L;
 	
 	ResourceHeaderPage(RawPage rawPage){
 		this.rawPage = rawPage;
@@ -41,6 +45,7 @@ public class ResourceHeaderPage implements ComplexPage {
 	public void initialize() {
 		ByteBuffer buf = rawPage.bufferAtZero();
 		buf.putInt(1); // 1 pages in this file, this page
+		buf.putLong(NO_NEXT_HEADER); // offset to next header page, 
 		valid = true;
 	}
 
