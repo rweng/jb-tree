@@ -7,23 +7,7 @@
  */
 package com.freshbourne.io;
 
-public interface ComplexPage {
-	
-	/**
-	 * uses the underlying byte array to create a fresh valid ComplexPage
-	 */
-	public void initialize();
-	
-	/**
-	 * tries to load an old ComplexPage from the underlying byte array
-	 */
-	public void load();
-	
-	/**
-	 * @return if the page has been initialized or loaded
-	 */
-	public boolean isValid();
-	
+public interface ComplexPage extends MustInitializeOrLoad {
 	
 	/**
 	 * @return the underlying RawPage
