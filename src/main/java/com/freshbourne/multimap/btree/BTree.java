@@ -15,6 +15,8 @@
  */
 package com.freshbourne.multimap.btree;
 
+import com.freshbourne.io.ComplexPage;
+import com.freshbourne.io.RawPage;
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.InnerNode.PagePointerAndKey;
@@ -35,11 +37,12 @@ import java.util.List;
  * @param <K>
  * @param <V>
  */
-public class BTree<K, V> implements MultiMap<K, V> {
+public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 	private final LeafPageManager<K,V> leafPageManager;
 	private final InnerNodeManager<K, V> innerNodeManager;
 	private final Comparator<K> comparator;
+	private final RawPage rawPage;
 	
 	private Node<K, V> root;
 	
@@ -48,18 +51,23 @@ public class BTree<K, V> implements MultiMap<K, V> {
 	 * from another node. This number is computed from the
 	 * <tt>MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE</tt> constant.
 	 */
-	private final int minFreeLeafEntriesToMove;
+	private int minFreeLeafEntriesToMove;
+	private boolean valid = false;
 	
 	
+	/**
+	 * @param rawPage for storing meta-information like size and depth of the tree and root page
+	 * @param leafPageManager
+	 * @param innerNodeManager
+	 * @param comparator
+	 */
 	@Inject
-	BTree(LeafPageManager<K,V> leafPageManager, InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
+	BTree(RawPage rawPage, LeafPageManager<K,V> leafPageManager, InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
 		this.leafPageManager = leafPageManager;
 		this.innerNodeManager = innerNodeManager;
 		this.comparator = comparator;
-		root = leafPageManager.createPage();
+		this.rawPage = rawPage;
 		
-		this.minFreeLeafEntriesToMove = (int) (((LeafPage<K, V>)root).getMaximalNumberOfEntries() *
-                (1 - MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE)) + 2;
 	}
 	
 	/* (non-Javadoc)
@@ -218,5 +226,42 @@ public class BTree<K, V> implements MultiMap<K, V> {
 	 * where entries are moved from one page to another. 
 	 */
 	private static final float MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE = 0.75f;
+
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ComplexPage#initialize()
+	 */
+	@Override
+	public void initialize() {
+		root = leafPageManager.createPage();
+		
+		this.minFreeLeafEntriesToMove = (int) (((LeafPage<K, V>)root).getMaximalNumberOfEntries() *
+                (1 - MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE)) + 2;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ComplexPage#load()
+	 */
+	@Override
+	public void load() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ComplexPage#isValid()
+	 */
+	@Override
+	public boolean isValid() {
+		return valid ;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.ComplexPage#rawPage()
+	 */
+	@Override
+	public RawPage rawPage() {
+		return rawPage;
+	}
 
 }
