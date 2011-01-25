@@ -56,8 +56,10 @@ public class FileResourceManager implements ResourceManager {
 		this.header = new ResourceHeader(ioChannel, pageSize);
 		
 		
-		// load header if file existed
-		if(handle.length() > 0){
+		if(handle.length() == 0){
+			header.initialize();
+		} else {
+			// load header if file existed
 			header.load();
 		}
 	}

@@ -7,6 +7,8 @@
  */
 package com.freshbourne.io;
 
+import java.io.IOException;
+
 /**
  * Classes should not have too complex logic in the constructor. Instead, they should provide a separate method to open the object.
  * 
@@ -19,13 +21,15 @@ public interface MustInitializeOrLoad {
 	
 	/**
 	 * uses the underlying byte array to create a fresh valid ComplexPage
+	 * @throws IOException 
 	 */
-	public void initialize();
+	public void initialize() throws IOException;
 	
 	/**
 	 * tries to load an old ComplexPage from the underlying byte array
+	 * @throws IOException 
 	 */
-	public void load();
+	public void load() throws IOException;
 	
 	/**
 	 * @return if the page has been initialized or loaded

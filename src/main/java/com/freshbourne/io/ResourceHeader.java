@@ -29,10 +29,11 @@ import java.util.List;
  * header pages at the end of the index can be removed to continue appending real pages.
  * 
  */
-public class ResourceHeader {
+public class ResourceHeader implements MustInitializeOrLoad{
 	private final List<Long> dictionary = new ArrayList<Long>();
 	private int pageSize;
 	private FileChannel ioChannel;
+	private boolean valid = false;
 	
 	ResourceHeader(FileChannel ioChannel, int pageSize){
 		this.ioChannel = ioChannel;
@@ -43,12 +44,20 @@ public class ResourceHeader {
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 		ioChannel.position(0);
 		ioChannel.read(buf);
+		buf.position(0);
 		
 		int numberOfpages = buf.getInt();
-		for( int i = 1; i < numberOfpages; i++){
-			long id = buf.getLong();
-			dictionary.add(id);
+		int additionalHeaderPages = buf.getInt();
+		
+		int longSize = Long.SIZE / 8;
+		while(dictionary.size() < numberOfpages && buf.remaining() >= longSize){
+			dictionary.add(buf.getLong());
 		}
+		
+		if(additionalHeaderPages > 0)
+			throw new UnsupportedOperationException("reading additional header pages is not yet supported");
+		
+		valid = true;
 	}
 
 	public boolean contains(Long id){
@@ -139,5 +148,24 @@ public class ResourceHeader {
 		
 		ioChannel.position(0);
 		ioChannel.write(firstPageBuf);		
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.MustInitializeOrLoad#initialize()
+	 */
+	@Override
+	public void initialize() throws IOException {
+		ioChannel.truncate(0);
+		ioChannel.position(0);
+		ioChannel.write(ByteBuffer.allocate(pageSize));
+		valid = true;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.MustInitializeOrLoad#isValid()
+	 */
+	@Override
+	public boolean isValid() {
+		return valid;
 	}
 }
