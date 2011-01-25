@@ -51,7 +51,7 @@ public class FileResourceManager implements ResourceManager {
 	@Override
 	public void open() throws IOException {
 		if(isOpen())
-			throw new IOException("File already open");
+			throw new IllegalStateException("Resource already open");
 		
 		// if the file does not exist already
 		if(!file.exists()){
