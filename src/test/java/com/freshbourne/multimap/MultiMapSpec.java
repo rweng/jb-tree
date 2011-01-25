@@ -23,25 +23,27 @@ import java.io.IOException;
 
 import static org.junit.Assert.*;
 
-public class MultiMapSpec {
+public abstract class MultiMapSpec<K, V> {
 	
-	private MultiMap<Integer, String> tree;
-	private String s = "testString";
-	private String s2 = "string 2";
+	private MultiMap<K, V> tree;
+	private K key1;
+	private K key2;
 	
-
-	private final static Injector injector;
-	
-	static {
-		injector = Guice.createInjector(
-				new IOModule("/tmp/btreetest"),
-				new BTreeModule());
-	}
+	private V value1;
+	private V value2;
 	
 	@Before
 	public void setUp() throws IOException{
-		tree = injector.getInstance(Key.get(new TypeLiteral<BTree<Integer,String>>(){}));
+		tree = createMultiMap();
+		key1 = createRandomKey();
+		key2 = createRandomKey();
+		value1 = createRandomValue();
+		value2 = createRandomValue();
 	}
+	
+	protected abstract MultiMap<K, V> createMultiMap();
+	protected abstract K createRandomKey();
+	protected abstract V createRandomValue();
 	
 	
 	@Test
@@ -51,46 +53,46 @@ public class MultiMapSpec {
 	
 	@Test
 	public void shouldContainAddedEntries() throws Exception{
-		tree.add(1, s);
-		assertTrue(tree.containsKey(1));
-		assertEquals(1, tree.get(1).size());
-		assertEquals(s, tree.get(1).get(0));
+		tree.add(key1, value1);
+		assertTrue(tree.containsKey(key1));
+		assertEquals(1, tree.get(key1).size());
+		assertEquals(value1, tree.get(key1).get(0));
 		assertEquals(1, tree.getNumberOfEntries());
 		
-		tree.add(1, s2);
-		assertTrue(tree.containsKey(1));
-		assertEquals(2, tree.get(1).size());
-		assertEquals(s, tree.get(1).get(0));
-		assertEquals(s2, tree.get(1).get(1));
+		tree.add(key1, value2);
+		assertTrue(tree.containsKey(key1));
+		assertEquals(2, tree.get(key1).size());
+		assertEquals(value1, tree.get(key1).get(0));
+		assertEquals(value2, tree.get(key1).get(1));
 		assertEquals(2, tree.getNumberOfEntries());
 		
-		tree.add(2, s2);
-		assertTrue(tree.containsKey(2));
-		assertEquals(1, tree.get(2).size());
-		assertTrue(tree.get(1).contains(s2));
-		assertTrue(tree.get(1).contains(s));
-		assertTrue(tree.get(1).size() == 2);
+		tree.add(key2, value2);
+		assertTrue(tree.containsKey(key2));
+		assertEquals(1, tree.get(key2).size());
+		assertTrue(tree.get(key1).contains(value2));
+		assertTrue(tree.get(key1).contains(value1));
+		assertTrue(tree.get(key1).size() == 2);
 		assertEquals(3, tree.getNumberOfEntries());
 	}
 	
 	@Test
 	public void shouldReturnEmptyArrayIfKeyNotFound() throws IOException, Exception{
-		assertEquals(0, tree.get(1).size());
+		assertEquals(0, tree.get(key1).size());
 	}
 	
 	@Test
 	public void shouldBeAbleToRemoveInsertedEntries() throws Exception{
-		tree.add(1, s);
-		assertTrue(tree.containsKey(1));
-		tree.remove(1);
-		assertFalse(tree.containsKey(1));
+		tree.add(key1, value1);
+		assertTrue(tree.containsKey(key1));
+		tree.remove(key1);
+		assertFalse(tree.containsKey(key1));
 		assertEquals(0, tree.getNumberOfEntries());
 	}
 	
 	@Test
 	public void clearShouldRemoveAllElements() throws Exception{
-		tree.add(1, s);
-		tree.add(2, s2);
+		tree.add(key1, value1);
+		tree.add(key2, value2);
 		assertEquals(2, tree.getNumberOfEntries());
 		tree.clear();
 		assertEquals(0, tree.getNumberOfEntries());
@@ -98,34 +100,34 @@ public class MultiMapSpec {
 	
 	@Test
 	public void removeWithValueArgumentShouldRemoveOnlyThisValue() throws Exception{
-		tree.add(1, s);
-		tree.add(1, s2);
-		tree.add(2, s2);
+		tree.add(key1, value1);
+		tree.add(key1, value2);
+		tree.add(key2, value2);
 		
 		assertEquals(3, tree.getNumberOfEntries());
-		tree.remove(1, s2);
-		assertEquals(1, tree.get(1).size());
-		assertEquals(s, tree.get(1).get(0));
-		assertEquals(s2, tree.get(2).get(0));
+		tree.remove(key1, value2);
+		assertEquals(1, tree.get(key1).size());
+		assertEquals(value1, tree.get(key1).get(0));
+		assertEquals(value2, tree.get(key2).get(0));
 		
 	}
 	
 	@Test
 	public void removeWithOnlyKeyArgumentShouldRemoveAllValues() throws Exception{
-		tree.add(1, s);
-		tree.add(1, s2);
-		tree.add(2, s2);
+		tree.add(key1, value1);
+		tree.add(key1, value2);
+		tree.add(key2, value2);
 		
 		assertEquals(3, tree.getNumberOfEntries());
-		tree.remove(1);
+		tree.remove(key1);
 		assertEquals(1, tree.getNumberOfEntries());
-		assertEquals(0, tree.get(1).size());
+		assertEquals(0, tree.get(key1).size());
 	}
 	
 	@Test public void shouldWorkWithANumberOfValues(){
 		for(int i = 0; i < 1000; i++){
 			System.out.println(i);
-			tree.add(i, s);
+			tree.add(createRandomKey(), value1);
 		}
 		assertEquals(1000, tree.getNumberOfEntries());
 	}

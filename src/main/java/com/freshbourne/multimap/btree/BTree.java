@@ -62,11 +62,13 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @param comparator
 	 */
 	@Inject
-	BTree(RawPage rawPage, LeafPageManager<K,V> leafPageManager, InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
+	BTree(LeafPageManager<K,V> leafPageManager, InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
 		this.leafPageManager = leafPageManager;
 		this.innerNodeManager = innerNodeManager;
 		this.comparator = comparator;
-		this.rawPage = rawPage;
+		this.rawPage = null;
+		
+		initialize();
 		
 	}
 	
