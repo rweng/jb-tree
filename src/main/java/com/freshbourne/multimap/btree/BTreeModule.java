@@ -13,6 +13,7 @@ import java.util.Comparator;
 
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.DynamicDataPage;
+import com.freshbourne.io.IOModule;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
 import com.freshbourne.serializer.PagePointSerializer;
@@ -23,6 +24,12 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 
 public class BTreeModule extends AbstractModule {
+	
+	private final String indexFile;
+	
+	public BTreeModule(String indexFile){
+		this.indexFile = indexFile;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.google.inject.AbstractModule#configure()
@@ -40,6 +47,8 @@ public class BTreeModule extends AbstractModule {
 		bind(new TypeLiteral<BTree<Integer,String>>(){});
 		
 		bind(new TypeLiteral<Comparator<Integer>>(){}).toInstance(IntegerComparator.INSTANCE);
+		
+		binder().install(new IOModule(indexFile));
 		
 	}
 	

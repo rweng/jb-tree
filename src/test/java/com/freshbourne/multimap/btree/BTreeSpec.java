@@ -26,9 +26,7 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	private final static SecureRandom srand;
 	
 	static {
-		injector = Guice.createInjector(
-				new IOModule("/tmp/btreetest"),
-				new BTreeModule());
+		injector = Guice.createInjector(new BTreeModule("/tmp/btree_spec"));
 		
 		rand = new Random();
 		srand = new SecureRandom();
