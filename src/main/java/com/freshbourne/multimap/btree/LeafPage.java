@@ -10,8 +10,6 @@ package com.freshbourne.multimap.btree;
 import com.freshbourne.io.*;
 import com.freshbourne.serializer.FixLengthSerializer;
 
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
