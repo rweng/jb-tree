@@ -6,10 +6,12 @@
  * For alternative conditions contact the author.
  */
 
-package com.freshbourne.multimap.btree;
+package com.freshbourne.multimap;
 
 import com.freshbourne.io.IOModule;
 import com.freshbourne.multimap.MultiMap;
+import com.freshbourne.multimap.btree.BTree;
+import com.freshbourne.multimap.btree.BTreeModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -21,7 +23,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.*;
 
-public class BTreeSpec {
+public class MultiMapSpec {
 	
 	private MultiMap<Integer, String> tree;
 	private String s = "testString";
