@@ -7,7 +7,9 @@
  */
 package com.freshbourne.io;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,69 +29,28 @@ import java.util.List;
  * header pages at the end of the index can be removed to continue appending real pages.
  * 
  */
-public class ResourceHeader implements ComplexPage {
-	private final RawPage rawPage;
+public class ResourceHeader {
 	private final List<Long> dictionary = new ArrayList<Long>();
-	private boolean valid = false;
+	private int pageSize;
+	private FileChannel ioChannel;
 	
-	private static final Long NO_NEXT_HEADER = -1L;
+	ResourceHeader(FileChannel ioChannel, int pageSize){
+		this.ioChannel = ioChannel;
+		this.pageSize = pageSize;
+	}
 	
-	ResourceHeader(RawPage rawpage){
-		this.rawPage = rawpage;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ComplexPage#initialize()
-	 */
-	@Override
-	public void initialize() {
-		dictionary.clear();
-		valid = true;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ComplexPage#load()
-	 */
-	@Override
-	public void load() {
-		ByteBuffer buf = rawPage.bufferAtZero();
+	public void load() throws IOException {
+		ByteBuffer buf = ByteBuffer.allocate(pageSize);
+		ioChannel.position(0);
+		ioChannel.read(buf);
+		
 		int numberOfpages = buf.getInt();
 		for( int i = 1; i < numberOfpages; i++){
 			long id = buf.getLong();
 			dictionary.add(id);
 		}
-		valid = true;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ComplexPage#isValid()
-	 */
-	@Override
-	public boolean isValid() {
-		return valid;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ComplexPage#rawPage()
-	 */
-	@Override
-	public RawPage rawPage() {
-		return rawPage;
-	}
-	
-	public void add(Long pageId) throws DuplicatePageIdException{
-		if(contains(pageId))
-			throw new DuplicatePageIdException(pageId);
-		
-		int offset = offsetOfPageNr(dictionary.size());
-		rawPage.buffer().position( offset );
-		rawPage.buffer().putLong(pageId);
-		dictionary.add(pageId);
-		
-		rawPage.buffer().position(0);
-		rawPage.buffer().putInt(dictionary.size());
-	}
-	
 	public boolean contains(Long id){
 		return dictionary.contains(id);
 	}
@@ -101,22 +62,11 @@ public class ResourceHeader implements ComplexPage {
 	public int getNumberOfPages(){
 		return dictionary.size();
 	}
-
-	/**
-	 * sets the location of the virtual id to be pos, meaning that the offset in the File where the page is stored is pageSize * pos
-	 * 
-	 * @param id
-	 * @param pos
-	 * @throws DuplicatePageIdException 
-	 */
-	private void setRealPageNr(Long id, int pos) {
-		if(dictionary.contains(id))
-			throw new DuplicatePageIdException(id);
-		
-		dictionary.set(pos, id);
-		rawPage().buffer().position( offsetOfPageNr(pos) );
-		rawPage().buffer().putLong(id);
+	
+	public void add(Long id){
+		dictionary.add(id);
 	}
+
 	
 	private int offsetOfPageNr(int pos){
 		return Integer.SIZE / 8 + (pos * Long.SIZE / 8);
@@ -138,13 +88,17 @@ public class ResourceHeader implements ComplexPage {
 		// overwrite the current pageNr with the last index in the dictionary
 		dictionary.set(pageNr, dictionary.get(dictionary.size() - 1 ));
 		dictionary.remove(dictionary.size() - 1);
-		rawPage.buffer().position(0);
-		rawPage.buffer().putInt(dictionary.size());
-		
-		
 	}
 	
 	public Long getLastPageId(){
 		return dictionary.get(dictionary.size() - 1);
+	}
+
+	/**
+	 * 
+	 */
+	public void writeToFile() {
+		// TODO Auto-generated method stub
+		
 	}
 }

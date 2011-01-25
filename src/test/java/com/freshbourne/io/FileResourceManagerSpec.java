@@ -52,10 +52,4 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 		
 		return rm;
 	}
-	
-	@Test
-	public void firstPageShouldBeWrittenAfterOpen() throws IOException{
-		rm.close();
-		assertEquals(PageSize.DEFAULT_PAGE_SIZE, file.length());
-	}
 }

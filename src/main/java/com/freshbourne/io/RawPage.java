@@ -31,6 +31,7 @@ public class RawPage {
     private boolean modified = false;
 
 
+    public RawPage(ByteBuffer buffer, Long pageId){this(buffer, pageId, null);}
     public RawPage(ByteBuffer buffer, Long pageId, ResourceManager rm){
         this.buffer = buffer;
         this.id = pageId;

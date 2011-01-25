@@ -31,7 +31,6 @@ public class FileResourceManager implements ResourceManager {
 	private FileLock fileLock;
 	private FileChannel ioChannel;
 	private ResourceHeader header;
-	private final List<Long> dictionary = new ArrayList<Long>();
 	
 	
     @Inject
@@ -54,17 +53,12 @@ public class FileResourceManager implements ResourceManager {
 		}
 		
 		initIOChannel(file);
+		this.header = new ResourceHeader(ioChannel, pageSize);
 		
 		
-		// if new file, initialize by writing header
-		ByteBuffer buf = ByteBuffer.allocate(pageSize);
-		
-		if(handle.length() == 0){
-			// do nothing
-			
-		} else { // if the file already existed
-			ioChannel.read(buf);
-			
+		// load header if file existed
+		if(handle.length() > 0){
+			header.load();
 		}
 	}
 	
@@ -121,7 +115,7 @@ public class FileResourceManager implements ResourceManager {
 	@Override
 	public void close() {
 		if(header != null){
-			this.writePage(header.rawPage());
+			header.writeToFile();
 			header = null;
 		}
 		
