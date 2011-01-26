@@ -1,7 +1,7 @@
 h1. Flexible BTree-MultiMap implementation 
 
 h2. Requirements
-* gradle 0.9-rc3 (install on mac with homebrew: brew install gradle --HEAD)
+* gradle 0.9-rc3 (install on mac with homebrew: @brew install gradle --HEAD@)
 * eclipse 
 
 h2. Getting started
