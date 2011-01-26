@@ -73,10 +73,10 @@ public class FileResourceManager implements ResourceManager {
         ByteBuffer buffer = page.bufferAtZero();
 
 		try{
-			ioChannel.write(buffer, header.getPageOffset(page.id()));
+			Long offset = header.getPageOffset(page.id());
+			ioChannel.write(buffer, offset);
 		} catch(IOException e){
-			e.printStackTrace();
-			System.exit(1);
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -92,7 +92,7 @@ public class FileResourceManager implements ResourceManager {
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 		
 		try{
-			ioChannel.read(buf, 0);
+			ioChannel.read(buf, header.getPageOffset(pageId));
 		} catch(IOException e){
 			e.printStackTrace();
 			System.exit(1);
