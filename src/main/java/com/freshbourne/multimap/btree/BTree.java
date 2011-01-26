@@ -113,6 +113,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	public void add(K key, V value) {
 		ensureValid();
 		
+		numberOfEntries++;
+		
 		AdjustmentAction<K, V> result = recursivelyInsert(root, key, value, 0);
 		
 		// insert was successful
