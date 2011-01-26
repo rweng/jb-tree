@@ -1,5 +1,24 @@
+h1. Flexible BTree-MultiMap implementation 
 
-you can easily order your tree by providing a different comparator for the keys.
+h2. Requirements
+* gradle 0.9-rc3 (install on mac with homebrew: brew install gradle --HEAD)
+* eclipse 
+
+h2. Getting started
+
+get started by cloning the repository:
+bc. git clone https://rweng@github.com/rweng/index.git
+cd index
+
+# look at all tasks you can do with the build manager
+gradle tasks
+
+# if you are in eclipse, generate the eclipse files to be able to open the folder as eclipse project
+gradle eclipse
+
+# run the tests (currently, only the BTreeSpec should fail)
+gradle test
 
 
-for FileResourceManager and IOChannel look at: [[http://www.yaldex.com/java_tutorial/0600410861.htm]]
+h2. Features
+* you can easily order your tree by providing a different comparator for the keys.
