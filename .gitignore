@@ -4,7 +4,7 @@ tpch/
 .project
 .settings/
 build.properties
-build/
+build/*
 .externalToolBuilders/
 bin/
 target/
@@ -12,3 +12,11 @@ target/
 libs/
 *.iml
 *.ipr
+
+#except docs
+!build/docs
+#but in docs, ignore everything
+build/docs/*
+# except javadoc
+!build/docs/javadoc
+!build/docs/javadoc/*
