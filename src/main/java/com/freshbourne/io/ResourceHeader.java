@@ -44,11 +44,10 @@ public class ResourceHeader implements MustInitializeOrLoad{
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 		ioChannel.position(0);
 		ioChannel.read(buf);
-		buf.position(0);
+		buf.rewind();
 		
 		int numberOfpages = buf.getInt();
 		int additionalHeaderPages = buf.getInt();
-		
 		int longSize = Long.SIZE / 8;
 		while(dictionary.size() < numberOfpages && buf.remaining() >= longSize){
 			dictionary.add(buf.getLong());
@@ -65,7 +64,7 @@ public class ResourceHeader implements MustInitializeOrLoad{
 	}
 	
 	public int getRealPageNr(Long id){
-		return dictionary.indexOf(id);
+		return dictionary.indexOf(id) + 1; // skip first header page
 	}
 	
 	public int getNumberOfPages(){
@@ -79,24 +78,6 @@ public class ResourceHeader implements MustInitializeOrLoad{
 	
 	private int offsetOfPageNr(int pos){
 		return Integer.SIZE / 8 + (pos * Long.SIZE / 8);
-	}
-	
-	/**
-	 * before calling this function, you should fetch the last page and write it imidiately after the method returns.
-	 * The reason is that the method moves the last Id in the spot of the inserted id
-	 * 
-	 * @param id of the page to be removed
-	 */
-	public void remove(Long id){
-		if(!contains(id)){
-			return;
-		}
-		
-		int pageNr = getRealPageNr(id);
-		
-		// overwrite the current pageNr with the last index in the dictionary
-		dictionary.set(pageNr, dictionary.get(dictionary.size() - 1 ));
-		dictionary.remove(dictionary.size() - 1);
 	}
 	
 	public Long getLastPageId(){
@@ -145,9 +126,11 @@ public class ResourceHeader implements MustInitializeOrLoad{
 		firstPageBuf.position(0);
 		firstPageBuf.putInt(dictionary.size());
 		firstPageBuf.putInt(additionalHeaderPages);
+		firstPageBuf.position(0);
 		
 		ioChannel.position(0);
-		ioChannel.write(firstPageBuf);		
+		ioChannel.write(firstPageBuf);	
+		ioChannel.force(true);
 	}
 
 	/* (non-Javadoc)
@@ -155,6 +138,7 @@ public class ResourceHeader implements MustInitializeOrLoad{
 	 */
 	@Override
 	public void initialize() throws IOException {
+		dictionary.clear();
 		ioChannel.truncate(0);
 		ioChannel.position(0);
 		ioChannel.write(ByteBuffer.allocate(pageSize));
@@ -167,5 +151,22 @@ public class ResourceHeader implements MustInitializeOrLoad{
 	@Override
 	public boolean isValid() {
 		return valid;
+	}
+
+	public long getPageOffset(Long id) {
+		return getRealPageNr(id) * pageSize;
+	}
+
+	/**
+	 * @param pageIdToReplace id to replace
+	 * @param replacementId id to put at this position instead
+	 */
+	public void replaceId(long pageIdToReplace, Long replacementId) {
+		dictionary.set(dictionary.indexOf(pageIdToReplace), replacementId);
+	}
+
+	
+	public void removeLastId() {
+		dictionary.remove(dictionary.size() - 1);
 	}
 }

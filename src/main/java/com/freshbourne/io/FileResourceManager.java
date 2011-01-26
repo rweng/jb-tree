@@ -70,11 +70,10 @@ public class FileResourceManager implements ResourceManager {
         ensureOpen();
         ensurePageExists(page.id());
         
-        ByteBuffer buffer = page.buffer();
-		buffer.rewind();
+        ByteBuffer buffer = page.bufferAtZero();
 
 		try{
-			ioChannel.write(buffer, header.getRealPageNr(page.id()));
+			ioChannel.write(buffer, header.getPageOffset(page.id()));
 		} catch(IOException e){
 			e.printStackTrace();
 			System.exit(1);
@@ -122,15 +121,14 @@ public class FileResourceManager implements ResourceManager {
 		}
 		
 		try{
-			if(ioChannel != null){
-				ioChannel.close();
-				ioChannel = null;
-				fileLock = null;
-			}
-
 			if (fileLock != null && fileLock.isValid()) {
 				fileLock.release();
 				fileLock = null;
+			}
+			
+			if(ioChannel != null){
+				ioChannel.close();
+				ioChannel = null;
 			}
 
 			if (handle != null) {
@@ -274,22 +272,22 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void removePage(long pageId) {
-		int pos = header.getRealPageNr(pageId);
 		Long lastPageId = header.getLastPageId();
 		
+		
 		// copy the last entry to this position
-		try{
-		if(pos == header.getRealPageNr(lastPageId)){ // last page?
-			header.remove(pageId);
-			ioChannel.truncate(header.getNumberOfPages() * pageSize);
-		} else {
-			RawPage last = readPage(lastPageId);
-			header.remove(pageId);
-			writePage(last);
-			
-			
-			ioChannel.truncate(header.getNumberOfPages() * pageSize);
-		}
+		try {
+			if (pageId == lastPageId) { // last page?
+				header.removeLastId();
+				ioChannel.truncate(header.getNumberOfPages() * pageSize);
+			} else {
+				RawPage last = readPage(lastPageId);
+				header.replaceId(pageId, lastPageId);
+				header.removeLastId();
+				writePage(last);
+
+				ioChannel.truncate(header.getNumberOfPages() * pageSize);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);

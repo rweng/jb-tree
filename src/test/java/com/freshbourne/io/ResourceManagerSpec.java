@@ -24,7 +24,7 @@ public abstract class ResourceManagerSpec {
 	
 	@Before
 	public void setUp() throws IOException {
-		rm = createOpenResourceManager();
+		rm = createNewOpenResourceManager();
 	}
 	
 	@After
@@ -40,7 +40,7 @@ public abstract class ResourceManagerSpec {
 	public void shouldBeEmptyAtFirst() throws IOException{
 		assertTrue(rm != null);
 		assertEquals(PageSize.DEFAULT_PAGE_SIZE, rm.pageSize());
-		assertEquals(1, rm.numberOfPages()); // header page
+		assertEquals(0, rm.numberOfPages()); // 0 pages
 	}
 	
 	
@@ -84,9 +84,16 @@ public abstract class ResourceManagerSpec {
 		assertEquals(0, rm.numberOfPages());
 		page = rm.createPage();
 		assertEquals(1, rm.numberOfPages());
-		RawPage newPage2 = rm.createPage();
+		rm.createPage();
 		assertEquals(2, rm.numberOfPages());
-		assertEquals(rm.readPage(newPage2.id()).buffer(), page.buffer());
+		
+		long longToCompare = 12345L;
+		ByteBuffer buf = page.bufferAtZero();
+		buf.putLong(longToCompare);
+		rm.writePage(page);
+		
+		assertEquals(2, rm.numberOfPages());
+		assertEquals(longToCompare, rm.readPage(page.id()).bufferAtZero().getLong());
 		
 		rm.close();
 		
@@ -94,7 +101,7 @@ public abstract class ResourceManagerSpec {
 		rm = createOpenResourceManager();
 		
 		assertEquals(2, rm.numberOfPages());
-		assertEquals(rm.readPage(newPage2.id()).buffer(), page.buffer());
+		assertEquals(longToCompare, rm.readPage(page.id()).bufferAtZero().getLong());
 	}
 	
 	@Test(expected= WrongPageSizeException.class)
@@ -125,5 +132,16 @@ public abstract class ResourceManagerSpec {
 	}
 
 	
+	/**
+	 * should reset the ResourceManager and create a completely new ResourceManager
+	 * @return
+	 */
+	protected abstract ResourceManager createNewOpenResourceManager();
+	
+	/**
+	 * should just create a new ResourceManager, without resetting the resource
+	 * @return
+	 */
 	protected abstract ResourceManager createOpenResourceManager();
+	
 }

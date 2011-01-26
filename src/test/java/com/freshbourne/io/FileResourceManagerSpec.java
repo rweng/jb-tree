@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
@@ -37,11 +38,15 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 	 * @see com.freshbourne.io.ResourceManagerSpec#createResourceManager()
 	 */
 	@Override
-	protected ResourceManager createOpenResourceManager() {
+	protected ResourceManager createNewOpenResourceManager() {
 		if(file.exists()){
 			file.delete();
 		}
 		
+		return createOpenResourceManager();
+	}
+	
+	protected ResourceManager createOpenResourceManager(){
 		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE);
 		
 		try {
@@ -51,5 +56,17 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 		}
 		
 		return rm;
+	}
+	
+	@Test public void shouldWriteOutHeaderCorrectly() throws IOException{
+		rm = (FileResourceManager) createNewOpenResourceManager();
+		rm.createPage();
+		rm.close();
+		
+		RandomAccessFile rFile = new RandomAccessFile(file, "rw");
+		assertEquals(1, rFile.readInt());
+		assertEquals(0, rFile.readInt());
+		rFile.close();
+		
 	}
 }
