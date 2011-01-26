@@ -53,7 +53,9 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public int getNumberOfEntries() {
 		ensureValid();
-		return 0;
+
+		throw new UnsupportedOperationException();
+		
 	}
 
 	/* (non-Javadoc)
@@ -62,7 +64,8 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public boolean containsKey(K key) {
 		ensureValid();
-		return false;
+
+		throw new UnsupportedOperationException();
 	}
 
 	/* (non-Javadoc)
@@ -71,7 +74,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public List<V> get(K key) {
 		ensureValid();
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	/* (non-Javadoc)
@@ -81,8 +84,8 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	public int remove(K key) {
 		ensureValid();
 		getChildForKey(key);
-		
-		return 0;
+
+		throw new UnsupportedOperationException();
 	}
 	
 	
@@ -96,6 +99,8 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public void remove(K key, V value) {
 		ensureValid();
+
+		throw new UnsupportedOperationException();
 	}
 
 	/* (non-Javadoc)
@@ -104,6 +109,8 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public void destroy() {
 		ensureValid();
+
+		throw new UnsupportedOperationException();
 	}
 
 	/* (non-Javadoc)
@@ -131,6 +138,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public void load() {
 		valid = true;
+		throw new UnsupportedOperationException();
 	}
 
 	/* (non-Javadoc)
@@ -155,9 +163,8 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public AdjustmentAction<K, V> insert(K key, V value) {
 		ensureValid();
-		
-		// TODO Auto-generated method stub
-		return null;
+
+		throw new UnsupportedOperationException();
 	}
 	
 	private void ensureValid(){
@@ -172,7 +179,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public PagePointer getKeyPointer(int pos) {
 		ensureValid();
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	/* (non-Javadoc)
