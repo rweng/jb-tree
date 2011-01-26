@@ -8,6 +8,7 @@
 package com.freshbourne.multimap.btree;
 
 import com.freshbourne.io.*;
+import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.serializer.FixLengthSerializer;
 
 import java.nio.ByteBuffer;
@@ -25,6 +26,13 @@ import java.util.List;
  * @param <V> ValueType
  */
 public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
+	
+	/**
+	 * If a leaf page is less full than this factor, it may be target of operations
+	 * where entries are moved from one page to another. 
+	 */
+	private static final float MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE = 0.75f;
+
 	
 	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	
@@ -56,7 +64,9 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	private Long lastValuePageId = null;
 	private int lastValuePageRemainingBytes = -1;
 	private final PageManager<LeafPage<K,V>> leafPageManager;
-
+	
+	private BTree<K, V> tree;
+	
 	LeafPage(
 			RawPage page,
             DataPageManager<K> keyPageManager,
@@ -76,6 +86,16 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		
 		// one pointer to key, one to value
 		maxEntries = (rawPage.buffer().capacity() - headerSize()) / (serializedPointerSize * 2); 
+	}
+	
+	/**
+	 * If a leaf page has at least that many free slots left, we can move pointers to it
+	 * from another node. This number is computed from the
+	 * <tt>MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE</tt> constant.
+	 */
+	private int getMinFreeLeafEntriesToMove(){
+		return (int) (getMaxEntries() *
+                (1 - MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE)) + 2;
 	}
     
     public boolean isFull(){
@@ -506,19 +526,60 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	@Override
 	public AdjustmentAction<K, V> insert(K key, V value) {
 		ensureValid();
-		if(isFull())
-			throw new IllegalStateException("node full");
 		
-		// add to data_page
-		PagePointer keyPointer = storeKey(key);
-		PagePointer valuePointer = storeValue(value);
-		
+		if(!isFull()){
+			// add to data_page
+			PagePointer keyPointer = storeKey(key);
+			PagePointer valuePointer = storeValue(value);
+			
 
-        // serialize Pointers
-		addEntry(keyPointer, valuePointer);
+	        // serialize Pointers
+			addEntry(keyPointer, valuePointer);
+			
+			writeNumberOfEntries();
+			return null;	
+		}
 		
-		writeNumberOfEntries();
-		return null;
+		// if leaf does not have enough space but we can move some data to the next leaf
+		if (this.getNextLeafId() != null) {
+			LeafPage<K, V> nextLeaf = leafPageManager.getPage(this.getNextLeafId());
+			
+			if(nextLeaf.getRemainingEntries() >= getMinFreeLeafEntriesToMove()){
+				nextLeaf.prependEntriesFromOtherPage(this, nextLeaf.getRemainingEntries() >> 1);
+				
+				// see on which page we will insert the value
+				if(comperator.compare(key, this.getLastKey()) > 0){
+					nextLeaf.insert(key, value);
+				} else {
+					this.insert(key, value);
+				}
+				
+				return new AdjustmentAction<K, V>(ACTION.UPDATE_KEY, this.getLastKeyPointer(), null);
+			}
+		}
+		
+		// if we have to allocate a new leaf
+		
+		// allocate new leaf
+		LeafPage<K,V> newLeaf = leafPageManager.createPage();
+		newLeaf.setNextLeafId(this.getId());
+		this.setNextLeafId(newLeaf.rawPage().id());
+			
+		// newLeaf.setLastKeyContinuesOnNextPage(root.isLastKeyContinuingOnNextPage());
+			
+		// move half of the keys to new page
+		newLeaf.prependEntriesFromOtherPage(this,
+				this.getNumberOfEntries() >> 1);
+
+		// see on which page we will insert the value
+		if (comperator.compare(key, this.getLastKey()) > 0) {
+			newLeaf.insert(key, value);
+		} else {
+			this.insert(key, value);
+		}
+
+		return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE,
+				this.getLastKeyPointer(), newLeaf.rawPage().id());
 	}
 	
 	
@@ -567,5 +628,19 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 
 	public int getMaximalNumberOfEntries() {
 		return maxEntries;
+	}
+
+	/**
+	 * @param tree the tree to set
+	 */
+	public void setTree(BTree<K, V> tree) {
+		this.tree = tree;
+	}
+
+	/**
+	 * @return the tree
+	 */
+	public BTree<K, V> getTree() {
+		return tree;
 	}
 }
