@@ -232,7 +232,10 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	public void clear() throws Exception {
 		ensureValid();
 		
-		root.clear();
+		root.destroy();
+		
+		root = leafPageManager.createPage();
+		numberOfEntries = 0;
 	}
 	
 	/**

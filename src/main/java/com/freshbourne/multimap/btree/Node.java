@@ -97,8 +97,9 @@ public interface Node<K, V> {
     void remove(K key, V value) throws Exception;
     
     /**
-     * removes all keys and values
+     * removes all key and values, destroying all rawPages with the keyPages, valuePages, leafPages and innerNodePages
      * @throws Exception 
      */
-    void clear() throws Exception;
+    void destroy() throws Exception;
+    
 }

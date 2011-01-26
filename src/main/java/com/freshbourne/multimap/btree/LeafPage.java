@@ -396,7 +396,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#clear()
 	 */
 	@Override
-	public void clear() throws Exception {
+	public void destroy() throws Exception {
 		byte[] buf = new byte[serializedPointerSize];
 		
 		//TODO: free pages
