@@ -25,6 +25,7 @@ import static org.junit.Assert.*;
 public abstract class BufferPoolManagerSpec {
 	private BufferPoolManager bpm;
 	private int cacheSize;
+	private final long valueToCompare = 12345L;
 	
 	
 	@Before
@@ -35,19 +36,36 @@ public abstract class BufferPoolManagerSpec {
 	
 	protected abstract BufferPoolManager createBufferPoolManager();
 	protected abstract int getCacheSize();
-
-	@Test
-	public void shouldReturnCorrectPagesEvenIfExceededCache() throws IOException {
+	
+	private Long createPageWithCompareValueAndLoop(){
 		RawPage page = bpm.createPage();
 		long id = page.id();
-		long valueToCompare = 123345L;
 		page.bufferAtZero().putLong(valueToCompare);
 		page.setModified(true);
 		
 		for(int i = 0; i < cacheSize * 3; i++) // make sure all cache is replaced
 			bpm.createPage();
 		
-		assertEquals(valueToCompare, bpm.getPage(id).bufferAtZero().getLong());
+		return id;
+	}
+
+	@Test
+	public void shouldReturnCorrectPagesEvenIfExceededCache() throws IOException {
+		Long pageId = createPageWithCompareValueAndLoop();
+		
+		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());
+	}
+	
+	@Test public void flush(){
+		Long pageId = createPageWithCompareValueAndLoop();
+		bpm.flush();
+		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());
+	}
+	
+	@Test public void clearCache(){
+		Long pageId = createPageWithCompareValueAndLoop();
+		bpm.clearCache();
+		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());		
 	}
 	
 }
