@@ -116,11 +116,12 @@ public abstract class MultiMapSpec<K, V> {
 	}
 	
 	@Test public void shouldWorkWithANumberOfValues(){
-		for(int i = 0; i < 1000; i++){
+		int size = 171;
+		for(int i = 0; i < size; i++){
 			System.out.println(i);
 			tree.add(createRandomKey(), value1);
 		}
-		assertEquals(1000, tree.getNumberOfEntries());
+		assertEquals(size, tree.getNumberOfEntries());
 		
 		tree.add(key1, value2);
 		assertTrue(tree.containsKey(key1));

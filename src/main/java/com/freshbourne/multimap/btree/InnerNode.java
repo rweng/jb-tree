@@ -7,7 +7,6 @@
  */
 package com.freshbourne.multimap.btree;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Comparator;
 import java.util.List;
@@ -25,6 +24,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	
 	private int numberOfKeys = 0;
+	private boolean valid = false;
 	
 	InnerNode(RawPage rawPage, FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
 			Comparator<K> comparator){
@@ -52,7 +52,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public int getNumberOfEntries() {
-		// TODO Auto-generated method stub
+		ensureValid();
 		return 0;
 	}
 
@@ -61,7 +61,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public boolean containsKey(K key) {
-		// TODO Auto-generated method stub
+		ensureValid();
 		return false;
 	}
 
@@ -70,7 +70,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public List<V> get(K key) {
-		// TODO Auto-generated method stub
+		ensureValid();
 		return null;
 	}
 
@@ -79,6 +79,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public int remove(K key) {
+		ensureValid();
 		getChildForKey(key);
 		
 		return 0;
@@ -94,8 +95,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void remove(K key, V value) {
-		// TODO Auto-generated method stub
-		
+		ensureValid();
 	}
 
 	/* (non-Javadoc)
@@ -103,8 +103,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
-		
+		ensureValid();
 	}
 
 	/* (non-Javadoc)
@@ -114,6 +113,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	public void initialize() {
 		numberOfKeys = 0;
 		writeNumberOfKeys();
+		valid = true;
 	}
 	
 	private void writeNumberOfKeys(){
@@ -130,8 +130,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void load() {
-		// TODO Auto-generated method stub
-		
+		valid = true;
 	}
 
 	/* (non-Javadoc)
@@ -139,8 +138,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public boolean isValid() {
-		// TODO Auto-generated method stub
-		return false;
+		return valid;
 	}
 
 	/* (non-Javadoc)
@@ -148,17 +146,24 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public RawPage rawPage() {
-		// TODO Auto-generated method stub
-		return null;
+		return rawPage;
 	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.Node#insert(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public AdjustmentAction insert(K key, V value) {
+	public AdjustmentAction<K, V> insert(K key, V value) {
+		ensureValid();
+		
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	private void ensureValid(){
+		if(!isValid()){
+			throw new IllegalStateException("inner page with the id " + rawPage().id() + " not valid!");
+		}
 	}
 
 	/* (non-Javadoc)
@@ -166,7 +171,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public PagePointer getKeyPointer(int pos) {
-		// TODO Auto-generated method stub
+		ensureValid();
 		return null;
 	}
 
