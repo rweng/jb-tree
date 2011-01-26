@@ -7,8 +7,6 @@
  */
 package com.freshbourne.io;
 
-import java.io.IOException;
-
 public class WrongPageSizeException extends IllegalStateException {
 	
 	private static final long serialVersionUID = 1L;

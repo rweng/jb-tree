@@ -16,8 +16,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -189,6 +187,7 @@ public class FileResourceManager implements ResourceManager {
 		}
 	}
 	
+	@Override
 	public boolean isOpen() {
 		return !(ioChannel == null || !ioChannel.isOpen());
 	}
@@ -197,6 +196,7 @@ public class FileResourceManager implements ResourceManager {
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString(){
 		return "Resource: " + file.getAbsolutePath();
 	}

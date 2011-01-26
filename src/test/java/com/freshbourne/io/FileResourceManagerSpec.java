@@ -15,18 +15,12 @@
  */
 package com.freshbourne.io;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class FileResourceManagerSpec extends ResourceManagerSpec {
 	
@@ -46,6 +40,7 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 		return createOpenResourceManager();
 	}
 	
+	@Override
 	protected ResourceManager createOpenResourceManager(){
 		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE);
 		

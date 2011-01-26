@@ -8,18 +8,12 @@
 package com.freshbourne.io;
 
 import java.nio.ByteBuffer;
-import java.util.Observer;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import com.freshbourne.serializer.PagePointSerializer;
 import com.freshbourne.serializer.StringSerializer;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 public class DynamicDataPageSpec {
 	

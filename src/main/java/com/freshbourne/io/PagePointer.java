@@ -63,6 +63,7 @@ public class PagePointer {
 		return id;
 	}
 	
+	@Override
 	public boolean equals(Object o){
 		return o instanceof PagePointer && ((PagePointer)o).getId() == getId() && 
 			((PagePointer)o).getOffset() == getOffset();

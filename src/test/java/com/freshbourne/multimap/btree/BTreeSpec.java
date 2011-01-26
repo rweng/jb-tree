@@ -9,9 +9,6 @@ package com.freshbourne.multimap.btree;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Random;
-
-import com.freshbourne.io.IOModule;
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.MultiMapSpec;
 import com.google.inject.Guice;

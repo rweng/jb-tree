@@ -16,6 +16,7 @@ public class PagePointerSerializerTest extends TestCase {
 	private PagePointer p1, p2;
 	private FixLengthSerializer<PagePointer, byte[]> serializer;
 	
+	@Override
 	public void setUp(){
 		p1 = new PagePointer(5, 10);
 		p2 = new PagePointer(50, 100);

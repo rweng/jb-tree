@@ -8,14 +8,7 @@
 
 package com.freshbourne.multimap;
 
-import com.freshbourne.io.IOModule;
 import com.freshbourne.multimap.MultiMap;
-import com.freshbourne.multimap.btree.BTree;
-import com.freshbourne.multimap.btree.BTreeModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
 import org.junit.Before;
 import org.junit.Test;
 

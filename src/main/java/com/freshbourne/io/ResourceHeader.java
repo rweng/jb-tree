@@ -40,6 +40,7 @@ public class ResourceHeader implements MustInitializeOrLoad{
 		this.pageSize = pageSize;
 	}
 	
+	@Override
 	public void load() throws IOException {
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 		ioChannel.position(0);

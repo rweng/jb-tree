@@ -21,7 +21,6 @@ import com.freshbourne.io.PagePointer;
 import com.freshbourne.serializer.Serializer;
 import com.freshbourne.serializer.StringSerializer;
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 
 public class BTreeModule extends AbstractModule {

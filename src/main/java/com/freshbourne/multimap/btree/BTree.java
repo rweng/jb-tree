@@ -18,13 +18,10 @@ package com.freshbourne.multimap.btree;
 import com.freshbourne.io.BufferPoolManager;
 import com.freshbourne.io.ComplexPage;
 import com.freshbourne.io.RawPage;
-import com.freshbourne.io.ResourceManager;
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.InnerNode.PagePointerAndKey;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
 import java.nio.ByteBuffer;
 import java.util.Comparator;
 import java.util.List;

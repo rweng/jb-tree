@@ -7,10 +7,7 @@
  */
 package com.freshbourne.io;
 
-import java.nio.ByteBuffer;
-
 import com.freshbourne.serializer.FixLengthSerializer;
-import com.freshbourne.serializer.PagePointSerializer;
 import com.freshbourne.serializer.Serializer;
 
 
