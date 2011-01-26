@@ -17,60 +17,38 @@ package com.freshbourne.io;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
-public class BufferPoolManagerSpec {
+public abstract class BufferPoolManagerSpec {
 	private BufferPoolManager bpm;
+	private int cacheSize;
 	
-	private final int cacheSize = 30;
-	
-	@Mock private ResourceManager mockRM;
-	@Mock private RawPage mockPageWithoutId;
-	@Mock private RawPage mockPageWithId;
 	
 	@Before
 	public void setUp() throws IOException{
-		MockitoAnnotations.initMocks(this);
-		
-		when(mockRM.pageSize()).thenReturn(PageSize.DEFAULT_PAGE_SIZE);
-		
-		when(mockPageWithId.id()).thenReturn(1L);
-		when(mockRM.addPage(any(RawPage.class))).thenReturn(mockPageWithId);
-		
-		//bpm = new BufferPoolManagerImpl(mockRM, cacheSize);
+		bpm = createBufferPoolManager();
+		cacheSize = getCacheSize();
 	}
 	
+	protected abstract BufferPoolManager createBufferPoolManager();
+	protected abstract int getCacheSize();
+
 	@Test
-	public void shouldCachePages() throws IOException {
-		// RawPage p = bpm.createPage();
-		// bpm.getPage(p.id());
-		verify(mockRM, times(0)).readPage(anyInt());
+	public void shouldReturnCorrectPagesEvenIfExceededCache() throws IOException {
+		RawPage page = bpm.createPage();
+		long id = page.id();
+		long valueToCompare = 123345L;
+		page.bufferAtZero().putLong(valueToCompare);
+		page.setModified(true);
+		
+		for(int i = 0; i < cacheSize; i++)
+			bpm.createPage();
+		
+		assertTrue(true);
+		assertEquals(valueToCompare, 1L);
 	}
-	
-//	@Test
-//	public void shouldCreateInitializedHashPages() throws IOException{
-//		HashPage p = bpm.newPage();
-//		assertNotNull(p);
-//		assertTrue(p.valid());
-//		assertEquals(PageSize.DEFAULT_PAGE_SIZE, p.buffer().capacity());
-//	}
-//	
-//	@Test
-//	public void shouldNotPersistNewPages() throws IOException {
-//		bpm.newPage();
-//		verify(mockRM, times(0)).writePage(any(HashPage.class));
-//	}
-	
-	@Test
-	public void shouldPersistCreatedPages() throws IOException{
-		// bpm.createPage();
-		// verify(mockRM).writePage(any(RawPage.class));
-	}
-	
 	
 }
