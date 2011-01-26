@@ -40,14 +40,10 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 	private HashMap<Long, RawPage> cache;
 	
 	@Inject
-	public BufferPoolManagerImpl(ResourceManager rm,@Named("cacheSize") int cacheSize) throws IOException {
-		if(!rm.isOpen())
-            rm.open();
-
-        this.rm = rm;
+	public BufferPoolManagerImpl(ResourceManager rm, @Named("cacheSize") int cacheSize) {
+		this.rm = rm;
         this.cacheSize = cacheSize;
 		this.cache = new HashMap<Long, RawPage>();
-		
 		cacheQueue = new ArrayBlockingQueue<RawPage>(cacheSize);
 	}
 
@@ -97,5 +93,41 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 				rawPage.setModified(false);
 			}
 		}
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.MustBeOpened#open()
+	 */
+	@Override
+	public void open() throws Exception {
+		if(!rm.isOpen())
+            rm.open();
+		
+		clearCache();
+	}
+	
+	private void clearCache(){
+		cache.clear();
+		cacheQueue.clear();
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.MustBeOpened#isOpen()
+	 */
+	@Override
+	public boolean isOpen() {
+		return rm.isOpen();
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.MustBeOpened#close()
+	 */
+	@Override
+	public void close() throws Exception {
+		rm.close();
+		clearCache();
 	}
 }

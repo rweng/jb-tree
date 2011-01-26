@@ -16,10 +16,12 @@
 package com.freshbourne.io;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
 import java.io.File;
+import java.io.IOException;
 
 public class IOModule extends AbstractModule{
 	
@@ -69,19 +71,22 @@ public class IOModule extends AbstractModule{
         if(file != null)
 		    bind(File.class).annotatedWith(ResourceFile.class).toInstance(file);
 		
-		bind(ResourceManager.class).to(FileResourceManager.class).in(Singleton.class);
 		bind(BufferPoolManager.class).to(BufferPoolManagerImpl.class);
 		
 		bindConstant().annotatedWith(Names.named("cacheSize")).to(cacheSize);
 	}
 
-    // this worked
-//	@Provides @Singleton
-//	public ResourceManager provideFileResourceManager() throws IOException{
-//		ResourceManager result = new FileResourceManager(file, pageSize);
-//		result.open();
-//		return result;
-//	}
+    @Provides @Singleton
+	public ResourceManager provideFileResourceManager() {
+		ResourceManager result = new FileResourceManager(file, pageSize);
+		try {
+			result.open();
+		} catch (IOException e) {
+			e.printStackTrace();
+			// throw no runtime error, since the user can handle the fact that the resource is closed
+		}
+		return result;
+	}
 
 	
 }
