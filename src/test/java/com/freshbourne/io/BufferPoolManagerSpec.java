@@ -47,8 +47,9 @@ public abstract class BufferPoolManagerSpec {
 		for(int i = 0; i < cacheSize; i++)
 			bpm.createPage();
 		
-		assertTrue(true);
-		assertEquals(valueToCompare, 1L);
+		assertEquals(valueToCompare, bpm.getPage(id).bufferAtZero().getLong());
+		
+		
 	}
 	
 }

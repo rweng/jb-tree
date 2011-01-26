@@ -25,10 +25,12 @@ public class IOModule extends AbstractModule{
 	
 	// ***** CONFIGURATION (CONSTRUCTURS) *****
 	private File file;
-	private int pageSize = -1;
+	private int pageSize = PageSize.DEFAULT_PAGE_SIZE;
+	private int cacheSize = 10;
 	
 	public IOModule(File file){
-		this(file, PageSize.DEFAULT_PAGE_SIZE);
+		super();
+		this.file = file;
 	}
 	
 	public IOModule(String path){
@@ -36,11 +38,20 @@ public class IOModule extends AbstractModule{
 	}
 	
 	public IOModule(File file, int pageSize){
-		super();
-		this.file = file;
+		this(file);
 		this.pageSize = pageSize;
 	}
+	
+	public IOModule(File file, int pageSize, int cacheSize){
+		this(file, pageSize);
+		this.cacheSize = cacheSize;
+	}
 
+	public IOModule(String file, int pageSize, int cacheSize){
+		this(new File(file), pageSize);
+		this.cacheSize = cacheSize;
+	}
+	
     public void resourceFile(File file){this.file = file;};
     public void pageSize(int i){pageSize = i;}
 
@@ -61,7 +72,7 @@ public class IOModule extends AbstractModule{
 		bind(ResourceManager.class).to(FileResourceManager.class).in(Singleton.class);
 		bind(BufferPoolManager.class).to(BufferPoolManagerImpl.class);
 		
-		bindConstant().annotatedWith(Names.named("cacheSize")).to(300);
+		bindConstant().annotatedWith(Names.named("cacheSize")).to(cacheSize);
 	}
 
     // this worked

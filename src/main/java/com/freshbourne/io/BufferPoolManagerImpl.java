@@ -84,4 +84,18 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 		// TODO Auto-generated method stub
 		
 	}
+
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.BufferPoolManager#flush()
+	 */
+	@Override
+	public void flush() {
+		for(RawPage rawPage : cache.values()){
+			if(rawPage.isModified()){
+				rm.writePage(rawPage);
+				rawPage.setModified(false);
+			}
+		}
+	}
 }

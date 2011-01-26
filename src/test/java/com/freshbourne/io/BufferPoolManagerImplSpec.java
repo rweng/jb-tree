@@ -13,8 +13,10 @@ import com.google.inject.Injector;
 public class BufferPoolManagerImplSpec extends BufferPoolManagerSpec {
 	
 	private static Injector injector;
+	private static int cacheSize = 5;
+	
 	static {
-		injector = Guice.createInjector(new IOModule("/tmp/bpm_test"));
+		injector = Guice.createInjector(new IOModule("/tmp/bpm_test", PageSize.DEFAULT_PAGE_SIZE, cacheSize));
 	}
 
 	/* (non-Javadoc)
@@ -30,7 +32,7 @@ public class BufferPoolManagerImplSpec extends BufferPoolManagerSpec {
 	 */
 	@Override
 	protected int getCacheSize() {
-		return 5;
+		return cacheSize;
 	}
 
 }
