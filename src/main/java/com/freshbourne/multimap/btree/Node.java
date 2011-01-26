@@ -15,7 +15,6 @@
  */
 package com.freshbourne.multimap.btree;
 
-import java.io.IOException;
 import java.util.List;
 
 import com.freshbourne.io.PagePointer;
@@ -67,10 +66,8 @@ public interface Node<K, V> {
 	/**
 	 * @param key
 	 * @return array of values associated with the key or an empty array if the key does not exist
-	 * @throws IOException 
-	 * @throws Exception 
 	 */
-	public List<V> get(K key) throws IOException, Exception;
+	public List<V> get(K key);
 	
 	
 	
@@ -82,9 +79,8 @@ public interface Node<K, V> {
      * 
      * @param key
      * @return number of removed values
-     * @throws Exception 
      */
-    int remove(K key) throws Exception;
+    int remove(K key);
     
     /**
      * Removes the value under key.
@@ -92,14 +88,12 @@ public interface Node<K, V> {
      * 
      * @param key
      * @param value
-     * @throws Exception 
      */
-    void remove(K key, V value) throws Exception;
+    void remove(K key, V value);
     
     /**
      * removes all key and values, destroying all rawPages with the keyPages, valuePages, leafPages and innerNodePages
-     * @throws Exception 
      */
-    void destroy() throws Exception;
+    void destroy();
     
 }

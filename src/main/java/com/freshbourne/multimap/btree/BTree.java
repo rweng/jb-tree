@@ -93,7 +93,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#get(java.lang.Object)
 	 */
 	@Override
-	public List<V> get(K key) throws Exception {
+	public List<V> get(K key) {
 		ensureValid();
 		
 		return root.get(key);
@@ -129,7 +129,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
 	 */
 	@Override
-	public void remove(K key) throws Exception {
+	public void remove(K key) {
 		ensureValid();
 		
 		numberOfEntries -= root.remove(key);
@@ -139,7 +139,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public void remove(K key, V value) throws Exception {
+	public void remove(K key, V value) {
 		ensureValid();
 		
 		root.remove(key, value);
@@ -149,7 +149,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#clear()
 	 */
 	@Override
-	public void clear() throws Exception {
+	public void clear() {
 		ensureValid();
 		
 		root.destroy();

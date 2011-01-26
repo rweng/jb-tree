@@ -14,8 +14,6 @@
  */
 package com.freshbourne.multimap;
 
-
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -51,10 +49,8 @@ public interface MultiMap<K, V> {
 	/**
 	 * @param key
 	 * @return array of values associated with the key or an empty array if the key does not exist
-	 * @throws IOException 
-	 * @throws Exception 
 	 */
-	public List<V> get(K key) throws IOException, Exception;
+	public List<V> get(K key);
 	
 	
 	
@@ -74,9 +70,8 @@ public interface MultiMap<K, V> {
      * If the key was not found, an empty array is returned.
      * 
      * @param key
-     * @throws Exception 
      */
-    void remove(K key) throws Exception;
+    void remove(K key);
     
     /**
      * Removes the value under key.
@@ -84,13 +79,11 @@ public interface MultiMap<K, V> {
      * 
      * @param key
      * @param value
-     * @throws Exception 
      */
-    void remove(K key, V value) throws Exception;
+    void remove(K key, V value);
     
     /**
      * removes all keys and values
-     * @throws Exception 
      */
-    void clear() throws Exception;
+    void clear();
 }

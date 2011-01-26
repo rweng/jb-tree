@@ -12,8 +12,6 @@ import com.freshbourne.multimap.MultiMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-
 import static org.junit.Assert.*;
 
 public abstract class MultiMapSpec<K, V> {
@@ -26,7 +24,7 @@ public abstract class MultiMapSpec<K, V> {
 	private V value2;
 	
 	@Before
-	public void setUp() throws IOException{
+	public void setUp() {
 		tree = createMultiMap();
 		key1 = createRandomKey();
 		key2 = createRandomKey();
@@ -45,7 +43,7 @@ public abstract class MultiMapSpec<K, V> {
 	}
 	
 	@Test
-	public void shouldContainAddedEntries() throws Exception{
+	public void shouldContainAddedEntries() {
 		tree.add(key1, value1);
 		assertTrue(tree.containsKey(key1));
 		assertEquals(1, tree.get(key1).size());
@@ -69,12 +67,12 @@ public abstract class MultiMapSpec<K, V> {
 	}
 	
 	@Test
-	public void shouldReturnEmptyArrayIfKeyNotFound() throws IOException, Exception{
+	public void shouldReturnEmptyArrayIfKeyNotFound() {
 		assertEquals(0, tree.get(key1).size());
 	}
 	
 	@Test
-	public void shouldBeAbleToRemoveInsertedEntries() throws Exception{
+	public void shouldBeAbleToRemoveInsertedEntries() {
 		tree.add(key1, value1);
 		assertTrue(tree.containsKey(key1));
 		tree.remove(key1);
@@ -83,7 +81,7 @@ public abstract class MultiMapSpec<K, V> {
 	}
 	
 	@Test
-	public void clearShouldRemoveAllElements() throws Exception{
+	public void clearShouldRemoveAllElements() {
 		tree.add(key1, value1);
 		tree.add(key2, value2);
 		assertEquals(2, tree.getNumberOfEntries());
@@ -92,7 +90,7 @@ public abstract class MultiMapSpec<K, V> {
 	}
 	
 	@Test
-	public void removeWithValueArgumentShouldRemoveOnlyThisValue() throws Exception{
+	public void removeWithValueArgumentShouldRemoveOnlyThisValue() {
 		tree.add(key1, value1);
 		tree.add(key1, value2);
 		tree.add(key2, value2);
@@ -106,7 +104,7 @@ public abstract class MultiMapSpec<K, V> {
 	}
 	
 	@Test
-	public void removeWithOnlyKeyArgumentShouldRemoveAllValues() throws Exception{
+	public void removeWithOnlyKeyArgumentShouldRemoveAllValues() {
 		tree.add(key1, value1);
 		tree.add(key1, value2);
 		tree.add(key2, value2);

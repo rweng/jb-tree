@@ -241,7 +241,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<V> get(K key) throws Exception {
+	public List<V> get(K key) {
 		List<V> result = new ArrayList<V>();
 		
 		byte[] bytebuf = new byte[pointerSerializer.serializedLength(PagePointer.class)];
@@ -328,7 +328,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
 	 */
 	@Override
-	public int remove(K key) throws Exception {
+	public int remove(K key) {
 		int pos = posOfKey(key);
 		if(pos == NOT_FOUND)
 			return 0;
@@ -348,7 +348,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public void remove(K key, V value) throws Exception {
+	public void remove(K key, V value) {
 		int pos = posOfKey(key);
 		if(pos == NOT_FOUND)
 			return;
@@ -417,7 +417,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.btree.Node#destroy()
 	 */
 	@Override
-	public void destroy() throws Exception {
+	public void destroy() {
 		byte[] buf = new byte[serializedPointerSize];
 		
 		//TODO: free pages
