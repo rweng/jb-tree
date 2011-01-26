@@ -14,7 +14,7 @@ cd index
 gradle tasks
 # if you are in eclipse, generate the eclipse files to be able to open the repository as eclipse project
 gradle eclipse
-# run the tests (currently, only the BTreeSpec should fail)
+# run the tests
 gradle test
 # generate javadoc
 gradle javadoc
