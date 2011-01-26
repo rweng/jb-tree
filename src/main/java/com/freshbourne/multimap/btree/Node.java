@@ -90,9 +90,10 @@ public interface Node<K, V> {
      * If the key was not found, an empty array is returned.
      * 
      * @param key
+     * @return number of removed values
      * @throws Exception 
      */
-    void remove(K key) throws Exception;
+    int remove(K key) throws Exception;
     
     /**
      * Removes the value under key.

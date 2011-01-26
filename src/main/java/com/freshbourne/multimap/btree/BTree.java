@@ -20,7 +20,6 @@ import com.freshbourne.io.ComplexPage;
 import com.freshbourne.io.RawPage;
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
-import com.freshbourne.multimap.btree.InnerNode.PagePointerAndKey;
 import com.google.inject.Inject;
 import java.nio.ByteBuffer;
 import java.util.Comparator;
@@ -150,7 +149,6 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		InnerNode<K, V> thisInnerNode = (InnerNode<K, V>) node;
 		
 		// get a marker for the point where we descended
-		PagePointerAndKey pos = thisInnerNode.getChildWithKeyAndPosition(key);
 		
 		
 		return null;

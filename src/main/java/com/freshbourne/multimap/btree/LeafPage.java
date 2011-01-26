@@ -314,10 +314,10 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
 	 */
 	@Override
-	public void remove(K key) throws Exception {
+	public int remove(K key) throws Exception {
 		int pos = posOfKey(key);
 		if(pos == NOT_FOUND)
-			return;
+			return 0;
 		
 		int numberOfValues = get(key).size();
 		int sizeOfValues = numberOfValues * serializedPointerSize * 2;
@@ -327,6 +327,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		// shift the pointers after key
 		System.arraycopy(buffer().array(), pos + sizeOfValues , buffer().array(), pos , buffer().array().length - pos - sizeOfValues);
 		numberOfEntries -= numberOfValues;
+		return numberOfValues;
 	}
 
 	/* (non-Javadoc)
