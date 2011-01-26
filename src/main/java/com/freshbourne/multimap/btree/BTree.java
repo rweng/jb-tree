@@ -212,7 +212,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	public void remove(K key) throws Exception {
 		ensureValid();
 		
-		root.remove(key);
+		numberOfEntries -= root.remove(key);
 	}
 
 	/* (non-Javadoc)
