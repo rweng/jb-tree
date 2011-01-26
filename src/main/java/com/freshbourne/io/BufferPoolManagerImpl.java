@@ -97,37 +97,25 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.MustBeOpened#open()
+	 * @see com.freshbourne.io.BufferPoolManager#clearCache()
 	 */
 	@Override
-	public void open() throws Exception {
-		if(!rm.isOpen())
-            rm.open();
-		
-		clearCache();
-	}
-	
-	private void clearCache(){
+	public void clearCache() {
 		cache.clear();
 		cacheQueue.clear();
 	}
 
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.MustBeOpened#isOpen()
+	 * @see com.freshbourne.io.BufferPoolManager#getResourceManager()
 	 */
 	@Override
-	public boolean isOpen() {
-		return rm.isOpen();
+	public ResourceManager getResourceManager() {
+		return rm;
 	}
 
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.MustBeOpened#close()
-	 */
-	@Override
-	public void close() throws Exception {
-		rm.close();
-		clearCache();
-	}
+	
+
+
 }

@@ -7,12 +7,22 @@
  */
 package com.freshbourne.io;
 
-public interface BufferPoolManager extends PageManager<RawPage>, MustBeOpened {
+public interface BufferPoolManager extends PageManager<RawPage> {
 	
 	/**
 	 * writes all pages in the cache to the resource
 	 */
 	public void flush();
+	
+	/**
+	 * @return resourceManager backing this BuferPoolManager
+	 */
+	public ResourceManager getResourceManager();
+	
+	/**
+	 * clears the cache
+	 */
+	public void clearCache();
 	
 	
 }
