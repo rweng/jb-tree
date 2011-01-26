@@ -10,16 +10,12 @@ get started by cloning the repository:
 
 bc. git clone https://rweng@github.com/rweng/index.git
 cd index
-
 # look at all tasks you can do with the build manager
 gradle tasks
-
 # if you are in eclipse, generate the eclipse files to be able to open the folder as eclipse project
 gradle eclipse
-
 # run the tests (currently, only the BTreeSpec should fail)
 gradle test
-
 
 h2. Features
 * you can easily order your tree by providing a different comparator for the keys.
