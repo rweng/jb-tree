@@ -44,12 +44,10 @@ public abstract class BufferPoolManagerSpec {
 		page.bufferAtZero().putLong(valueToCompare);
 		page.setModified(true);
 		
-		for(int i = 0; i < cacheSize; i++)
+		for(int i = 0; i < cacheSize * 3; i++) // make sure all cache is replaced
 			bpm.createPage();
 		
 		assertEquals(valueToCompare, bpm.getPage(id).bufferAtZero().getLong());
-		
-		
 	}
 	
 }
