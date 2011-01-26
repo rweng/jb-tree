@@ -114,7 +114,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		
 		numberOfEntries++;
 		
-		AdjustmentAction<K, V> result = recursivelyInsert(root, key, value, 0);
+		AdjustmentAction<K, V> result = root.insert(key, value);
 		
 		// insert was successful
 		if(result == null)
@@ -158,7 +158,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		
 		// if leaf has enough space
 		if (!thisLeaf.isFull()) {
-			thisLeaf.add(key, value);
+			thisLeaf.insert(key, value);
 			return null;
 		} 
 		

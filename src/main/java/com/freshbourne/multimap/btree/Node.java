@@ -33,7 +33,7 @@ import com.freshbourne.io.PagePointer;
 public interface Node<K, V> {
 	
 	/**
-	 * replaces the add method for Leafs and InnerNodes
+	 * inserts the key and value into the node
 	 * 
 	 * @param key
 	 * @param value
@@ -75,15 +75,6 @@ public interface Node<K, V> {
 	
 	
     // Modification Operations
-    
-    /**
-     * Adds the specified value to the specified key.
-     * 
-     * @param key
-     * @param value
-     * 
-     */
-    public void add(K key, V value);
     
     /**
      * Removes the key with all its associated values from the map.

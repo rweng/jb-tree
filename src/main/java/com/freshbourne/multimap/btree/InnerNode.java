@@ -75,15 +75,6 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMap#add(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public void add(K key, V value) {
-		// TODO Auto-generated method stub
-		return;
-	}
-
-	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
 	 */
 	@Override

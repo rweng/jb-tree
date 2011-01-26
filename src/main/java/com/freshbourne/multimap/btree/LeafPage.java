@@ -82,13 +82,6 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
     
     
 	
-	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMap#add(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public void add(K key, V value) {
-		insert(key, value);
-	}
 	
 	private void ensureValid() {
 		if( isValid() )
