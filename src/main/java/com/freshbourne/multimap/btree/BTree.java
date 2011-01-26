@@ -29,13 +29,8 @@ import java.util.List;
 /**
  * An implementation of a Map that can hold more that one value for each key.
  * 
- * This class does all the rotating and balancing of the BTree so that Leafs and InnerNodes. There are two reasons for this decision:
- * 
- * First, if Nodes handle the rotating themselves, it is hard to decide who should actually create other nodes. Some logic would be duplicate since
- * in the worst case this class has to have some methods that are already in the InnerNode. 
- * 
- * Second, this way Nodes are more generic and can be used in other Trees as well. The correct way to move the recursion in nodes might be to inherit from
- * the current nodes, make special BTreeNodes that also have access to the BTree for configuration values (like when to move entries from one leaf to another)
+ * This class does all the rotating and balancing of the BTree so that Leafs and InnerNodes are not polluted by having
+ * to create new nodes. This is done exclusively in this class.
  * 
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
@@ -237,7 +232,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	public void clear() throws Exception {
 		ensureValid();
 		
-		root.clear();
+		root.destroy();
 		
 		root = leafPageManager.createPage();
 		numberOfEntries = 0;
