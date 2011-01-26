@@ -102,7 +102,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#clear()
 	 */
 	@Override
-	public void destroy() throws Exception {
+	public void clear() throws Exception {
 		// TODO Auto-generated method stub
 		
 	}

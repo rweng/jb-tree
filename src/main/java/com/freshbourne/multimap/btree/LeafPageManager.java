@@ -44,7 +44,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	@Override
 	public LeafPage<K, V> createPage() {
 		RawPage p = bpm.createPage();
-		LeafPage<K, V> l = new LeafPage<K, V>(p, keyPageManager, valuePageManager, ppSerializer, comparator, this);
+		LeafPage<K, V> l = new LeafPage<K, V>(p, keyPageManager, valuePageManager, ppSerializer, comparator);
 		l.initialize();
 		return l;
 	}

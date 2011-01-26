@@ -55,17 +55,14 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	
 	private Long lastValuePageId = null;
 	private int lastValuePageRemainingBytes = -1;
-	private final PageManager<LeafPage<K,V>> leafPageManager;
 
 	LeafPage(
 			RawPage page,
             DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
 			FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
-			Comparator<K> comparator,
-			PageManager<LeafPage<K,V>> leafPageManager
+			Comparator<K> comparator
 			){
-    	this.leafPageManager = leafPageManager;
     	this.rawPage = page;
 		this.keyPageManager = keyPageManager;
 		this.valuePageManager = valuePageManager;
@@ -398,7 +395,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.btree.Node#destroy()
 	 */
 	@Override
-	public void destroy() throws Exception {
+	public void clear() throws Exception {
 		byte[] buf = new byte[serializedPointerSize];
 		
 		//TODO: free pages
@@ -422,8 +419,6 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 				valuePageManager.removePage(valuePage.rawPage().id());
 			
 		}
-		
-		leafPageManager.removePage(rawPage().id());
 	}
 
 	/**
