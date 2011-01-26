@@ -39,7 +39,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	private DataPageManager<K> keyPageManager;
 	private DataPageManager<V> valuePageManager;
 	
-	private final Comparator<K> comperator;
+	private final Comparator<K> comparator;
 	
 	private boolean valid = false;
 	
@@ -80,7 +80,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		this.keyPageManager = keyPageManager;
 		this.valuePageManager = valuePageManager;
 		this.pointerSerializer = pointerSerializer;
-		this.comperator = comparator;
+		this.comparator = comparator;
 		
 		this.serializedPointerSize = pointerSerializer.serializedLength(PagePointer.class);
 		
@@ -125,7 +125,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		if(getNumberOfEntries() + num > maxEntries)
 			throw new IllegalArgumentException("not enough space in this leaf to prepend " + num + " entries from other leaf");
 		
-		if(getNumberOfEntries() > 0 && comperator.compare(source.getLastKey(), getFirstKey()) > 0)
+		if(getNumberOfEntries() > 0 && comparator.compare(source.getLastKey(), getFirstKey()) > 0)
 			throw new IllegalArgumentException("the last key of the provided source leaf is larger than this leafs first key");
 		
 		// make space in this leaf, move all elements to the right
@@ -548,7 +548,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 				nextLeaf.prependEntriesFromOtherPage(this, nextLeaf.getRemainingEntries() >> 1);
 				
 				// see on which page we will insert the value
-				if(comperator.compare(key, this.getLastKey()) > 0){
+				if(comparator.compare(key, this.getLastKey()) > 0){
 					nextLeaf.insert(key, value);
 				} else {
 					this.insert(key, value);
@@ -572,7 +572,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 				this.getNumberOfEntries() >> 1);
 
 		// see on which page we will insert the value
-		if (comperator.compare(key, this.getLastKey()) > 0) {
+		if (comparator.compare(key, this.getLastKey()) > 0) {
 			newLeaf.insert(key, value);
 		} else {
 			this.insert(key, value);
