@@ -60,7 +60,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#containsKey(java.lang.Object)
 	 */
 	@Override
-	public boolean containsKey(K key) throws Exception {
+	public boolean containsKey(K key) {
 		// TODO Auto-generated method stub
 		return false;
 	}

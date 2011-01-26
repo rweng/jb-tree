@@ -62,7 +62,7 @@ public interface Node<K, V> {
 	/**
 	 * @return boolean if the key is contained in the map
 	 */
-	public boolean containsKey(K key) throws Exception;
+	public boolean containsKey(K key);
     
 	/**
 	 * @param key

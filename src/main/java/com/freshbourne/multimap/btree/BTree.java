@@ -83,7 +83,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#containsKey(java.lang.Object)
 	 */
 	@Override
-	public boolean containsKey(K key) throws Exception {
+	public boolean containsKey(K key) {
 		ensureValid();
 		
 		return root.containsKey(key);

@@ -125,13 +125,7 @@ public abstract class MultiMapSpec<K, V> {
 		assertEquals(1000, tree.getNumberOfEntries());
 		
 		tree.add(key1, value2);
-		try {
-			assertTrue(tree.containsKey(key1));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		assertTrue(tree.containsKey(key1));
 		
 	}
 	

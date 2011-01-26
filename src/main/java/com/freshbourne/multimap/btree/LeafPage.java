@@ -213,7 +213,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.MultiMap#containsKey(java.lang.Object)
 	 */
 	@Override
-	public boolean containsKey(K key) throws Exception {
+	public boolean containsKey(K key) {
         return posOfKey(key) != NOT_FOUND;
 	}
 	
@@ -284,9 +284,8 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	/**
 	 * @param key
 	 * @return position to set the buffer to, where the key starts, -1 if key not found 
-	 * @throws Exception 
 	 */
-	private int posOfKey(K key) throws Exception{
+	private int posOfKey(K key) {
 		int pSize = pointerSerializer.serializedLength(PagePointer.class);
 		byte[] bytebuf = new byte[pSize];
 
