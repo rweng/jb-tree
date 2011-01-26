@@ -38,7 +38,9 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	 */
 	@Override
 	protected MultiMap<Integer, String> createMultiMap() {
-		return injector.getInstance(Key.get(new TypeLiteral<BTree<Integer,String>>(){}));
+		BTree<Integer, String> tree = injector.getInstance(Key.get(new TypeLiteral<BTree<Integer,String>>(){}));
+		tree.initialize();
+		return tree;
 	}
 
 	/* (non-Javadoc)
