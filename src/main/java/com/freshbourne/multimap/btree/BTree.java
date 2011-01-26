@@ -77,7 +77,13 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public int getNumberOfEntries() {
+		ensureValid();
 		return numberOfEntries;
+	}
+
+	private void ensureValid() {
+		if(!isValid())
+			throw new IllegalStateException("Btree must be initialized or loaded");
 	}
 
 	/* (non-Javadoc)
@@ -85,6 +91,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public boolean containsKey(K key) throws Exception {
+		ensureValid();
+		
 		return root.containsKey(key);
 	}
 
@@ -93,6 +101,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public List<V> get(K key) throws Exception {
+		ensureValid();
+		
 		return root.get(key);
 	}
 
@@ -101,6 +111,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public void add(K key, V value) {
+		ensureValid();
+		
 		AdjustmentAction<K, V> result = recursivelyInsert(root, key, value, 0);
 		
 		// insert was successful
@@ -129,7 +141,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		
 		// make sure node is right type
 		if (!(node instanceof InnerNode)){
-			throw new IllegalArgumentException("node must be of type Leaf or InnerNode!");
+			throw new IllegalArgumentException("node must be of type Leaf or InnerNode! Current class: " + node.getClass());
 		}
 		
 		// handle normal InnerNodes
@@ -198,6 +210,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public void remove(K key) throws Exception {
+		ensureValid();
+		
 		root.remove(key);
 	}
 
@@ -206,6 +220,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public void remove(K key, V value) throws Exception {
+		ensureValid();
+		
 		root.remove(key, value);
 	}
 
@@ -214,6 +230,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public void clear() throws Exception {
+		ensureValid();
+		
 		root.clear();
 	}
 	
@@ -277,6 +295,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public RawPage rawPage() {
+		ensureValid();
+		
 		return rawPage;
 	}
 
