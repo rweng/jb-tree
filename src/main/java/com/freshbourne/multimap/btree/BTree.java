@@ -39,6 +39,27 @@ import java.util.List;
  */
 public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
+	private enum NodeType {
+		LEAF_NODE('L'), INNERNODE('I');
+		
+		private final char serialized;
+		NodeType(char serialized){
+			this.serialized = serialized;
+		}
+		
+		public char serialize(){
+			return serialized;
+		}
+		
+		public NodeType deserialize(char serialized){
+			for(NodeType nt : NodeType.values())
+				if(nt.serialize() == serialized)
+					return nt;
+			
+			return null;
+		}
+	}
+	
 	private final LeafPageManager<K,V> leafPageManager;
 	private final InnerNodeManager<K, V> innerNodeManager;
 	private final Comparator<K> comparator;
@@ -118,7 +139,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		if(result.getAction() == ACTION.INSERT_NEW_NODE){
 			
 			// new root
-			InnerNode<K, V> newRoot = innerNodeManager.createPage();
+			BTreeInnerNode<K, V> newRoot = innerNodeManager.createPage();
 			newRoot.initRootState(result.getKeyPointer(), root.getId(), result.getPageId());
 			root = newRoot;
 		}

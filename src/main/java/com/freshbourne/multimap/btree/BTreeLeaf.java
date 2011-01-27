@@ -17,15 +17,16 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * This B-Tree-Leaf stores entries by storing the keys and values in seperate pages
+ * This B-Tree-Leaf stores entries by storing the keys and values in separate pages
  * and keeping track only of the pageId and offset.
+ * 
  * 
  * @author "Robin Wenglewski <robin@wenglewski.de>"
  *
  * @param <K> KeyType
  * @param <V> ValueType
  */
-public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
+public class BTreeLeaf<K,V> implements Node<K,V>, ComplexPage {
 	
 	/**
 	 * If a leaf page is less full than this factor, it may be target of operations
@@ -63,17 +64,17 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 	
 	private Long lastValuePageId = null;
 	private int lastValuePageRemainingBytes = -1;
-	private final PageManager<LeafPage<K,V>> leafPageManager;
+	private final PageManager<BTreeLeaf<K,V>> leafPageManager;
 	
 	private BTree<K, V> tree;
 	
-	LeafPage(
+	BTreeLeaf(
 			RawPage page,
             DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
 			FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
 			Comparator<K> comparator,
-			PageManager<LeafPage<K,V>> leafPageManager
+			PageManager<BTreeLeaf<K,V>> leafPageManager
 			){
     	this.leafPageManager = leafPageManager;
     	this.rawPage = page;
@@ -113,7 +114,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		System.exit(1);
 	}
 	
-	public void prependEntriesFromOtherPage(LeafPage<K, V> source, int num){
+	public void prependEntriesFromOtherPage(BTreeLeaf<K, V> source, int num){
 		
 		// checks
 		if(num < 0)
@@ -541,7 +542,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		
 		// if leaf does not have enough space but we can move some data to the next leaf
 		if (this.getNextLeafId() != null) {
-			LeafPage<K, V> nextLeaf = leafPageManager.getPage(this.getNextLeafId());
+			BTreeLeaf<K, V> nextLeaf = leafPageManager.getPage(this.getNextLeafId());
 			
 			if(nextLeaf.getRemainingEntries() >= getMinFreeLeafEntriesToMove()){
 				nextLeaf.prependEntriesFromOtherPage(this, nextLeaf.getRemainingEntries() >> 1);
@@ -560,7 +561,7 @@ public class LeafPage<K,V> implements Node<K,V>, ComplexPage {
 		// if we have to allocate a new leaf
 		
 		// allocate new leaf
-		LeafPage<K,V> newLeaf = leafPageManager.createPage();
+		BTreeLeaf<K,V> newLeaf = leafPageManager.createPage();
 		newLeaf.setNextLeafId(this.getId());
 		this.setNextLeafId(newLeaf.rawPage().id());
 			

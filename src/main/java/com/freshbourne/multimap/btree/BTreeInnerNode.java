@@ -16,7 +16,20 @@ import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.RawPage;
 import com.freshbourne.serializer.FixLengthSerializer;
 
-public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
+/**
+ *
+ * stores pointers to the keys that get push upwards to InnerNodes from LeafPages, as well as the id of nodes
+ * in the following order:
+ * 
+ * NODE_ID | KEY_POINTER | NODE_ID | KEY_POINTER | NODE_ID ...
+ *
+ * @author Robin Wenglewski <robin@wenglewski.de>
+ *
+ * @param <K>
+ * @param <V>
+ */
+public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
+
 
 	
 	private final RawPage rawPage;
@@ -26,7 +39,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private int numberOfKeys = 0;
 	private boolean valid = false;
 	
-	InnerNode(RawPage rawPage, FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
+	BTreeInnerNode(RawPage rawPage, FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
 			Comparator<K> comparator){
 		this.rawPage = rawPage;
 		this.comperator = comparator;
@@ -34,7 +47,9 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	public void initRootState(PagePointer keyPointer, Long pageId1, Long pageId2){
-		buffer().position(headerSize());
+		ByteBuffer buf = buffer();
+		buf.position(headerSize());
+		
 		buffer().putLong(pageId1);
 		buffer().put(pointerSerializer.serialize(keyPointer));
 		buffer().putLong(pageId2);
@@ -89,8 +104,9 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	
-	private void getChildForKey(K key) {
+	private PagePointer getChildForKey(K key) {
 		
+		return null;
 	}
 
 	/* (non-Javadoc)
@@ -163,6 +179,8 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public AdjustmentAction<K, V> insert(K key, V value) {
 		ensureValid();
+		
+		getChildForKey(key);
 
 		throw new UnsupportedOperationException();
 	}

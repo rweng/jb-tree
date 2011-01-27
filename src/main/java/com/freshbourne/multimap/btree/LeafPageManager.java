@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 
 import java.util.Comparator;
 
-public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
+public class LeafPageManager<K,V> implements PageManager<BTreeLeaf<K,V>> {
 
 	private final BufferPoolManager bpm;
 	private final FixLengthSerializer<PagePointer, byte[]> ppSerializer;
@@ -42,9 +42,9 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	 * @see com.freshbourne.io.PageManager#createPage()
 	 */
 	@Override
-	public LeafPage<K, V> createPage() {
+	public BTreeLeaf<K, V> createPage() {
 		RawPage p = bpm.createPage();
-		LeafPage<K, V> l = new LeafPage<K, V>(p, keyPageManager, valuePageManager, ppSerializer, comparator, this);
+		BTreeLeaf<K, V> l = new BTreeLeaf<K, V>(p, keyPageManager, valuePageManager, ppSerializer, comparator, this);
 		l.initialize();
 		return l;
 	}
@@ -53,7 +53,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafPage<K,V>> {
 	 * @see com.freshbourne.io.PageManager#getPage(int)
 	 */
 	@Override
-	public LeafPage<K, V> getPage(long id) {
+	public BTreeLeaf<K, V> getPage(long id) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -17,7 +17,7 @@ import com.freshbourne.io.RawPage;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.google.inject.Inject;
 
-public class InnerNodeManager<K, V> implements PageManager<InnerNode<K, V>> {
+public class InnerNodeManager<K, V> implements PageManager<BTreeInnerNode<K, V>> {
 
 	private final BufferPoolManager bpm;
 	private final FixLengthSerializer<PagePointer, byte[]> ppSerializer;
@@ -45,9 +45,9 @@ public class InnerNodeManager<K, V> implements PageManager<InnerNode<K, V>> {
 	 * @see com.freshbourne.io.PageManager#createPage()
 	 */
 	@Override
-	public InnerNode<K, V> createPage() {
+	public BTreeInnerNode<K, V> createPage() {
 		RawPage p = bpm.createPage();
-		InnerNode<K, V> l = new InnerNode<K, V>(bpm.createPage(), ppSerializer, comparator);
+		BTreeInnerNode<K, V> l = new BTreeInnerNode<K, V>(bpm.createPage(), ppSerializer, comparator);
 		l.initialize();
 		return l;
 	}
@@ -56,7 +56,7 @@ public class InnerNodeManager<K, V> implements PageManager<InnerNode<K, V>> {
 	 * @see com.freshbourne.io.PageManager#getPage(int)
 	 */
 	@Override
-	public InnerNode<K, V> getPage(long id) {
+	public BTreeInnerNode<K, V> getPage(long id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
