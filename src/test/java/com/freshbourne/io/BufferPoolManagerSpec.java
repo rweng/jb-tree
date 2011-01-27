@@ -56,6 +56,33 @@ public abstract class BufferPoolManagerSpec {
 		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());
 	}
 	
+	@Test public void shouldReturnSameInstanceWhenPageIsGotTwice(){
+		Long pageId = createPageWithCompareValueAndLoop();
+		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());
+		
+		
+		long secondValue = 1111L;
+		bpm.getPage(pageId).bufferAtZero().putLong(secondValue);
+		createPageWithCompareValueAndLoop();
+		assertEquals(secondValue, bpm.getPage(pageId).bufferAtZero().getLong());
+	}
+	
+	@Test public void shouldWorkWhenClosingAndReopeningResourceManager() throws IOException{
+		long pageId = createPageWithCompareValueAndLoop();
+
+		bpm.flush();
+		bpm.getResourceManager().close();
+		bpm.getResourceManager().open();
+		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());
+	}
+	
+	@Test public void shouldWorkWithNewBufferPoolManager() throws IOException{
+		long pageId = createPageWithCompareValueAndLoop();
+		bpm.flush();
+		bpm = createBufferPoolManager();
+		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());	
+	}
+	
 	@Test public void flush(){
 		Long pageId = createPageWithCompareValueAndLoop();
 		bpm.flush();
