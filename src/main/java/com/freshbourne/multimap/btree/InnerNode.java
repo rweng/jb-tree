@@ -33,7 +33,7 @@ import com.freshbourne.serializer.Serializer;
  * @param <K>
  * @param <V>
  */
-public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
+public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	
 	private static final NodeType NODE_TYPE = NodeType.INNER_NODE;
 	
@@ -53,19 +53,19 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private final Comparator<K> comperator;
 	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	private final DataPageManager<K> keyPageManager;
-	private final PageManager<BTreeLeaf<K, V>> leafPageManager;
-	private final PageManager<BTreeInnerNode<K, V>> innerNodePageManager;
+	private final PageManager<LeafNode<K, V>> leafPageManager;
+	private final PageManager<InnerNode<K, V>> innerNodePageManager;
 	
 	private int numberOfKeys;
 	private boolean valid = false;
 	
-	BTreeInnerNode(
+	InnerNode(
 			RawPage rawPage, 
 			FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
 			Comparator<K> comparator,
 			DataPageManager<K> keyPageManager,
-			PageManager<BTreeLeaf<K, V>> leafPageManager,
-			PageManager<BTreeInnerNode<K, V>> innerNodePageManager
+			PageManager<LeafNode<K, V>> leafPageManager,
+			PageManager<InnerNode<K, V>> innerNodePageManager
 	){
 		this.leafPageManager = leafPageManager;
 		this.innerNodePageManager = innerNodePageManager;
@@ -293,13 +293,13 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 		else
 			pageId = getLeftPageIdOfKey(posOfFirstLargerOrEqualKey);
 		
-		BTreeLeaf<K, V> leaf = leafPageManager.getPage(pageId);
+		LeafNode<K, V> leaf = leafPageManager.getPage(pageId);
 		AdjustmentAction<K, V> result;
 		
 		if(leaf != null){
 			result = leaf.insert(key, value);
 		} else {
-			BTreeInnerNode<K, V> innerNode = innerNodePageManager.getPage(pageId);
+			InnerNode<K, V> innerNode = innerNodePageManager.getPage(pageId);
 			result = innerNode.insert(key, value);
 		}
 		

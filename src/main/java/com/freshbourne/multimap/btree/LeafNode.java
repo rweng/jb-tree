@@ -27,7 +27,7 @@ import java.util.List;
  * @param <K> KeyType
  * @param <V> ValueType
  */
-public class BTreeLeaf<K,V> implements Node<K,V>, ComplexPage {
+public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	
 	/**
 	 * If a leaf page is less full than this factor, it may be target of operations
@@ -67,17 +67,17 @@ public class BTreeLeaf<K,V> implements Node<K,V>, ComplexPage {
 	
 	private Long lastValuePageId = null;
 	private int lastValuePageRemainingBytes = -1;
-	private final PageManager<BTreeLeaf<K,V>> leafPageManager;
+	private final PageManager<LeafNode<K,V>> leafPageManager;
 	
 	private BTree<K, V> tree;
 	
-	BTreeLeaf(
+	LeafNode(
 			RawPage page,
             DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
 			FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
 			Comparator<K> comparator,
-			PageManager<BTreeLeaf<K,V>> leafPageManager
+			PageManager<LeafNode<K,V>> leafPageManager
 			){
     	this.leafPageManager = leafPageManager;
     	this.rawPage = page;
@@ -117,7 +117,7 @@ public class BTreeLeaf<K,V> implements Node<K,V>, ComplexPage {
 		System.exit(1);
 	}
 	
-	public void prependEntriesFromOtherPage(BTreeLeaf<K, V> source, int num){
+	public void prependEntriesFromOtherPage(LeafNode<K, V> source, int num){
 		
 		// checks
 		if(num < 0)
@@ -545,7 +545,7 @@ public class BTreeLeaf<K,V> implements Node<K,V>, ComplexPage {
 		
 		// if leaf does not have enough space but we can move some data to the next leaf
 		if (this.getNextLeafId() != null) {
-			BTreeLeaf<K, V> nextLeaf = leafPageManager.getPage(this.getNextLeafId());
+			LeafNode<K, V> nextLeaf = leafPageManager.getPage(this.getNextLeafId());
 			
 			if(nextLeaf.getRemainingEntries() >= getMinFreeLeafEntriesToMove()){
 				nextLeaf.prependEntriesFromOtherPage(this, nextLeaf.getRemainingEntries() >> 1);
@@ -564,7 +564,7 @@ public class BTreeLeaf<K,V> implements Node<K,V>, ComplexPage {
 		// if we have to allocate a new leaf
 		
 		// allocate new leaf
-		BTreeLeaf<K,V> newLeaf = leafPageManager.createPage();
+		LeafNode<K,V> newLeaf = leafPageManager.createPage();
 		newLeaf.setNextLeafId(this.getId());
 		this.setNextLeafId(newLeaf.rawPage().id());
 			
