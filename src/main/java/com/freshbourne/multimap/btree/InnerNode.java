@@ -38,14 +38,14 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private static final NodeType NODE_TYPE = NodeType.INNER_NODE;
 	
 	private static enum Header{
-		NODE_TYPE(0){},
-		NUMBER_OF_KEYS(1);
+		NODE_TYPE(0){}, // char
+		NUMBER_OF_KEYS(1); // int
 		
 		private int offset;
 		Header(int offset){
 			this.offset = offset;
 		}
-		
+		static int size(){return 5;}
 		int getOffset(){return offset;}
 	}
 	
@@ -79,7 +79,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		ensureValid();
 		
 		ByteBuffer buf = buffer();
-		buf.position(headerSize());
+		buf.position(Header.size());
 		
 		buffer().putLong(pageId1);
 		buffer().put(pointerSerializer.serialize(keyPointer));
@@ -88,11 +88,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		setNumberOfKeys(1);
 	}
 	
-	private static int headerSize() {
-		return Integer.SIZE / 8;
-	}
-
-	/* (non-Javadoc)
+		/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#getNumberOfEntries()
 	 */
 	@Override
@@ -161,12 +157,18 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		throw new UnsupportedOperationException();
 	}
 	
+	private int getSizeOfPageId(){
+		return Long.SIZE / 8;
+	}
+	
 	private int offsetForKey(int i){
-		return headerSize() + ((i + 1) * Long.SIZE / 8) + (i * pointerSerializer.serializedLength(PagePointer.class)); 
+		return Header.size() + 
+			((i+1) * getSizeOfPageId()) + // one id more that pages, the first id
+			(i * getSizeOfSerializedPointer());
 	}
 	
 	private int offsetForPageId(int i){
-		return headerSize() + (i * Long.SIZE / 8) + (i == 0 ? 0 : (i-1) * pointerSerializer.serializedLength(PagePointer.class));
+		return Header.size() + (i * getSizeOfPageId()) + (i == 0 ? 0 : (i-1) * getSizeOfSerializedPointer());
 	}
 	
 	private int posOfFirstLargerKey(K key){
@@ -225,7 +227,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private PagePointer getPointerAtOffset(int offset) {
 		ByteBuffer buf = buffer();
 		buf.position(offset);
-		byte[] byteBuf = new byte[pointerSerializer.serializedLength(PagePointer.class)];
+		byte[] byteBuf = new byte[getSizeOfSerializedPointer()];
 		buf.get(byteBuf);
 		return pointerSerializer.deserialize(byteBuf);
 	}
@@ -366,7 +368,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 
 	private int getMaximalNumberOfKeys() {
-		int size = rawPage.buffer().limit() - headerSize();
+		int size = rawPage.buffer().limit() - Header.size();
 		
 		// size first page id
 		size -= Long.SIZE / 8;

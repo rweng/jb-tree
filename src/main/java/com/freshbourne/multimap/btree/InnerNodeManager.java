@@ -49,7 +49,6 @@ public class InnerNodeManager<K, V> implements PageManager<InnerNode<K, V>> {
 	 */
 	@Override
 	public InnerNode<K, V> createPage() {
-		RawPage p = bpm.createPage();
 		InnerNode<K, V> l = new InnerNode<K, V>(bpm.createPage(), ppSerializer, comparator, keyPageManager, leafPageManager, this);
 		l.initialize();
 		return l;
@@ -60,8 +59,9 @@ public class InnerNodeManager<K, V> implements PageManager<InnerNode<K, V>> {
 	 */
 	@Override
 	public InnerNode<K, V> getPage(long id) {
-		// TODO Auto-generated method stub
-		return null;
+		InnerNode<K, V> l = new InnerNode<K, V>(bpm.getPage(id), ppSerializer, comparator, keyPageManager, leafPageManager, this);
+		l.load();
+		return l;
 	}
 
 	/* (non-Javadoc)
@@ -69,8 +69,7 @@ public class InnerNodeManager<K, V> implements PageManager<InnerNode<K, V>> {
 	 */
 	@Override
 	public void removePage(long id) {
-		// TODO Auto-generated method stub
-		
+		bpm.removePage(id);
 	}
 
 }

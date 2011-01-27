@@ -43,8 +43,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafNode<K,V>> {
 	 */
 	@Override
 	public LeafNode<K, V> createPage() {
-		RawPage p = bpm.createPage();
-		LeafNode<K, V> l = new LeafNode<K, V>(p, keyPageManager, valuePageManager, ppSerializer, comparator, this);
+		LeafNode<K, V> l = new LeafNode<K, V>(bpm.createPage(), keyPageManager, valuePageManager, ppSerializer, comparator, this);
 		l.initialize();
 		return l;
 	}
@@ -54,8 +53,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafNode<K,V>> {
 	 */
 	@Override
 	public LeafNode<K, V> getPage(long id) {
-		RawPage p = bpm.getPage(id);
-		LeafNode<K, V> l = new LeafNode<K, V>(p, keyPageManager, valuePageManager, ppSerializer, comparator, this);
+		LeafNode<K, V> l = new LeafNode<K, V>(bpm.getPage(id), keyPageManager, valuePageManager, ppSerializer, comparator, this);
 		l.load();
 		return l;
 	}

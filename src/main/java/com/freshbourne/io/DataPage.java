@@ -21,7 +21,7 @@ import com.freshbourne.serializer.Serializer;
  *
  */
 public interface DataPage<T> extends ComplexPage {
-
+	
 	/**
 	 * adds some bytes to the underlying body. It is possible that the header
 	 * also grows through this process.

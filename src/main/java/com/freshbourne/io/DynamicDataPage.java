@@ -186,10 +186,10 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	public T get(int id) {
 		ensureValid();
 		
-		Integer offset = entries.get(id);
-		if( offset == null){
+		if(!entries.containsKey(id))
 			return null;
-		}
+		
+		Integer offset = entries.get(id);
 		
 		rawPage.buffer().position(offset);
 		int size = sizeOfEntryAt(offset);
