@@ -59,9 +59,9 @@ public interface Node<K, V> {
 	public int getNumberOfEntries();
 	
 	/**
-	 * @return number of distinct keys in a node
+	 * @return number of keys in a node
 	 */
-	public int getNumberOfUniqueKeys();
+	public int getNumberOfKeys();
 	
 	/**
 	 * @return boolean if the key is contained in the map

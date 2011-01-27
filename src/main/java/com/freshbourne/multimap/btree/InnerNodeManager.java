@@ -26,7 +26,6 @@ public class InnerNodeManager<K, V> implements PageManager<BTreeInnerNode<K, V>>
 	private final DataPageManager<V> valuePageManager;
 	
 	private final Comparator<K> comparator;
-	private final PageManager<BTreeInnerNode<K, V>> innerNodePageManager;
 	private final PageManager<BTreeLeaf<K, V>> leafPageManager;
 	
 	@Inject
@@ -34,15 +33,13 @@ public class InnerNodeManager<K, V> implements PageManager<BTreeInnerNode<K, V>>
 			BufferPoolManager bpm, 
 			DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
-			PageManager<BTreeLeaf<K, V>> leafPageManager,
-			PageManager<BTreeInnerNode<K, V>> innerNodePageManager,
+			LeafPageManager<K, V> leafPageManager,
 			FixLengthSerializer<PagePointer, byte[]> ppSerializer,
 			Comparator<K> comparator) {
 		this.bpm = bpm;
 		this.ppSerializer = ppSerializer;
         this.keyPageManager = keyPageManager;
         this.valuePageManager = valuePageManager;
-        this.innerNodePageManager = innerNodePageManager;
         this.leafPageManager = leafPageManager;
         this.comparator = comparator;
 	}
@@ -53,7 +50,7 @@ public class InnerNodeManager<K, V> implements PageManager<BTreeInnerNode<K, V>>
 	@Override
 	public BTreeInnerNode<K, V> createPage() {
 		RawPage p = bpm.createPage();
-		BTreeInnerNode<K, V> l = new BTreeInnerNode<K, V>(bpm.createPage(), ppSerializer, comparator, keyPageManager, leafPageManager, innerNodePageManager);
+		BTreeInnerNode<K, V> l = new BTreeInnerNode<K, V>(bpm.createPage(), ppSerializer, comparator, keyPageManager, leafPageManager, this);
 		l.initialize();
 		return l;
 	}

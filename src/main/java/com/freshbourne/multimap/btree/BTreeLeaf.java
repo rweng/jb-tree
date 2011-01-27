@@ -651,7 +651,7 @@ public class BTreeLeaf<K,V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.btree.Node#getNumberOfUniqueKeys()
 	 */
 	@Override
-	public int getNumberOfUniqueKeys() {
+	public int getNumberOfKeys() {
 		throw new UnsupportedOperationException();
 	}
 }

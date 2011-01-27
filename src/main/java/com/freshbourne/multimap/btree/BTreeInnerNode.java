@@ -16,6 +16,7 @@ import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.RawPage;
+import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.Serializer;
@@ -146,25 +147,60 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 		throw new UnsupportedOperationException();
 	}
 	
-	private int posOfKey(int i){
-		return ((i + 1) * Long.SIZE / 8) + (i * pointerSerializer.serializedLength(PagePointer.class)); 
+	private int offsetForKey(int i){
+		return headerSize() + ((i + 1) * Long.SIZE / 8) + (i * pointerSerializer.serializedLength(PagePointer.class)); 
 	}
 	
-	private Long getChildForKey(K key) {
-		
+	private int offsetForPageId(int i){
+		return headerSize() + (i * Long.SIZE / 8) + (i == 0 ? 0 : (i-1) * pointerSerializer.serializedLength(PagePointer.class));
+	}
+	
+	private int posOfFirstLargerKey(K key){
 		for(int i = 0; i < numberOfKeys; i++){
-			PagePointer pp = getPointerAtOffset(posOfKey(i));
-			if(comperator.compare(key, getKeyFromPagePointer(pp)) > 0){
-				return getLeftPageIdOfKey(i);
+			PagePointer pp = getPointerAtOffset(offsetForKey(i));
+			if(comperator.compare(getKeyFromPagePointer(pp), key) > 0){
+				return i;
 			}
 		}
-		return null;
+		return -1;
+	}
+	
+	private int posOfFirstLargerOrEqualKey(K key){
+		for(int i = 0; i < numberOfKeys; i++){
+			PagePointer pp = getPointerAtOffset(offsetForKey(i));
+			if(comperator.compare(getKeyFromPagePointer(pp), key) >= 0){
+				return i;
+			}
+		}
+		return -1;
+	}
+	private Long getChildForKey(K key) {
+		return getLeftPageIdOfKey(posOfFirstLargerKey(key));
 	}
 	
 	private Long getLeftPageIdOfKey(int i) {
-		int pos = posOfKey(i) - Long.SIZE / 8;
+		return readPageId(getOffsetForLeftPageIdOfKey(i));
+	}
+	
+	private int getOffsetForLeftPageIdOfKey(int i){
+		return offsetForKey(i) - Long.SIZE / 8;
+	}
+	
+	private int getOffsetForRightPageIdOfKey(int i){
+		return offsetForKey(i) + getSizeOfSerializedPointer();
+	}
+	
+	private int getSizeOfSerializedPointer(){
+		return pointerSerializer.serializedLength(PagePointer.class);
+	}
+	
+	private Long getRightPageIdOfKey(int i) {
+		return readPageId(getOffsetForRightPageIdOfKey(i));
+	}
+	
+	private Long readPageId(int offset){
 		ByteBuffer buf = buffer();
-		buf.position(pos);
+		buf.position(offset);
 		return buf.getLong();
 	}
 
@@ -236,6 +272,12 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	public RawPage rawPage() {
 		return rawPage;
 	}
+	
+	
+	private int getOffsetOfPageIdForKey(K key){
+		
+		return 0;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.Node#insert(java.lang.Object, java.lang.Object)
@@ -244,22 +286,103 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	public AdjustmentAction<K, V> insert(K key, V value) {
 		ensureValid();
 		
-		Long id = getChildForKey(key);
+		int posOfFirstLargerOrEqualKey = posOfFirstLargerOrEqualKey(key);
+		Long pageId;
+		if(posOfFirstLargerOrEqualKey < 0) // if key is largest
+			pageId = getRightPageIdOfKey(getNumberOfKeys());
+		else
+			pageId = getLeftPageIdOfKey(posOfFirstLargerOrEqualKey);
 		
-		BTreeLeaf<K, V> leaf = leafPageManager.getPage(id);
+		BTreeLeaf<K, V> leaf = leafPageManager.getPage(pageId);
 		AdjustmentAction<K, V> result;
 		
 		if(leaf != null){
 			result = leaf.insert(key, value);
 		} else {
-			BTreeInnerNode<K, V> innerNode = innerNodePageManager.getPage(id);
+			BTreeInnerNode<K, V> innerNode = innerNodePageManager.getPage(pageId);
 			result = innerNode.insert(key, value);
 		}
 		
+		// insert worked fine, no adjustment
+		if(result == null)
+			return null;
+		
+		if(result.getAction() == ACTION.UPDATE_KEY){
+			return updateKey(posOfFirstLargerOrEqualKey, result);
+		}
+		
+		if(result.getAction() == ACTION.INSERT_NEW_NODE){
+			// a new child node has been created, check for available space
+			if(getNumberOfKeys() < getMaximalNumberOfKeys()){
+				// space left, simply insert the key/pointer.
+				// the key replaces the old key for our node, since the split caused a different
+				// key to be the now highest in the subtree
+				
+				int posForInsert = posOfFirstLargerOrEqualKey == -1 ? getNumberOfKeys() + 1 : posOfFirstLargerOrEqualKey;
+				insertKeyPointerPageIdAtPosition(
+						result.getKeyPointer(), result.getPageId(),  posForInsert);
+				
+				// no further adjustment necessary. even if we inserted to the last position, the
+				// highest key in the subtree below is still the same, because otherwise we would
+				// have never ended up here during the descend from the root, or we are in the
+				// right-most path of the subtree.
+				return null;
+			}
+		}
 		
 		throw new UnsupportedOperationException();
 	}
+
+	/**
+	 * @param keyPointer
+	 * @param pageId
+	 * @param posOfKeyForInsert
+	 */
+	private void insertKeyPointerPageIdAtPosition(PagePointer keyPointer,
+			Long pageId, int posOfKeyForInsert) {
+		ByteBuffer buf = buffer();
+		buf.position(offsetForKey(posOfKeyForInsert));
+		
+		
+	}
+
+	private int getMaximalNumberOfKeys() {
+		int size = rawPage.buffer().limit() - headerSize();
+		
+		// size first page id
+		size -= Long.SIZE / 8;
+		
+		return size / (Long.SIZE / 8 + pointerSerializer.serializedLength(PagePointer.class));
+	}
+
+	private AdjustmentAction<K, V> updateKey(int posOfFirstLargerOrEqualKey, AdjustmentAction<K, V> result) {
+		if(result.getAction() != ACTION.UPDATE_KEY)
+			throw new IllegalArgumentException("action must be of type UPDATE_KEY");
+		
+		
+		if(posOfFirstLargerOrEqualKey < 0){ // last page
+			return result; // last page must be propagated up
+		}
+		
+		// We need to adjust our own key, because keys were moved to the next node.
+		// That changes the highest key in this page, so the corresponding key
+		// must be adjusted.
+		setKey(result.getKeyPointer(), posOfFirstLargerOrEqualKey);
+		return null;
+	}
 	
+	private void setKey(PagePointer pointer, int pos){
+		ByteBuffer buf = buffer();
+		buf.position(offsetForKey(pos));
+		buf.put(pointerSerializer.serialize(pointer));
+	}
+	
+	private void setPageId(Long pageId, int pos){
+		ByteBuffer buf = buffer();
+		buf.position(offsetForPageId(pos));
+		buf.putLong(pageId);
+	}
+
 	private void ensureValid(){
 		if(!isValid()){
 			throw new IllegalStateException("inner page with the id " + rawPage().id() + " not valid!");
@@ -297,10 +420,10 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.btree.Node#getNumberOfUniqueKeys()
+	 * @see com.freshbourne.multimap.btree.Node#getNumberOfKeys()
 	 */
 	@Override
-	public int getNumberOfUniqueKeys() {
+	public int getNumberOfKeys() {
 		return numberOfKeys;
 	}
 }
