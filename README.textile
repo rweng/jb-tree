@@ -1,8 +1,8 @@
 h1. Flexible BTree-MultiMap implementation 
 
-h2. Requirements
+h2. Dev Requirements
+
 * gradle 0.9-rc3 (install on mac with homebrew: @brew install gradle --HEAD@)
-* eclipse 
 
 h2. Getting started
 
@@ -20,6 +20,11 @@ gradle test
 gradle javadoc
 open build/doc/javadoc/index.html
 
+h2. Documentation
+
+You can find the Javadoc "here":http://rweng.github.com/index/doc/ - If you click on Network, you can see a branch called gh-pages on which you can see the commit the Javadocs are about (not always completely up-to-date).
+
 h2. Features
+
 * you can easily order your tree by providing a different comparator for the keys.
 * ...
