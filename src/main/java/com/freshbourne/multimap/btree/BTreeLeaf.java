@@ -9,6 +9,7 @@ package com.freshbourne.multimap.btree;
 
 import com.freshbourne.io.*;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
+import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
 
 import java.nio.ByteBuffer;
@@ -33,7 +34,9 @@ public class BTreeLeaf<K,V> implements Node<K,V>, ComplexPage {
 	 * where entries are moved from one page to another. 
 	 */
 	private static final float MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE = 0.75f;
-
+	
+	private static final NodeType NODE_TYPE = NodeType.LEAF_NODE;
+	
 	
 	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	

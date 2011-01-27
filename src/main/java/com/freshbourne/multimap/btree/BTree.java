@@ -39,21 +39,28 @@ import java.util.List;
  */
 public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
-	private enum NodeType {
-		LEAF_NODE('L'), INNERNODE('I');
+	/**
+	 * This enum is used to make it possible for all nodes in the BTree to serialize and deserialize
+	 * in a unique fashion
+	 * 
+	 * @author Robin Wenglewski <robin@wenglewski.de>
+	 *
+	 */
+	public enum NodeType {
+		LEAF_NODE('L'), INNER_NODE('I');
 		
 		private final char serialized;
-		NodeType(char serialized){
-			this.serialized = serialized;
+		NodeType(char value){
+			this.serialized = value;
 		}
 		
 		public char serialize(){
 			return serialized;
 		}
 		
-		public NodeType deserialize(char serialized){
-			for(NodeType nt : NodeType.values())
-				if(nt.serialize() == serialized)
+		public static NodeType deserialize(char serialized){
+			for(NodeType nt : values())
+				if(nt.serialized == serialized)
 					return nt;
 			
 			return null;

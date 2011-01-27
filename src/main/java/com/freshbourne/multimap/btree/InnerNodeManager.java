@@ -7,6 +7,7 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.io.IOException;
 import java.util.Comparator;
 
 import com.freshbourne.io.BufferPoolManager;
@@ -48,7 +49,11 @@ public class InnerNodeManager<K, V> implements PageManager<BTreeInnerNode<K, V>>
 	public BTreeInnerNode<K, V> createPage() {
 		RawPage p = bpm.createPage();
 		BTreeInnerNode<K, V> l = new BTreeInnerNode<K, V>(bpm.createPage(), ppSerializer, comparator);
-		l.initialize();
+		try {
+			l.initialize();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 		return l;
 	}
 

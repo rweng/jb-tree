@@ -7,6 +7,7 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Comparator;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 import com.freshbourne.io.ComplexPage;
 import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.RawPage;
+import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
 
 /**
@@ -29,15 +31,28 @@ import com.freshbourne.serializer.FixLengthSerializer;
  * @param <V>
  */
 public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
-
-
+	
+	private static final NodeType NODE_TYPE = NodeType.INNER_NODE;
+	
+	private static enum Header{
+		NODE_TYPE(0){},
+		NUMBER_OF_KEYS(1);
+		
+		private int pos;
+		Header(int pos){
+			this.pos = pos;
+		}
+		
+		int getPosition(){return pos;}
+	}
 	
 	private final RawPage rawPage;
 	private final Comparator<K> comperator;
 	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	
-	private int numberOfKeys = 0;
+	private int numberOfKeys;
 	private boolean valid = false;
+	
 	
 	BTreeInnerNode(RawPage rawPage, FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
 			Comparator<K> comparator){
@@ -47,6 +62,8 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	public void initRootState(PagePointer keyPointer, Long pageId1, Long pageId2){
+		ensureValid();
+		
 		ByteBuffer buf = buffer();
 		buf.position(headerSize());
 		
@@ -54,8 +71,7 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 		buffer().put(pointerSerializer.serialize(keyPointer));
 		buffer().putLong(pageId2);
 		
-		numberOfKeys = 1;
-		writeNumberOfKeys();
+		setNumberOfKeys(1);
 	}
 	
 	private static int headerSize() {
@@ -81,6 +97,20 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 		ensureValid();
 
 		throw new UnsupportedOperationException();
+	}
+	
+	private void writeNumberOfKeys() {
+		ByteBuffer buf = rawPage.buffer();
+		buf.position(Header.NUMBER_OF_KEYS.getPosition());
+		buf.putInt(numberOfKeys);
+	}
+	
+	/**
+	 * @param numberOfKeys the numberOfKeys to set
+	 */
+	private void setNumberOfKeys(int numberOfKeys) {
+		this.numberOfKeys = numberOfKeys;
+		writeNumberOfKeys();
 	}
 
 	/* (non-Javadoc)
@@ -128,21 +158,6 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 
 		throw new UnsupportedOperationException();
 	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ComplexPage#initialize()
-	 */
-	@Override
-	public void initialize() {
-		numberOfKeys = 0;
-		writeNumberOfKeys();
-		valid = true;
-	}
-	
-	private void writeNumberOfKeys(){
-		buffer().position(0);
-		buffer().putInt(numberOfKeys);
-	}
 	
 	private ByteBuffer buffer(){
 		return rawPage.buffer();
@@ -153,7 +168,15 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void load() {
-		valid = true;
+		ByteBuffer buf = rawPage.bufferAtZero();
+		if(NodeType.deserialize(buf.getChar()) != NODE_TYPE)
+			throw new IllegalStateException("You are trying to load a InnerNode from a byte array, that does not contain an InnerNode");
+		
+
+		buf.position(Header.NUMBER_OF_KEYS.getPosition());
+		numberOfKeys = buf.getInt();
+
+		
 		throw new UnsupportedOperationException();
 	}
 
@@ -206,5 +229,14 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public Long getId() {
 		return rawPage.id();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.MustInitializeOrLoad#initialize()
+	 */
+	@Override
+	public void initialize() throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 }
