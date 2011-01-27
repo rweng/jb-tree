@@ -646,4 +646,12 @@ public class BTreeLeaf<K,V> implements Node<K,V>, ComplexPage {
 	public BTree<K, V> getTree() {
 		return tree;
 	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#getNumberOfUniqueKeys()
+	 */
+	@Override
+	public int getNumberOfUniqueKeys() {
+		throw new UnsupportedOperationException();
+	}
 }

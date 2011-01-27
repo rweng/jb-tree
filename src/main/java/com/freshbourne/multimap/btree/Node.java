@@ -54,9 +54,14 @@ public interface Node<K, V> {
 	public Long getId();
 	
 	/**
-	 * @return number of values
+	 * @return number of values in or under a node
 	 */
 	public int getNumberOfEntries();
+	
+	/**
+	 * @return number of distinct keys in a node
+	 */
+	public int getNumberOfUniqueKeys();
 	
 	/**
 	 * @return boolean if the key is contained in the map

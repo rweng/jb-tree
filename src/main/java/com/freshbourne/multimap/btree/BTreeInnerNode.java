@@ -7,7 +7,6 @@
  */
 package com.freshbourne.multimap.btree;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Comparator;
 import java.util.List;
@@ -53,7 +52,6 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private int numberOfKeys;
 	private boolean valid = false;
 	
-	
 	BTreeInnerNode(RawPage rawPage, FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
 			Comparator<K> comparator){
 		this.rawPage = rawPage;
@@ -85,7 +83,7 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	public int getNumberOfEntries() {
 		ensureValid();
 
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("recursive get number of entries not yet supported.");
 		
 	}
 
@@ -133,10 +131,24 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 		throw new UnsupportedOperationException();
 	}
 	
+	private int posOfKey(int i){
+		return ((i + 1) * Long.SIZE / 8) + (i * pointerSerializer.serializedLength(PagePointer.class)); 
+	}
 	
 	private PagePointer getChildForKey(K key) {
-		
+		for(int i = 0; i < numberOfKeys; i++){
+			PagePointer pp = getPointerAtOffset(posOfKey(i));
+			
+		}
 		return null;
+	}
+
+	private PagePointer getPointerAtOffset(int offset) {
+		ByteBuffer buf = buffer();
+		buf.position(offset);
+		byte[] byteBuf = new byte[pointerSerializer.serializedLength(PagePointer.class)];
+		buf.get(byteBuf);
+		return pointerSerializer.deserialize(byteBuf);
 	}
 
 	/* (non-Javadoc)
@@ -242,5 +254,13 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 		setNumberOfKeys(0);
 		
 		valid = true;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#getNumberOfUniqueKeys()
+	 */
+	@Override
+	public int getNumberOfUniqueKeys() {
+		return numberOfKeys;
 	}
 }
