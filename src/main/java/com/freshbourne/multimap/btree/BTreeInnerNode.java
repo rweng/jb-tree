@@ -236,7 +236,11 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
+		ByteBuffer buf = rawPage().buffer();
+		buf.position(Header.NODE_TYPE.getPosition());
+		buf.putChar(NODE_TYPE.serialize());
+		setNumberOfKeys(0);
 		
+		valid = true;
 	}
 }
