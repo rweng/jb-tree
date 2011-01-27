@@ -12,10 +12,13 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.freshbourne.io.ComplexPage;
+import com.freshbourne.io.DataPageManager;
+import com.freshbourne.io.PageManager;
 import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.RawPage;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
+import com.freshbourne.serializer.Serializer;
 
 /**
  *
@@ -48,12 +51,24 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private final RawPage rawPage;
 	private final Comparator<K> comperator;
 	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
+	private final DataPageManager<K> keyPageManager;
+	private final PageManager<BTreeLeaf<K, V>> leafPageManager;
+	private final PageManager<BTreeInnerNode<K, V>> innerNodePageManager;
 	
 	private int numberOfKeys;
 	private boolean valid = false;
 	
-	BTreeInnerNode(RawPage rawPage, FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
-			Comparator<K> comparator){
+	BTreeInnerNode(
+			RawPage rawPage, 
+			FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
+			Comparator<K> comparator,
+			DataPageManager<K> keyPageManager,
+			PageManager<BTreeLeaf<K, V>> leafPageManager,
+			PageManager<BTreeInnerNode<K, V>> innerNodePageManager
+	){
+		this.leafPageManager = leafPageManager;
+		this.innerNodePageManager = innerNodePageManager;
+		this.keyPageManager = keyPageManager;
 		this.rawPage = rawPage;
 		this.comperator = comparator;
 		this.pointerSerializer = pointerSerializer;
@@ -126,8 +141,8 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public int remove(K key) {
 		ensureValid();
-		getChildForKey(key);
-
+		Long id = getChildForKey(key);
+		
 		throw new UnsupportedOperationException();
 	}
 	
@@ -135,12 +150,26 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 		return ((i + 1) * Long.SIZE / 8) + (i * pointerSerializer.serializedLength(PagePointer.class)); 
 	}
 	
-	private PagePointer getChildForKey(K key) {
+	private Long getChildForKey(K key) {
+		
 		for(int i = 0; i < numberOfKeys; i++){
 			PagePointer pp = getPointerAtOffset(posOfKey(i));
-			
+			if(comperator.compare(key, getKeyFromPagePointer(pp)) > 0){
+				return getLeftPageIdOfKey(i);
+			}
 		}
 		return null;
+	}
+	
+	private Long getLeftPageIdOfKey(int i) {
+		int pos = posOfKey(i) - Long.SIZE / 8;
+		ByteBuffer buf = buffer();
+		buf.position(pos);
+		return buf.getLong();
+	}
+
+	private K getKeyFromPagePointer(PagePointer pp) {
+		return keyPageManager.getPage(pp.getId()).get(pp.getOffset());
 	}
 
 	private PagePointer getPointerAtOffset(int offset) {
@@ -215,8 +244,19 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	public AdjustmentAction<K, V> insert(K key, V value) {
 		ensureValid();
 		
-		getChildForKey(key);
-
+		Long id = getChildForKey(key);
+		
+		BTreeLeaf<K, V> leaf = leafPageManager.getPage(id);
+		AdjustmentAction<K, V> result;
+		
+		if(leaf != null){
+			result = leaf.insert(key, value);
+		} else {
+			BTreeInnerNode<K, V> innerNode = innerNodePageManager.getPage(id);
+			result = innerNode.insert(key, value);
+		}
+		
+		
 		throw new UnsupportedOperationException();
 	}
 	

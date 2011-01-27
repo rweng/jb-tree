@@ -22,14 +22,12 @@ public interface PageManager<T> {
 	 * the resource.
 	 * 
 	 * @return HashPage
-	 * @throws IOException
 	 */
 	public T createPage();
 	
 	/**
 	 * @param id of the page to be fetched
-	 * @return page with given id from resource or cache
-     * @throws IOException
+	 * @return page with given id from resource or cache, null if page could not be found
 	 */
 	public T getPage(long id);
 	

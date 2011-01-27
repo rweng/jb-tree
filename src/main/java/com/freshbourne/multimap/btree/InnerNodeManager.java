@@ -7,7 +7,6 @@
  */
 package com.freshbourne.multimap.btree;
 
-import java.io.IOException;
 import java.util.Comparator;
 
 import com.freshbourne.io.BufferPoolManager;
@@ -27,18 +26,24 @@ public class InnerNodeManager<K, V> implements PageManager<BTreeInnerNode<K, V>>
 	private final DataPageManager<V> valuePageManager;
 	
 	private final Comparator<K> comparator;
+	private final PageManager<BTreeInnerNode<K, V>> innerNodePageManager;
+	private final PageManager<BTreeLeaf<K, V>> leafPageManager;
 	
 	@Inject
 	public InnerNodeManager(
 			BufferPoolManager bpm, 
 			DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
+			PageManager<BTreeLeaf<K, V>> leafPageManager,
+			PageManager<BTreeInnerNode<K, V>> innerNodePageManager,
 			FixLengthSerializer<PagePointer, byte[]> ppSerializer,
 			Comparator<K> comparator) {
 		this.bpm = bpm;
 		this.ppSerializer = ppSerializer;
         this.keyPageManager = keyPageManager;
         this.valuePageManager = valuePageManager;
+        this.innerNodePageManager = innerNodePageManager;
+        this.leafPageManager = leafPageManager;
         this.comparator = comparator;
 	}
 	
@@ -48,7 +53,7 @@ public class InnerNodeManager<K, V> implements PageManager<BTreeInnerNode<K, V>>
 	@Override
 	public BTreeInnerNode<K, V> createPage() {
 		RawPage p = bpm.createPage();
-		BTreeInnerNode<K, V> l = new BTreeInnerNode<K, V>(bpm.createPage(), ppSerializer, comparator);
+		BTreeInnerNode<K, V> l = new BTreeInnerNode<K, V>(bpm.createPage(), ppSerializer, comparator, keyPageManager, leafPageManager, innerNodePageManager);
 		l.initialize();
 		return l;
 	}
