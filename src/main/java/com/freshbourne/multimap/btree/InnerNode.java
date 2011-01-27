@@ -102,6 +102,12 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		throw new UnsupportedOperationException("recursive get number of entries not yet supported.");
 		
 	}
+	
+	private Long getPageIdForKey(K key){
+		ByteBuffer buf = buffer();
+		buf.position(getOffsetOfPageIdForKey(key));
+		return buf.getLong();
+	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#containsKey(java.lang.Object)
@@ -110,7 +116,15 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	public boolean containsKey(K key) {
 		ensureValid();
 
-		throw new UnsupportedOperationException();
+		return getPageForPageId(getPageIdForKey(key)).containsKey(key);
+	}
+	
+	private Node<K, V> getPageForPageId(Long pageId){
+		Node <K, V> result = innerNodePageManager.getPage(pageId);
+		if(result == null)
+			result = leafPageManager.getPage(pageId);
+		
+		return result;
 	}
 	
 	private void writeNumberOfKeys() {
@@ -275,8 +289,13 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	
 	
 	private int getOffsetOfPageIdForKey(K key){
+		int posOfFirstLargerOrEqualKey = posOfFirstLargerOrEqualKey(key);
 		
-		return 0;
+		if(posOfFirstLargerOrEqualKey < 0) // if key is largest
+			return getOffsetForRightPageIdOfKey((getNumberOfKeys()));
+		
+		
+		return getOffsetForLeftPageIdOfKey(posOfFirstLargerOrEqualKey);
 	}
 
 	/* (non-Javadoc)

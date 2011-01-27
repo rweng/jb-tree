@@ -565,9 +565,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		
 		// allocate new leaf
 		LeafNode<K,V> newLeaf = leafPageManager.createPage();
-		newLeaf.setNextLeafId(this.getId());
-		this.setNextLeafId(newLeaf.rawPage().id());
-			
+		setNextLeafId(newLeaf.getId());
+		
 		// newLeaf.setLastKeyContinuesOnNextPage(root.isLastKeyContinuingOnNextPage());
 			
 		// move half of the keys to new page

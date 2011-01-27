@@ -54,8 +54,10 @@ public class LeafPageManager<K,V> implements PageManager<LeafNode<K,V>> {
 	 */
 	@Override
 	public LeafNode<K, V> getPage(long id) {
-		// TODO Auto-generated method stub
-		return null;
+		RawPage p = bpm.getPage(id);
+		LeafNode<K, V> l = new LeafNode<K, V>(p, keyPageManager, valuePageManager, ppSerializer, comparator, this);
+		l.load();
+		return l;
 	}
 
 	/* (non-Javadoc)
@@ -63,8 +65,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafNode<K,V>> {
 	 */
 	@Override
 	public void removePage(long id) {
-		// TODO Auto-generated method stub
-		
+		bpm.removePage(id);
 	}
 
 }
