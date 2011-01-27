@@ -41,12 +41,12 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 		NODE_TYPE(0){},
 		NUMBER_OF_KEYS(1);
 		
-		private int pos;
-		Header(int pos){
-			this.pos = pos;
+		private int offset;
+		Header(int offset){
+			this.offset = offset;
 		}
 		
-		int getPosition(){return pos;}
+		int getOffset(){return offset;}
 	}
 	
 	private final RawPage rawPage;
@@ -115,7 +115,7 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	
 	private void writeNumberOfKeys() {
 		ByteBuffer buf = rawPage.buffer();
-		buf.position(Header.NUMBER_OF_KEYS.getPosition());
+		buf.position(Header.NUMBER_OF_KEYS.getOffset());
 		buf.putInt(numberOfKeys);
 	}
 	
@@ -250,7 +250,7 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 			throw new IllegalStateException("You are trying to load a InnerNode from a byte array, that does not contain an InnerNode");
 		
 
-		buf.position(Header.NUMBER_OF_KEYS.getPosition());
+		buf.position(Header.NUMBER_OF_KEYS.getOffset());
 		numberOfKeys = buf.getInt();
 
 		
@@ -412,7 +412,7 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public void initialize() {
 		ByteBuffer buf = rawPage().buffer();
-		buf.position(Header.NODE_TYPE.getPosition());
+		buf.position(Header.NODE_TYPE.getOffset());
 		buf.putChar(NODE_TYPE.serialize());
 		setNumberOfKeys(0);
 		
