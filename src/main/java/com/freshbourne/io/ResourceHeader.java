@@ -54,9 +54,19 @@ public class ResourceHeader implements MustInitializeOrLoad{
 			dictionary.add(buf.getLong());
 		}
 		
-		if(additionalHeaderPages > 0)
-			throw new UnsupportedOperationException("reading additional header pages is not yet supported");
+		long endOfRealPages = ioChannel.size() - additionalHeaderPages * pageSize;
+		for(int i = 0; i < additionalHeaderPages; i++){
+			buf.rewind();
+			ioChannel.position(endOfRealPages);
+			ioChannel.read(buf);
+			buf.rewind();
+			
+			while(dictionary.size() < numberOfpages && buf.remaining() >= longSize){
+				dictionary.add(buf.getLong());
+			}
+		}
 		
+		ioChannel.truncate(endOfRealPages); // cut additional pages off
 		valid = true;
 	}
 
