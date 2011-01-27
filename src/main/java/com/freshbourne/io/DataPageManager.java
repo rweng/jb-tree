@@ -34,12 +34,8 @@ public class DataPageManager<T> implements PageManager<DataPage<T>> {
     @Override
     public DataPage<T> createPage() {
     	DataPage<T> result = new DynamicDataPage<T>(bpm.createPage(), pointSerializer, dataSerializer);
-    	try {
-			result.initialize();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-    	return result;
+    	result.initialize();
+		return result;
     }
 
     @Override

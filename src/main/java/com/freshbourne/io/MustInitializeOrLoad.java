@@ -10,7 +10,9 @@ package com.freshbourne.io;
 import java.io.IOException;
 
 /**
- * Classes should not have too complex logic in the constructor. Instead, they should provide a separate method to open the object.
+ * This interface is for objects that can be loaded or initialized. Note that initialize should always work.
+ * If it could fail due to closed Resources, consider implementing both, this interface and MustBeOpened to
+ * ensure that the Resource can be accessed.
  * 
  * Classes can implement this interface if they need to be initialized or loaded to be usable.
  * 
@@ -20,19 +22,17 @@ import java.io.IOException;
 public interface MustInitializeOrLoad {
 	
 	/**
-	 * uses the underlying byte array to create a fresh valid ComplexPage
-	 * @throws IOException 
+	 * create a valid object
 	 */
-	public void initialize() throws IOException;
+	public void initialize();
 	
 	/**
-	 * tries to load an old ComplexPage from the underlying byte array
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void load() throws IOException;
 	
 	/**
-	 * @return if the page has been initialized or loaded
+	 * @return if the object has been initialized or loaded
 	 */
 	public boolean isValid();
 }

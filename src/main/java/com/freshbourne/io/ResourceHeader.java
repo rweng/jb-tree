@@ -138,11 +138,15 @@ public class ResourceHeader implements MustInitializeOrLoad{
 	 * @see com.freshbourne.io.MustInitializeOrLoad#initialize()
 	 */
 	@Override
-	public void initialize() throws IOException {
+	public void initialize(){
+		try {
+			ioChannel.truncate(0);
+			ioChannel.position(0);
+			ioChannel.write(ByteBuffer.allocate(pageSize));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 		dictionary.clear();
-		ioChannel.truncate(0);
-		ioChannel.position(0);
-		ioChannel.write(ByteBuffer.allocate(pageSize));
 		valid = true;
 	}
 

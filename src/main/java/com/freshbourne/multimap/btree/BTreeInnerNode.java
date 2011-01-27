@@ -235,7 +235,7 @@ public class BTreeInnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.io.MustInitializeOrLoad#initialize()
 	 */
 	@Override
-	public void initialize() throws IOException {
+	public void initialize() {
 		// TODO Auto-generated method stub
 		
 	}

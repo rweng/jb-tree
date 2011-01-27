@@ -49,11 +49,7 @@ public class InnerNodeManager<K, V> implements PageManager<BTreeInnerNode<K, V>>
 	public BTreeInnerNode<K, V> createPage() {
 		RawPage p = bpm.createPage();
 		BTreeInnerNode<K, V> l = new BTreeInnerNode<K, V>(bpm.createPage(), ppSerializer, comparator);
-		try {
-			l.initialize();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		l.initialize();
 		return l;
 	}
 
