@@ -144,7 +144,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		source.setNumberOfEntries(source.getNumberOfEntries() - num);
 		setNumberOfEntries(getNumberOfEntries() + num);
 		
-		
+		source.rawPage().setModified(true);
+		rawPage().setModified(true);
 	}
 	
 	private void setNumberOfEntries(int num){
@@ -346,6 +347,9 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		// shift the pointers after key
 		System.arraycopy(buffer().array(), pos + sizeOfValues , buffer().array(), pos , buffer().array().length - pos - sizeOfValues);
 		numberOfEntries -= numberOfValues;
+		
+		rawPage().setModified(true);
+		
 		return numberOfValues;
 	}
 
@@ -391,11 +395,10 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 				
 				buffer().position(startingPos);
 				
-			}
-			
+			}	
 		}
-		
-		
+
+		rawPage().setModified(true);
 	}
 
 	/**

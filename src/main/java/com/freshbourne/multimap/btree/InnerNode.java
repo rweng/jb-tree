@@ -135,6 +135,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private void setNumberOfKeys(int numberOfKeys) {
 		this.numberOfKeys = numberOfKeys;
 		writeNumberOfKeys();
+		rawPage().setModified(true);
 	}
 
 	/* (non-Javadoc)
@@ -356,7 +357,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 				int posForInsert = posOfFirstLargerOrEqualKey == -1 ? getNumberOfKeys() + 1 : posOfFirstLargerOrEqualKey;
 				insertKeyPointerPageIdAtPosition(
 						result.getKeyPointer(), result.getPageId(),  posForInsert);
-				
+				rawPage().setModified(true);
 				// no further adjustment necessary. even if we inserted to the last position, the
 				// highest key in the subtree below is still the same, because otherwise we would
 				// have never ended up here during the descend from the root, or we are in the
@@ -410,6 +411,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		ByteBuffer buf = buffer();
 		buf.position(offsetForKey(pos));
 		buf.put(pointerSerializer.serialize(pointer));
+		rawPage().setModified(true);
 	}
 	
 	private void setPageId(Long pageId, int pos){
