@@ -312,6 +312,8 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	public AdjustmentAction<K, V> insert(K key, V value) {
 		ensureValid();
 		
+		ensureRoot();
+		
 		int posOfFirstLargerOrEqualKey = posOfFirstLargerOrEqualKey(key);
 		Long pageId;
 		if(posOfFirstLargerOrEqualKey < 0) // if key is largest
@@ -357,6 +359,11 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		}
 		
 		throw new UnsupportedOperationException();
+	}
+
+	private void ensureRoot() {
+		if(getNumberOfKeys() == 0)
+			throw new IllegalStateException("use inizializeRootState() for the first insert!");
 	}
 
 	/**

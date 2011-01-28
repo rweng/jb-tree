@@ -11,6 +11,7 @@ import com.freshbourne.io.*;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
+import com.google.inject.Inject;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -578,7 +579,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 			throw new RuntimeException();
 		}
 			
-
 		return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE,
 				this.getLastKeyPointer(), newLeaf.rawPage().id());
 	}
