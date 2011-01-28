@@ -349,36 +349,40 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object, java.lang.Object)
+	 * @see com.freshbourne.multimap.btree.Node#remove(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public void remove(K key, V value) {
+	public int remove(K key, V value) {
 		int pos = posOfKey(key);
 		if(pos == NOT_FOUND)
-			return;
+			return 0;
 		
 		
 		int numberOfValues = get(key).size();
 		
 		ByteBuffer buffer = rawPage().bufferForWriting(pos);
-		int sizeOfValues = numberOfValues * serializedPointerSize * 2;
 		byte[] buf1 = new byte[serializedPointerSize];
 		byte[] buf2 = new byte[serializedPointerSize];
+		int removed = 0;
 		
-		List<Integer> toRemove = new ArrayList<Integer>();
 		for(int i = 0; i < numberOfValues; i++){
 			buffer.get(buf1);
 			buffer.get(buf2); // load only the value
 			PagePointer p = pointerSerializer.deserialize(buf2);
 			DataPage<V> vPage = valuePageManager.getPage(p.getId());
 			V val = vPage.get(p.getOffset());
-			if( val != null && val.equals(value)){
+			
+			if(val == null)
+				throw new IllegalStateException("value retrieved from a value page should not be null");
+			
+			// we cant use a comparator here since we have none for values (its the only case we need it)
+			if( val.equals(value) ){
 				vPage.remove(p.getOffset());
 				if(vPage.numberOfEntries() == 0)
 					valuePageManager.removePage(vPage.rawPage().id());
 				
-				// also free value page
-				p = pointerSerializer.deserialize(buf2);
+				// also free key page
+				p = pointerSerializer.deserialize(buf1);
 				DataPage <K> kPage = keyPageManager.getPage(p.getId());
 				kPage.remove(p.getOffset());
 				if(kPage.numberOfEntries() == 0)
@@ -386,9 +390,12 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 				
 				// move pointers forward and reset buffer
 				int startingPos = buffer.position() - buf1.length - buf2.length;
-				System.arraycopy(buffer.array(), buffer.position(), buffer.array(), startingPos, offsetBehindLastEntry() - buffer.position());				
+				System.arraycopy(buffer.array(), buffer.position(), buffer.array(), startingPos, offsetBehindLastEntry() - buffer.position());
+				
+				removed++;
 			}	
 		}
+		return 0;
 	}
 
 	/**

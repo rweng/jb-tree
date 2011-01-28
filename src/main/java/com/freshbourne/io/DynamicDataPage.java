@@ -221,7 +221,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 		int smallestLarger = nextEntry(offset);
 		
 		if(smallestLarger == -1)
-			smallestLarger = rawPage.bufferForReading(0).capacity();
+			smallestLarger = rawPage.bufferForReading(0).limit();
 		
 		return smallestLarger - offset;
 	}

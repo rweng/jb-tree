@@ -91,10 +91,13 @@ public interface Node<K, V> {
      * Removes the value under key.
      * IF the key or value was not found, null is returned.
      * 
+     * Note: This method might use value.equals to determine the values to remove. Make sure this method works correctly.
+     * 
      * @param key
      * @param value
+     * @return number of removed values
      */
-    void remove(K key, V value);
+    int remove(K key, V value);
     
     /**
      * removes all key and values, destroying all rawPages with the keyPages, valuePages, leafPages and innerNodePages

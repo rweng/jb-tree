@@ -100,7 +100,6 @@ public abstract class MultiMapSpec<K, V> {
 		assertEquals(1, tree.get(key1).size());
 		assertEquals(value1, tree.get(key1).get(0));
 		assertEquals(value2, tree.get(key2).get(0));
-		
 	}
 	
 	@Test

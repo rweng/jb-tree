@@ -242,10 +242,10 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object, java.lang.Object)
+	 * @see com.freshbourne.multimap.btree.Node#remove(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public void remove(K key, V value) {
+	public int remove(K key, V value) {
 		ensureValid();
 
 		throw new UnsupportedOperationException();
