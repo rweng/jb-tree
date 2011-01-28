@@ -40,8 +40,7 @@ public abstract class BufferPoolManagerSpec {
 	private Long createPageWithCompareValueAndLoop(){
 		RawPage page = bpm.createPage();
 		long id = page.id();
-		page.bufferAtZero().putLong(valueToCompare);
-		page.setModified(true);
+		page.bufferForWriting(0).putLong(valueToCompare);
 		
 		for(int i = 0; i < cacheSize * 3; i++) // make sure all cache is replaced
 			bpm.createPage();
@@ -53,7 +52,7 @@ public abstract class BufferPoolManagerSpec {
 	public void shouldReturnCorrectPagesEvenIfExceededCache() throws IOException {
 		Long pageId = createPageWithCompareValueAndLoop();
 		
-		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());
+		assertEquals(valueToCompare, bpm.getPage(pageId).bufferForWriting(0).getLong());
 	}
 	
 	@Test public void evenTheObjectIdShouldBeTheSameWhenCommingFromCache(){
@@ -65,13 +64,13 @@ public abstract class BufferPoolManagerSpec {
 	
 	@Test public void shouldReturnSameInstanceWhenPageIsGotTwice(){
 		Long pageId = createPageWithCompareValueAndLoop();
-		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());
+		assertEquals(valueToCompare, bpm.getPage(pageId).bufferForWriting(0).getLong());
 		
 		
 		long secondValue = 1111L;
-		bpm.getPage(pageId).bufferAtZero().putLong(secondValue);
+		bpm.getPage(pageId).bufferForWriting(0).putLong(secondValue);
 		createPageWithCompareValueAndLoop();
-		assertEquals(secondValue, bpm.getPage(pageId).bufferAtZero().getLong());
+		assertEquals(secondValue, bpm.getPage(pageId).bufferForWriting(0).getLong());
 	}
 	
 	@Test public void shouldWorkWhenClosingAndReopeningResourceManager() throws IOException{
@@ -80,26 +79,26 @@ public abstract class BufferPoolManagerSpec {
 		bpm.flush();
 		bpm.getResourceManager().close();
 		bpm.getResourceManager().open();
-		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());
+		assertEquals(valueToCompare, bpm.getPage(pageId).bufferForWriting(0).getLong());
 	}
 	
 	@Test public void shouldWorkWithNewBufferPoolManager() throws IOException{
 		long pageId = createPageWithCompareValueAndLoop();
 		bpm.flush();
 		bpm = createBufferPoolManager();
-		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());	
+		assertEquals(valueToCompare, bpm.getPage(pageId).bufferForWriting(0).getLong());	
 	}
 	
 	@Test public void flush(){
 		Long pageId = createPageWithCompareValueAndLoop();
 		bpm.flush();
-		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());
+		assertEquals(valueToCompare, bpm.getPage(pageId).bufferForWriting(0).getLong());
 	}
 	
 	@Test public void clearCache(){
 		Long pageId = createPageWithCompareValueAndLoop();
 		bpm.clearCache();
-		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());		
+		assertEquals(valueToCompare, bpm.getPage(pageId).bufferForWriting(0).getLong());		
 	}
 	
 }

@@ -65,11 +65,10 @@ public abstract class ResourceManagerSpec {
 	@Test
 	public void shouldReadWrittenPages() throws IOException{
 		page = rm.createPage();
-		page.buffer().position(0);
-		page.buffer().putInt(1234);
+		page.bufferForWriting(0).putInt(1234);
 		rm.writePage(page);
 		
-		assertEquals(rm.readPage(page.id()).buffer(), page.buffer());
+		assertEquals(rm.readPage(page.id()).bufferForWriting(0), page.bufferForWriting(0));
 	}
 	
 	@Test
@@ -88,12 +87,12 @@ public abstract class ResourceManagerSpec {
 		assertEquals(2, rm.numberOfPages());
 		
 		long longToCompare = 12345L;
-		ByteBuffer buf = page.bufferAtZero();
+		ByteBuffer buf = page.bufferForWriting(0);
 		buf.putLong(longToCompare);
 		rm.writePage(page);
 		
 		assertEquals(2, rm.numberOfPages());
-		assertEquals(longToCompare, rm.readPage(page.id()).bufferAtZero().getLong());
+		assertEquals(longToCompare, rm.readPage(page.id()).bufferForWriting(0).getLong());
 		
 		rm.close();
 		
@@ -101,7 +100,7 @@ public abstract class ResourceManagerSpec {
 		rm = createOpenResourceManager();
 		
 		assertEquals(2, rm.numberOfPages());
-		assertEquals(longToCompare, rm.readPage(page.id()).bufferAtZero().getLong());
+		assertEquals(longToCompare, rm.readPage(page.id()).bufferForWriting(0).getLong());
 	}
 	
 	@Test(expected= WrongPageSizeException.class)

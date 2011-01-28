@@ -89,7 +89,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		this.serializedPointerSize = pointerSerializer.serializedLength(PagePointer.class);
 		
 		// one pointer to key, one to value
-		maxEntries = (rawPage.buffer().capacity() - headerSize()) / (serializedPointerSize * 2); 
+		maxEntries = (rawPage.bufferForReading(0).capacity() - headerSize()) / (serializedPointerSize * 2); 
 	}
 	
 	/**
@@ -132,20 +132,19 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		if(getNumberOfEntries() > 0 && comparator.compare(source.getLastKey(), getFirstKey()) > 0)
 			throw new IllegalArgumentException("the last key of the provided source leaf is larger than this leafs first key");
 		
+		ByteBuffer buffer = rawPage().bufferForWriting(0);
+		
 		// make space in this leaf, move all elements to the right
 		int totalSize = num * (serializedPointerSize * 2);
-		System.arraycopy(buffer().array(), headerSize(), buffer().array(), headerSize() + totalSize, totalSize);
+		System.arraycopy(buffer.array(), headerSize(), buffer.array(), headerSize() + totalSize, totalSize);
 		
 		// copy from other to us
 		int sourceOffset = source.offsetForKey(source.getNumberOfEntries() - 1 - num);
-		System.arraycopy(source.rawPage().buffer().array(), sourceOffset, buffer().array(), headerSize(), totalSize);
+		System.arraycopy(source.rawPage().bufferForWriting(0).array(), sourceOffset, buffer.array(), headerSize(), totalSize);
 		
 		// update headers, also sets modified
 		source.setNumberOfEntries(source.getNumberOfEntries() - num);
 		setNumberOfEntries(getNumberOfEntries() + num);
-		
-		source.rawPage().setModified(true);
-		rawPage().setModified(true);
 	}
 	
 	private void setNumberOfEntries(int num){
@@ -160,16 +159,16 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	}
 	
 	public PagePointer getLastKeyPointer(){
-		buffer().position(offsetForKey(-1));
+		ByteBuffer buffer = rawPage().bufferForWriting(offsetForKey(-1));
 		byte[] buf = new byte[serializedPointerSize];
-		buffer().get(buf);
+		buffer.get(buf);
 		return pointerSerializer.deserialize(buf);
 	}
 	
 	public K getKeyOfPos(int pos){
-		buffer().position(pos);
+		ByteBuffer buffer = rawPage().bufferForWriting(pos);
 		byte[] buf = new byte[serializedPointerSize];
-		buffer().get(buf);
+		buffer.get(buf);
 		
 		PagePointer p = pointerSerializer.deserialize(buf);
 		return keyPageManager.getPage(p.getId()).get(p.getOffset());
@@ -188,12 +187,12 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 * @param valuePointer
 	 */
 	private void addEntry(PagePointer keyPointer, PagePointer valuePointer) {
-		rawPage.buffer().position(offsetBehindLastEntry());
+		ByteBuffer buffer = rawPage.bufferForWriting(offsetBehindLastEntry());
 		
-		rawPage.buffer().put(pointerSerializer.serialize(keyPointer));
-		rawPage.buffer().put(pointerSerializer.serialize(valuePointer));
+		buffer.put(pointerSerializer.serialize(keyPointer));
+		buffer.put(pointerSerializer.serialize(valuePointer));
         
-		numberOfEntries++;
+		setNumberOfEntries(getNumberOfEntries() + 1);
 	}
 	
 	private int headerSize(){
@@ -202,9 +201,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	}
 
 	private void writeNumberOfEntries() {
-		buffer().position(0);
-		buffer().putInt(numberOfEntries);
-		rawPage.setModified(true);
+		rawPage().bufferForWriting(0).putInt(getNumberOfEntries());
 	}
 
 	/* (non-Javadoc)
@@ -256,36 +253,32 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		if( pos == NOT_FOUND)
 			return result;
 		
-		int oldPos = buffer().position();
-		buffer().position(pos);
+		ByteBuffer buffer = rawPage().bufferForReading(pos);
 		
 		// read first
-		buffer().get(bytebuf);
+		buffer.get(bytebuf);
 		PagePointer p = pointerSerializer.deserialize(bytebuf);
 		DataPage<K> dataPage = keyPageManager.getPage(p.getId());
 		
 		while (dataPage.get(p.getOffset()).equals(key)) {
-			buffer().get(bytebuf);
+			buffer.get(bytebuf);
 			p = pointerSerializer.deserialize(bytebuf);
 			DataPage<V> valueDataPage = valuePageManager.getPage(p.getId());
 
 			result.add(valueDataPage.get(p.getOffset()));
 			
 			// if no other entries are available, return
-			if(buffer().position() >= offsetBehindLastEntry())
+			if(buffer.position() >= offsetBehindLastEntry())
 				break;
 			
 			// otherwise check, if the next entry also has this key
-			buffer().get(bytebuf);
+			buffer.get(bytebuf);
 			p = pointerSerializer.deserialize(bytebuf);
 			dataPage = keyPageManager.getPage(p.getId());
 			
 		}
-		buffer().position(oldPos);
 		return result;
 	}
-	
-	private ByteBuffer buffer(){return rawPage.buffer();}
 	
 	/**
 	 * @param key
@@ -295,19 +288,19 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		int pSize = pointerSerializer.serializedLength(PagePointer.class);
 		byte[] bytebuf = new byte[pSize];
 
-		buffer().position(headerSize());
+		ByteBuffer buffer = rawPage().bufferForReading(headerSize());
 
 		for(int i = 0; i < numberOfEntries; i++){
 
-			buffer().get(bytebuf);
+			buffer.get(bytebuf);
 			PagePointer p = pointerSerializer.deserialize(bytebuf);
 			DataPage<K> dataPage = keyPageManager.getPage(p.getId());
 			if(dataPage.get(p.getOffset()).equals(key)){
-				return buffer().position() - pSize;
+				return buffer.position() - pSize;
 			}
 
 			// get the data pointer but do nothing with it
-			buffer().get(bytebuf);
+			buffer.get(bytebuf);
 		}
 		return NOT_FOUND;
 	}
@@ -345,7 +338,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		//TODO: free key and value pages
 		
 		// shift the pointers after key
-		System.arraycopy(buffer().array(), pos + sizeOfValues , buffer().array(), pos , buffer().array().length - pos - sizeOfValues);
+		ByteBuffer buffer = rawPage().bufferForWriting(0);
+		System.arraycopy(buffer.array(), pos + sizeOfValues , buffer.array(), pos , buffer.array().length - pos - sizeOfValues);
 		numberOfEntries -= numberOfValues;
 		
 		rawPage().setModified(true);
@@ -365,15 +359,15 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		
 		int numberOfValues = get(key).size();
 		
-		buffer().position(pos);
+		ByteBuffer buffer = rawPage().bufferForWriting(pos);
 		int sizeOfValues = numberOfValues * serializedPointerSize * 2;
 		byte[] buf1 = new byte[serializedPointerSize];
 		byte[] buf2 = new byte[serializedPointerSize];
 		
 		List<Integer> toRemove = new ArrayList<Integer>();
 		for(int i = 0; i < numberOfValues; i++){
-			buffer().get(buf1);
-			buffer().get(buf2); // load only the value
+			buffer.get(buf1);
+			buffer.get(buf2); // load only the value
 			PagePointer p = pointerSerializer.deserialize(buf2);
 			DataPage<V> vPage = valuePageManager.getPage(p.getId());
 			V val = vPage.get(p.getOffset());
@@ -390,15 +384,10 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 					keyPageManager.removePage(p.getId());
 				
 				// move pointers forward and reset buffer
-				int startingPos = buffer().position() - buf1.length - buf2.length;
-				System.arraycopy(buffer().array(), buffer().position(), buffer().array(), startingPos, offsetBehindLastEntry() - buffer().position());
-				
-				buffer().position(startingPos);
-				
+				int startingPos = buffer.position() - buf1.length - buf2.length;
+				System.arraycopy(buffer.array(), buffer.position(), buffer.array(), startingPos, offsetBehindLastEntry() - buffer.position());				
 			}	
 		}
-
-		rawPage().setModified(true);
 	}
 
 	/**
@@ -432,8 +421,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		for(int i = 0; i < numberOfEntries; i++){
 			
 			// key page
-			buffer().position(offsetForKey(i));
-			buffer().get(buf);
+			ByteBuffer buffer = rawPage().bufferForWriting(offsetForKey(i));
+			buffer.get(buf);
 			PagePointer p = pointerSerializer.deserialize(buf);
 			DataPage<K> keyPage = keyPageManager.getPage(p.getId());
 			keyPage.remove(p.getOffset());
@@ -441,7 +430,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 				keyPageManager.removePage(keyPage.rawPage().id());
 			
 			// data page
-			buffer().get(buf);
+			buffer.get(buf);
 			p = pointerSerializer.deserialize(buf);
 			DataPage<V> valuePage = valuePageManager.getPage(p.getId());
 			valuePage.remove(p.getOffset());
@@ -504,8 +493,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void load() {
-		buffer().position(0);
-		numberOfEntries = buffer().getInt();
+		ByteBuffer buffer = rawPage().bufferForReading(0);
+		numberOfEntries = buffer.getInt();
 		valid = true;
 	}
 
@@ -599,8 +588,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 * @return id of the next leaf or null
 	 */
 	public Long getNextLeafId() {
-		buffer().position(posOfNextLeafId());
-		Long result = buffer().getLong();
+		ByteBuffer buffer = rawPage().bufferForReading(posOfNextLeafId());
+		Long result = buffer.getLong();
 		return result == NO_NEXT_LEAF ? null : result;
 	}
 	
@@ -609,8 +598,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	}
 
 	public void setNextLeafId(Long id) {
-		buffer().position(posOfNextLeafId());
-		buffer().putLong(id);
+		ByteBuffer buffer = rawPage().bufferForWriting(posOfNextLeafId());
+		buffer.putLong(id);
 	}
 
 	/* (non-Javadoc)

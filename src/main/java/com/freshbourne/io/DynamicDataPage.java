@@ -68,8 +68,8 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 
 		this.rawPage = rawPage;
 		
-        this.header = rawPage.buffer().duplicate();
-        this.bodyOffset = rawPage.buffer().limit();
+        this.header = rawPage.bufferForWriting(0).duplicate();
+        this.bodyOffset = rawPage.bufferForWriting(0).limit();
 		this.pointSerializer = pointSerializer;
 		this.entrySerializer = dataSerializer;
 		
@@ -95,8 +95,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 			return null;
 		
 		bodyOffset -= bytes.length;
-		rawPage.buffer().position(bodyOffset);
-		rawPage.buffer().put(bytes);
+		rawPage.bufferForWriting(bodyOffset).put(bytes);
 		
 		int id = generateId();
 		entries.put(id, bodyOffset);
@@ -122,13 +121,13 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 		header.position(header.limit()-size);
 		header.put(pointSerializer.serialize(p));
 		
-		if(rawPage.buffer().capacity() - header.position() - bodyUsedBytes() > size)
+		if(rawPage.bufferForWriting(0).capacity() - header.position() - bodyUsedBytes() > size)
 			header.limit(header.position() + size);
 	}
 	
 	
 	private int bodyUsedBytes(){
-		return rawPage.buffer().limit() - bodyOffset;
+		return rawPage.bufferForWriting(0).limit() - bodyOffset;
 	}
 
 	/* (non-Javadoc)
@@ -143,7 +142,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 		
 		// move all body elements
 		int size = sizeOfEntryAt(offset);
-		System.arraycopy(rawPage.buffer().array(), bodyOffset, rawPage.buffer().array(), bodyOffset + size, offset - bodyOffset );
+		System.arraycopy(rawPage.bufferForWriting(0).array(), bodyOffset, rawPage.bufferForWriting(0).array(), bodyOffset + size, offset - bodyOffset );
 		
 		// adjust the entries in the entries array
 		for(int key : entries.keySet()){
@@ -193,10 +192,9 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 		
 		Integer offset = entries.get(id);
 		
-		rawPage.buffer().position(offset);
 		int size = sizeOfEntryAt(offset);
 		byte[] bytes = new byte[size];
-		rawPage.buffer().get(bytes);
+		rawPage.bufferForReading(offset).get(bytes);
 		
 		return entrySerializer.deserialize(bytes);
 	}
@@ -223,7 +221,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 		int smallestLarger = nextEntry(offset);
 		
 		if(smallestLarger == -1)
-			smallestLarger = rawPage.buffer().capacity();
+			smallestLarger = rawPage.bufferForReading(0).capacity();
 		
 		return smallestLarger - offset;
 	}
@@ -233,7 +231,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	 */
 	@Override
 	public int remaining() {
-		return rawPage.buffer().limit() - header.limit() - bodyUsedBytes();
+		return rawPage.bufferForReading(0).limit() - header.limit() - bodyUsedBytes();
 	}
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ComplexPage#load()
@@ -250,7 +248,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 			entries.put(key, header.getInt());
 		}
 		
-		bodyOffset = rawPage.buffer().limit();
+		bodyOffset = rawPage.bufferForReading(0).limit();
 		for(int i : entries.values()){
 			if(i < bodyOffset)
 				bodyOffset = i;

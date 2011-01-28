@@ -41,8 +41,8 @@ public class RawPage {
     /**
      * @return ByteBuffer backing this RawPage
      */
-    public ByteBuffer buffer(){return buffer;}
-    public ByteBuffer bufferAtZero(){buffer.position(0); return buffer;}
+    public ByteBuffer bufferForWriting(int pos){setModified(true); buffer.position(pos); return buffer;}
+    public ByteBuffer bufferForReading(int pos){buffer.position(pos); return buffer.asReadOnlyBuffer();}
     public Long id(){return id;}
     
     /**

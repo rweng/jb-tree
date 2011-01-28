@@ -211,21 +211,17 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	}
 	
 	private void writeHeader(){
-		buffer().position(0);
-		buffer().putInt(numberOfEntries);
-		buffer().putLong(root.getId());
+		ByteBuffer buffer = rawPage.bufferForWriting(0);
+		buffer.putInt(numberOfEntries);
+		buffer.putLong(root.getId());
 	}
 	
-	private ByteBuffer buffer(){return rawPage.buffer();}
-
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ComplexPage#load()
 	 */
 	@Override
 	public void load() {
-		buffer().position(0);
-		numberOfEntries = buffer().getInt();
-		
+		numberOfEntries = rawPage().bufferForReading(0).getInt();
 	}
 
 	/* (non-Javadoc)

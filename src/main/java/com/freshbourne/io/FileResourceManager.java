@@ -68,7 +68,7 @@ public class FileResourceManager implements ResourceManager {
         ensureOpen();
         ensurePageExists(page.id());
         
-        ByteBuffer buffer = page.bufferAtZero();
+        ByteBuffer buffer = page.bufferForReading(0);
 
 		try{
 			Long offset = header.getPageOffset(page.id());
@@ -209,11 +209,10 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 		ensureCorrectPageSize(page);
 		
-		RawPage result = new RawPage(page.buffer(), RawPage.generateId(), this);
-		page.buffer().position(0);
+		RawPage result = new RawPage(page.bufferForWriting(0), RawPage.generateId(), this);
 		
 		try {
-			ioChannel.write(page.buffer(), ioChannel.size());
+			ioChannel.write(page.bufferForReading(0), ioChannel.size());
 			header.add(result.id());
 		} catch (DuplicatePageIdException e) {
 			e.printStackTrace();
@@ -231,7 +230,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @throws WrongPageSizeException 
 	 */
 	private void ensureCorrectPageSize(RawPage page) {
-		if(page.buffer().limit() != pageSize)
+		if(page.bufferForReading(0).limit() != pageSize)
 			throw new WrongPageSizeException(page, pageSize);
 	}
 

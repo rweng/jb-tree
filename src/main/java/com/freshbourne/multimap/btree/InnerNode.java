@@ -78,8 +78,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	public void initRootState(PagePointer keyPointer, Long pageId1, Long pageId2){
 		ensureValid();
 		
-		ByteBuffer buf = buffer();
-		buf.position(Header.size());
+		ByteBuffer buf = rawPage().bufferForWriting(Header.size());
 		
 		buf.putLong(pageId1);
 		buf.put(pointerSerializer.serialize(keyPointer));
@@ -100,8 +99,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private Long getPageIdForKey(K key){
-		ByteBuffer buf = buffer();
-		buf.position(getOffsetOfPageIdForKey(key));
+		ByteBuffer buf = rawPage.bufferForReading(getOffsetOfPageIdForKey(key));
 		return buf.getLong();
 	}
 
@@ -124,8 +122,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private void writeNumberOfKeys() {
-		ByteBuffer buf = rawPage.buffer();
-		buf.position(Header.NUMBER_OF_KEYS.getOffset());
+		ByteBuffer buf = rawPage.bufferForWriting(Header.NUMBER_OF_KEYS.getOffset());
 		buf.putInt(numberOfKeys);
 	}
 	
@@ -135,7 +132,6 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private void setNumberOfKeys(int numberOfKeys) {
 		this.numberOfKeys = numberOfKeys;
 		writeNumberOfKeys();
-		rawPage().setModified(true);
 	}
 
 	/* (non-Javadoc)
@@ -230,8 +226,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private Long readPageId(int offset){
-		ByteBuffer buf = buffer();
-		buf.position(offset);
+		ByteBuffer buf = rawPage().bufferForReading(offset);
 		return buf.getLong();
 	}
 
@@ -240,8 +235,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 
 	private PagePointer getPointerAtOffset(int offset) {
-		ByteBuffer buf = buffer();
-		buf.position(offset);
+		ByteBuffer buf = rawPage().bufferForReading(offset);
 		byte[] byteBuf = new byte[getSizeOfSerializedPointer()];
 		buf.get(byteBuf);
 		return pointerSerializer.deserialize(byteBuf);
@@ -267,16 +261,12 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		throw new UnsupportedOperationException();
 	}
 	
-	private ByteBuffer buffer(){
-		return rawPage.buffer();
-	}
-
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ComplexPage#load()
 	 */
 	@Override
 	public void load() {
-		ByteBuffer buf = rawPage.bufferAtZero();
+		ByteBuffer buf = rawPage.bufferForWriting(0);
 		if(NodeType.deserialize(buf.getChar()) != NODE_TYPE)
 			throw new IllegalStateException("You are trying to load a InnerNode from a byte array, that does not contain an InnerNode");
 		
@@ -376,14 +366,13 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	private void insertKeyPointerPageIdAtPosition(PagePointer keyPointer,
 			Long pageId, int posOfKeyForInsert) {
-		ByteBuffer buf = buffer();
-		buf.position(offsetForKey(posOfKeyForInsert));
+		ByteBuffer buf = rawPage().bufferForWriting(offsetForKey(posOfKeyForInsert));
 		
-		
+		throw new UnsupportedOperationException();
 	}
 
 	private int getMaximalNumberOfKeys() {
-		int size = rawPage.buffer().limit() - Header.size();
+		int size = rawPage.bufferForReading(0).limit() - Header.size();
 		
 		// size first page id
 		size -= Long.SIZE / 8;
@@ -408,15 +397,12 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private void setKey(PagePointer pointer, int pos){
-		ByteBuffer buf = buffer();
-		buf.position(offsetForKey(pos));
+		ByteBuffer buf = rawPage().bufferForWriting(offsetForKey(pos));
 		buf.put(pointerSerializer.serialize(pointer));
-		rawPage().setModified(true);
 	}
 	
 	private void setPageId(Long pageId, int pos){
-		ByteBuffer buf = buffer();
-		buf.position(offsetForPageId(pos));
+		ByteBuffer buf = rawPage().bufferForWriting(offsetForPageId(pos));
 		buf.putLong(pageId);
 	}
 
@@ -448,8 +434,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void initialize() {
-		ByteBuffer buf = rawPage().buffer();
-		buf.position(Header.NODE_TYPE.getOffset());
+		ByteBuffer buf = rawPage().bufferForWriting(Header.NODE_TYPE.getOffset());
 		buf.putChar(NODE_TYPE.serialize());
 		setNumberOfKeys(0);
 		

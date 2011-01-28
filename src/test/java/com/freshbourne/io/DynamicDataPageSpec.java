@@ -32,7 +32,6 @@ public class DynamicDataPageSpec {
 	@Test
 	public void shouldHaveToInitialize(){
 		assertFalse(page.isValid());
-		assertFalse(page.rawPage().isModified());
 		page.initialize();
 		assertTrue(page.isValid());
 		checkAndSetModified(page);
