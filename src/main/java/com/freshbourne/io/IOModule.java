@@ -17,6 +17,7 @@ package com.freshbourne.io;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Scope;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
@@ -71,7 +72,7 @@ public class IOModule extends AbstractModule{
         if(file != null)
 		    bind(File.class).annotatedWith(ResourceFile.class).toInstance(file);
 		
-		bind(BufferPoolManager.class).to(BufferPoolManagerImpl.class);
+		bind(BufferPoolManager.class).to(BufferPoolManagerImpl.class).in(Singleton.class);
 		
 		bindConstant().annotatedWith(Names.named("cacheSize")).to(cacheSize);
 	}

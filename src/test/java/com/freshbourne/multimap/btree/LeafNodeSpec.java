@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.BufferPoolManager;
+import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.DynamicDataPage;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -57,6 +58,39 @@ public class LeafNodeSpec {
 		leaf.insert(key2, val2);
 		assertNotNull(leaf.getLastKey());
 		assertNotNull(leaf.getLastKeyPointer());
+	}
+	
+	@Test public void shouldAlwaysWorkAfterReload(){
+		for(int i = 0; i < 5; i++){
+			leaf.insert(key1, val1);
+		}
+		leaf.insert(key2, val2);
+		assertEquals(6, leaf.getNumberOfEntries());
+		leaf.load();
+		assertEquals(6, leaf.getNumberOfEntries());
+		assertEquals(1, leaf.get(key2).size());
+		
+	}
+	
+	@Test public void shouldAtSomePointReturnAValidAdjustmentAction(){
+		AdjustmentAction<Integer, String> action;
+		do{
+			action = leaf.insert(key1, val1);
+		} while(action == null);
+		
+		DataPageManager<Integer> keyPageManager = injector.getInstance(Key.get(new TypeLiteral<DataPageManager<Integer>>(){}));
+		
+		assertNotNull(leaf.getLastKey());
+		assertEquals(AdjustmentAction.ACTION.INSERT_NEW_NODE, action.getAction());
+		
+		assertNotNull(action.getKeyPointer());
+		assertNotNull(action.getKeyPointer().getOffset());
+		assertNotNull(action.getKeyPointer().getId());
+		
+		assertNotNull(keyPageManager.getPage(action.getKeyPointer().getId()));
+		assertNotNull(keyPageManager.getPage(action.getKeyPointer().getId()).get(action.getKeyPointer().getOffset()));
+		
+		
 	}
 	
 	

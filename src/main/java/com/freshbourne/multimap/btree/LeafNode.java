@@ -11,7 +11,6 @@ import com.freshbourne.io.*;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
-import com.google.inject.Inject;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import java.util.List;
  * This B-Tree-Leaf stores entries by storing the keys and values in separate pages
  * and keeping track only of the pageId and offset.
  * 
+ * Looks like this in binary: NUM_OF_ENTRIES, NEXT_LEAF_ID, KEY_POINTER, VALUE_POINTER, ...
  * 
  * @author "Robin Wenglewski <robin@wenglewski.de>"
  *
@@ -140,7 +140,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		System.arraycopy(buffer.array(), headerSize(), buffer.array(), headerSize() + totalSize, totalSize);
 		
 		// copy from other to us
-		int sourceOffset = source.offsetForKey(source.getNumberOfEntries() - 1 - num);
+		int sourceOffset = source.offsetForKeyPos(source.getNumberOfEntries() - 1 - num);
 		System.arraycopy(source.rawPage().bufferForWriting(0).array(), sourceOffset, buffer.array(), headerSize(), totalSize);
 		
 		// update headers, also sets modified
@@ -160,7 +160,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	}
 	
 	public PagePointer getLastKeyPointer(){
-		ByteBuffer buffer = rawPage().bufferForWriting(offsetForKey(-1));
+		ByteBuffer buffer = rawPage().bufferForReading(offsetForKeyPos(getNumberOfEntries() - 1));
 		byte[] buf = new byte[serializedPointerSize];
 		buffer.get(buf);
 		return pointerSerializer.deserialize(buf);
@@ -179,7 +179,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		if(getNumberOfEntries() == 0)
 			return null;
 		
-		int pos = offsetForKey(0);
+		int pos = offsetForKeyPos(0);
 		return getKeyOfPos(pos);
 	}
 
@@ -221,15 +221,15 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
         return posOfKey(key) != NOT_FOUND;
 	}
 	
-	private int offsetForKey(int i){
-		if(!((i >= 0 && i < getNumberOfEntries()) || (i < 0 && i >= -1 * getNumberOfEntries())))
-			throw new IllegalArgumentException("i must be between -numberOfEntries and +(numberOfEntries - 1)");
+	private int offsetForKeyPos(int pos){
+		if(pos < 0 || pos >= getNumberOfEntries())
+			throw new IllegalArgumentException("pos must be between 0 and numberOfEntries - 1");
 		
-		return ( i >= 0 ) ? headerSize() + i * serializedPointerSize * 2 : offsetForKey(getNumberOfEntries() + i);
+		return headerSize() + pos * serializedPointerSize * 2;
 	}
 	
 	private int offsetForValue(int i){
-		return offsetForKey(i) + serializedPointerSize;
+		return offsetForKeyPos(i) + serializedPointerSize;
 	}
 	
 	/**
@@ -237,7 +237,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 * @return
 	 */
 	private int offsetBehindLastEntry(){
-		return headerSize() + numberOfEntries * serializedPointerSize * 2;
+		return headerSize() + getNumberOfEntries() * serializedPointerSize * 2;
 	}
 
 	/* (non-Javadoc)
@@ -291,7 +291,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 
 		ByteBuffer buffer = rawPage().bufferForReading(headerSize());
 
-		for(int i = 0; i < numberOfEntries; i++){
+		for(int i = 0; i < getNumberOfEntries(); i++){
 
 			buffer.get(bytebuf);
 			PagePointer p = pointerSerializer.deserialize(bytebuf);
@@ -317,7 +317,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		
 		currentPos -= headerSize();
 		currentPos /= (serializedPointerSize * 2);
-		if(currentPos >= numberOfEntries)
+		if(currentPos >= getNumberOfEntries())
 			return NOT_FOUND;
 		
 		currentPos *= (serializedPointerSize * 2);
@@ -341,7 +341,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		// shift the pointers after key
 		ByteBuffer buffer = rawPage().bufferForWriting(0);
 		System.arraycopy(buffer.array(), pos + sizeOfValues , buffer.array(), pos , buffer.array().length - pos - sizeOfValues);
-		numberOfEntries -= numberOfValues;
+		setNumberOfEntries(getNumberOfEntries() - numberOfValues);
 		
 		rawPage().setModified(true);
 		
@@ -419,10 +419,10 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		byte[] buf = new byte[serializedPointerSize];
 		
 		//TODO: free pages
-		for(int i = 0; i < numberOfEntries; i++){
+		for(int i = 0; i < getNumberOfEntries(); i++){
 			
 			// key page
-			ByteBuffer buffer = rawPage().bufferForWriting(offsetForKey(i));
+			ByteBuffer buffer = rawPage().bufferForWriting(offsetForKeyPos(i));
 			buffer.get(buf);
 			PagePointer p = pointerSerializer.deserialize(buf);
 			DataPage<K> keyPage = keyPageManager.getPage(p.getId());
@@ -482,9 +482,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void initialize() {
-		numberOfEntries = 0;
+		setNumberOfEntries(0);
 		setNextLeafId(NO_NEXT_LEAF);
-		writeNumberOfEntries();
 		valid = true;
 	}
 
@@ -494,8 +493,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void load() {
-		ByteBuffer buffer = rawPage().bufferForReading(0);
-		numberOfEntries = buffer.getInt();
+		setNumberOfEntries(rawPage().bufferForReading(0).getInt());
 		valid = true;
 	}
 
@@ -533,7 +531,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	        // serialize Pointers
 			addEntry(keyPointer, valuePointer);
 			
-			writeNumberOfEntries();
 			return null;	
 		}
 		
@@ -575,12 +572,13 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		}
 		
 		// just to make sure, that the adjustment action is correct:
-		if(keyPageManager.getPage(this.getLastKeyPointer().getId()).get(this.getLastKeyPointer().getOffset()) == null){
+		AdjustmentAction<K, V> action = new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE,
+				this.getLastKeyPointer(), newLeaf.rawPage().id());
+		if(keyPageManager.getPage(action.getKeyPointer().getId()).get(action.getKeyPointer().getOffset()) == null){
 			throw new RuntimeException();
 		}
 			
-		return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE,
-				this.getLastKeyPointer(), newLeaf.rawPage().id());
+		return action;
 	}
 	
 	
@@ -609,7 +607,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	public PagePointer getKeyPointer(int pos) {
 		
 		if(pos >= 0){
-			offsetForKey(pos);
+			offsetForKeyPos(pos);
 		}
 		
 		return null;
