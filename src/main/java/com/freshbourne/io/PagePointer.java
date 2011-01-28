@@ -68,5 +68,11 @@ public class PagePointer {
 		return o instanceof PagePointer && ((PagePointer)o).getId() == getId() && 
 			((PagePointer)o).getOffset() == getOffset();
 	}
+	
+	@Override
+	public String toString(){
+		return "PagePointer {id: " + getId() + ", offset: " + getOffset() + "}";
+		
+	}
 
 }

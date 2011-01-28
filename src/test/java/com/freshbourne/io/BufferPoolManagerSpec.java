@@ -48,12 +48,19 @@ public abstract class BufferPoolManagerSpec {
 		
 		return id;
 	}
-
+	
 	@Test
 	public void shouldReturnCorrectPagesEvenIfExceededCache() throws IOException {
 		Long pageId = createPageWithCompareValueAndLoop();
 		
 		assertEquals(valueToCompare, bpm.getPage(pageId).bufferAtZero().getLong());
+	}
+	
+	@Test public void evenTheObjectIdShouldBeTheSameWhenCommingFromCache(){
+		Long pageId = createPageWithCompareValueAndLoop();
+		
+		assertEquals(System.identityHashCode(bpm.getPage(pageId)), System.identityHashCode(bpm.getPage(pageId)));
+		
 	}
 	
 	@Test public void shouldReturnSameInstanceWhenPageIsGotTwice(){

@@ -148,6 +148,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 			@SuppressWarnings("unused")
 			int i = root.getNumberOfEntries();
 			i = leafPageManager.getPage(result.getPageId()).getNumberOfEntries();
+			
 			// new root
 			InnerNode<K, V> newRoot = innerNodeManager.createPage();
 			newRoot.initRootState(result.getKeyPointer(), root.getId(), result.getPageId());

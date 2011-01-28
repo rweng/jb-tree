@@ -177,6 +177,8 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 		header.limit( (Integer.SIZE + (Integer.SIZE) * 2 * entries.size()) / 8 );
 		if(remaining() > Integer.SIZE / 8)
 			header.limit(header.limit() + Integer.SIZE / 8);
+		
+		rawPage().setModified(true);
 	}
 
 	/* (non-Javadoc)

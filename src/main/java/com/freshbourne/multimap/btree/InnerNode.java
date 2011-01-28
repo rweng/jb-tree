@@ -81,9 +81,9 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		ByteBuffer buf = buffer();
 		buf.position(Header.size());
 		
-		buffer().putLong(pageId1);
-		buffer().put(pointerSerializer.serialize(keyPointer));
-		buffer().putLong(pageId2);
+		buf.putLong(pageId1);
+		buf.put(pointerSerializer.serialize(keyPointer));
+		buf.putLong(pageId2);
 		
 		setNumberOfKeys(1);
 	}
@@ -182,9 +182,23 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private int posOfFirstLargerOrEqualKey(K key){
+		if(comperator == null){
+			throw new IllegalStateException("comparator must not be null");
+		}
+		
+		if(key == null){
+			throw new IllegalArgumentException("key must not be null");
+		}
+		
 		for(int i = 0; i < numberOfKeys; i++){
+			
 			PagePointer pp = getPointerAtOffset(offsetForKey(i));
-			if(comperator.compare(getKeyFromPagePointer(pp), key) >= 0){
+			K keyFromPointer = getKeyFromPagePointer(pp);
+			if(keyFromPointer == null){
+				throw new IllegalStateException("key retrieved from PagePointer " + pp + " must not be null!");
+			}
+			
+			if(comperator.compare(keyFromPointer, key) >= 0){
 				return i;
 			}
 		}

@@ -32,8 +32,10 @@ public class DynamicDataPageSpec {
 	@Test
 	public void shouldHaveToInitialize(){
 		assertFalse(page.isValid());
+		assertFalse(page.rawPage().isModified());
 		page.initialize();
 		assertTrue(page.isValid());
+		checkAndSetModified(page);
 	}
 	
 	@Test
@@ -42,6 +44,10 @@ public class DynamicDataPageSpec {
 		assertEquals(0, page.numberOfEntries());
 	}
 	
+	private void checkAndSetModified(DynamicDataPage<String> page){
+		assertTrue(page.rawPage().isModified());
+		page.rawPage().setModified(false);
+	}
 	
 	
 	@Test(expected= Exception.class)
@@ -52,15 +58,18 @@ public class DynamicDataPageSpec {
 	@Test
 	public void shouldGetSmallerWhenInsertingSomething() throws NoSpaceException, InvalidPageException{
 		page.initialize();
+		checkAndSetModified(page);
 		
 		int rest = page.remaining();
 		page.add("bla");
+		checkAndSetModified(page);
 		assertTrue(rest > page.remaining());
 	}
 	
 	@Test(expected= InvalidPageException.class)
 	public void shouldThrowAnExceptionOnAddIfNotValid() throws NoSpaceException, InvalidPageException{
 		page.add(s1);
+		checkAndSetModified(page);
 	}
 	
 	@Test(expected= InvalidPageException.class)
@@ -81,11 +90,13 @@ public class DynamicDataPageSpec {
 		int id1 = page.add(s1);
 		int id2 = page.add(s2);
 		int id3 = page.add(s3);
+		checkAndSetModified(page);
 		
 		assertEquals(s1, page.get(id1));
 		assertEquals(s3, page.get(id3));
 		
 		page.remove(id1);
+		checkAndSetModified(page);
 		assertEquals(s2, page.get(id2));
 		assertEquals(s3, page.get(id3));
 	}
@@ -97,6 +108,8 @@ public class DynamicDataPageSpec {
 		
 		int id = page.add(s3);
 		page.remove(id);
+		checkAndSetModified(page);
+		
 		assertEquals(null, page.get(id));
 		assertEquals(null, page.get(id + 5));
 		
