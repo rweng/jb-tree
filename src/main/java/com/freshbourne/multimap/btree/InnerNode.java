@@ -7,6 +7,7 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Comparator;
 import java.util.List;
@@ -115,8 +116,12 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	
 	private Node<K, V> getPageForPageId(Long pageId){
 		Node <K, V> result = innerNodePageManager.getPage(pageId);
+		
 		if(result == null)
 			result = leafPageManager.getPage(pageId);
+		
+		if(result == null)
+			throw new IllegalArgumentException("the requested pageId " + pageId + " is neither in InnerNodePageManager nor in LeafPageManager");
 		
 		return result;
 	}
@@ -265,17 +270,14 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.io.ComplexPage#load()
 	 */
 	@Override
-	public void load() {
-		ByteBuffer buf = rawPage.bufferForWriting(0);
+	public void load() throws IOException {
+		ByteBuffer buf = rawPage.bufferForReading(0);
 		if(NodeType.deserialize(buf.getChar()) != NODE_TYPE)
-			throw new IllegalStateException("You are trying to load a InnerNode from a byte array, that does not contain an InnerNode");
+			throw new IOException("You are trying to load a InnerNode from a byte array, that does not contain an InnerNode");
 		
 
 		buf.position(Header.NUMBER_OF_KEYS.getOffset());
 		numberOfKeys = buf.getInt();
-
-		
-		throw new UnsupportedOperationException();
 	}
 
 	/* (non-Javadoc)
