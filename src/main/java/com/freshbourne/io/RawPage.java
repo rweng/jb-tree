@@ -76,6 +76,15 @@ public class RawPage {
 	public ResourceManager getResourceManager() {
 		return resourceManager;
 	}
+	
+	protected void finalize() throws Throwable {
+		try {
+			if (isModified())
+				getResourceManager().writePage(this);
+		} catch (Exception e) {
+			super.finalize();
+		}
+	}
     
     
 }
