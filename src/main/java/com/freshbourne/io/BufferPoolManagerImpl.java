@@ -46,7 +46,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 		if(cache.get(pageId) != null)
 			return cache.get(pageId);
 		
-		return addToCache(rm.readPage(pageId));
+		return addToCache(rm.getPage(pageId));
 	}
 
 

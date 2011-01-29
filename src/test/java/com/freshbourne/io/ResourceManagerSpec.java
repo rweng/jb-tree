@@ -68,7 +68,7 @@ public abstract class ResourceManagerSpec {
 		page.bufferForWriting(0).putInt(1234);
 		rm.writePage(page);
 		
-		assertEquals(rm.readPage(page.id()).bufferForWriting(0), page.bufferForWriting(0));
+		assertEquals(rm.getPage(page.id()).bufferForWriting(0), page.bufferForWriting(0));
 	}
 	
 	@Test
@@ -92,7 +92,7 @@ public abstract class ResourceManagerSpec {
 		rm.writePage(page);
 		
 		assertEquals(2, rm.numberOfPages());
-		assertEquals(longToCompare, rm.readPage(page.id()).bufferForWriting(0).getLong());
+		assertEquals(longToCompare, rm.getPage(page.id()).bufferForWriting(0).getLong());
 		
 		rm.close();
 		
@@ -100,7 +100,7 @@ public abstract class ResourceManagerSpec {
 		rm = createOpenResourceManager();
 		
 		assertEquals(2, rm.numberOfPages());
-		assertEquals(longToCompare, rm.readPage(page.id()).bufferForWriting(0).getLong());
+		assertEquals(longToCompare, rm.getPage(page.id()).bufferForWriting(0).getLong());
 	}
 	
 	@Test(expected= WrongPageSizeException.class)
@@ -119,7 +119,7 @@ public abstract class ResourceManagerSpec {
 		rm.removePage(p1Id);
 		assertEquals(i - 1, rm.numberOfPages());
 		try{
-			rm.readPage(p1Id);
+			rm.getPage(p1Id);
 			fail("reading a non-existent page should throw an exeption");
 		} catch( Exception expected){
 		}

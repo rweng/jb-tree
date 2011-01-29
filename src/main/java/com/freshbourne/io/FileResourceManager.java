@@ -8,20 +8,17 @@
 package com.freshbourne.io;
 
 import com.google.inject.Inject;
-import com.sun.tools.internal.xjc.reader.RawTypeSet.Ref;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.ref.Reference;
-import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -88,10 +85,10 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#readPage(int)
+	 * @see com.freshbourne.io.PageManager#getPage(long)
 	 */
 	@Override
-	public RawPage readPage(long pageId) {
+	public RawPage getPage(long pageId) {
 		
 		ensureOpen();
 		ensurePageExists(pageId);
@@ -301,7 +298,7 @@ public class FileResourceManager implements ResourceManager {
 				header.removeLastId();
 				ioChannel.truncate(header.getNumberOfPages() * pageSize);
 			} else {
-				RawPage last = readPage(lastPageId);
+				RawPage last = getPage(lastPageId);
 				header.replaceId(pageId, lastPageId);
 				header.removeLastId();
 				writePage(last);
