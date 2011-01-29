@@ -21,14 +21,13 @@ import com.freshbourne.io.RawPage;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
-import com.freshbourne.serializer.Serializer;
 
 /**
  *
  * stores pointers to the keys that get push upwards to InnerNodes from LeafPages, as well as the id of nodes
  * in the following order:
  * 
- * NODE_ID | KEY_POINTER | NODE_ID | KEY_POINTER | NODE_ID ...
+ * NODE_TYPE | NUM_OF_KEYS | NODE_ID | KEY_POINTER | NODE_ID | KEY_POINTER | NODE_ID ...
  *
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
@@ -357,10 +356,10 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 				// the key replaces the old key for our node, since the split caused a different
 				// key to be the now highest in the subtree
 				
-				int posForInsert = posOfFirstLargerOrEqualKey == -1 ? getNumberOfKeys() + 1 : posOfFirstLargerOrEqualKey;
+				int posForInsert = posOfFirstLargerOrEqualKey == -1 ? getNumberOfKeys() : posOfFirstLargerOrEqualKey;
 				insertKeyPointerPageIdAtPosition(
 						result.getKeyPointer(), result.getPageId(),  posForInsert);
-				rawPage().setModified(true);
+				
 				// no further adjustment necessary. even if we inserted to the last position, the
 				// highest key in the subtree below is still the same, because otherwise we would
 				// have never ended up here during the descend from the root, or we are in the
@@ -384,9 +383,16 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	private void insertKeyPointerPageIdAtPosition(PagePointer keyPointer,
 			Long pageId, int posOfKeyForInsert) {
+		
 		ByteBuffer buf = rawPage().bufferForWriting(offsetForKey(posOfKeyForInsert));
 		
-		throw new UnsupportedOperationException();
+		int spaceNeededForInsert = getSizeOfPageId() + getSizeOfSerializedPointer();
+		System.arraycopy(buf.array(), buf.position(), buf.array(), buf.position() + spaceNeededForInsert, buf.limit() - buf.position() - spaceNeededForInsert);
+		
+		buf.put(pointerSerializer.serialize(keyPointer));
+		buf.putLong(pageId);
+		
+		setNumberOfKeys(getNumberOfKeys() + 1);
 	}
 
 	private int getMaximalNumberOfKeys() {
