@@ -162,9 +162,13 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public int remove(K key) {
 		ensureValid();
-		Long id = getChildForKey(key);
 		
-		throw new UnsupportedOperationException();
+		if(getNumberOfKeys() == 0)
+			return 0;
+		
+		Long id = getPageIdForKey(key);
+		Node<K,V>node = getPageForPageId(id);
+		return node.remove(key);
 	}
 	
 	private int getSizeOfPageId(){
@@ -213,9 +217,6 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 			}
 		}
 		return -1;
-	}
-	private Long getChildForKey(K key) {
-		return getLeftPageIdOfKey(posOfFirstLargerKey(key));
 	}
 	
 	private Long getLeftPageIdOfKey(int i) {
