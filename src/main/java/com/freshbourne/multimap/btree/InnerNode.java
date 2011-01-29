@@ -145,7 +145,12 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public List<V> get(K key) {
 		ensureValid();
-		throw new UnsupportedOperationException();
+		ensureRoot();
+		
+		long pageId = getPageIdForKey(key);
+		Node<K,V> node = getPageForPageId(pageId);
+		
+		return node.get(key);
 	}
 
 	/* (non-Javadoc)
