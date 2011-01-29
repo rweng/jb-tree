@@ -18,9 +18,9 @@ package com.freshbourne.io;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * 
@@ -34,9 +34,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class BufferPoolManagerImpl implements BufferPoolManager {
 	
 	private final ResourceManager rm;
-	private final int cacheSize;
+	private int cacheSize;
 	
-	private ArrayBlockingQueue<RawPage> cacheQueue;
+	private Queue<RawPage> cacheQueue;
 	private HashMap<Long, RawPage> cache;
 	
 	@Inject
@@ -44,7 +44,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 		this.rm = rm;
         this.cacheSize = cacheSize;
 		this.cache = new HashMap<Long, RawPage>();
-		cacheQueue = new ArrayBlockingQueue<RawPage>(cacheSize);
+		cacheQueue = new LinkedList<RawPage>();
 	}
 
 	
@@ -58,7 +58,7 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 
 
 	private RawPage addToCache(RawPage p) {
-		if(cacheQueue.remainingCapacity() == 0){
+		if(cacheQueue.size() == cacheSize){
 			RawPage toRemove = cacheQueue.poll();
 			rm.writePage(toRemove);
 			cache.remove(toRemove);
@@ -77,8 +77,13 @@ public class BufferPoolManagerImpl implements BufferPoolManager {
 
 	@Override
 	public void removePage(long id) {
-		// TODO Auto-generated method stub
+		if(cache.containsKey(id)){
+			RawPage page = cache.get(id);
+			cacheQueue.remove(page);
+			cache.remove(id);
+		}
 		
+		rm.removePage(id);
 	}
 
 
