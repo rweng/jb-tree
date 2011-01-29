@@ -15,7 +15,6 @@
  */
 package com.freshbourne.multimap.btree;
 
-import com.freshbourne.io.BufferPoolManager;
 import com.freshbourne.io.ComplexPage;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.RawPage;

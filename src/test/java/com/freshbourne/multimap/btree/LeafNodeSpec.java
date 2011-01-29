@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.freshbourne.comparator.IntegerComparator;
-import com.freshbourne.io.BufferPoolManager;
 import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.DynamicDataPage;
 import com.google.inject.Guice;
