@@ -9,6 +9,7 @@ package com.freshbourne.multimap.btree;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -145,7 +146,9 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public List<V> get(K key) {
 		ensureValid();
-		ensureRoot();
+		
+		if(getNumberOfKeys() == 0)
+			return new ArrayList<V>();
 		
 		long pageId = getPageIdForKey(key);
 		Node<K,V> node = getPageForPageId(pageId);
