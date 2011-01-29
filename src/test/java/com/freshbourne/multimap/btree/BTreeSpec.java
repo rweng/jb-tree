@@ -9,6 +9,9 @@ package com.freshbourne.multimap.btree;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+
+import org.junit.Test;
+
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.MultiMapSpec;
 import com.google.inject.Guice;
@@ -58,5 +61,4 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	protected String createRandomValue() {
 		return (new BigInteger(130, srand())).toString(32);
 	}
-
 }

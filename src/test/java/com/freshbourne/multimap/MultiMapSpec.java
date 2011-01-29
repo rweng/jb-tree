@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 
 public abstract class MultiMapSpec<K, V> {
 	
-	private MultiMap<K, V> tree;
+	protected MultiMap<K, V> tree;
 	private K key1;
 	private K key2;
 	
@@ -114,10 +114,10 @@ public abstract class MultiMapSpec<K, V> {
 		assertEquals(0, tree.get(key1).size());
 	}
 	
-	private void fill(int size){
+	protected void fill(int size){
 		K key = createRandomKey();
+		System.out.println("adding " + size + "values to " + tree.getClass().toString());
 		for(int i = 0; i < size; i++){
-			System.out.println(i);
 			tree.add(key, value1);
 		}
 		
@@ -142,7 +142,7 @@ public abstract class MultiMapSpec<K, V> {
 		simpleTests();
 	}
 	
-	private void simpleTests(){
+	protected void simpleTests(){
 		tree.add(key1, value2);
 		assertTrue(tree.containsKey(key1));
 		assertEquals(value2, tree.get(key1).get(0));
