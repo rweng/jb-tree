@@ -20,6 +20,12 @@ gradle test
 gradle javadoc
 open build/doc/javadoc/index.html
 
+You can perform all those operations on the master branch which contains the latest releases and hotfixes. If you want to start developing or see the current status, check out the development branch after cloning the repository
+
+bc. cd index
+# switch to dev branch
+git checkout -b development origin/development
+
 h2. Documentation
 
 You can find the Javadoc "here":http://rweng.github.com/index/doc/ - If you click on Network, you can see a branch called gh-pages on which you can see the commit the Javadocs are about (not always completely up-to-date).
