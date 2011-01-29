@@ -301,7 +301,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		int posOfFirstLargerOrEqualKey = posOfFirstLargerOrEqualKey(key);
 		
 		if(posOfFirstLargerOrEqualKey < 0) // if key is largest
-			return getOffsetForRightPageIdOfKey((getNumberOfKeys()));
+			return getOffsetForRightPageIdOfKey((getNumberOfKeys() - 1));
 		
 		
 		return getOffsetForLeftPageIdOfKey(posOfFirstLargerOrEqualKey);
