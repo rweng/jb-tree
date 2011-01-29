@@ -114,23 +114,42 @@ public abstract class MultiMapSpec<K, V> {
 		assertEquals(0, tree.get(key1).size());
 	}
 	
-	@Test public void shouldWorkWithANumberOfValues(){
-		int size = 170;
+	private void fill(int size){
 		K key = createRandomKey();
 		for(int i = 0; i < size; i++){
 			System.out.println(i);
 			tree.add(key, value1);
 		}
 		
+	}
+	
+	@Test public void shouldWorkOnTheEdgeToCreateNewInnerNode(){
+		int size = 170;
+		fill(size);
+		
+		assertEquals(size, tree.getNumberOfEntries());
+		simpleTests();
+	}
+	
+	@Test
+	public void shouldWorkWithMassiveValues(){
+		int size = 10000;
+
+		fill(size);
+		
 		assertEquals(size, tree.getNumberOfEntries());
 		
+		simpleTests();
+	}
+	
+	private void simpleTests(){
 		tree.add(key1, value2);
 		assertTrue(tree.containsKey(key1));
 		assertEquals(value2, tree.get(key1).get(0));
 		
 		tree.remove(key1);
 		assertFalse(tree.containsKey(key1));
-		assertEquals(0, tree.get(key1).size());
+		assertEquals(0, tree.get(key1).size());		
 	}
 	
 }
