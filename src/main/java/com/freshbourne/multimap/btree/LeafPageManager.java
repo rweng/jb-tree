@@ -16,7 +16,7 @@ import java.util.Comparator;
 
 public class LeafPageManager<K,V> implements PageManager<LeafNode<K,V>> {
 
-	private final BufferPoolManager bpm;
+	private final PageManager<RawPage> bpm;
 	private final FixLengthSerializer<PagePointer, byte[]> ppSerializer;
 	
 	private final DataPageManager<K> keyPageManager;
@@ -26,7 +26,7 @@ public class LeafPageManager<K,V> implements PageManager<LeafNode<K,V>> {
 	
 	@Inject
 	public LeafPageManager(
-			BufferPoolManager bpm, 
+			PageManager<RawPage> bpm, 
 			DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
 			FixLengthSerializer<PagePointer, byte[]> ppSerializer,

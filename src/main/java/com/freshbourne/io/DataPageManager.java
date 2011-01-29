@@ -16,13 +16,13 @@ import java.io.IOException;
 
 public class DataPageManager<T> implements PageManager<DataPage<T>> {
 
-    private final BufferPoolManager bpm;
+    private final PageManager<RawPage> bpm;
     private final FixLengthSerializer<PagePointer, byte[]> pointSerializer;
     private final Serializer<T, byte[]> dataSerializer;
 
     @Inject
     DataPageManager(
-            BufferPoolManager bpm,
+    		PageManager<RawPage> bpm,
             FixLengthSerializer<PagePointer, byte[]> pointSerializer,
 			Serializer<T, byte[]> dataSerializer
             ){

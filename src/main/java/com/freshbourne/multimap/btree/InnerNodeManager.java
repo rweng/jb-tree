@@ -10,7 +10,6 @@ package com.freshbourne.multimap.btree;
 import java.io.IOException;
 import java.util.Comparator;
 
-import com.freshbourne.io.BufferPoolManager;
 import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.PagePointer;
@@ -20,18 +19,17 @@ import com.google.inject.Inject;
 
 public class InnerNodeManager<K, V> implements PageManager<InnerNode<K, V>> {
 
-	private final BufferPoolManager bpm;
+	private final PageManager<RawPage> bpm;
 	private final FixLengthSerializer<PagePointer, byte[]> ppSerializer;
 	
 	private final DataPageManager<K> keyPageManager;
-	private final DataPageManager<V> valuePageManager;
 	
 	private final Comparator<K> comparator;
 	private final PageManager<LeafNode<K, V>> leafPageManager;
 	
 	@Inject
 	public InnerNodeManager(
-			BufferPoolManager bpm, 
+			PageManager<RawPage> bpm, 
 			DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
 			LeafPageManager<K, V> leafPageManager,
@@ -40,7 +38,6 @@ public class InnerNodeManager<K, V> implements PageManager<InnerNode<K, V>> {
 		this.bpm = bpm;
 		this.ppSerializer = ppSerializer;
         this.keyPageManager = keyPageManager;
-        this.valuePageManager = valuePageManager;
         this.leafPageManager = leafPageManager;
         this.comparator = comparator;
 	}
