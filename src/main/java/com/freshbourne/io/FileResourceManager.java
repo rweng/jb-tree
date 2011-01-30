@@ -312,4 +312,12 @@ public class FileResourceManager implements ResourceManager {
 		
 		refs.remove(pageId);
 	}
+	
+	protected void finalize() throws Throwable{
+		try{
+			close();
+		} catch (Exception e) {
+			super.finalize();
+		}
+	}
 }

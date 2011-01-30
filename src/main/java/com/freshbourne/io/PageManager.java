@@ -36,4 +36,5 @@ public interface PageManager<T> {
 	 * @param id of the Page to be removed
 	 */
 	public void removePage(long id);
+	
 }

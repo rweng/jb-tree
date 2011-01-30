@@ -25,6 +25,7 @@ public class LeafNodeSpec {
 	
 	private final static Injector injector;
 	private LeafNode<Integer, String> leaf;
+	private LeafPageManager<Integer, String> lpm;
 	
 	private int key1 = 1;
 	private int key2 = 2;
@@ -34,11 +35,12 @@ public class LeafNodeSpec {
 	
 	
 	static {
-		injector = Guice.createInjector(new BTreeModule("/tmp/leaf_spec")); 
+		injector = Guice.createInjector(new BTreeModule("/tmp/leaf_spec"));
 	}
 	
 	@Before public void setUp(){
-		leaf = injector.getInstance(Key.get(new TypeLiteral<LeafPageManager<Integer, String>>(){})).createPage();
+		lpm = injector.getInstance(Key.get(new TypeLiteral<LeafPageManager<Integer, String>>(){}));
+		leaf = lpm.createPage();
 		}
 	
 	@Test public void shouldBeAbleToInsertAndGet(){
@@ -87,7 +89,17 @@ public class LeafNodeSpec {
 		assertNotNull(action.getKeyPointer().getId());
 		
 		assertNotNull(keyPageManager.getPage(action.getKeyPointer().getId()));
-		assertNotNull(keyPageManager.getPage(action.getKeyPointer().getId()).get(action.getKeyPointer().getOffset()));	
+		assertNotNull(keyPageManager.getPage(action.getKeyPointer().getId()).get(action.getKeyPointer().getOffset()));
+		
+		// this should still work and not throw an exception
+		Integer k = leaf.getLastKey();
+		assertNotNull(leaf.get(k));
+		
+		// same for the newly create leaf
+		leaf = lpm.getPage(action.getPageId());
+		k = leaf.getLastKey();
+		assertNotNull(leaf.get(k));
+		
 	}
 	
 	@Test

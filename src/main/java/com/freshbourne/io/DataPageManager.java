@@ -44,7 +44,7 @@ public class DataPageManager<T> implements PageManager<DataPage<T>> {
     	try {
 			result.load();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new IllegalStateException();
 		}
         return result;
     }

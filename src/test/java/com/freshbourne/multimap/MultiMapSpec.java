@@ -143,13 +143,17 @@ public abstract class MultiMapSpec<K, V> {
 	}
 	
 	protected void simpleTests(){
+		int numOfEntries = tree.getNumberOfEntries();
+		
 		tree.add(key1, value2);
 		assertTrue(tree.containsKey(key1));
 		assertEquals(value2, tree.get(key1).get(0));
+		assertEquals(numOfEntries + 1, tree.getNumberOfEntries());
 		
 		tree.remove(key1);
 		assertFalse(tree.containsKey(key1));
 		assertEquals(0, tree.get(key1).size());		
+		assertEquals(numOfEntries, tree.getNumberOfEntries());
 	}
 	
 }

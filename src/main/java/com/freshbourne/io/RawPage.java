@@ -48,12 +48,13 @@ public class RawPage {
     /**
      * @return a random Long but 0L
      */
+    private static long lastid = 0;
     public static Long generateId(){
-		long result;
+    	long result;
 		do{
 			result = (new Random()).nextLong();
 		} while (result == 0L);
-		return result;
+		return ++lastid;
     }
 
 	/**

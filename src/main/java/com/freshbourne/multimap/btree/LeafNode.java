@@ -296,6 +296,9 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 			buffer.get(bytebuf);
 			PagePointer p = pointerSerializer.deserialize(bytebuf);
 			DataPage<K> dataPage = keyPageManager.getPage(p.getId());
+			if(dataPage == null)
+				throw new IllegalStateException("dataPage should not be null");
+			
 			if(dataPage.get(p.getOffset()).equals(key)){
 				return buffer.position() - pSize;
 			}

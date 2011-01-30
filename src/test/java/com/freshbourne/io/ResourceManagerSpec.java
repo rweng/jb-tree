@@ -7,12 +7,20 @@
  */
 package com.freshbourne.io;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.lang.ref.PhantomReference;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -42,7 +50,6 @@ public abstract class ResourceManagerSpec {
 		assertEquals(PageSize.DEFAULT_PAGE_SIZE, rm.pageSize());
 		assertEquals(0, rm.numberOfPages()); // 0 pages
 	}
-	
 	
 	
 	@Test(expected= IllegalStateException.class)
@@ -128,6 +135,21 @@ public abstract class ResourceManagerSpec {
 		assertEquals(i, rm.numberOfPages());
 		rm.removePage(p3.id());
 		assertEquals(i - 1, rm.numberOfPages());
+	}
+	
+	@Test
+	public void shouldBeAbleToCreateAMassiveNumberOfPages(){
+		List<Long> ids = new ArrayList<Long>();
+		int size = 10000;
+		for(int i = 0; i < size; i++){
+			ids.add(rm.createPage().id());
+		}
+		
+		assertEquals(size, rm.numberOfPages());
+		for(int i = 0; i < size; i++){
+			Long id = ids.get(0);
+			assertEquals(id, rm.getPage(id).id());
+		}
 	}
 
 	
