@@ -115,15 +115,15 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private Node<K, V> getPageForPageId(Long pageId){
-		Node <K, V> result = innerNodePageManager.getPage(pageId);
 		
-		if(result == null)
-			result = leafPageManager.getPage(pageId);
+		if(innerNodePageManager.hasPage(pageId)){
+			return innerNodePageManager.getPage(pageId);
+		}
 		
-		if(result == null)
-			throw new IllegalArgumentException("the requested pageId " + pageId + " is neither in InnerNodePageManager nor in LeafPageManager");
+		if(leafPageManager.hasPage(pageId))
+			return leafPageManager.getPage(pageId);
 		
-		return result;
+		throw new IllegalArgumentException("the requested pageId " + pageId + " is neither in InnerNodePageManager nor in LeafPageManager");
 	}
 	
 	private void writeNumberOfKeys() {
