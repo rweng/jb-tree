@@ -36,5 +36,10 @@ public interface PageManager<T> {
 	 * @param id of the Page to be removed
 	 */
 	public void removePage(long id);
-	
+
+	/**
+	 * @param page id
+	 * @return true, if the page exists
+	 */
+	public boolean hasPage(long id);
 }

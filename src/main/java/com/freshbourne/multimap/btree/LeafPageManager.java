@@ -14,9 +14,8 @@ import com.google.inject.Inject;
 
 import java.util.Comparator;
 
-public class LeafPageManager<K,V> implements PageManager<LeafNode<K,V>> {
+public class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 
-	private final PageManager<RawPage> bpm;
 	private final FixLengthSerializer<PagePointer, byte[]> ppSerializer;
 	
 	private final DataPageManager<K> keyPageManager;
@@ -31,39 +30,21 @@ public class LeafPageManager<K,V> implements PageManager<LeafNode<K,V>> {
 			DataPageManager<V> valuePageManager,
 			FixLengthSerializer<PagePointer, byte[]> ppSerializer,
 			Comparator<K> comparator) {
-		this.bpm = bpm;
+		super(bpm);
 		this.ppSerializer = ppSerializer;
         this.keyPageManager = keyPageManager;
         this.valuePageManager = valuePageManager;
         this.comparator = comparator;
 	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.AbstractPageManager#createObjectPage()
+	 */
+	@Override
+	protected LeafNode<K, V> createObjectPage(RawPage page) {
+		return new LeafNode<K, V>(page, keyPageManager, valuePageManager, ppSerializer, comparator, this);
+	}
 	
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#createPage()
-	 */
-	@Override
-	public LeafNode<K, V> createPage() {
-		LeafNode<K, V> l = new LeafNode<K, V>(bpm.createPage(), keyPageManager, valuePageManager, ppSerializer, comparator, this);
-		l.initialize();
-		return l;
-	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#getPage(int)
-	 */
-	@Override
-	public LeafNode<K, V> getPage(long id) {
-		LeafNode<K, V> l = new LeafNode<K, V>(bpm.getPage(id), keyPageManager, valuePageManager, ppSerializer, comparator, this);
-		l.load();
-		return l;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#removePage(int)
-	 */
-	@Override
-	public void removePage(long id) {
-		bpm.removePage(id);
-	}
 
 }

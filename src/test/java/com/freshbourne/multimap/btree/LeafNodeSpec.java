@@ -96,9 +96,9 @@ public class LeafNodeSpec {
 		assertNotNull(leaf.get(k));
 		
 		// same for the newly create leaf
-		leaf = lpm.getPage(action.getPageId());
-		k = leaf.getLastKey();
-		assertNotNull(leaf.get(k));
+		LeafNode<Integer, String> newLeaf = lpm.getPage(action.getPageId());;
+		k = newLeaf.getLastKey();
+		assertNotNull(newLeaf.get(k));
 		
 	}
 	

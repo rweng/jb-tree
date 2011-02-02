@@ -75,7 +75,7 @@ public class IOModule extends AbstractModule{
 		
 		bindConstant().annotatedWith(Names.named("cacheSize")).to(cacheSize);
 		
-		bind(new TypeLiteral<PageManager<RawPage>>(){}).to(ResourceManager.class);
+		bind(new TypeLiteral<PageManager<RawPage>>(){}).to(ResourceManager.class).in(Singleton.class);
 	}
 
     @Provides @Singleton

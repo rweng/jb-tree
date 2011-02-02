@@ -320,4 +320,12 @@ public class FileResourceManager implements ResourceManager {
 			super.finalize();
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.PageManager#hasPage(long)
+	 */
+	@Override
+	public boolean hasPage(long id) {
+		return header.contains(id);
+	}
 }

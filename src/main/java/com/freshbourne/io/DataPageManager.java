@@ -53,4 +53,12 @@ public class DataPageManager<T> implements PageManager<DataPage<T>> {
     public void removePage(long id) {
         bpm.removePage(id);
     }
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.PageManager#hasPage(long)
+	 */
+	@Override
+	public boolean hasPage(long id) {
+		return bpm.hasPage(id);
+	}
 }
