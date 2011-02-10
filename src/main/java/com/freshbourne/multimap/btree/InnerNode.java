@@ -317,6 +317,9 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 			throw new IllegalArgumentException("pageId must not be 0 ( posOfFirstLargerOrEqualKey: " + posOfFirstLargerOrEqualKey + " )");
 		}
 		
+		if(!leafPageManager.hasPage(pageId))
+			throw new UnsupportedOperationException("we cant load from next innerNode yet");
+		
 		LeafNode<K, V> leaf = leafPageManager.getPage(pageId);
 		AdjustmentAction<K, V> result;
 		
