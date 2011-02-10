@@ -40,13 +40,13 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	
 	static enum Header{
 		NODE_TYPE(0){}, // char
-		NUMBER_OF_KEYS(2); // int
+		NUMBER_OF_KEYS(Character.SIZE); // int
 		
 		private int offset;
 		Header(int offset){
 			this.offset = offset;
 		}
-		static int size(){return 6;}
+		static int size(){return Character.SIZE + Integer.SIZE;}
 		int getOffset(){return offset;}
 	}
 	
