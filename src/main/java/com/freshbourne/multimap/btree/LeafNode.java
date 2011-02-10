@@ -140,7 +140,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		System.arraycopy(buffer.array(), headerSize(), buffer.array(), headerSize() + totalSize, totalSize);
 		
 		// copy from other to us
-		int sourceOffset = source.offsetForKeyPos(source.getNumberOfEntries() - 1 - num);
+		int sourceOffset = source.getOffsetForKeyPos(source.getNumberOfEntries() - 1 - num);
 		System.arraycopy(source.rawPage().bufferForWriting(0).array(), sourceOffset, buffer.array(), headerSize(), totalSize);
 		
 		// update headers, also sets modified
@@ -157,20 +157,20 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		if(getNumberOfEntries() == 0)
 			throw new IllegalStateException("you can only get the last key if there are any Keys in the Leaf");
 		
-		int pos = offsetBehindLastEntry();
-		pos -= 2 * serializedPointerSize;
-		return getKeyOfPos(pos);
+		int offset = offsetBehindLastEntry();
+		offset -= 2 * serializedPointerSize;
+		return getKeyAtOffset(offset);
 	}
 	
 	public PagePointer getLastKeyPointer(){
-		ByteBuffer buffer = rawPage().bufferForReading(offsetForKeyPos(getNumberOfEntries() - 1));
+		ByteBuffer buffer = rawPage().bufferForReading(getOffsetForKeyPos(getNumberOfEntries() - 1));
 		byte[] buf = new byte[serializedPointerSize];
 		buffer.get(buf);
 		return pointerSerializer.deserialize(buf);
 	}
 	
-	public K getKeyOfPos(int pos){
-		ByteBuffer buffer = rawPage().bufferForWriting(pos);
+	public K getKeyAtOffset(int offset){
+		ByteBuffer buffer = rawPage().bufferForReading(offset);
 		byte[] buf = new byte[serializedPointerSize];
 		buffer.get(buf);
 		
@@ -182,8 +182,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		if(getNumberOfEntries() == 0)
 			return null;
 		
-		int pos = offsetForKeyPos(0);
-		return getKeyOfPos(pos);
+		int pos = getOffsetForKeyPos(0);
+		return getKeyAtOffset(pos);
 	}
 
 	/**
@@ -221,7 +221,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
         return posOfKey(key) != NOT_FOUND;
 	}
 	
-	private int offsetForKeyPos(int pos){
+	private int getOffsetForKeyPos(int pos){
 		if(pos < 0 || pos >= getNumberOfEntries())
 			throw new IllegalArgumentException("pos must be between 0 and numberOfEntries - 1");
 		
@@ -229,7 +229,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private int offsetForValue(int i){
-		return offsetForKeyPos(i) + serializedPointerSize;
+		return getOffsetForKeyPos(i) + serializedPointerSize;
 	}
 	
 	/**
@@ -432,7 +432,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		for(int i = 0; i < getNumberOfEntries(); i++){
 			
 			// key page
-			ByteBuffer buffer = rawPage().bufferForWriting(offsetForKeyPos(i));
+			ByteBuffer buffer = rawPage().bufferForWriting(getOffsetForKeyPos(i));
 			buffer.get(buf);
 			PagePointer p = pointerSerializer.deserialize(buf);
 			DataPage<K> keyPage = keyPageManager.getPage(p.getId());
@@ -617,7 +617,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	public PagePointer getKeyPointer(int pos) {
 		
 		if(pos >= 0){
-			offsetForKeyPos(pos);
+			getOffsetForKeyPos(pos);
 		}
 		
 		return null;
@@ -659,5 +659,9 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	@Override
 	public int getNumberOfKeys() {
 		throw new UnsupportedOperationException();
+	}
+
+	public K getKeyAtPosition(int pos) {
+		return getKeyAtOffset(getOffsetForKeyPos(pos));
 	}
 }

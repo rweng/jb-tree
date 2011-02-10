@@ -92,14 +92,15 @@ public class LeafNodeSpec {
 		assertNotNull(keyPageManager.getPage(action.getKeyPointer().getId()).get(action.getKeyPointer().getOffset()));
 		
 		// this should still work and not throw an exception
+		stateTest(leaf);
+		LeafNode<Integer, String> newLeaf = lpm.getPage(action.getPageId());;
+		stateTest(newLeaf);
+	}
+	
+	private void stateTest(LeafNode<Integer, String> leaf){
 		Integer k = leaf.getLastKey();
 		assertNotNull(leaf.get(k));
-		
-		// same for the newly create leaf
-		LeafNode<Integer, String> newLeaf = lpm.getPage(action.getPageId());;
-		k = newLeaf.getLastKey();
-		assertNotNull(newLeaf.get(k));
-		
+		assertEquals(k, leaf.getKeyAtPosition(leaf.getNumberOfEntries() - 1));
 	}
 	
 	@Test
