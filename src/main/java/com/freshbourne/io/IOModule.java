@@ -19,6 +19,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scope;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 import java.io.File;
@@ -72,9 +73,9 @@ public class IOModule extends AbstractModule{
         if(file != null)
 		    bind(File.class).annotatedWith(ResourceFile.class).toInstance(file);
 		
-		bind(BufferPoolManager.class).to(BufferPoolManagerImpl.class).in(Singleton.class);
-		
 		bindConstant().annotatedWith(Names.named("cacheSize")).to(cacheSize);
+		
+		bind(new TypeLiteral<PageManager<RawPage>>(){}).to(ResourceManager.class).in(Singleton.class);
 	}
 
     @Provides @Singleton
@@ -88,6 +89,4 @@ public class IOModule extends AbstractModule{
 		}
 		return result;
 	}
-
-	
 }

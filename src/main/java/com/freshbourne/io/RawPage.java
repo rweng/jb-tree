@@ -48,12 +48,13 @@ public class RawPage {
     /**
      * @return a random Long but 0L
      */
+    private static long lastid = 0;
     public static Long generateId(){
-		long result;
+    	long result;
 		do{
 			result = (new Random()).nextLong();
 		} while (result == 0L);
-		return result;
+		return ++lastid;
     }
 
 	/**
@@ -75,6 +76,15 @@ public class RawPage {
 	 */
 	public ResourceManager getResourceManager() {
 		return resourceManager;
+	}
+	
+	protected void finalize() throws Throwable {
+		try {
+			if (isModified())
+				getResourceManager().writePage(this);
+		} catch (Exception e) {
+			super.finalize();
+		}
 	}
     
     

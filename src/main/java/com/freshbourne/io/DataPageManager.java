@@ -16,13 +16,13 @@ import java.io.IOException;
 
 public class DataPageManager<T> implements PageManager<DataPage<T>> {
 
-    private final BufferPoolManager bpm;
+    private final PageManager<RawPage> bpm;
     private final FixLengthSerializer<PagePointer, byte[]> pointSerializer;
     private final Serializer<T, byte[]> dataSerializer;
 
     @Inject
     DataPageManager(
-            BufferPoolManager bpm,
+    		PageManager<RawPage> bpm,
             FixLengthSerializer<PagePointer, byte[]> pointSerializer,
 			Serializer<T, byte[]> dataSerializer
             ){
@@ -44,7 +44,7 @@ public class DataPageManager<T> implements PageManager<DataPage<T>> {
     	try {
 			result.load();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new IllegalStateException();
 		}
         return result;
     }
@@ -53,4 +53,12 @@ public class DataPageManager<T> implements PageManager<DataPage<T>> {
     public void removePage(long id) {
         bpm.removePage(id);
     }
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.PageManager#hasPage(long)
+	 */
+	@Override
+	public boolean hasPage(long id) {
+		return bpm.hasPage(id);
+	}
 }

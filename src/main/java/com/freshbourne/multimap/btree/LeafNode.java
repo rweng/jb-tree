@@ -150,10 +150,13 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	
 	private void setNumberOfEntries(int num){
 		numberOfEntries = num;
-		writeNumberOfEntries();
+		rawPage().bufferForWriting(0).putInt(numberOfEntries);
 	}
 	
 	public K getLastKey(){
+		if(getNumberOfEntries() == 0)
+			throw new IllegalStateException("you can only get the last key if there are any Keys in the Leaf");
+		
 		int pos = offsetBehindLastEntry();
 		pos -= 2 * serializedPointerSize;
 		return getKeyOfPos(pos);
@@ -201,9 +204,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		return (Integer.SIZE + Long.SIZE) / 8;
 	}
 
-	private void writeNumberOfEntries() {
-		rawPage().bufferForWriting(0).putInt(getNumberOfEntries());
-	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.Node#getNumberOfEntries()
@@ -296,6 +296,9 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 			buffer.get(bytebuf);
 			PagePointer p = pointerSerializer.deserialize(bytebuf);
 			DataPage<K> dataPage = keyPageManager.getPage(p.getId());
+			if(dataPage == null)
+				throw new IllegalStateException("dataPage should not be null");
+			
 			if(dataPage.get(p.getOffset()).equals(key)){
 				return buffer.position() - pSize;
 			}
@@ -500,7 +503,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void load() {
-		setNumberOfEntries(rawPage().bufferForReading(0).getInt());
+		numberOfEntries = rawPage().bufferForReading(0).getInt();
 		valid = true;
 	}
 

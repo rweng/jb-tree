@@ -53,7 +53,8 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 		return rm;
 	}
 	
-	@Test public void shouldWriteOutHeaderCorrectly() throws IOException{
+	@Test 
+	public void shouldWriteOutHeaderCorrectly() throws IOException{
 		rm = (FileResourceManager) createNewOpenResourceManager();
 		rm.createPage();
 		rm.close();
@@ -62,6 +63,5 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 		assertEquals(1, rFile.readInt());
 		assertEquals(0, rFile.readInt());
 		rFile.close();
-		
 	}
 }

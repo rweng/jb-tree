@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.freshbourne.comparator.IntegerComparator;
-import com.freshbourne.io.BufferPoolManager;
 import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.DynamicDataPage;
 import com.google.inject.Guice;
@@ -26,6 +25,7 @@ public class LeafNodeSpec {
 	
 	private final static Injector injector;
 	private LeafNode<Integer, String> leaf;
+	private LeafPageManager<Integer, String> lpm;
 	
 	private int key1 = 1;
 	private int key2 = 2;
@@ -35,11 +35,12 @@ public class LeafNodeSpec {
 	
 	
 	static {
-		injector = Guice.createInjector(new BTreeModule("/tmp/leaf_spec")); 
+		injector = Guice.createInjector(new BTreeModule("/tmp/leaf_spec"));
 	}
 	
 	@Before public void setUp(){
-		leaf = injector.getInstance(Key.get(new TypeLiteral<LeafPageManager<Integer, String>>(){})).createPage();
+		lpm = injector.getInstance(Key.get(new TypeLiteral<LeafPageManager<Integer, String>>(){}));
+		leaf = lpm.createPage();
 		}
 	
 	@Test public void shouldBeAbleToInsertAndGet(){
@@ -88,7 +89,17 @@ public class LeafNodeSpec {
 		assertNotNull(action.getKeyPointer().getId());
 		
 		assertNotNull(keyPageManager.getPage(action.getKeyPointer().getId()));
-		assertNotNull(keyPageManager.getPage(action.getKeyPointer().getId()).get(action.getKeyPointer().getOffset()));	
+		assertNotNull(keyPageManager.getPage(action.getKeyPointer().getId()).get(action.getKeyPointer().getOffset()));
+		
+		// this should still work and not throw an exception
+		Integer k = leaf.getLastKey();
+		assertNotNull(leaf.get(k));
+		
+		// same for the newly create leaf
+		LeafNode<Integer, String> newLeaf = lpm.getPage(action.getPageId());;
+		k = newLeaf.getLastKey();
+		assertNotNull(newLeaf.get(k));
+		
 	}
 	
 	@Test

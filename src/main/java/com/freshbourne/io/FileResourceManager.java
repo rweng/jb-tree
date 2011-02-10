@@ -12,10 +12,14 @@ import com.google.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -29,6 +33,7 @@ public class FileResourceManager implements ResourceManager {
 	private FileLock fileLock;
 	private FileChannel ioChannel;
 	private ResourceHeader header;
+	private Map<Long, Reference<RawPage>> refs;
 	
 	
     @Inject
@@ -53,13 +58,14 @@ public class FileResourceManager implements ResourceManager {
 		initIOChannel(file);
 		this.header = new ResourceHeader(ioChannel, pageSize);
 		
-		
 		if(handle.length() == 0){
 			header.initialize();
 		} else {
 			// load header if file existed
 			header.load();
 		}
+		
+		this.refs = new HashMap<Long, Reference<RawPage>>();
 	}
 	
 	@Override
@@ -79,13 +85,21 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#readPage(int)
+	 * @see com.freshbourne.io.PageManager#getPage(long)
 	 */
 	@Override
-	public RawPage readPage(long pageId) {
+	public RawPage getPage(long pageId) {
 		
 		ensureOpen();
 		ensurePageExists(pageId);
+		
+		RawPage result;
+		
+		if(refs.containsKey(pageId)){
+			result = refs.get(pageId).get();
+			if(result != null)
+				return result;
+		}
 
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 		
@@ -96,7 +110,10 @@ public class FileResourceManager implements ResourceManager {
 			System.exit(1);
 		}
 		
-		return new RawPage(buf, pageId, this);
+		result = new RawPage(buf, pageId, this);
+		refs.put(result.id(), new SoftReference<RawPage>(result));
+		
+		return result;
 	}
 
 	/**
@@ -135,7 +152,6 @@ public class FileResourceManager implements ResourceManager {
 			}
 		} catch (Exception ignored) {
 		}
-		
 	}
 
 	/* (non-Javadoc)
@@ -222,6 +238,7 @@ public class FileResourceManager implements ResourceManager {
 			System.exit(1);
 		}
 		
+		refs.put(result.id(), new SoftReference<RawPage>(result));
 		return result;
 	}
 	
@@ -263,6 +280,7 @@ public class FileResourceManager implements ResourceManager {
 			System.exit(1);
 		}
 		
+		refs.put(result.id(), new SoftReference<RawPage>(result));
 		return result;
 	}
 
@@ -280,7 +298,7 @@ public class FileResourceManager implements ResourceManager {
 				header.removeLastId();
 				ioChannel.truncate(header.getNumberOfPages() * pageSize);
 			} else {
-				RawPage last = readPage(lastPageId);
+				RawPage last = getPage(lastPageId);
 				header.replaceId(pageId, lastPageId);
 				header.removeLastId();
 				writePage(last);
@@ -291,5 +309,23 @@ public class FileResourceManager implements ResourceManager {
 			e.printStackTrace();
 			System.exit(1);
 		}
+		
+		refs.remove(pageId);
+	}
+	
+	protected void finalize() throws Throwable{
+		try{
+			close();
+		} catch (Exception e) {
+			super.finalize();
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.PageManager#hasPage(long)
+	 */
+	@Override
+	public boolean hasPage(long id) {
+		return header.contains(id);
 	}
 }

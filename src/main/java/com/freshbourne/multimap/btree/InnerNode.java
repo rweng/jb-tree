@@ -9,6 +9,7 @@ package com.freshbourne.multimap.btree;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -20,14 +21,13 @@ import com.freshbourne.io.RawPage;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
-import com.freshbourne.serializer.Serializer;
 
 /**
  *
  * stores pointers to the keys that get push upwards to InnerNodes from LeafPages, as well as the id of nodes
  * in the following order:
  * 
- * NODE_ID | KEY_POINTER | NODE_ID | KEY_POINTER | NODE_ID ...
+ * NODE_TYPE | NUM_OF_KEYS | NODE_ID | KEY_POINTER | NODE_ID | KEY_POINTER | NODE_ID ...
  *
  * @author Robin Wenglewski <robin@wenglewski.de>
  *
@@ -115,15 +115,15 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private Node<K, V> getPageForPageId(Long pageId){
-		Node <K, V> result = innerNodePageManager.getPage(pageId);
 		
-		if(result == null)
-			result = leafPageManager.getPage(pageId);
+		if(innerNodePageManager.hasPage(pageId)){
+			return innerNodePageManager.getPage(pageId);
+		}
 		
-		if(result == null)
-			throw new IllegalArgumentException("the requested pageId " + pageId + " is neither in InnerNodePageManager nor in LeafPageManager");
+		if(leafPageManager.hasPage(pageId))
+			return leafPageManager.getPage(pageId);
 		
-		return result;
+		throw new IllegalArgumentException("the requested pageId " + pageId + " is neither in InnerNodePageManager nor in LeafPageManager");
 	}
 	
 	private void writeNumberOfKeys() {
@@ -145,7 +145,14 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public List<V> get(K key) {
 		ensureValid();
-		throw new UnsupportedOperationException();
+		
+		if(getNumberOfKeys() == 0)
+			return new ArrayList<V>();
+		
+		long pageId = getPageIdForKey(key);
+		Node<K,V> node = getPageForPageId(pageId);
+		
+		return node.get(key);
 	}
 
 	/* (non-Javadoc)
@@ -154,9 +161,13 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public int remove(K key) {
 		ensureValid();
-		Long id = getChildForKey(key);
 		
-		throw new UnsupportedOperationException();
+		if(getNumberOfKeys() == 0)
+			return 0;
+		
+		Long id = getPageIdForKey(key);
+		Node<K,V>node = getPageForPageId(id);
+		return node.remove(key);
 	}
 	
 	private int getSizeOfPageId(){
@@ -169,20 +180,6 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 			(i * getSizeOfSerializedPointer());
 	}
 	
-	private int offsetForPageId(int i){
-		return Header.size() + (i * getSizeOfPageId()) + (i == 0 ? 0 : (i-1) * getSizeOfSerializedPointer());
-	}
-	
-	private int posOfFirstLargerKey(K key){
-		for(int i = 0; i < numberOfKeys; i++){
-			PagePointer pp = getPointerAtOffset(offsetForKey(i));
-			if(comperator.compare(getKeyFromPagePointer(pp), key) > 0){
-				return i;
-			}
-		}
-		return -1;
-	}
-	
 	private int posOfFirstLargerOrEqualKey(K key){
 		if(comperator == null){
 			throw new IllegalStateException("comparator must not be null");
@@ -192,7 +189,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 			throw new IllegalArgumentException("key must not be null");
 		}
 		
-		for(int i = 0; i < numberOfKeys; i++){
+		for(int i = 0; i < getNumberOfKeys(); i++){
 			
 			PagePointer pp = getPointerAtOffset(offsetForKey(i));
 			K keyFromPointer = getKeyFromPagePointer(pp);
@@ -206,12 +203,9 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		}
 		return -1;
 	}
-	private Long getChildForKey(K key) {
-		return getLeftPageIdOfKey(posOfFirstLargerKey(key));
-	}
 	
 	private Long getLeftPageIdOfKey(int i) {
-		return readPageId(getOffsetForLeftPageIdOfKey(i));
+		return rawPage().bufferForReading(getOffsetForLeftPageIdOfKey(i)).getLong();
 	}
 	
 	private int getOffsetForLeftPageIdOfKey(int i){
@@ -227,12 +221,8 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private Long getRightPageIdOfKey(int i) {
-		return readPageId(getOffsetForRightPageIdOfKey(i));
-	}
-	
-	private Long readPageId(int offset){
-		ByteBuffer buf = rawPage().bufferForReading(offset);
-		return buf.getLong();
+		int offset = getOffsetForRightPageIdOfKey(i);
+		return rawPage().bufferForReading(offset).getLong();
 	}
 
 	private K getKeyFromPagePointer(PagePointer pp) {
@@ -317,11 +307,18 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		ensureRoot();
 		
 		int posOfFirstLargerOrEqualKey = posOfFirstLargerOrEqualKey(key);
-		Long pageId;
+		long pageId;
 		if(posOfFirstLargerOrEqualKey < 0) // if key is largest
-			pageId = getRightPageIdOfKey(getNumberOfKeys());
+			pageId = getRightPageIdOfKey(getNumberOfKeys() - 1);
 		else
 			pageId = getLeftPageIdOfKey(posOfFirstLargerOrEqualKey);
+		
+		if(pageId == 0){
+			throw new IllegalArgumentException("pageId must not be 0 ( posOfFirstLargerOrEqualKey: " + posOfFirstLargerOrEqualKey + " )");
+		}
+		
+		if(!leafPageManager.hasPage(pageId))
+			throw new UnsupportedOperationException("we cant load from next innerNode yet");
 		
 		LeafNode<K, V> leaf = leafPageManager.getPage(pageId);
 		AdjustmentAction<K, V> result;
@@ -348,10 +345,10 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 				// the key replaces the old key for our node, since the split caused a different
 				// key to be the now highest in the subtree
 				
-				int posForInsert = posOfFirstLargerOrEqualKey == -1 ? getNumberOfKeys() + 1 : posOfFirstLargerOrEqualKey;
+				int posForInsert = posOfFirstLargerOrEqualKey == -1 ? getNumberOfKeys() : posOfFirstLargerOrEqualKey;
 				insertKeyPointerPageIdAtPosition(
 						result.getKeyPointer(), result.getPageId(),  posForInsert);
-				rawPage().setModified(true);
+				
 				// no further adjustment necessary. even if we inserted to the last position, the
 				// highest key in the subtree below is still the same, because otherwise we would
 				// have never ended up here during the descend from the root, or we are in the
@@ -375,9 +372,16 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	 */
 	private void insertKeyPointerPageIdAtPosition(PagePointer keyPointer,
 			Long pageId, int posOfKeyForInsert) {
+		
 		ByteBuffer buf = rawPage().bufferForWriting(offsetForKey(posOfKeyForInsert));
 		
-		throw new UnsupportedOperationException();
+		int spaceNeededForInsert = getSizeOfPageId() + getSizeOfSerializedPointer();
+		System.arraycopy(buf.array(), buf.position(), buf.array(), buf.position() + spaceNeededForInsert, buf.limit() - buf.position() - spaceNeededForInsert);
+		
+		buf.put(pointerSerializer.serialize(keyPointer));
+		buf.putLong(pageId);
+		
+		setNumberOfKeys(getNumberOfKeys() + 1);
 	}
 
 	private int getMaximalNumberOfKeys() {
@@ -408,11 +412,6 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private void setKey(PagePointer pointer, int pos){
 		ByteBuffer buf = rawPage().bufferForWriting(offsetForKey(pos));
 		buf.put(pointerSerializer.serialize(pointer));
-	}
-	
-	private void setPageId(Long pageId, int pos){
-		ByteBuffer buf = rawPage().bufferForWriting(offsetForPageId(pos));
-		buf.putLong(pageId);
 	}
 
 	private void ensureValid(){

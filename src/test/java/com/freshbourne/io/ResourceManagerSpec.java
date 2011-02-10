@@ -7,12 +7,20 @@
  */
 package com.freshbourne.io;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.lang.ref.PhantomReference;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -44,7 +52,6 @@ public abstract class ResourceManagerSpec {
 	}
 	
 	
-	
 	@Test(expected= IllegalStateException.class)
 	public void shouldThrowExceptionIfResourceClosed() throws IOException{
 		rm.close();
@@ -68,7 +75,7 @@ public abstract class ResourceManagerSpec {
 		page.bufferForWriting(0).putInt(1234);
 		rm.writePage(page);
 		
-		assertEquals(rm.readPage(page.id()).bufferForWriting(0), page.bufferForWriting(0));
+		assertEquals(rm.getPage(page.id()).bufferForWriting(0), page.bufferForWriting(0));
 	}
 	
 	@Test
@@ -92,7 +99,7 @@ public abstract class ResourceManagerSpec {
 		rm.writePage(page);
 		
 		assertEquals(2, rm.numberOfPages());
-		assertEquals(longToCompare, rm.readPage(page.id()).bufferForWriting(0).getLong());
+		assertEquals(longToCompare, rm.getPage(page.id()).bufferForWriting(0).getLong());
 		
 		rm.close();
 		
@@ -100,7 +107,7 @@ public abstract class ResourceManagerSpec {
 		rm = createOpenResourceManager();
 		
 		assertEquals(2, rm.numberOfPages());
-		assertEquals(longToCompare, rm.readPage(page.id()).bufferForWriting(0).getLong());
+		assertEquals(longToCompare, rm.getPage(page.id()).bufferForWriting(0).getLong());
 	}
 	
 	@Test(expected= WrongPageSizeException.class)
@@ -119,7 +126,7 @@ public abstract class ResourceManagerSpec {
 		rm.removePage(p1Id);
 		assertEquals(i - 1, rm.numberOfPages());
 		try{
-			rm.readPage(p1Id);
+			rm.getPage(p1Id);
 			fail("reading a non-existent page should throw an exeption");
 		} catch( Exception expected){
 		}
@@ -128,6 +135,21 @@ public abstract class ResourceManagerSpec {
 		assertEquals(i, rm.numberOfPages());
 		rm.removePage(p3.id());
 		assertEquals(i - 1, rm.numberOfPages());
+	}
+	
+	@Test
+	public void shouldBeAbleToCreateAMassiveNumberOfPages(){
+		List<Long> ids = new ArrayList<Long>();
+		int size = 10000;
+		for(int i = 0; i < size; i++){
+			ids.add(rm.createPage().id());
+		}
+		
+		assertEquals(size, rm.numberOfPages());
+		for(int i = 0; i < size; i++){
+			Long id = ids.get(0);
+			assertEquals(id, rm.getPage(id).id());
+		}
 	}
 
 	

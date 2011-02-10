@@ -15,8 +15,8 @@
  */
 package com.freshbourne.multimap.btree;
 
-import com.freshbourne.io.BufferPoolManager;
 import com.freshbourne.io.ComplexPage;
+import com.freshbourne.io.PageManager;
 import com.freshbourne.io.RawPage;
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
@@ -70,7 +70,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	private final LeafPageManager<K,V> leafPageManager;
 	private final InnerNodeManager<K, V> innerNodeManager;
 	private final Comparator<K> comparator;
-	private final BufferPoolManager bpm;
+	private final PageManager<RawPage> bpm;
 	private RawPage rawPage;
 	
 	private Node<K, V> root;
@@ -86,7 +86,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @param comparator
 	 */
 	@Inject
-	BTree(BufferPoolManager bpm, LeafPageManager<K,V> leafPageManager, InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
+	BTree(PageManager<RawPage> bpm, LeafPageManager<K,V> leafPageManager, InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
 		this.leafPageManager = leafPageManager;
 		this.innerNodeManager = innerNodeManager;
 		this.comparator = comparator;
