@@ -34,6 +34,8 @@ public abstract class MultiMapSpec<K, V> {
 	
 	protected abstract MultiMap<K, V> createMultiMap();
 	protected abstract K createRandomKey();
+	protected abstract K createMaxKey();
+	protected abstract K createMinKey();
 	protected abstract V createRandomValue();
 	
 	
@@ -138,7 +140,9 @@ public abstract class MultiMapSpec<K, V> {
 		fill(size);
 		
 		assertEquals(size, tree.getNumberOfEntries());
-		
+		key1 = createMaxKey();
+		simpleTests();
+		key1 = createMinKey();
 		simpleTests();
 	}
 	

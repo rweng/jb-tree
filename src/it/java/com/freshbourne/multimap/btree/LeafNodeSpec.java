@@ -100,7 +100,17 @@ public class LeafNodeSpec {
 	private void stateTest(LeafNode<Integer, String> leaf){
 		Integer k = leaf.getLastKey();
 		assertNotNull(leaf.get(k));
+		assertTrue(leaf.containsKey(k));
+		
+		// all keys should be accessible
+		for(int i = 0; i < leaf.getNumberOfEntries(); i++){
+			Integer key = leaf.getKeyAtPosition(i);
+			assertNotNull(k);
+			assertTrue(leaf.containsKey(key));
+			
+		}
 		assertEquals(k, leaf.getKeyAtPosition(leaf.getNumberOfEntries() - 1));
+
 	}
 	
 	@Test

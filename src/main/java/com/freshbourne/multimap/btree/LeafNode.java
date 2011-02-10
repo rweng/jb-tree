@@ -70,7 +70,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	private int lastValuePageRemainingBytes = -1;
 	private final PageManager<LeafNode<K,V>> leafPageManager;
 	
-	private BTree<K, V> tree;
 	
 	LeafNode(
 			RawPage page,
@@ -286,6 +285,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 * @return position to set the buffer to, where the key starts, -1 if key not found 
 	 */
 	private int posOfKey(K key) {
+		
 		int pSize = pointerSerializer.serializedLength(PagePointer.class);
 		byte[] bytebuf = new byte[pSize];
 
@@ -532,6 +532,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	public AdjustmentAction<K, V> insert(K key, V value) {
 		ensureValid();
 		
+		System.out.println("insert key " + key + " in leaf " + rawPage().id() + " with currently " + getNumberOfEntries() + " entries");
+		
 		if(!isFull()){
 			// add to data_page
 			PagePointer keyPointer = storeKey(key);
@@ -545,7 +547,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		}
 		
 		// if leaf does not have enough space but we can move some data to the next leaf
-		if (this.getNextLeafId() != null) {
+		if (this.getNextLeafId() != NO_NEXT_LEAF) {
+			System.out.println("trying to move data");
 			LeafNode<K, V> nextLeaf = leafPageManager.getPage(this.getNextLeafId());
 			
 			if(nextLeaf.getRemainingEntries() >= getMinFreeLeafEntriesToMove()){
@@ -560,12 +563,15 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 				
 				return new AdjustmentAction<K, V>(ACTION.UPDATE_KEY, this.getLastKeyPointer(), null);
 			}
+			
+			
 		}
 		
 		// if we have to allocate a new leaf
-		
+		System.out.println("allocating new leaf");
 		// allocate new leaf
 		LeafNode<K,V> newLeaf = leafPageManager.createPage();
+		newLeaf.setNextLeafId(getNextLeafId());
 		setNextLeafId(newLeaf.getId());
 		
 		// newLeaf.setLastKeyContinuesOnNextPage(root.isLastKeyContinuingOnNextPage());
@@ -598,7 +604,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	public Long getNextLeafId() {
 		ByteBuffer buffer = rawPage().bufferForReading(posOfNextLeafId());
 		Long result = buffer.getLong();
-		return result == NO_NEXT_LEAF ? null : result;
+		return result;
 	}
 	
 	private int posOfNextLeafId(){
@@ -637,20 +643,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 
 	public int getMaximalNumberOfEntries() {
 		return maxEntries;
-	}
-
-	/**
-	 * @param tree the tree to set
-	 */
-	public void setTree(BTree<K, V> tree) {
-		this.tree = tree;
-	}
-
-	/**
-	 * @return the tree
-	 */
-	public BTree<K, V> getTree() {
-		return tree;
 	}
 
 	/* (non-Javadoc)

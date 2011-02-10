@@ -53,6 +53,8 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	protected Integer createRandomKey() {
 		return srand().nextInt();
 	}
+	
+	
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMapSpec#createRandomValue()
@@ -60,5 +62,23 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	@Override
 	protected String createRandomValue() {
 		return (new BigInteger(130, srand())).toString(32);
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.MultiMapSpec#createMaxKey()
+	 */
+	@Override
+	protected Integer createMaxKey() {
+		return Integer.MAX_VALUE;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.MultiMapSpec#createMinKey()
+	 */
+	@Override
+	protected Integer createMinKey() {
+		return Integer.MIN_VALUE;
 	}
 }
