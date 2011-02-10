@@ -8,7 +8,7 @@ h2. Getting started
 
 get started by cloning the repository:
 
-bc. git clone git://github.com/rweng/index.git
+bc. git clone git://github.com/rweng/multimap.git
 cd index
 # look at all tasks you can do with the build manager
 gradle tasks
@@ -22,7 +22,7 @@ open build/doc/javadoc/index.html
 
 h2. Documentation
 
-You can find the Javadoc "here":http://rweng.github.com/index/doc/ - If you click on Network, you can see a branch called gh-pages on which you can see the commit the Javadocs are about (not always completely up-to-date).
+You can find the Javadoc "here":http://rweng.github.com/multimap/doc/ - If you click on Network, you can see a branch called gh-pages on which you can see the commit the Javadocs are about (not always completely up-to-date).
 
 h2. Features
 
