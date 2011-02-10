@@ -38,20 +38,20 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	
 	private static final NodeType NODE_TYPE = NodeType.INNER_NODE;
 	
-	private static enum Header{
+	static enum Header{
 		NODE_TYPE(0){}, // char
-		NUMBER_OF_KEYS(1); // int
+		NUMBER_OF_KEYS(2); // int
 		
 		private int offset;
 		Header(int offset){
 			this.offset = offset;
 		}
-		static int size(){return 5;}
+		static int size(){return 6;}
 		int getOffset(){return offset;}
 	}
 	
 	private final RawPage rawPage;
-	private final Comparator<K> comperator;
+	private final Comparator<K> comparator;
 	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	private final DataPageManager<K> keyPageManager;
 	private final PageManager<LeafNode<K, V>> leafPageManager;
@@ -68,12 +68,20 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 			PageManager<LeafNode<K, V>> leafPageManager,
 			PageManager<InnerNode<K, V>> innerNodePageManager
 	){
+		
+		if(comparator == null){
+			throw new IllegalStateException("comparator must not be null");
+		}
+		
+		
 		this.leafPageManager = leafPageManager;
 		this.innerNodePageManager = innerNodePageManager;
 		this.keyPageManager = keyPageManager;
 		this.rawPage = rawPage;
-		this.comperator = comparator;
+		this.comparator = comparator;
 		this.pointerSerializer = pointerSerializer;
+		
+		
 	}
 	
 	public void initRootState(PagePointer keyPointer, Long pageId1, Long pageId2){
@@ -110,8 +118,15 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public boolean containsKey(K key) {
 		ensureValid();
-
+		ensureKeyNotNull(key);
+		
 		return getPageForPageId(getPageIdForKey(key)).containsKey(key);
+	}
+	
+	private void ensureKeyNotNull(K key){
+		if(key == null){
+			throw new IllegalArgumentException("key must not be null");
+		}
 	}
 	
 	private Node<K, V> getPageForPageId(Long pageId){
@@ -181,13 +196,6 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private int posOfFirstLargerOrEqualKey(K key){
-		if(comperator == null){
-			throw new IllegalStateException("comparator must not be null");
-		}
-		
-		if(key == null){
-			throw new IllegalArgumentException("key must not be null");
-		}
 		
 		for(int i = 0; i < getNumberOfKeys(); i++){
 			
@@ -197,7 +205,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 				throw new IllegalStateException("key retrieved from PagePointer " + pp + " must not be null!");
 			}
 			
-			if(comperator.compare(keyFromPointer, key) >= 0){
+			if(comparator.compare(keyFromPointer, key) >= 0){
 				return i;
 			}
 		}
