@@ -155,31 +155,52 @@ public class LeafNodeSpec {
 	public void prependEntriesShouldWork(){
 		LeafNode<Integer, String> leaf2 = lpm.createPage();
 		
+		int totalInserted = 0;
+		
 		leaf.setNextLeafId(leaf2.getId());
 		
 		// fill leaf
 		for(int i = 0; i < leaf.getMaximalNumberOfEntries(); i++){
 			assertNull(leaf.insert(i, "val"));
+			totalInserted++;
 		}
 		
+		
+		testPrepend(leaf, leaf2);
+		totalInserted++;
+		assertEquals(totalInserted,leaf.getNumberOfEntries() + leaf2.getNumberOfEntries());
+
+		// should work again and again, when we have to actually move some entries in leaf2
+		for(int j = 0; j < 3; j++){
+			for(int i = leaf.getNumberOfEntries(); i < leaf.getMaximalNumberOfEntries(); i++){
+				assertNull(leaf.insert(-1 * i, "val"));
+				totalInserted++;
+			}
+			
+			testPrepend(leaf, leaf2);
+			totalInserted++;
+			assertEquals(totalInserted,leaf.getNumberOfEntries() + leaf2.getNumberOfEntries());
+		}
+		
+	}
+	
+	private void testPrepend(LeafNode<Integer, String> leaf1, LeafNode<Integer, String> leaf2){
 		// insert key so that move should happen
-		AdjustmentAction<Integer, String> action = leaf.insert(1, "value");
+		AdjustmentAction<Integer, String> action = leaf1.insert(1, "value");
 		
 		// an update key action should be passed up
 		assertNotNull(action);
 		
 		// make sure leaf structures are in tact
-		assertEquals(leaf.getLastKey(), leaf.getKeyAtPosition(leaf.getNumberOfEntries() - 1));
+		assertEquals(leaf1.getLastKey(), leaf1.getKeyAtPosition(leaf1.getNumberOfEntries() - 1));
 		
-		for(int key : leaf.getKeySet()){
-			assertNotNull(leaf.get(key));
+		for(int key : leaf1.getKeySet()){
+			assertNotNull(leaf1.get(key));
 		}
 		
 		for(int key : leaf2.getKeySet()){
 			assertNotNull(leaf2.get(key));
 		}
-		
-		
 	}
 	
 

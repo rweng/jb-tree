@@ -26,6 +26,8 @@ public interface PageManager<T> {
 	public T createPage();
 	
 	/**
+	 * IMPORTANT NOTE: A PageManager should cache so it can return the same Object here.
+	 * 
 	 * @param id of the page to be fetched
 	 * @return page with given id from resource or cache, null if page could not be found
 	 */

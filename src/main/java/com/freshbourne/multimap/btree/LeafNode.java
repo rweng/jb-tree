@@ -130,7 +130,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 			throw new IllegalArgumentException("not enough space in this leaf to prepend " + num + " entries from other leaf");
 		
 		if(getNumberOfEntries() > 0 && comparator.compare(source.getLastKey(), getFirstKey()) > 0)
-			throw new IllegalArgumentException("the last key of the provided source leaf is larger than this leafs first key");
+			throw new IllegalStateException("the last key of the provided source leaf is larger than this leafs first key");
 		
 		ByteBuffer buffer = rawPage().bufferForWriting(0);
 		

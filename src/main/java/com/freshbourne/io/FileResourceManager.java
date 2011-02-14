@@ -111,7 +111,7 @@ public class FileResourceManager implements ResourceManager {
 		}
 		
 		result = new RawPage(buf, pageId, this);
-		refs.put(result.id(), new SoftReference<RawPage>(result));
+		refs.put(pageId, new SoftReference<RawPage>(result));
 		
 		return result;
 	}
