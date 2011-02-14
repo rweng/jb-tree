@@ -47,7 +47,6 @@ public class LeafNodeTest {
 		leaf2.initialize();
 	}
 	
-	@Test
 	public void prependFromOtherNode(){
 		leaf.setNextLeafId(leaf2.getId());
 		
