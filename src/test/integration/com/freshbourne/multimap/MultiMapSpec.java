@@ -8,37 +8,17 @@
 
 package com.freshbourne.multimap;
 
-import com.freshbourne.multimap.MultiMap;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public abstract class MultiMapSpec<K, V> {
+public abstract class MultiMapSpec<K, V> extends MultiMapTestBase<K,V> {
 	
-	protected MultiMap<K, V> tree;
-	private K key1;
-	private K key2;
 	
-	private V value1;
-	private V value2;
-	
-	@Before
-	public void setUp() {
-		tree = createMultiMap();
-		key1 = createRandomKey();
-		key2 = createRandomKey();
-		value1 = createRandomValue();
-		value2 = createRandomValue();
+	protected MultiMapSpec(MultiMapProvider<K,V> provider) {
+		super(provider);
 	}
-	
-	protected abstract MultiMap<K, V> createMultiMap();
-	protected abstract K createRandomKey();
-	protected abstract K createMaxKey();
-	protected abstract K createMinKey();
-	protected abstract V createRandomValue();
-	
-	
+
 	@Test
 	public void shouldBeEmptyAfterCreation(){
 		assertEquals(0, tree.getNumberOfEntries());
@@ -116,49 +96,12 @@ public abstract class MultiMapSpec<K, V> {
 		assertEquals(0, tree.get(key1).size());
 	}
 	
-	protected void fill(int size){
-		K key = createRandomKey();
-		System.out.println("adding " + size + "values to " + tree.getClass().toString());
-		for(int i = 0; i < size; i++){
-			System.out.println("inserting value " + i);
-			tree.add(createRandomKey(), createRandomValue());
-		}
-		
-	}
-	
 	@Test public void shouldWorkOnTheEdgeToCreateNewInnerNode(){
 		int size = 170;
 		fill(size);
 		
 		assertEquals(size, tree.getNumberOfEntries());
 		simpleTests();
-	}
-	
-	@Test
-	public void shouldWorkWithMassiveValues(){
-		int size = 10000;
-
-		fill(size);
-		
-		assertEquals(size, tree.getNumberOfEntries());
-		key1 = createMaxKey();
-		simpleTests();
-		key1 = createMinKey();
-		simpleTests();
-	}
-	
-	protected void simpleTests(){
-		int numOfEntries = tree.getNumberOfEntries();
-		
-		tree.add(key1, value2);
-		assertTrue(tree.containsKey(key1));
-		assertEquals(value2, tree.get(key1).get(0));
-		assertEquals(numOfEntries + 1, tree.getNumberOfEntries());
-		
-		tree.remove(key1);
-		assertFalse(tree.containsKey(key1));
-		assertEquals(0, tree.get(key1).size());		
-		assertEquals(numOfEntries, tree.getNumberOfEntries());
 	}
 	
 }

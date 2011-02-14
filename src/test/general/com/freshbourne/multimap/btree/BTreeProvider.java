@@ -10,22 +10,20 @@ package com.freshbourne.multimap.btree;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import org.junit.Test;
-
 import com.freshbourne.multimap.MultiMap;
-import com.freshbourne.multimap.MultiMapSpec;
+import com.freshbourne.multimap.MultiMapProvider;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 
-public class BTreeSpec extends MultiMapSpec<Integer, String> {
+public class BTreeProvider implements MultiMapProvider<Integer, String> {
 
-	private final static Injector injector;
+	private final Injector injector;
 	private static SecureRandom srand;
 	
-	static {
-		injector = Guice.createInjector(new BTreeModule("/tmp/btree_spec")); 
+	public BTreeProvider(String path) {
+		injector = Guice.createInjector(new BTreeModule(path)); 
 	}
 	
 	private static SecureRandom srand(){
@@ -40,7 +38,7 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	 * @see com.freshbourne.multimap.MultiMapSpec#createMultiMap()
 	 */
 	@Override
-	protected MultiMap<Integer, String> createMultiMap() {
+	public MultiMap<Integer, String> createMultiMap() {
 		BTree<Integer, String> tree = injector.getInstance(Key.get(new TypeLiteral<BTree<Integer,String>>(){}));
 		tree.initialize();
 		return tree;
@@ -50,7 +48,7 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	 * @see com.freshbourne.multimap.MultiMapSpec#createRandomKey()
 	 */
 	@Override
-	protected Integer createRandomKey() {
+	public Integer createRandomKey() {
 		return srand().nextInt();
 	}
 	
@@ -60,7 +58,7 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	 * @see com.freshbourne.multimap.MultiMapSpec#createRandomValue()
 	 */
 	@Override
-	protected String createRandomValue() {
+	public String createRandomValue() {
 		return (new BigInteger(130, srand())).toString(32);
 	}
 
@@ -69,7 +67,7 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	 * @see com.freshbourne.multimap.MultiMapSpec#createMaxKey()
 	 */
 	@Override
-	protected Integer createMaxKey() {
+	public Integer createMaxKey() {
 		return Integer.MAX_VALUE;
 	}
 
@@ -78,7 +76,8 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	 * @see com.freshbourne.multimap.MultiMapSpec#createMinKey()
 	 */
 	@Override
-	protected Integer createMinKey() {
+	public Integer createMinKey() {
 		return Integer.MIN_VALUE;
 	}
+
 }
