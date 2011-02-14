@@ -136,7 +136,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		
 		// make space in this leaf, move all elements to the right
 		int totalSize = num * (serializedPointerSize * 2);
-		System.arraycopy(buffer.array(), headerSize(), buffer.array(), headerSize() + totalSize, totalSize);
+		int byteToMove = buffer.limit() - headerSize() - totalSize;
+		System.arraycopy(buffer.array(), headerSize(), buffer.array(), headerSize() + totalSize, byteToMove);
 		
 		// copy from other to us
 		int sourceOffset = source.getOffsetForKeyPos(source.getNumberOfEntries() - 1 - num);
