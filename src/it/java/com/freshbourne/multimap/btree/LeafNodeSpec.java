@@ -170,17 +170,17 @@ public class LeafNodeSpec {
 		totalInserted++;
 		assertEquals(totalInserted,leaf.getNumberOfEntries() + leaf2.getNumberOfEntries());
 
-		// should work again and again, when we have to actually move some entries in leaf2
-		for(int j = 0; j < 3; j++){
-			for(int i = leaf.getNumberOfEntries(); i < leaf.getMaximalNumberOfEntries(); i++){
-				assertNull(leaf.insert(-1 * i, "val"));
-				totalInserted++;
-			}
-			
-			testPrepend(leaf, leaf2);
+		// should work again, when we have to actually move some entries in leaf2
+		for (int i = leaf.getNumberOfEntries(); i < leaf
+				.getMaximalNumberOfEntries(); i++) {
+			assertNull(leaf.insert(-1 * i, "val"));
 			totalInserted++;
-			assertEquals(totalInserted,leaf.getNumberOfEntries() + leaf2.getNumberOfEntries());
 		}
+
+		testPrepend(leaf, leaf2);
+		totalInserted++;
+		assertEquals(totalInserted,
+				leaf.getNumberOfEntries() + leaf2.getNumberOfEntries());
 		
 	}
 	
