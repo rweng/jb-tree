@@ -140,16 +140,27 @@ public abstract class ResourceManagerSpec {
 	@Test
 	public void shouldBeAbleToCreateAMassiveNumberOfPages(){
 		List<Long> ids = new ArrayList<Long>();
+		RawPage p1 = rm.createPage();
+		p1.bufferForWriting(0).putInt(111);
 		int size = 10000;
 		for(int i = 0; i < size; i++){
 			ids.add(rm.createPage().id());
 		}
+		RawPage p2 = rm.createPage();
+		p2.bufferForWriting(0).putInt(222);
 		
-		assertEquals(size, rm.numberOfPages());
+		assertEquals(111, rm.getPage(p1.id()).bufferForReading(0).getInt());
+		assertEquals(222, rm.getPage(p2.id()).bufferForReading(0).getInt());
+
+		assertEquals(size + 2, rm.numberOfPages());
 		for(int i = 0; i < size; i++){
 			Long id = ids.get(0);
 			assertEquals(id, rm.getPage(id).id());
 		}
+		
+		
+		
+		
 	}
 
 	

@@ -150,8 +150,37 @@ public class LeafNodeSpec {
 		assertEquals(value2, leaf.get(key2).get(0));
 	}
 	
-	
-	
+
+	@Test
+	public void prependEntriesShouldWork(){
+		LeafNode<Integer, String> leaf2 = lpm.createPage();
+		
+		leaf.setNextLeafId(leaf2.getId());
+		
+		// fill leaf
+		for(int i = 0; i < leaf.getMaximalNumberOfEntries(); i++){
+			assertNull(leaf.insert(i, "val"));
+		}
+		
+		// insert key so that move should happen
+		AdjustmentAction<Integer, String> action = leaf.insert(1, "value");
+		
+		// an update key action should be passed up
+		assertNotNull(action);
+		
+		// make sure leaf structures are in tact
+		assertEquals(leaf.getLastKey(), leaf.getKeyAtPosition(leaf.getNumberOfEntries() - 1));
+		
+		for(int key : leaf.getKeySet()){
+			assertNotNull(leaf.get(key));
+		}
+		
+		for(int key : leaf2.getKeySet()){
+			assertNotNull(leaf2.get(key));
+		}
+		
+		
+	}
 	
 
 }

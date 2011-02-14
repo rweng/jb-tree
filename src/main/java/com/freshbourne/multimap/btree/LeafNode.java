@@ -98,7 +98,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 * <tt>MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE</tt> constant.
 	 */
 	private int getMinFreeLeafEntriesToMove(){
-		return (int) (getMaxEntries() *
+		return (int) (getMaximalNumberOfEntries() *
                 (1 - MAX_LEAF_ENTRY_FILL_LEVEL_TO_MOVE)) + 2;
 	}
     
@@ -220,6 +220,10 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
         return posOfKey(key) != NOT_FOUND;
 	}
 	
+	/**
+	 * @param pos, must be between 0 and numberOfEntries - 1
+	 * @return offset
+	 */
 	private int getOffsetForKeyPos(int pos){
 		if(pos < 0 || pos >= getNumberOfEntries())
 			throw new IllegalArgumentException("pos must be between 0 and numberOfEntries - 1");
@@ -453,13 +457,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		leafPageManager.removePage(rawPage().id());
 	}
 
-	/**
-	 * @return the maximal number of Entries
-	 */
-	public int getMaxEntries() {
-		return maxEntries;
-	}
-
 	private PagePointer storeKey(K key) {
 		DataPage<K> page = null;
 		Integer entryId = null;
@@ -638,9 +635,12 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	}
 
 	public int getRemainingEntries() {
-		return getMaxEntries() - getNumberOfEntries();
+		return getMaximalNumberOfEntries() - getNumberOfEntries();
 	}
 
+	/**
+	 * @return the maximal number of Entries
+	 */
 	public int getMaximalNumberOfEntries() {
 		return maxEntries;
 	}
@@ -653,7 +653,19 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * @param pos, starting with 0, going to numberOfEntries - 1
+	 * @return
+	 */
 	public K getKeyAtPosition(int pos) {
 		return getKeyAtOffset(getOffsetForKeyPos(pos));
+	}
+	
+	public List<K> getKeySet(){
+		List<K> result = new ArrayList<K>();
+		for(int i = 0; i < getNumberOfEntries(); i++){
+			result.add(getKeyAtPosition(i));
+		}
+		return result;
 	}
 }

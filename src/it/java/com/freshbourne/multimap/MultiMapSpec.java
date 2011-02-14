@@ -120,7 +120,8 @@ public abstract class MultiMapSpec<K, V> {
 		K key = createRandomKey();
 		System.out.println("adding " + size + "values to " + tree.getClass().toString());
 		for(int i = 0; i < size; i++){
-			tree.add(key, value1);
+			System.out.println("inserting value " + i);
+			tree.add(createRandomKey(), createRandomValue());
 		}
 		
 	}
