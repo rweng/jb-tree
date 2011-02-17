@@ -7,12 +7,38 @@
  */
 package com.freshbourne.multimap;
 
+import org.junit.Test;
+
 import com.freshbourne.multimap.btree.BTreeProvider;
 
 public class BTreePTest extends MultiMapPTest<Integer, String>  {
-
+	
+	private static BTreeProvider provider = new BTreeProvider("/tmp/btree_performance_test");
+	
 	public BTreePTest() {
-		super(new BTreeProvider("/tmp/btree_performance_test"));
+		super(provider);
 	}
+	
+	
+	@Test
+	public void shouldNotHaveTooMuchOverhead(){
+		int key = getProvider().createRandomKey();
+		String val = getProvider().createRandomValue();
+		
+		
+		// insert 10.000 K/V pairs
+		int size = 10000;
+		for(int i = 0; i<size;i++){
+			getMultiMap().add(key, val);
+		}
+		
+		//TODO: getMultiMap().sync();
+		
+		
+	}
+	
+	@Test
+	public void shouldNotTakeTooLong(){}
+	
 
 }

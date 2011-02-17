@@ -157,14 +157,11 @@ public class LeafNodeSpec {
 		
 		int totalInserted = 0;
 		
-		leaf.setNextLeafId(leaf2.getId());
-		
 		// fill leaf
 		for(int i = 0; i < leaf.getMaximalNumberOfEntries(); i++){
 			assertNull(leaf.insert(i, "val"));
 			totalInserted++;
 		}
-		
 		
 		testPrepend(leaf, leaf2);
 		totalInserted++;
@@ -185,6 +182,8 @@ public class LeafNodeSpec {
 	}
 	
 	private void testPrepend(LeafNode<Integer, String> leaf1, LeafNode<Integer, String> leaf2){
+		leaf1.setNextLeafId(leaf2.getId());
+		
 		// insert key so that move should happen
 		AdjustmentAction<Integer, String> action = leaf1.insert(1, "value");
 		

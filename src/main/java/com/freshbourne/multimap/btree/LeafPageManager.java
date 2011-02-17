@@ -11,9 +11,11 @@ package com.freshbourne.multimap.btree;
 import com.freshbourne.io.*;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import java.util.Comparator;
 
+@Singleton
 public class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 
 	private final FixLengthSerializer<PagePointer, byte[]> ppSerializer;
@@ -44,7 +46,5 @@ public class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 	protected LeafNode<K, V> createObjectPage(RawPage page) {
 		return new LeafNode<K, V>(page, keyPageManager, valuePageManager, ppSerializer, comparator, this);
 	}
-	
-
 
 }

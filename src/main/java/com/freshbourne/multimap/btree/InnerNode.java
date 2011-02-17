@@ -202,7 +202,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 			PagePointer pp = getPointerAtOffset(offsetForKey(i));
 			K keyFromPointer = getKeyFromPagePointer(pp);
 			if(keyFromPointer == null){
-				throw new IllegalStateException("key retrieved from PagePointer " + pp + " must not be null!");
+				throw new IllegalStateException("key " + i + " retrieved from PagePointer " + pp + " must not be null!");
 			}
 			
 			if(comparator.compare(keyFromPointer, key) >= 0){

@@ -8,6 +8,7 @@
 package com.freshbourne.io;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.util.Map;
  * Provides access to Pages stored in a RandomAccessFile.
  * 
  */
+@Singleton
 public class FileResourceManager implements ResourceManager {
 	private RandomAccessFile handle;
 	private final File file;
@@ -33,7 +35,7 @@ public class FileResourceManager implements ResourceManager {
 	private FileLock fileLock;
 	private FileChannel ioChannel;
 	private ResourceHeader header;
-	private Map<Long, Reference<RawPage>> refs;
+	private Map<Long, RawPage> cache;
 	
 	
     @Inject
@@ -65,7 +67,7 @@ public class FileResourceManager implements ResourceManager {
 			header.load();
 		}
 		
-		this.refs = new HashMap<Long, Reference<RawPage>>();
+		this.cache = new SoftReferenceCacheMap<Long, RawPage>();
 	}
 	
 	@Override
@@ -95,8 +97,8 @@ public class FileResourceManager implements ResourceManager {
 		
 		RawPage result;
 		
-		if(refs.containsKey(pageId)){
-			result = refs.get(pageId).get();
+		if(cache.containsKey(pageId)){
+			result = cache.get(pageId);
 			if(result != null)
 				return result;
 		}
@@ -111,7 +113,7 @@ public class FileResourceManager implements ResourceManager {
 		}
 		
 		result = new RawPage(buf, pageId, this);
-		refs.put(pageId, new SoftReference<RawPage>(result));
+		cache.put(pageId, result);
 		
 		return result;
 	}
@@ -238,7 +240,7 @@ public class FileResourceManager implements ResourceManager {
 			System.exit(1);
 		}
 		
-		refs.put(result.id(), new SoftReference<RawPage>(result));
+		cache.put(result.id(), result);
 		return result;
 	}
 	
@@ -280,7 +282,7 @@ public class FileResourceManager implements ResourceManager {
 			System.exit(1);
 		}
 		
-		refs.put(result.id(), new SoftReference<RawPage>(result));
+		cache.put(result.id(), result);
 		return result;
 	}
 
@@ -310,7 +312,7 @@ public class FileResourceManager implements ResourceManager {
 			System.exit(1);
 		}
 		
-		refs.remove(pageId);
+		cache.remove(pageId);
 	}
 	
 	protected void finalize() throws Throwable{
@@ -327,5 +329,14 @@ public class FileResourceManager implements ResourceManager {
 	@Override
 	public boolean hasPage(long id) {
 		return header.contains(id);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.PageManager#sync()
+	 */
+	@Override
+	public void sync() {
+		// TODO Auto-generated method stub
+		
 	}
 }

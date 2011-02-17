@@ -17,7 +17,7 @@ public class MultiMapTestBase<K,V> {
 	
 	private MultiMapProvider<K, V> provider;
 	
-	protected MultiMap<K, V> tree;
+	private MultiMap<K, V> multiMap;
 	protected K key1;
 	protected K key2;
 	
@@ -49,7 +49,7 @@ public class MultiMapTestBase<K,V> {
 	
 	@Before
 	public void setUp() {
-		tree = getProvider().createMultiMap();
+		setMultiMap(getProvider().createMultiMap());
 		key1 = getProvider().createRandomKey();
 		key2 = getProvider().createRandomKey();
 		value1 = getProvider().createRandomValue();
@@ -57,25 +57,38 @@ public class MultiMapTestBase<K,V> {
 	}
 	
 	protected void simpleTests(){
-		int numOfEntries = tree.getNumberOfEntries();
+		int numOfEntries = getMultiMap().getNumberOfEntries();
 		
-		tree.add(key1, value2);
-		assertTrue(tree.containsKey(key1));
-		assertEquals(value2, tree.get(key1).get(0));
-		assertEquals(numOfEntries + 1, tree.getNumberOfEntries());
+		getMultiMap().add(key1, value2);
+		assertTrue(getMultiMap().containsKey(key1));
+		assertEquals(value2, getMultiMap().get(key1).get(0));
+		assertEquals(numOfEntries + 1, getMultiMap().getNumberOfEntries());
 		
-		tree.remove(key1);
-		assertFalse(tree.containsKey(key1));
-		assertEquals(0, tree.get(key1).size());		
-		assertEquals(numOfEntries, tree.getNumberOfEntries());
+		getMultiMap().remove(key1);
+		assertFalse(getMultiMap().containsKey(key1));
+		assertEquals(0, getMultiMap().get(key1).size());		
+		assertEquals(numOfEntries, getMultiMap().getNumberOfEntries());
 	}
 	
 	protected void fill(int size){
-		K key = getProvider().createRandomKey();
-		System.out.println("adding " + size + "values to " + tree.getClass().toString());
 		for(int i = 0; i < size; i++){
-			System.out.println("inserting value " + i);
-			tree.add(getProvider().createRandomKey(), getProvider().createRandomValue());
+			getMultiMap().add(getProvider().createRandomKey(), getProvider().createRandomValue());
 		}
+	}
+
+
+	/**
+	 * @param multiMap the multiMap to set
+	 */
+	public void setMultiMap(MultiMap<K, V> multiMap) {
+		this.multiMap = multiMap;
+	}
+
+
+	/**
+	 * @return the multiMap
+	 */
+	public MultiMap<K, V> getMultiMap() {
+		return multiMap;
 	}
 }

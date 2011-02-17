@@ -8,17 +8,12 @@
 package com.freshbourne.io;
 
 import java.io.IOException;
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
-import java.util.HashMap;
 import java.util.Map;
-
-import com.freshbourne.multimap.btree.InnerNode;
 
 public abstract class AbstractPageManager<T extends ComplexPage> implements PageManager<T> {
 	
 	private final PageManager<RawPage> rpm;
-	private Map<Long, Reference<T>> refs = new HashMap<Long, Reference<T>>();;
+	private Map<Long, T> cache = new SoftReferenceCacheMap<Long, T>();;
 	
 	protected AbstractPageManager(PageManager<RawPage> rpm) {
 		this.rpm = rpm;
@@ -35,17 +30,16 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	public T getPage(long id) {
 		T result;
 		
-		if(refs.containsKey(id)){
-			result = refs.get(id).get();
-			if(result != null)
-				return result;
+		if (cache.containsKey(id)) {
+			result = cache.get(id);
+			return result;
 		}
 
 		result = createObjectPage(rpm.getPage(id));
 		
 		try {
 			result.load();
-			refs.put(id, new SoftReference<T>(result));
+			cache.put(id, result);
 		} catch (IOException e) {
 			throw new IllegalArgumentException("cant load InnerNodePage with id " + id);
 		}
@@ -60,7 +54,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	public T createPage() {
 		T l = createObjectPage(rpm.createPage());
 		l.initialize();
-		refs.put(l.rawPage().id(), new SoftReference<T>(l));
+		cache.put(l.rawPage().id(), l);
 		return l;
 	}
 
@@ -71,7 +65,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	 */
 	@Override
 	public void removePage(long id) {
-		refs.remove(id);
+		cache.remove(id);
 		rpm.removePage(id);
 		
 	}
@@ -86,18 +80,25 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		if(!rpm.hasPage(id))
 			return false;
 		
-		if(refs.containsKey(id))
+		if(cache.containsKey(id))
 			return true;
 		
 		try {
 			T page = createObjectPage(rpm.getPage(id));
 			page.load();
-			refs.put(page.rawPage().id(), new SoftReference<T>(page));
+			cache.put(page.rawPage().id(), page);
 		} catch (Exception e) {
 			return false;
 		}
 		
 		return true;
-	}
+	}	
 	
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.PageManager#sync()
+	 */
+	@Override
+	public void sync() {
+		
+	}
 }

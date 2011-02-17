@@ -530,8 +530,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	public AdjustmentAction<K, V> insert(K key, V value) {
 		ensureValid();
 		
-		System.out.println("insert key " + key + " in leaf " + rawPage().id() + " with currently " + getNumberOfEntries() + " entries");
-		
 		if(!isFull()){
 			// add to data_page
 			PagePointer keyPointer = storeKey(key);
@@ -546,7 +544,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		
 		// if leaf does not have enough space but we can move some data to the next leaf
 		if (this.getNextLeafId() != NO_NEXT_LEAF) {
-			System.out.println("trying to move data");
 			LeafNode<K, V> nextLeaf = leafPageManager.getPage(this.getNextLeafId());
 			
 			if(nextLeaf.getRemainingEntries() >= getMinFreeLeafEntriesToMove()){
@@ -565,8 +562,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 			
 		}
 		
-		// if we have to allocate a new leaf
-		System.out.println("allocating new leaf");
 		// allocate new leaf
 		LeafNode<K,V> newLeaf = leafPageManager.createPage();
 		newLeaf.setNextLeafId(getNextLeafId());

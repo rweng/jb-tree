@@ -86,6 +86,14 @@ public class RawPage {
 			super.finalize();
 		}
 	}
+	
+	/**
+	 * syncs the RawPage with the ResourceManager its from.
+	 */
+	public void sync() {
+		if (isModified())
+			getResourceManager().writePage(this);
+	}
     
     
 }

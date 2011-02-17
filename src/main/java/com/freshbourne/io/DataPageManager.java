@@ -11,10 +11,12 @@ package com.freshbourne.io;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.Serializer;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import java.io.IOException;
 
-public class DataPageManager<T> implements PageManager<DataPage<T>> {
+@Singleton
+public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {
 
     private final PageManager<RawPage> bpm;
     private final FixLengthSerializer<PagePointer, byte[]> pointSerializer;
@@ -26,33 +28,22 @@ public class DataPageManager<T> implements PageManager<DataPage<T>> {
             FixLengthSerializer<PagePointer, byte[]> pointSerializer,
 			Serializer<T, byte[]> dataSerializer
             ){
+    	super(bpm);
         this.bpm = bpm;
         this.pointSerializer = pointSerializer;
         this.dataSerializer = dataSerializer;
     }
 
-    @Override
-    public DataPage<T> createPage() {
-    	DataPage<T> result = new DynamicDataPage<T>(bpm.createPage(), pointSerializer, dataSerializer);
-    	result.initialize();
-		return result;
-    }
-
-    @Override
-    public DataPage<T> getPage(long id) {
-    	DataPage<T> result = new DynamicDataPage<T>(bpm.getPage(id), pointSerializer, dataSerializer);
-    	try {
-			result.load();
-		} catch (IOException e) {
-			throw new IllegalStateException();
-		}
-        return result;
-    }
-
-    @Override
-    public void removePage(long id) {
-        bpm.removePage(id);
-    }
+//    @Override
+//    public DataPage<T> getPage(long id) {
+//    	DataPage<T> result = new DynamicDataPage<T>(bpm.getPage(id), pointSerializer, dataSerializer);
+//    	try {
+//			result.load();
+//		} catch (IOException e) {
+//			throw new IllegalStateException();
+//		}
+//        return result;
+//    }
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.PageManager#hasPage(long)
@@ -60,5 +51,22 @@ public class DataPageManager<T> implements PageManager<DataPage<T>> {
 	@Override
 	public boolean hasPage(long id) {
 		return bpm.hasPage(id);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.PageManager#sync()
+	 */
+	@Override
+	public void sync() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.AbstractPageManager#createObjectPage(com.freshbourne.io.RawPage)
+	 */
+	@Override
+	protected DataPage<T> createObjectPage(RawPage page) {
+		return new DynamicDataPage<T>(page, pointSerializer, dataSerializer);
 	}
 }

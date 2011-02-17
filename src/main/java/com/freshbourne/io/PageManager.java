@@ -44,4 +44,9 @@ public interface PageManager<T> {
 	 * @return true, if the page exists
 	 */
 	public boolean hasPage(long id);
+	
+	/**
+	 * forces the sync of pages to resources
+	 */
+	public void sync();
 }

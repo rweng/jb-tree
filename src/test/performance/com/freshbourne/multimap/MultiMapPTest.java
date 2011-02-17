@@ -23,7 +23,7 @@ public abstract class MultiMapPTest<K, V> extends MultiMapTestBase<K,V> {
 
 		fill(size);
 		
-		assertEquals(size, tree.getNumberOfEntries());
+		assertEquals(size, getMultiMap().getNumberOfEntries());
 		key1 = getProvider().createMaxKey();
 		simpleTests();
 		key1 = getProvider().createMinKey();

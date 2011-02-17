@@ -55,7 +55,7 @@ public class DynamicDataPageSpec {
 	}
 	
 	@Test
-	public void shouldGetSmallerWhenInsertingSomething() throws NoSpaceException, InvalidPageException{
+	public void remainingShouldGetSmallerWhenInsertingSomething() throws NoSpaceException, InvalidPageException{
 		page.initialize();
 		checkAndSetModified(page);
 		
@@ -86,15 +86,26 @@ public class DynamicDataPageSpec {
 		
 		page.initialize();
 		
+		assertEquals(DynamicDataPage.NO_ENTRIES_INT, page.rawPage().bufferForReading(0).getInt());
+		assertEquals(0, page.numberOfEntries());
+		
 		int id1 = page.add(s1);
+		assertEquals(1, page.rawPage().bufferForReading(0).getInt());
+		assertEquals(1, page.numberOfEntries());
 		int id2 = page.add(s2);
+		assertEquals(2, page.rawPage().bufferForReading(0).getInt());
+		assertEquals(2, page.numberOfEntries());
 		int id3 = page.add(s3);
+		assertEquals(3, page.rawPage().bufferForReading(0).getInt());
+		assertEquals(3, page.numberOfEntries());
 		checkAndSetModified(page);
 		
 		assertEquals(s1, page.get(id1));
 		assertEquals(s3, page.get(id3));
 		
 		page.remove(id1);
+		assertEquals(2, page.rawPage().bufferForReading(0).getInt());
+		assertEquals(2, page.numberOfEntries());
 		checkAndSetModified(page);
 		assertEquals(s2, page.get(id2));
 		assertEquals(s3, page.get(id3));

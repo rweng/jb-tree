@@ -17,7 +17,9 @@ import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.RawPage;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class InnerNodeManager<K, V> extends AbstractPageManager<InnerNode<K, V>> {
 
 	private final FixLengthSerializer<PagePointer, byte[]> ppSerializer;
