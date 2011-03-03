@@ -7,6 +7,11 @@
  */
 package com.freshbourne.multimap;
 
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+import java.io.File;
+
 import org.junit.Test;
 
 import com.freshbourne.multimap.btree.BTree;
@@ -27,21 +32,31 @@ public class BTreePTest extends MultiMapPTest<Integer, String>  {
 		int key = getProvider().createRandomKey();
 		String val = getProvider().createRandomValue();
 		
+		int sizeForKey = Integer.SIZE / 8;
+		int sizeForVal = val.length();
 		
 		// insert 10.000 K/V pairs
 		int size = 10000;
+		long start = System.currentTimeMillis();
 		for(int i = 0; i<size;i++){
 			getMultiMap().add(key, val);
 		}
 		
-		getMultiMap().sync();
+		getTree().sync();
+		long end = System.currentTimeMillis();
 		
+		File file = new File(path);
+		Long sizeOfData = (long)(size * (sizeForKey + sizeForVal));
+		float realSizePercent = (Long)file.length() / sizeOfData * 100; 
 		
-		
+		System.out.println("====== BTREE: SIZE OVERHEAD TEST ======");
+		System.out.println("key + value data inserted:" + sizeOfData / 1024 + "k");
+		System.out.println("fileSize: " + file.length()/1024 + "k ("+realSizePercent+"%)");
+		System.out.println("time for insert w/ sync in millis: " + (end - start));
+		assertThat("current Size: " + realSizePercent + "%", realSizePercent, lessThan(150f));
 	}
 	
-	@Test
-	public void shouldNotTakeTooLong(){}
-	
-
+	private BTree<Integer, String> getTree(){
+		return (BTree<Integer, String>) getMultiMap();
+	}	
 }
