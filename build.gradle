@@ -9,6 +9,15 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
+// java
+sourceCompatibility = 1.5
+version = '0.01'
+jar {
+	manifest {
+		attributes 'Implementation-Title': 'MultiMap', 'Implementation-Version': version
+	}
+}
+
 repositories {
     mavenCentral()
 	mavenRepo urls: "http://guice-maven.googlecode.com/svn/trunk"
