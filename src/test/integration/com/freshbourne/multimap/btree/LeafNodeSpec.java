@@ -13,9 +13,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.DataPageManager;
-import com.freshbourne.io.DynamicDataPage;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;

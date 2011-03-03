@@ -78,6 +78,7 @@ public class RawPage {
 		return resourceManager;
 	}
 	
+	@Override
 	protected void finalize() throws Throwable {
 		try {
 			sync();

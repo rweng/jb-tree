@@ -13,8 +13,6 @@ import com.freshbourne.serializer.Serializer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import java.io.IOException;
-
 @Singleton
 public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {
 

@@ -13,16 +13,11 @@ import com.google.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import java.util.HashMap;
 import java.util.Map;
-
-import quicktime.io.IOConstants;
 
 
 /**
@@ -317,6 +312,7 @@ public class FileResourceManager implements ResourceManager {
 		cache.remove(pageId);
 	}
 	
+	@Override
 	protected void finalize() throws Throwable{
 		try{
 			close();

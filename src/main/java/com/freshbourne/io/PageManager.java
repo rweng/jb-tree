@@ -7,8 +7,6 @@
  */
 package com.freshbourne.io;
 
-import java.io.IOException;
-
 /**
  * Classes implementing this interface provide controlled access to pages.
  * The pages are usually cached by the implementing class.

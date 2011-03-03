@@ -7,7 +7,6 @@
  */
 package com.freshbourne.multimap.btree;
 
-import java.io.IOException;
 import java.util.Comparator;
 
 import com.freshbourne.io.AbstractPageManager;

@@ -7,9 +7,6 @@
  */
 package com.freshbourne.multimap;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-
 import java.io.File;
 
 import org.junit.Test;
@@ -47,7 +44,7 @@ public class BTreePTest extends MultiMapPTest<Integer, String>  {
 		
 		File file = new File(path);
 		Long sizeOfData = (long)(size * (sizeForKey + sizeForVal));
-		float realSizePercent = (Long)file.length() / sizeOfData * 100; 
+		float realSizePercent = file.length() / sizeOfData * 100; 
 		
 		System.out.println("====== BTREE: SIZE OVERHEAD TEST ======");
 		System.out.println("key + value data inserted:" + sizeOfData / 1024 + "k");
