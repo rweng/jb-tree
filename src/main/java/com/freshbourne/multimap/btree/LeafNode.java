@@ -480,8 +480,23 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	
 	
 	private PagePointer storeValue(V value) {
-        DataPage<V> page = valuePageManager.createPage();
-        return new PagePointer(page.rawPage().id(),page.add(value));
+		DataPage<V> page = null;
+		Integer entryId = null;
+		
+		if(lastValuePageId != null){
+			page = valuePageManager.getPage(lastValuePageId);
+			entryId = page.add(value);
+		}
+		
+		if(entryId == null){
+			page = valuePageManager.createPage();
+			entryId = page.add(value);
+		}
+		
+		lastValuePageId = page.rawPage().id();
+		lastValuePageRemainingBytes = page.remaining();
+		
+		return new PagePointer(page.rawPage().id(), entryId);
 	}
 
 

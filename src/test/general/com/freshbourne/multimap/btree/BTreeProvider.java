@@ -7,6 +7,7 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
@@ -21,8 +22,10 @@ public class BTreeProvider implements MultiMapProvider<Integer, String> {
 
 	private final Injector injector;
 	private static SecureRandom srand;
+	private final String path;
 	
 	public BTreeProvider(String path) {
+		this.path = path;
 		injector = Guice.createInjector(new BTreeModule(path)); 
 	}
 	
@@ -34,48 +37,32 @@ public class BTreeProvider implements MultiMapProvider<Integer, String> {
 	}
 	
 	
-	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMapSpec#createMultiMap()
-	 */
-	@Override
 	public MultiMap<Integer, String> createMultiMap() {
+		File f = new File(path);
+		if(f.exists())
+			f.delete();
+		
 		BTree<Integer, String> tree = injector.getInstance(Key.get(new TypeLiteral<BTree<Integer,String>>(){}));
 		tree.initialize();
 		return tree;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMapSpec#createRandomKey()
-	 */
-	@Override
 	public Integer createRandomKey() {
 		return srand().nextInt();
 	}
 	
 	
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMapSpec#createRandomValue()
-	 */
-	@Override
 	public String createRandomValue() {
 		return (new BigInteger(130, srand())).toString(32);
 	}
 
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMapSpec#createMaxKey()
-	 */
-	@Override
 	public Integer createMaxKey() {
 		return Integer.MAX_VALUE;
 	}
 
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMapSpec#createMinKey()
-	 */
-	@Override
 	public Integer createMinKey() {
 		return Integer.MIN_VALUE;
 	}
