@@ -176,4 +176,9 @@ public abstract class ResourceManagerSpec {
 	 */
 	protected abstract ResourceManager createOpenResourceManager();
 	
+	/**
+	 * implement the test for Sync
+	 */
+	public abstract void testSync();
+	
 }

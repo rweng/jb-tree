@@ -80,8 +80,7 @@ public class RawPage {
 	
 	protected void finalize() throws Throwable {
 		try {
-			if (isModified())
-				getResourceManager().writePage(this);
+			sync();
 		} catch (Exception e) {
 			super.finalize();
 		}

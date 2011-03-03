@@ -9,11 +9,13 @@ package com.freshbourne.multimap;
 
 import org.junit.Test;
 
+import com.freshbourne.multimap.btree.BTree;
 import com.freshbourne.multimap.btree.BTreeProvider;
 
 public class BTreePTest extends MultiMapPTest<Integer, String>  {
 	
-	private static BTreeProvider provider = new BTreeProvider("/tmp/btree_performance_test");
+	private static String path = "/tmp/btree_performance_test";
+	private static BTreeProvider provider = new BTreeProvider(path);
 	
 	public BTreePTest() {
 		super(provider);
@@ -32,7 +34,8 @@ public class BTreePTest extends MultiMapPTest<Integer, String>  {
 			getMultiMap().add(key, val);
 		}
 		
-		//TODO: getMultiMap().sync();
+		getMultiMap().sync();
+		
 		
 		
 	}

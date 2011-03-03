@@ -22,6 +22,8 @@ import java.nio.channels.OverlappingFileLockException;
 import java.util.HashMap;
 import java.util.Map;
 
+import quicktime.io.IOConstants;
+
 
 /**
  * Provides access to Pages stored in a RandomAccessFile.
@@ -336,7 +338,15 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void sync() {
-		// TODO Auto-generated method stub
-		
+		for(RawPage p : cache.values()){
+			p.sync();
+		}
+	}
+
+	/**
+	 * @return the handle
+	 */
+	public RandomAccessFile getHandle() {
+		return handle;
 	}
 }

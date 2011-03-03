@@ -87,5 +87,9 @@ public interface MultiMap<K, V> {
      */
     void clear();
     
+    /**
+     * if the MultiMap is backed by some kind of storage, this method forces the synchronization to it
+     */
+    public void sync();
     
 }

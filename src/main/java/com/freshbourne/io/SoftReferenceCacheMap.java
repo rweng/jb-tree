@@ -9,6 +9,7 @@ package com.freshbourne.io;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -148,7 +149,15 @@ public class SoftReferenceCacheMap<K, V> implements Map<K, V> {
 	 */
 	@Override
 	public Collection<V> values() {
-		throw new UnsupportedOperationException();
+		Collection<V> result = new ArrayList<V>();
+		V value;
+		for(K key : refs.keySet()){
+			if((value = refs.get(key).get()) == null)
+				refs.remove(key);
+			else
+				result.add(value);
+		}
+		return result;
 	}
 
 }

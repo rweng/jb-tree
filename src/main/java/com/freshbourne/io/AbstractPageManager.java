@@ -99,6 +99,6 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	 */
 	@Override
 	public void sync() {
-		
+		getRawPageManager().sync();
 	}
 }

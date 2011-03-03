@@ -234,12 +234,14 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		
 		return rawPage;
 	}
-	
-	/**
-	 * syncs all pages with the resources
-	 */
-	public void sync(){
-		//leafPageManager.
-	}
 
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.MultiMap#sync()
+	 */
+	@Override
+	public void sync() {
+		leafPageManager.sync();
+		innerNodeManager.sync();
+		bpm.sync();
+	}
 }
