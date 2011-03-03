@@ -18,6 +18,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.util.Map;
+import java.util.Random;
 
 
 /**
@@ -66,6 +67,18 @@ public class FileResourceManager implements ResourceManager {
 		
 		this.cache = new SoftReferenceCacheMap<Long, RawPage>();
 	}
+	
+	/**
+     * @return a random Long but 0L
+     */
+    private static long lastid = 0;
+    public static Long generateId(){
+    	long result;
+		do{
+			result = (new Random()).nextLong();
+		} while (result == 0L);
+		return ++lastid;
+    }
 	
 	@Override
 	public void writePage(RawPage page) {
@@ -224,7 +237,7 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 		ensureCorrectPageSize(page);
 		
-		RawPage result = new RawPage(page.bufferForWriting(0), RawPage.generateId(), this);
+		RawPage result = new RawPage(page.bufferForWriting(0), generateId(), this);
 		
 		try {
 			ioChannel.write(page.bufferForReading(0), ioChannel.size());
@@ -271,7 +284,7 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 		
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
-		RawPage result = new RawPage(buf, RawPage.generateId(), this);
+		RawPage result = new RawPage(buf, generateId(), this);
 		try {
 			header.add(result.id());
 		} catch (DuplicatePageIdException e) {

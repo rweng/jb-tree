@@ -45,19 +45,7 @@ public class RawPage {
     public ByteBuffer bufferForReading(int pos){buffer.position(pos); return buffer.asReadOnlyBuffer();}
     public Long id(){return id;}
     
-    /**
-     * @return a random Long but 0L
-     */
-    private static long lastid = 0;
-    public static Long generateId(){
-    	long result;
-		do{
-			result = (new Random()).nextLong();
-		} while (result == 0L);
-		return ++lastid;
-    }
-
-	/**
+    	/**
 	 * @param modified the modified to set
 	 */
 	public void setModified(boolean modified) {
