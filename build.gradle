@@ -10,11 +10,27 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 // java
-sourceCompatibility = 1.5
+sourceCompatibility = 1.6
 version = '0.01'
 jar {
 	manifest {
 		attributes 'Implementation-Title': 'MultiMap', 'Implementation-Version': version
+	}
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir 'src/main/java'
+			}
+		}
+	test {
+		java {
+			srcDir 'src/test/general'
+			srcDir 'src/test/integration'
+			srcDir 'src/test/performance'
+			srcDir 'src/test/unit'
+			}
 	}
 }
 
