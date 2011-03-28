@@ -12,6 +12,7 @@ import java.lang.reflect.Type;
 import java.util.Comparator;
 
 import com.freshbourne.comparator.IntegerComparator;
+import com.freshbourne.comparator.StringComparator;
 import com.freshbourne.io.DynamicDataPage;
 import com.freshbourne.io.IOModule;
 import com.freshbourne.serializer.FixLengthSerializer;
@@ -53,6 +54,7 @@ public class BTreeModule extends AbstractModule {
 		bind(new TypeLiteral<BTree<Integer,String>>(){});
 		
 		bind(new TypeLiteral<Comparator<Integer>>(){}).toInstance(IntegerComparator.INSTANCE);
+		bind(new TypeLiteral<Comparator<String>>(){}).toInstance(StringComparator.INSTANCE);
 		
 		binder().install(new IOModule(indexFile));
 		
