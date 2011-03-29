@@ -16,7 +16,7 @@ public class PageNotFoundException extends RuntimeException {
 		this(rm, page.id());
 	}
 	
-    public PageNotFoundException(ResourceManager rm, Long pageId){
+    public PageNotFoundException(ResourceManager rm, int pageId){
         super("The Page with the id " + pageId + " could not be found in the ResourceManager " + rm.toString());
     }
 }

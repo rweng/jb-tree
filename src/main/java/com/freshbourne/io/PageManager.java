@@ -29,19 +29,19 @@ public interface PageManager<T> {
 	 * @param id of the page to be fetched
 	 * @return page with given id from resource or cache, null if page could not be found
 	 */
-	public T getPage(long id);
+	public T getPage(int id);
 	
 	/**
 	 * removes the Page with the given id
 	 * @param id of the Page to be removed
 	 */
-	public void removePage(long id);
+	public void removePage(int id);
 
 	/**
 	 * @param page id
 	 * @return true, if the page exists
 	 */
-	public boolean hasPage(long id);
+	public boolean hasPage(int id);
 	
 	/**
 	 * forces the sync of pages to resources

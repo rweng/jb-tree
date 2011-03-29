@@ -51,7 +51,7 @@ public interface Node<K, V> {
 	/**
 	 * @return id of this node
 	 */
-	public Long getId();
+	public Integer getId();
 	
 	/**
 	 * @return number of values in or under a node

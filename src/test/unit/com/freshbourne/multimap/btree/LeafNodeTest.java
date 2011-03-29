@@ -39,8 +39,8 @@ public class LeafNodeTest {
 	public void setUp(){
 		MockitoAnnotations.initMocks(this);
 		
-		leaf = new LeafNode<Integer, String>(new RawPage(ByteBuffer.allocate(1024), 1L), keyPageManager, valuePageManager, pointerSerializer, comparator, leafPageManager);
-		leaf2 = new LeafNode<Integer, String>(new RawPage(ByteBuffer.allocate(1024), 1L), keyPageManager, valuePageManager, pointerSerializer, comparator, leafPageManager);
+		leaf = new LeafNode<Integer, String>(new RawPage(ByteBuffer.allocate(1024), 1), keyPageManager, valuePageManager, pointerSerializer, comparator, leafPageManager);
+		leaf2 = new LeafNode<Integer, String>(new RawPage(ByteBuffer.allocate(1024), 1), keyPageManager, valuePageManager, pointerSerializer, comparator, leafPageManager);
 		
 		leaf.initialize();
 		leaf2.initialize();

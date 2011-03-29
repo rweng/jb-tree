@@ -46,12 +46,12 @@ public class InnerNodeTest {
 	
 	
 	// some testing data
-	PagePointer keyPointer = new PagePointer(1111L, 1112); // value 100, see setUp
-	PagePointer keyPointer2 = new PagePointer(2222L, 2223);
+	PagePointer keyPointer = new PagePointer(1111, 1112); // value 100, see setUp
+	PagePointer keyPointer2 = new PagePointer(2222, 2223);
 	
-	long pageId1 = 111L;
-	long pageId2 = 222L;
-	long pageId3 = 333L;
+	Integer pageId1 = 111;
+	Integer pageId2 = 222;
+	Integer pageId3 = 333;
 	
 	int key1 = 100;
 	int key2 = 200;
@@ -61,17 +61,17 @@ public class InnerNodeTest {
 	@Before
 	public void setUp(){
 		MockitoAnnotations.initMocks(this);
-		rawPage = new RawPage(ByteBuffer.allocate(1024), 1L);
+		rawPage = new RawPage(ByteBuffer.allocate(1024), 1);
 		
-		when(keyPageManager.getPage(anyLong())).thenReturn(dataPage);
+		when(keyPageManager.getPage(anyInt())).thenReturn(dataPage);
 		when(dataPage.get(keyPointer.getOffset())).thenReturn(key1);
 		
 		
-		when(innerNodePageManager.hasPage(anyLong())).thenReturn(true);
-		when(innerNodePageManager.getPage(anyLong())).thenReturn(innerNode);
+		when(innerNodePageManager.hasPage(anyInt())).thenReturn(true);
+		when(innerNodePageManager.getPage(anyInt())).thenReturn(innerNode);
 		
-		when(leafPageManager.hasPage(anyLong())).thenReturn(true);
-		when(leafPageManager.getPage(anyLong())).thenReturn(leafNode1);
+		when(leafPageManager.hasPage(anyInt())).thenReturn(true);
+		when(leafPageManager.getPage(anyInt())).thenReturn(leafNode1);
 		
 		node = new InnerNode<Integer, String>(rawPage, pointerSerializer, comparator, keyPageManager, leafPageManager, innerNodePageManager);
 	}
@@ -96,13 +96,13 @@ public class InnerNodeTest {
 		RawPage page = node.rawPage();
 		ByteBuffer buffer = page.bufferForReading(InnerNode.Header.size());
 		
-		assertEquals(pageId1, buffer.getLong());
+		assertEquals(pageId1, (Integer) buffer.getInt());
 		
 		byte[] pointerBuf = new byte[pointerSerializer.serializedLength(PagePointer.class)];
 		buffer.get(pointerBuf);
 		
 		assertEquals(keyPointer, pointerSerializer.deserialize(pointerBuf));
-		assertEquals(pageId2, buffer.getLong());
+		assertEquals(pageId2, (Integer) buffer.getInt());
 	}
 	
 	@Test
@@ -111,7 +111,7 @@ public class InnerNodeTest {
 		node.initRootState(keyPointer, pageId1, pageId2);
 		
 		// next thing is a leaf
-		when(innerNodePageManager.hasPage(anyLong())).thenReturn(false);
+		when(innerNodePageManager.hasPage(anyInt())).thenReturn(false);
 		node.insert(key1 - 1, val1);
 		verify(leafNode1).insert(key1 - 1, val1);
 	}
@@ -123,7 +123,7 @@ public class InnerNodeTest {
 		node.initRootState(keyPointer, pageId1, pageId2);
 		
 		// next thing is a leaf
-		when(leafPageManager.hasPage(anyLong())).thenReturn(false);
+		when(leafPageManager.hasPage(anyInt())).thenReturn(false);
 		node.insert(key1 - 1, val1);
 		verify(innerNode).insert(key1 - 1, val1);
 	}

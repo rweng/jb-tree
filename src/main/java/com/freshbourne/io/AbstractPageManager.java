@@ -13,7 +13,7 @@ import java.util.Map;
 public abstract class AbstractPageManager<T extends ComplexPage> implements PageManager<T> {
 	
 	private final PageManager<RawPage> rpm;
-	private Map<Long, T> cache = new SoftReferenceCacheMap<Long, T>();;
+	private Map<Integer, T> cache = new SoftReferenceCacheMap<Integer, T>();;
 	
 	protected AbstractPageManager(PageManager<RawPage> rpm) {
 		this.rpm = rpm;
@@ -27,7 +27,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	 * @see com.freshbourne.io.PageManager#getPage(int)
 	 */
 	@Override
-	public T getPage(long id) {
+	public T getPage(int id) {
 		T result;
 		
 		if (cache.containsKey(id)) {
@@ -64,7 +64,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	 * @see com.freshbourne.io.PageManager#removePage(int)
 	 */
 	@Override
-	public void removePage(long id) {
+	public void removePage(int id) {
 		cache.remove(id);
 		rpm.removePage(id);
 		
@@ -76,7 +76,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	 * @see com.freshbourne.io.PageManager#hasPage(long)
 	 */
 	@Override
-	public boolean hasPage(long id) {
+	public boolean hasPage(int id) {
 		if(!rpm.hasPage(id))
 			return false;
 		

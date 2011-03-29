@@ -214,6 +214,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public void load() {
+		rawPage = bpm.getPage(0);
+		valid = true;
 		numberOfEntries = rawPage.bufferForReading(0).getInt();
 	}
 

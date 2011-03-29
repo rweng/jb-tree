@@ -22,8 +22,7 @@ import java.util.Random;
 
 
 /**
- * Provides access to Pages stored in a RandomAccessFile.
- * 
+ * Provides access to Pages stored in a RandomAccessFile. 
  */
 @Singleton
 public class FileResourceManager implements ResourceManager {
@@ -33,7 +32,7 @@ public class FileResourceManager implements ResourceManager {
 	private FileLock fileLock;
 	private FileChannel ioChannel;
 	private ResourceHeader header;
-	private Map<Long, RawPage> cache;
+	private Map<Integer, RawPage> cache;
 	
 	
     @Inject
@@ -58,6 +57,7 @@ public class FileResourceManager implements ResourceManager {
 		initIOChannel(file);
 		this.header = new ResourceHeader(ioChannel, pageSize);
 		
+		
 		if(handle.length() == 0){
 			header.initialize();
 		} else {
@@ -65,20 +65,8 @@ public class FileResourceManager implements ResourceManager {
 			header.load();
 		}
 		
-		this.cache = new SoftReferenceCacheMap<Long, RawPage>();
+		this.cache = new SoftReferenceCacheMap<Integer, RawPage>();
 	}
-	
-	/**
-     * @return a random Long but 0L
-     */
-    private static long lastid = 0;
-    public static Long generateId(){
-    	long result;
-		do{
-			result = (new Random()).nextLong();
-		} while (result == 0L);
-		return ++lastid;
-    }
 	
 	@Override
 	public void writePage(RawPage page) {
@@ -89,7 +77,7 @@ public class FileResourceManager implements ResourceManager {
         ByteBuffer buffer = page.bufferForReading(0);
 
 		try{
-			Long offset = header.getPageOffset(page.id());
+			long offset = header.getPageOffset(page.id());
 			ioChannel.write(buffer, offset);
 		} catch(IOException e){
 			throw new RuntimeException(e);
@@ -100,7 +88,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.PageManager#getPage(long)
 	 */
 	@Override
-	public RawPage getPage(long pageId) {
+	public RawPage getPage(int pageId) {
 		
 		ensureOpen();
 		ensurePageExists(pageId);
@@ -132,7 +120,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @param pageId
 	 * @throws PageNotFoundException 
 	 */
-	private void ensurePageExists(long pageId) throws PageNotFoundException {
+	private void ensurePageExists(int pageId) throws PageNotFoundException {
 		if(!header.contains(pageId))
             throw new PageNotFoundException(this, pageId);
 	}
@@ -143,7 +131,10 @@ public class FileResourceManager implements ResourceManager {
 	@Override
 	public void close() throws IOException {
 		if(header != null){
-			header.writeToFile();
+			for(RawPage r : cache.values()){
+				r.sync();
+			}
+			
 			header = null;
 		}
 		
@@ -237,11 +228,10 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 		ensureCorrectPageSize(page);
 		
-		RawPage result = new RawPage(page.bufferForWriting(0), generateId(), this);
+		RawPage result = new RawPage(page.bufferForWriting(0), header.generateId(), this);
 		
 		try {
 			ioChannel.write(page.bufferForReading(0), ioChannel.size());
-			header.add(result.id());
 		} catch (DuplicatePageIdException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -284,13 +274,7 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 		
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
-		RawPage result = new RawPage(buf, generateId(), this);
-		try {
-			header.add(result.id());
-		} catch (DuplicatePageIdException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		RawPage result = new RawPage(buf, header.generateId(), this);
 		
 		cache.put(result.id(), result);
 		return result;
@@ -300,27 +284,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#removePage(long)
 	 */
 	@Override
-	public void removePage(long pageId) {
-		Long lastPageId = header.getLastPageId();
-		
-		
-		// copy the last entry to this position
-		try {
-			if (pageId == lastPageId) { // last page?
-				header.removeLastId();
-				ioChannel.truncate(header.getNumberOfPages() * pageSize);
-			} else {
-				RawPage last = getPage(lastPageId);
-				header.replaceId(pageId, lastPageId);
-				header.removeLastId();
-				writePage(last);
-
-				ioChannel.truncate(header.getNumberOfPages() * pageSize);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+	public void removePage(int pageId) {
 		
 		cache.remove(pageId);
 	}
@@ -338,7 +302,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.PageManager#hasPage(long)
 	 */
 	@Override
-	public boolean hasPage(long id) {
+	public boolean hasPage(int id) {
 		return header.contains(id);
 	}
 

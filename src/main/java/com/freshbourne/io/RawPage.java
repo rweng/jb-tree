@@ -22,7 +22,7 @@ import java.util.Random;
 public class RawPage {
 
     private ByteBuffer buffer;
-    private Long id;
+    private int id;
     private ResourceManager resourceManager;
     
     /**
@@ -31,8 +31,8 @@ public class RawPage {
     private boolean modified = false;
 
 
-    public RawPage(ByteBuffer buffer, Long pageId){this(buffer, pageId, null);}
-    public RawPage(ByteBuffer buffer, Long pageId, ResourceManager rm){
+    public RawPage(ByteBuffer buffer, int pageId){this(buffer, pageId, null);}
+    public RawPage(ByteBuffer buffer, int pageId, ResourceManager rm){
         this.buffer = buffer;
         this.id = pageId;
         this.resourceManager = rm;
@@ -43,7 +43,7 @@ public class RawPage {
      */
     public ByteBuffer bufferForWriting(int pos){setModified(true); buffer.position(pos); return buffer;}
     public ByteBuffer bufferForReading(int pos){buffer.position(pos); return buffer.asReadOnlyBuffer();}
-    public Long id(){return id;}
+    public Integer id(){return id;}
     
     	/**
 	 * @param modified the modified to set

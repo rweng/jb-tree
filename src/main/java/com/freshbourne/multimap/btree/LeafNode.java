@@ -56,17 +56,17 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	
 	
 	private static final int NOT_FOUND = -1;
-	private static final Long NO_NEXT_LEAF = 0L;
+	private static final Integer NO_NEXT_LEAF = 0;
 	
 	private final RawPage rawPage;
 	
 	// counters
 	private int numberOfEntries = 0;
 	
-	private Long lastKeyPageId = null;
+	private Integer lastKeyPageId = null;
 	private int lastKeyPageRemainingBytes = -1;
 	
-	private Long lastValuePageId = null;
+	private Integer lastValuePageId = null;
 	private int lastValuePageRemainingBytes = -1;
 	private final PageManager<LeafNode<K,V>> leafPageManager;
 	
@@ -609,9 +609,9 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	/**
 	 * @return id of the next leaf or null
 	 */
-	public Long getNextLeafId() {
+	public Integer getNextLeafId() {
 		ByteBuffer buffer = rawPage().bufferForReading(posOfNextLeafId());
-		Long result = buffer.getLong();
+		Integer result = buffer.getInt();
 		return result;
 	}
 	
@@ -619,7 +619,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		return Integer.SIZE / 8;
 	}
 
-	public void setNextLeafId(Long id) {
+	public void setNextLeafId(Integer id) {
 		ByteBuffer buffer = rawPage().bufferForWriting(posOfNextLeafId());
 		buffer.putLong(id);
 	}
@@ -641,7 +641,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 * @see com.freshbourne.multimap.btree.Node#getId()
 	 */
 	@Override
-	public Long getId() {
+	public Integer getId() {
 		return rawPage.id();
 	}
 

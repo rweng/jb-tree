@@ -32,22 +32,12 @@ public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {
         this.dataSerializer = dataSerializer;
     }
 
-//    @Override
-//    public DataPage<T> getPage(long id) {
-//    	DataPage<T> result = new DynamicDataPage<T>(bpm.getPage(id), pointSerializer, dataSerializer);
-//    	try {
-//			result.load();
-//		} catch (IOException e) {
-//			throw new IllegalStateException();
-//		}
-//        return result;
-//    }
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.PageManager#hasPage(long)
 	 */
 	@Override
-	public boolean hasPage(long id) {
+	public boolean hasPage(int id) {
 		return bpm.hasPage(id);
 	}
 

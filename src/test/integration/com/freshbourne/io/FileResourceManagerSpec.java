@@ -61,8 +61,8 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 		rm.close();
 		
 		RandomAccessFile rFile = new RandomAccessFile(file, "rw");
+		assertEquals(PageSize.DEFAULT_PAGE_SIZE, rFile.readInt());
 		assertEquals(1, rFile.readInt());
-		assertEquals(0, rFile.readInt());
 		rFile.close();
 	}
 

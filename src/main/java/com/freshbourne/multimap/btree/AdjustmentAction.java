@@ -14,9 +14,9 @@ public class AdjustmentAction<K,V> {
 	
 	private ACTION action;
 	private PagePointer keyPointer;
-	private Long pageId;
+	private Integer pageId;
 	
-	protected AdjustmentAction(ACTION action, PagePointer keyPointer, Long pageId){
+	protected AdjustmentAction(ACTION action, PagePointer keyPointer, Integer pageId){
 		this.setAction(action);
 		this.setKey(keyPointer);
 		this.setPageId(pageId);
@@ -53,14 +53,14 @@ public class AdjustmentAction<K,V> {
 	/**
 	 * @param pageId the node to set
 	 */
-	public void setPageId(Long pageId) {
+	public void setPageId(Integer pageId) {
 		this.pageId = pageId;
 	}
 
 	/**
 	 * @return the pageId
 	 */
-	public Long getPageId() {
+	public Integer getPageId() {
 		return pageId;
 	}
 

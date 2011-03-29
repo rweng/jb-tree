@@ -26,7 +26,7 @@ public class DynamicDataPageSpec {
 	
 	@Before
 	public void setUp(){
-		page = new DynamicDataPage<String>(new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 1L), PagePointSerializer.INSTANCE, StringSerializer.INSTANCE);
+		page = new DynamicDataPage<String>(new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 1), PagePointSerializer.INSTANCE, StringSerializer.INSTANCE);
 	}
 	
 	@Test
