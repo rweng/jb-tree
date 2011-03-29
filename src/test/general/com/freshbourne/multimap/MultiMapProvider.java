@@ -9,7 +9,8 @@ package com.freshbourne.multimap;
 
 public interface MultiMapProvider<K,V> {
 
-	MultiMap<K,V> createMultiMap();
+	MultiMap<K,V> createNewMultiMap();
+	
 	K createRandomKey();
 	V createRandomValue();
 	K createMaxKey();

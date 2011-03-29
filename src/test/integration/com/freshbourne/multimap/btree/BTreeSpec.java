@@ -7,6 +7,11 @@
  */
 package com.freshbourne.multimap.btree;
 
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
+import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.MultiMapSpec;
 
 public class BTreeSpec extends MultiMapSpec<Integer, String> {
@@ -15,6 +20,21 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	
 	public BTreeSpec() {
 		super(provider);
+	}
+	
+	@Test
+	public void shouldBeAbleToOpenAndLoad(){
+		BTree<Integer, String> tree = provider.getInstance();
+		tree.initialize();
+		tree.add(key1, value1);
+		tree.add(key2, value2);
+		tree.sync();
+		
+		tree = provider.getInstance();
+		tree.load();
+		assertEquals(2, tree.getNumberOfEntries());
+		assertEquals(value1, tree.get(key1).get(0));
+		assertEquals(value2, tree.get(key2).get(0));
 	}
 
 	

@@ -49,7 +49,7 @@ public class MultiMapTestBase<K,V> {
 	
 	@Before
 	public void setUp() {
-		setMultiMap(getProvider().createMultiMap());
+		setMultiMap(getProvider().createNewMultiMap());
 		key1 = getProvider().createRandomKey();
 		key2 = getProvider().createRandomKey();
 		value1 = getProvider().createRandomValue();

@@ -36,14 +36,19 @@ public class BTreeProvider implements MultiMapProvider<Integer, String> {
 		return srand;
 	}
 	
+	public BTree<Integer, String> getInstance(){
+		return injector.getInstance(Key.get(new TypeLiteral<BTree<Integer,String>>(){}));
+	}
+	
+	
 	
 	@Override
-	public MultiMap<Integer, String> createMultiMap() {
+	public MultiMap<Integer, String> createNewMultiMap() {
 		File f = new File(path);
 		if(f.exists())
 			f.delete();
 		
-		BTree<Integer, String> tree = injector.getInstance(Key.get(new TypeLiteral<BTree<Integer,String>>(){}));
+		BTree<Integer, String> tree = getInstance();
 		tree.initialize();
 		return tree;
 	}
