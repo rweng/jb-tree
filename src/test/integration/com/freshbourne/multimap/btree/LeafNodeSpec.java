@@ -10,6 +10,8 @@ package com.freshbourne.multimap.btree;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,6 +24,7 @@ import com.google.inject.TypeLiteral;
 public class LeafNodeSpec {
 	
 	private final static Injector injector;
+	private final static String path = "/tmp/leaf_spec";
 	private LeafNode<Integer, String> leaf;
 	private LeafPageManager<Integer, String> lpm;
 	
@@ -33,7 +36,10 @@ public class LeafNodeSpec {
 	
 	
 	static {
-		injector = Guice.createInjector(new BTreeModule("/tmp/leaf_spec"));
+		if((new File(path)).exists())
+			(new File(path)).delete();
+		
+		injector = Guice.createInjector(new BTreeModule(path));
 	}
 	
 	@Before public void setUp(){
