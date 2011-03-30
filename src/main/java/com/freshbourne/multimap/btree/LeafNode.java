@@ -201,7 +201,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	
 	private int headerSize(){
 		// number of entries + next leaf id
-		return (Integer.SIZE + Long.SIZE) / 8;
+		return (Integer.SIZE + Integer.SIZE) / 8;
 	}
 
 
@@ -621,7 +621,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 
 	public void setNextLeafId(Integer id) {
 		ByteBuffer buffer = rawPage().bufferForWriting(posOfNextLeafId());
-		buffer.putLong(id);
+		buffer.putInt(id);
 	}
 
 	/* (non-Javadoc)
