@@ -47,4 +47,5 @@ public interface PageManager<T> {
 	 * forces the sync of pages to resources
 	 */
 	public void sync();
+
 }

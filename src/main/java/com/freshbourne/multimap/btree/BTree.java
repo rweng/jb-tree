@@ -127,7 +127,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	public void add(K key, V value) {
 		ensureValid();
 		
-		numberOfEntries++;
+		setNumberOfEntries(getNumberOfEntries() + 1);
 		
 		AdjustmentAction<K, V> result = root.insert(key, value);
 		
@@ -150,6 +150,14 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		
 	}
 	
+	/**
+	 * @param i
+	 */
+	private void setNumberOfEntries(int i) {
+		numberOfEntries = i;
+		rawPage().bufferForWriting(0).putInt(numberOfEntries);
+	}
+
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
 	 */
@@ -166,8 +174,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	@Override
 	public void remove(K key, V value) {
 		ensureValid();
-		
-		root.remove(key, value);
+
+		setNumberOfEntries(getNumberOfEntries() - root.remove(key, value));
 	}
 
 	/* (non-Javadoc)
@@ -197,16 +205,19 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		numberOfEntries = 0;
 		valid = true;
 		
-		rawPage = bpm.createPage();
+		if(bpm.hasPage(1))
+			rawPage = bpm.getPage(1);
+		else
+			rawPage = bpm.createPage();
+		
+		if(rawPage.id() != 1)
+			throw new IllegalStateException("rawPage must have id 1");
+		
 		root = leafPageManager.createPage();
 		
-		writeHeader();
-	}
-	
-	private void writeHeader(){
 		ByteBuffer buffer = rawPage.bufferForWriting(0);
 		buffer.putInt(numberOfEntries);
-		buffer.putLong(root.getId());
+		buffer.putInt(root.getId());
 	}
 	
 	/* (non-Javadoc)
@@ -214,9 +225,19 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public void load() {
-		rawPage = bpm.getPage(0);
+		rawPage = bpm.getPage(1);
+		
 		valid = true;
 		numberOfEntries = rawPage.bufferForReading(0).getInt();
+		
+		int rootId = rawPage().bufferForReading(4).getInt();
+		if(leafPageManager.hasPage(rootId)){
+			root = leafPageManager.getPage(rootId);
+		} else if(innerNodeManager.hasPage(rootId)){
+			root = innerNodeManager.getPage(rootId);
+		} else {
+			throw new IllegalStateException("the root page should exist");
+		}
 	}
 
 	/* (non-Javadoc)
@@ -242,6 +263,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public void sync() {
+		int num = rawPage.bufferForReading(0).getInt();
+		num = num;
 		leafPageManager.sync();
 		innerNodeManager.sync();
 		bpm.sync();

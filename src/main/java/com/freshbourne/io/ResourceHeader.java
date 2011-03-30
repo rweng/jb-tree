@@ -19,6 +19,8 @@ import java.util.List;
  * 
  * HEADER: PAGESIZE | LAST_ID | NUM_OF_FREED_PAGES | FREE_PAGE_1 | FREE_PAGE_
  * 
+ * Page Zero is reserved for the header.
+ * 
  */
 public class ResourceHeader implements MustInitializeOrLoad{
 	private int pageSize;
@@ -63,7 +65,7 @@ public class ResourceHeader implements MustInitializeOrLoad{
 	}
 
 	public boolean contains(int id){
-		return id <= lastId;
+		return id <= lastId && id != 0;
 	}
 	
 	/** 
@@ -113,10 +115,11 @@ public class ResourceHeader implements MustInitializeOrLoad{
 	 * @param id
 	 * @return
 	 */
-	public long getPageOffset(int id) {
+	public Long getPageOffset(int id) {
 		if(!contains(id))
-			return -1;
+			return null;
 		
-		return id * pageSize;
+		// first page reserved for header
+		return new Long((id) * pageSize);
 	}
 }

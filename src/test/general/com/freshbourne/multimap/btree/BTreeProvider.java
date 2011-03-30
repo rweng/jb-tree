@@ -44,10 +44,6 @@ public class BTreeProvider implements MultiMapProvider<Integer, String> {
 	
 	@Override
 	public MultiMap<Integer, String> createNewMultiMap() {
-		File f = new File(path);
-		if(f.exists())
-			f.delete();
-		
 		BTree<Integer, String> tree = getInstance();
 		tree.initialize();
 		return tree;
