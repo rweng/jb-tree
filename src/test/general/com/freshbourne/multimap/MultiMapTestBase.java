@@ -50,8 +50,10 @@ public class MultiMapTestBase<K,V> {
 	@Before
 	public void setUp() {
 		setMultiMap(getProvider().createNewMultiMap());
-		key1 = getProvider().createRandomKey();
-		key2 = getProvider().createRandomKey();
+			key1 = getProvider().createRandomKey();
+		do{
+			key2 = getProvider().createRandomKey();
+		} while (key2.equals(key1));
 		value1 = getProvider().createRandomValue();
 		value2 = getProvider().createRandomValue();
 	}

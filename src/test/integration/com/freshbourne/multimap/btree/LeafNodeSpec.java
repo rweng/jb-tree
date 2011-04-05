@@ -57,11 +57,11 @@ public class LeafNodeSpec {
 	
 	@Test public void shouldBeAbleToGetLastKeyAndPointer(){
 		leaf.insert(key1, value1);
-		assertNotNull(leaf.getLastKey());
+		assertNotNull(leaf.getLastLeafKey());
 		assertNotNull(leaf.getLastKeyPointer());
 		
 		leaf.insert(key2, value2);
-		assertNotNull(leaf.getLastKey());
+		assertNotNull(leaf.getLastLeafKey());
 		assertNotNull(leaf.getLastKeyPointer());
 	}
 	
@@ -85,7 +85,7 @@ public class LeafNodeSpec {
 		
 		DataPageManager<Integer> keyPageManager = injector.getInstance(Key.get(new TypeLiteral<DataPageManager<Integer>>(){}));
 		
-		assertNotNull(leaf.getLastKey());
+		assertNotNull(leaf.getLastLeafKey());
 		assertEquals(AdjustmentAction.ACTION.INSERT_NEW_NODE, action.getAction());
 		
 		assertNotNull(action.getKeyPointer());
@@ -102,7 +102,7 @@ public class LeafNodeSpec {
 	}
 	
 	private void stateTest(LeafNode<Integer, String> leaf){
-		Integer k = leaf.getLastKey();
+		Integer k = leaf.getLastLeafKey();
 		assertNotNull(leaf.get(k));
 		assertTrue(leaf.containsKey(k));
 		
@@ -128,8 +128,8 @@ public class LeafNodeSpec {
 		leaf.insert(key1, value2);
 		assertTrue(leaf.containsKey(key1));
 		assertEquals(2, leaf.get(key1).size());
-		assertEquals(value1, leaf.get(key1).get(0));
-		assertEquals(value2, leaf.get(key1).get(1));
+		assertTrue(leaf.get(key1).contains(value1));
+		assertTrue(leaf.get(key1).contains(value2));
 		assertEquals(2, leaf.getNumberOfEntries());
 		
 		leaf.insert(key2, value2);
@@ -195,7 +195,7 @@ public class LeafNodeSpec {
 		assertNotNull(action);
 		
 		// make sure leaf structures are in tact
-		assertEquals(leaf1.getLastKey(), leaf1.getKeyAtPosition(leaf1.getNumberOfEntries() - 1));
+		assertEquals(leaf1.getLastLeafKey(), leaf1.getKeyAtPosition(leaf1.getNumberOfEntries() - 1));
 		
 		for(int key : leaf1.getKeySet()){
 			assertNotNull(leaf1.get(key));

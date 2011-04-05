@@ -15,6 +15,7 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.util.Iterator;
 import java.util.List;
 
 import com.freshbourne.io.PagePointer;
@@ -103,5 +104,18 @@ public interface Node<K, V> {
      * removes all key and values, destroying all rawPages with the keyPages, valuePages, leafPages and innerNodePages
      */
     void destroy();
+    
+    
+    /**
+     * @return first key of first leaf
+     */
+    public K getFirstLeafKey();
+    
+    /**
+     * @return last key of last leaf
+     */
+    public K getLastLeafKey();
+    
+    public Iterator<V> getIterator(K from, K to);
     
 }

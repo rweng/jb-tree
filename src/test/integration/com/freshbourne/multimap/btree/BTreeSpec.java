@@ -27,7 +27,21 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	
 	@Test
 	public void shouldBeAbleToOpenAndLoad(){
+		Integer smaller, larger;
+		if(key1.compareTo(key2) > 0){
+			larger = key1;
+			smaller = key2;
+		} else {
+			smaller = key1;
+			larger = key2;
+		}
 		
+		shouldBeAbleToOpenAndLoad(smaller, larger);
+		shouldBeAbleToOpenAndLoad(larger, smaller);
+	}
+	
+	private void shouldBeAbleToOpenAndLoad(Integer key1, Integer key2){
+
 		BTree<Integer, String>tree = (BTree<Integer, String>)getMultiMap();
 		
 		tree.initialize();

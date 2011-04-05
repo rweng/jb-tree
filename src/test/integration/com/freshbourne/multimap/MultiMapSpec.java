@@ -8,6 +8,8 @@
 
 package com.freshbourne.multimap;
 
+import java.util.Iterator;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -35,8 +37,8 @@ public abstract class MultiMapSpec<K, V> extends MultiMapTestBase<K,V> {
 		getMultiMap().add(key1, value2);
 		assertTrue(getMultiMap().containsKey(key1));
 		assertEquals(2, getMultiMap().get(key1).size());
-		assertEquals(value1, getMultiMap().get(key1).get(0));
-		assertEquals(value2, getMultiMap().get(key1).get(1));
+		assertTrue(getMultiMap().get(key1).contains(value1));
+		assertTrue(getMultiMap().get(key1).contains(value2));
 		assertEquals(2, getMultiMap().getNumberOfEntries());
 		
 		getMultiMap().add(key2, value2);
@@ -72,13 +74,25 @@ public abstract class MultiMapSpec<K, V> extends MultiMapTestBase<K,V> {
 	}
 	
 	@Test
-	public void removeWithValueArgumentShouldRemoveOnlyThisValue() {
+	public void removeWithValueArgumentShouldRemoveOnlyThisValue(){
+		key1 = getProvider().createMaxKey();
+		key2 = getProvider().createMinKey();
+		removeWithValueArgumentShouldRemoveOnlyThisValue(key1, key2);
+		getMultiMap().clear();
+		removeWithValueArgumentShouldRemoveOnlyThisValue(key2, key1);
+	}
+	
+	public void removeWithValueArgumentShouldRemoveOnlyThisValue(K key1, K key2) {
 		getMultiMap().add(key1, value1);
 		getMultiMap().add(key1, value2);
 		getMultiMap().add(key2, value2);
 		
 		assertEquals(3, getMultiMap().getNumberOfEntries());
+		assertEquals(2, getMultiMap().get(key1).size());
+		assertEquals(1, getMultiMap().get(key2).size());
+		
 		getMultiMap().remove(key1, value2);
+		assertEquals(2, getMultiMap().getNumberOfEntries());
 		assertEquals(1, getMultiMap().get(key1).size());
 		assertEquals(value1, getMultiMap().get(key1).get(0));
 		assertEquals(value2, getMultiMap().get(key2).get(0));
@@ -102,6 +116,28 @@ public abstract class MultiMapSpec<K, V> extends MultiMapTestBase<K,V> {
 		
 		assertEquals(size, getMultiMap().getNumberOfEntries());
 		simpleTests();
+	}
+	
+	@Test public void iterator(){
+		V val;
+		
+		key1 = getProvider().createMinKey();
+		key2 = getProvider().createMaxKey();
+		
+		getMultiMap().add(key1, value1);
+		getMultiMap().add(key1, value2);
+		getMultiMap().add(key2, value2);
+		
+		Iterator<V> i = getMultiMap().getIterator();
+		assertTrue(i.hasNext());
+		val = i.next();
+		assertTrue(val.equals(value1) || val.equals(value2));
+		assertTrue(i.hasNext());
+		val = i.next();
+		assertTrue(val.equals(value1) || val.equals(value2));
+		assertTrue(i.hasNext());
+		assertEquals(value2, i.next());
+		assertFalse(i.hasNext());
 	}
 	
 }

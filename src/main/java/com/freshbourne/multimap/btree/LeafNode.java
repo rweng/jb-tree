@@ -15,6 +15,7 @@ import com.freshbourne.serializer.FixLengthSerializer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -129,7 +130,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		if(getNumberOfEntries() + num > maxEntries)
 			throw new IllegalArgumentException("not enough space in this leaf to prepend " + num + " entries from other leaf");
 		
-		if(getNumberOfEntries() > 0 && comparator.compare(source.getLastKey(), getFirstKey()) > 0)
+		if(getNumberOfEntries() > 0 && comparator.compare(source.getLastLeafKey(), getFirstLeafKey()) > 0)
 			throw new IllegalStateException("the last key of the provided source leaf is larger than this leafs first key");
 		
 		ByteBuffer buffer = rawPage().bufferForWriting(0);
@@ -153,7 +154,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		rawPage().bufferForWriting(0).putInt(numberOfEntries);
 	}
 	
-	public K getLastKey(){
+	public K getLastLeafKey(){
 		if(getNumberOfEntries() == 0)
 			throw new IllegalStateException("you can only get the last key if there are any Keys in the Leaf");
 		
@@ -178,7 +179,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		return keyPageManager.getPage(p.getId()).get(p.getOffset());
 	}
 	
-	public K getFirstKey(){
+	public K getFirstLeafKey(){
 		if(getNumberOfEntries() == 0)
 			return null;
 		
@@ -190,11 +191,22 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 * @param keyPointer
 	 * @param valuePointer
 	 */
-	private void addEntry(PagePointer keyPointer, PagePointer valuePointer) {
-		ByteBuffer buffer = rawPage.bufferForWriting(offsetBehindLastEntry());
+	private void addEntry(K key, PagePointer keyPointer, PagePointer valuePointer) {
 		
-		buffer.put(pointerSerializer.serialize(keyPointer));
-		buffer.put(pointerSerializer.serialize(valuePointer));
+		ByteBuffer buf = rawPage().bufferForWriting(0);
+		int offset = offsetOfKey(key, true);
+		
+		if (offset == -1) {
+			offset = offsetBehindLastEntry();
+		} else {
+			// move everything including pos backwards
+			System.arraycopy(buf.array(), offset, buf.array(), offset + 2
+					* serializedPointerSize, buf.capacity() - (offset + 2 * serializedPointerSize));
+		}
+		// insert both
+		buf.position(offset);
+		buf.put(pointerSerializer.serialize(keyPointer));
+		buf.put(pointerSerializer.serialize(valuePointer));
         
 		setNumberOfEntries(getNumberOfEntries() + 1);
 	}
@@ -218,16 +230,16 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public boolean containsKey(K key) {
-        return posOfKey(key) != NOT_FOUND;
+        return offsetOfKey(key) != NOT_FOUND;
 	}
 	
 	/**
 	 * @param pos, must be between 0 and numberOfEntries - 1
 	 * @return offset
 	 */
-	private int getOffsetForKeyPos(int pos){
+	int getOffsetForKeyPos(int pos){
 		if(pos < 0 || pos >= getNumberOfEntries())
-			throw new IllegalArgumentException("pos must be between 0 and numberOfEntries - 1");
+			throw new IllegalArgumentException("invalid pos: " + pos + ". pos must be between 0 and numberOfEntries - 1");
 		
 		return headerSize() + pos * serializedPointerSize * 2;
 	}
@@ -254,7 +266,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		
 		byte[] bytebuf = new byte[pointerSerializer.serializedLength(PagePointer.class)];
 		
-		int pos = posOfKey(key);
+		int pos = offsetOfKey(key);
 		if( pos == NOT_FOUND)
 			return result;
 		
@@ -287,9 +299,10 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	
 	/**
 	 * @param key
+	 * @param takeNext boolean, whether if the key was not found the next higher key should be taken
 	 * @return position to set the buffer to, where the key starts, -1 if key not found 
 	 */
-	private int posOfKey(K key) {
+	private int offsetOfKey(K key, boolean takeNext) {
 		
 		int pSize = pointerSerializer.serializedLength(PagePointer.class);
 		byte[] bytebuf = new byte[pSize];
@@ -304,14 +317,25 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 			if(dataPage == null)
 				throw new IllegalStateException("dataPage should not be null");
 			
-			if(dataPage.get(p.getOffset()).equals(key)){
+			int compResult = comparator.compare(dataPage.get(p.getOffset()),key);
+			if( compResult == 0){
 				return buffer.position() - pSize;
+			} else if ( compResult > 0){
+				if(takeNext)
+					return buffer.position() - pSize;
+				else
+					return NOT_FOUND;
 			}
-
+			
+			// if compresult < 0:
 			// get the data pointer but do nothing with it
 			buffer.get(bytebuf);
 		}
 		return NOT_FOUND;
+	}
+	
+	private int offsetOfKey(K key) {
+		return offsetOfKey(key, false);
 	}
 
 
@@ -337,7 +361,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public int remove(K key) {
-		int pos = posOfKey(key);
+		int pos = offsetOfKey(key);
 		if(pos == NOT_FOUND)
 			return 0;
 		
@@ -348,10 +372,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		
 		// shift the pointers after key
 		ByteBuffer buffer = rawPage().bufferForWriting(0);
-		System.arraycopy(buffer.array(), pos + sizeOfValues , buffer.array(), pos , buffer.array().length - pos - sizeOfValues);
+		System.arraycopy(buffer.array(), pos + sizeOfValues , buffer.array(), pos , buffer.capacity() - pos - sizeOfValues);
 		setNumberOfEntries(getNumberOfEntries() - numberOfValues);
-		
-		rawPage().setModified(true);
 		
 		return numberOfValues;
 	}
@@ -361,7 +383,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public int remove(K key, V value) {
-		int pos = posOfKey(key);
+		int pos = offsetOfKey(key); //TODO: refactor pos to offset
 		if(pos == NOT_FOUND)
 			return 0;
 		
@@ -398,12 +420,16 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 				
 				// move pointers forward and reset buffer
 				int startingPos = buffer.position() - buf1.length - buf2.length;
-				System.arraycopy(buffer.array(), buffer.position(), buffer.array(), startingPos, offsetBehindLastEntry() - buffer.position());
+				System.arraycopy(buffer.array(), buffer.position(), buffer.array(), startingPos, buffer.capacity() - buffer.position());
+				
+				buffer.position(startingPos);
 				
 				removed++;
 			}	
 		}
-		return 0;
+		
+		setNumberOfEntries(getNumberOfEntries() - removed);
+		return removed;
 	}
 
 	/**
@@ -552,20 +578,20 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 			
 
 	        // serialize Pointers
-			addEntry(keyPointer, valuePointer);
+			addEntry(key, keyPointer, valuePointer);
 			
 			return null;	
 		}
 		
 		// if leaf does not have enough space but we can move some data to the next leaf
-		if (this.getNextLeafId() != NO_NEXT_LEAF) {
+		if (hasNextLeaf()) {
 			LeafNode<K, V> nextLeaf = leafPageManager.getPage(this.getNextLeafId());
 			
 			if(nextLeaf.getRemainingEntries() >= getMinFreeLeafEntriesToMove()){
 				nextLeaf.prependEntriesFromOtherPage(this, nextLeaf.getRemainingEntries() >> 1);
 				
 				// see on which page we will insert the value
-				if(comparator.compare(key, this.getLastKey()) > 0){
+				if(comparator.compare(key, this.getLastLeafKey()) > 0){
 					nextLeaf.insert(key, value);
 				} else {
 					this.insert(key, value);
@@ -589,7 +615,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 				this.getNumberOfEntries() >> 1);
 
 		// see on which page we will insert the value
-		if (comparator.compare(key, this.getLastKey()) > 0) {
+		if (comparator.compare(key, this.getLastLeafKey()) > 0) {
 			newLeaf.insert(key, value);
 		} else {
 			this.insert(key, value);
@@ -612,7 +638,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	public Integer getNextLeafId() {
 		ByteBuffer buffer = rawPage().bufferForReading(posOfNextLeafId());
 		Integer result = buffer.getInt();
-		return result;
+		return result == 0 ? null : result;
 	}
 	
 	private int posOfNextLeafId(){
@@ -621,7 +647,11 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 
 	public void setNextLeafId(Integer id) {
 		ByteBuffer buffer = rawPage().bufferForWriting(posOfNextLeafId());
-		buffer.putInt(id);
+		buffer.putInt(id == null ? NO_NEXT_LEAF : id);
+	}
+	
+	public boolean hasNextLeaf(){
+		return getNextLeafId() != null;
 	}
 
 	/* (non-Javadoc)
@@ -678,5 +708,93 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 			result.add(getKeyAtPosition(i));
 		}
 		return result;
+	}
+	
+	
+	public class LeafNodeIterator implements Iterator<V>{
+		
+		private final K from;
+		private final K to;
+		private V next;
+		private int currentKeyOffset;
+		private LeafNode<K, V> currentNode;
+		private byte[] pointerBuffer;
+
+		public LeafNodeIterator(LeafNode<K, V> node, K from, K to) {
+			this.from = from;
+			this.to = to;
+			this.currentNode = node;
+			
+			pointerBuffer = new byte[(pointerSerializer.serializedLength(PagePointer.class))];
+			
+			this.currentKeyOffset = currentNode.offsetOfKey(from, true);
+			
+			if(currentKeyOffset == NOT_FOUND)
+				throw new RuntimeException("all keys are smaller in this leaf");
+			
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
+		@Override
+		public boolean hasNext() {
+			if(next != null)
+				return true;
+			
+			next = next();
+			
+			return next != null;
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public V next() {
+			
+			if(next != null){
+				V result = next;
+				next = null;
+				return result;
+			}
+			
+			if(currentKeyOffset > getOffsetForKeyPos(getNumberOfEntries() - 1)){
+				if(currentNode.getNextLeafId() == null){
+					return null;
+				}
+				
+				// if we have a next key
+				currentNode = leafPageManager.getPage(currentNode.getNextLeafId());
+				currentKeyOffset = currentNode.headerSize();
+			}
+			
+			ByteBuffer buf = currentNode.rawPage().bufferForReading(currentKeyOffset + pointerSerializer.serializedLength(PagePointer.class));
+			buf.get(pointerBuffer);
+			PagePointer p = pointerSerializer.deserialize(pointerBuffer);
+			
+			currentKeyOffset = buf.position();
+			
+			return valuePageManager.getPage(p.getId()).get(p.getOffset());
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		@Override
+		public void remove() {
+			// TODO Auto-generated method stub
+			throw new UnsupportedOperationException();
+		}
+
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#getIterator(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Iterator<V> getIterator(K from, K to) {
+		return new LeafNodeIterator(this, from, to);
 	}
 }

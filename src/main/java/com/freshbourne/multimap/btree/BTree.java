@@ -16,6 +16,7 @@ import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.google.inject.Inject;
 import java.nio.ByteBuffer;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -263,10 +264,26 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public void sync() {
-		int num = rawPage.bufferForReading(0).getInt();
-		num = num;
+		rawPage.bufferForReading(0).getInt();
 		leafPageManager.sync();
 		innerNodeManager.sync();
 		bpm.sync();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.MultiMap#getIterator()
+	 */
+	@Override
+	public Iterator<V> getIterator() {
+		return getIterator(root.getFirstLeafKey(), root.getLastLeafKey());
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.MultiMap#getIterator(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Iterator<V> getIterator(K from, K to) {
+		Iterator<V> result = root.getIterator(from, to);
+		return result;
 	}
 }

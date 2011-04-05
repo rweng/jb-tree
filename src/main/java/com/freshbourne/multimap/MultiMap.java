@@ -14,6 +14,7 @@
  */
 package com.freshbourne.multimap;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -91,5 +92,20 @@ public interface MultiMap<K, V> {
      * if the MultiMap is backed by some kind of storage, this method forces the synchronization to it
      */
     public void sync();
+    
+    
+    
+    /**
+     * @return iterator over all values
+     */
+    public Iterator<V> getIterator();
+    
+    /**
+     * returns an iterator over the values for the keys of the given range
+     * 
+     * @param from
+     * @param to
+     */
+    public Iterator<V> getIterator(K from, K to);
     
 }

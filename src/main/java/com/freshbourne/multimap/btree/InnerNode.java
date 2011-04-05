@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import com.freshbourne.io.ComplexPage;
@@ -463,5 +464,31 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public int getNumberOfKeys() {
 		return numberOfKeys;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#getFirstKey()
+	 */
+	@Override
+	public K getFirstLeafKey() {
+		ByteBuffer buf = rawPage().bufferForReading(getOffsetForLeftPageIdOfKey(0));
+		return getPageForPageId(buf.getInt()).getFirstLeafKey();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#getLastKey()
+	 */
+	@Override
+	public K getLastLeafKey() {
+		ByteBuffer buf = rawPage().bufferForReading(getOffsetForRightPageIdOfKey(getNumberOfKeys()) - 1);
+		return getPageForPageId(buf.getInt()).getFirstLeafKey();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#getIterator(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Iterator<V> getIterator(K from, K to) {
+		return getPageForPageId(getLeftPageIdOfKey(0)).getIterator(from, to);
 	}
 }
