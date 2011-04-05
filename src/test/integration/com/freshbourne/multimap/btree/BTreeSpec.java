@@ -28,8 +28,9 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	@Test
 	public void shouldBeAbleToOpenAndLoad(){
 		
-		BTree<Integer, String> tree = (BTree<Integer, String>)getMultiMap();
+		BTree<Integer, String>tree = (BTree<Integer, String>)getMultiMap();
 		
+		tree.initialize();
 		tree.add(key1, value1);
 		tree.add(key2, value2);
 		tree.sync();
