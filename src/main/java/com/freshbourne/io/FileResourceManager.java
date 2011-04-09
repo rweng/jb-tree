@@ -20,6 +20,9 @@ import java.nio.channels.OverlappingFileLockException;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /**
  * Provides access to Pages stored in a RandomAccessFile. 
@@ -33,6 +36,8 @@ public class FileResourceManager implements ResourceManager {
 	private FileChannel ioChannel;
 	private ResourceHeader header;
 	private Map<Integer, RawPage> cache;
+	
+	private static Log LOG = LogFactory.getLog(FileResourceManager.class);
 	
 	
     @Inject
@@ -70,8 +75,8 @@ public class FileResourceManager implements ResourceManager {
 	
 	@Override
 	public void writePage(RawPage page) {
-
-        ensureOpen();
+		LOG.debug("writing page to disk: "+ page.id());
+		ensureOpen();
         ensurePageExists(page.id());
         
         ByteBuffer buffer = page.bufferForReading(0);
@@ -82,6 +87,7 @@ public class FileResourceManager implements ResourceManager {
 		} catch(IOException e){
 			throw new RuntimeException(e);
 		}
+		LOG.debug("page written");
 	}
 
 	/* (non-Javadoc)

@@ -48,6 +48,9 @@ dependencies {
 	compile "com.google.code.guice:guice:2.0.1@jar"
 	compile "aopalliance:aopalliance:1.0@jar"
 	
+	compile "commons-logging:commons-logging:1.0.4@jar"
+	compile "commons-logging:commons-logging-api:1.0.4@jar"
+	
 	testCompile "junit:junit:4.8.2@jar"
 	testCompile "org.mockito:mockito-all:1.8.5@jar"
 	

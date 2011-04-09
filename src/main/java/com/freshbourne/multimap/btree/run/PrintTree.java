@@ -30,7 +30,7 @@ public class PrintTree {
 			throw new IllegalArgumentException("File does not exist");
 		
 		Injector injector = Guice.createInjector(new BTreeModule(f.getAbsolutePath()));
-		BTree<Integer, String> tree = injector.getInstance(Key.get(new TypeLiteral<BTree<Integer,String>>(){}));
+		BTree<String, String> tree = injector.getInstance(Key.get(new TypeLiteral<BTree<String,String>>(){}));
 		
 		tree.load();
 		Iterator<String> it = tree.getIterator();

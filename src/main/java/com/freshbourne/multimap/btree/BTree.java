@@ -265,8 +265,6 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	@Override
 	public void sync() {
 		rawPage.bufferForReading(0).getInt();
-		leafPageManager.sync();
-		innerNodeManager.sync();
 		bpm.sync();
 	}
 
