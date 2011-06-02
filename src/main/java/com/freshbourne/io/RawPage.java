@@ -11,6 +11,9 @@ package com.freshbourne.io;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /**
  * This class wraps a byte array and usually has an id and a source
@@ -25,6 +28,8 @@ public class RawPage {
     private int id;
     private ResourceManager resourceManager;
     
+    private static Log LOG = LogFactory.getLog(RawPage.class);
+	
     /**
      * buffer has been modified since RawPage was created?
      */
@@ -81,6 +86,8 @@ public class RawPage {
 	public void sync() {
 		if (isModified())
 			getResourceManager().writePage(this);
+		else
+			LOG.debug("page not modified");
 	}
     
     

@@ -33,7 +33,7 @@ public class BTreePTest extends MultiMapPTest<Integer, String>  {
 		int sizeForVal = val.length();
 		
 		// insert 10.000 K/V pairs
-		int size = 10000;
+		int size = 100000;
 		long start = System.currentTimeMillis();
 		for(int i = 0; i<size;i++){
 			getMultiMap().add(key, val);

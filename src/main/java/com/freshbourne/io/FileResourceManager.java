@@ -9,6 +9,7 @@ package com.freshbourne.io;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,14 +37,16 @@ public class FileResourceManager implements ResourceManager {
 	private FileChannel ioChannel;
 	private ResourceHeader header;
 	private Map<Integer, RawPage> cache;
+	private boolean doLock;
 	
 	private static Log LOG = LogFactory.getLog(FileResourceManager.class);
 	
 	
     @Inject
-	FileResourceManager(@ResourceFile File f, @PageSize int pageSize){
+	FileResourceManager(@ResourceFile File f, @PageSize int pageSize, @Named("doLock") boolean doLock){
 		this.file = f;
 		this.pageSize = pageSize;
+		this.doLock = doLock;
 	}
 	
 	/* (non-Javadoc)
@@ -55,11 +58,11 @@ public class FileResourceManager implements ResourceManager {
 			throw new IllegalStateException("Resource already open");
 		
 		// if the file does not exist already
-		if(!file.exists()){
-			file.createNewFile();
+		if(!getFile().exists()){
+			getFile().createNewFile();
 		}
 		
-		initIOChannel(file);
+		initIOChannel(getFile());
 		this.header = new ResourceHeader(ioChannel, pageSize);
 		
 		
@@ -188,14 +191,11 @@ public class FileResourceManager implements ResourceManager {
 		try {
 			ioChannel = handle.getChannel();
 			try {
-				fileLock = ioChannel.tryLock();
+				if(doLock)
+					fileLock = ioChannel.tryLock();
 			}
 			catch (OverlappingFileLockException oflex) {
 				throw new IOException("Index file locked by other consumer.");
-			}
-			
-			if (fileLock == null) {
-				throw new IOException("Could acquire index file handle for exclusive usage. File locked otherwise.");
 			}
 		}
 		catch (Throwable t) {
@@ -223,7 +223,7 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public String toString(){
-		return "Resource: " + file.getAbsolutePath();
+		return "Resource: " + getFile().getAbsolutePath();
 	}
 
 	/* (non-Javadoc)
@@ -317,7 +317,9 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void sync() {
+		LOG.debug("Syncing pages to disk");
 		for(RawPage p : cache.values()){
+			LOG.debug("trying to sync page " + p.id());
 			p.sync();
 		}
 	}
@@ -327,5 +329,12 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	public RandomAccessFile getHandle() {
 		return handle;
+	}
+
+	/**
+	 * @return the file
+	 */
+	public File getFile() {
+		return file;
 	}
 }

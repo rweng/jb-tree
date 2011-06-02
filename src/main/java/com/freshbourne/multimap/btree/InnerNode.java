@@ -190,7 +190,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		return Integer.SIZE / 8;
 	}
 	
-	private int offsetForKey(int i){
+	private int getOffsetForKey(int i){
 		return Header.size() + 
 			((i+1) * getSizeOfPageId()) + // one id more that pages, the first id
 			(i * getSizeOfSerializedPointer());
@@ -200,7 +200,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		
 		for(int i = 0; i < getNumberOfKeys(); i++){
 			
-			PagePointer pp = getPointerAtOffset(offsetForKey(i));
+			PagePointer pp = getPointerAtOffset(getOffsetForKey(i));
 			K keyFromPointer = getKeyFromPagePointer(pp);
 			if(keyFromPointer == null){
 				throw new IllegalStateException("key " + i + " retrieved from PagePointer " + pp + " must not be null!");
@@ -218,11 +218,11 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private int getOffsetForLeftPageIdOfKey(int i){
-		return offsetForKey(i) - Integer.SIZE / 8;
+		return getOffsetForKey(i) - Integer.SIZE / 8;
 	}
 	
 	private int getOffsetForRightPageIdOfKey(int i){
-		return offsetForKey(i) + getSizeOfSerializedPointer();
+		return getOffsetForKey(i) + getSizeOfSerializedPointer();
 	}
 	
 	private int getSizeOfSerializedPointer(){
@@ -364,9 +364,48 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 				// right-most path of the subtree.
 				return null;
 			}
+			
+			// else split is required, allocate new node
+			InnerNode<K, V> inp = innerNodePageManager.createPage();
+			
+			// move half the keys/pointers to the new node. remember the dropped key.
+			byte[] keyUpwardsBytes = moveLastToNewPage(inp, getNumberOfKeys() >> 1);
+			
+			// decide where to insert the pointer we are supposed to insert
+			if(posOfFirstLargerOrEqualKey > getNumberOfKeys()){
+				insertKeyPointerPageIdAtPosition(result.getKeyPointer(), result.getPageId(), posOfFirstLargerOrEqualKey - getNumberOfKeys() + 1);
+			} else {
+				insertKeyPointerPageIdAtPosition(result.getKeyPointer(), result.getPageId(), posOfFirstLargerOrEqualKey);
+				
+				return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, pointerSerializer.deserialize(keyUpwardsBytes), inp.getId());
+			}
+
+			throw new UnsupportedOperationException("no new child node");
 		}
 		
 		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * @param inp
+	 * @param i
+	 */
+	private byte[] moveLastToNewPage(InnerNode<K, V> inp, int numberOfKeys) {
+		if(!inp.isValid())
+			inp.initialize();
+		
+		ByteBuffer buf = inp.rawPage().bufferForWriting(0);
+		int from = getOffsetForLeftPageIdOfKey(getNumberOfKeys() - numberOfKeys);
+		int to = Header.size();
+		int length_to_copy = rawPage().bufferForReading(0).limit() - from;
+		System.arraycopy(rawPage().bufferForWriting(0).array(), from, buf.array(), to, length_to_copy);
+		inp.setNumberOfKeys(numberOfKeys);
+		
+		// last key is dropped, get the keyPointerByteSequence
+		byte[] result = new byte[getSizeOfSerializedPointer()];
+		rawPage().bufferForReading(from - getSizeOfPageId()).get(result);
+		setNumberOfKeys(getNumberOfKeys() - numberOfKeys - 1); // one key less
+		return result;
 	}
 
 	private void ensureRoot() {
@@ -382,7 +421,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private void insertKeyPointerPageIdAtPosition(PagePointer keyPointer,
 			Integer pageId, int posOfKeyForInsert) {
 		
-		ByteBuffer buf = rawPage().bufferForWriting(offsetForKey(posOfKeyForInsert));
+		ByteBuffer buf = rawPage().bufferForWriting(getOffsetForKey(posOfKeyForInsert));
 		
 		int spaceNeededForInsert = getSizeOfPageId() + getSizeOfSerializedPointer();
 		System.arraycopy(buf.array(), buf.position(), buf.array(), buf.position() + spaceNeededForInsert, buf.limit() - buf.position() - spaceNeededForInsert);
@@ -419,7 +458,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private void setKey(PagePointer pointer, int pos){
-		ByteBuffer buf = rawPage().bufferForWriting(offsetForKey(pos));
+		ByteBuffer buf = rawPage().bufferForWriting(getOffsetForKey(pos));
 		buf.put(pointerSerializer.serialize(pointer));
 	}
 

@@ -43,7 +43,7 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 	
 	@Override
 	protected ResourceManager createOpenResourceManager(){
-		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE);
+		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE, false);
 		
 		try {
 			rm.open();

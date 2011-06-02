@@ -79,7 +79,7 @@ public class IOModule extends AbstractModule{
 
     @Provides @Singleton
 	public ResourceManager provideFileResourceManager() {
-		ResourceManager result = new FileResourceManager(file, pageSize);
+		ResourceManager result = new FileResourceManager(file, pageSize, false);
 		try {
 			result.open();
 		} catch (IOException e) {
@@ -88,4 +88,5 @@ public class IOModule extends AbstractModule{
 		}
 		return result;
 	}
+
 }

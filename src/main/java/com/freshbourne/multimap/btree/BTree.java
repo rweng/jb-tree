@@ -9,6 +9,7 @@
 package com.freshbourne.multimap.btree;
 
 import com.freshbourne.io.ComplexPage;
+import com.freshbourne.io.FileResourceManager;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.RawPage;
 import com.freshbourne.multimap.MultiMap;
@@ -18,6 +19,9 @@ import java.nio.ByteBuffer;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -33,6 +37,8 @@ import java.util.List;
  */
 public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
+	private static final Log LOG = LogFactory.getLog(BTree.class);
+	
 	/**
 	 * This enum is used to make it possible for all nodes in the BTree to serialize and deserialize
 	 * in a unique fashion
@@ -128,6 +134,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	public void add(K key, V value) {
 		ensureValid();
 		
+		LOG.debug("adding key/value: " + key.toString() + "/" + value.toString());
+		
 		setNumberOfEntries(getNumberOfEntries() + 1);
 		
 		AdjustmentAction<K, V> result = root.insert(key, value);
@@ -140,7 +148,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		if(result.getAction() == ACTION.INSERT_NEW_NODE){
 			
 			@SuppressWarnings("unused")
-			int i = root.getNumberOfEntries();
+			int i = getNumberOfEntries();
 			i = leafPageManager.getPage(result.getPageId()).getNumberOfEntries();
 			
 			// new root
@@ -264,7 +272,6 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Override
 	public void sync() {
-		rawPage.bufferForReading(0).getInt();
 		bpm.sync();
 	}
 
@@ -283,5 +290,9 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	public Iterator<V> getIterator(K from, K to) {
 		Iterator<V> result = root.getIterator(from, to);
 		return result;
+	}
+
+	public String getPath(){
+		return ((FileResourceManager)bpm).getFile().getAbsolutePath();
 	}
 }
