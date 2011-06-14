@@ -7,33 +7,13 @@
  */
 package com.freshbourne.io;
 
-import java.nio.ByteBuffer;
-
-import org.junit.Before;
 import org.junit.Test;
 
 
-import static org.mockito.Mockito.*;
-
-import com.freshbourne.comparator.IntegerComparator;
-import com.freshbourne.multimap.btree.InnerNode;
-import com.freshbourne.serializer.FixLengthSerializer;
-import com.freshbourne.serializer.IntegerSerializer;
-import com.freshbourne.serializer.PagePointSerializer;
+import com.freshbourne.multimap.btree.InnerNodeTestBase;
 
 
-public class InnerNodeTest {
-	
-	
-	private InnerNode<Integer, Integer> innerNode;
-	
-	@Before
-	public void setUp(){
-		RawPage p = new RawPage(ByteBuffer.allocate(1024), 1);
-		
-//		innerNode = new InnerNode<Integer, Integer>(
-//				p, IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE);
-	}
+public class InnerNodeTest extends InnerNodeTestBase {
 	
 	@Test
 	public void testNewInnerNodeSplit(){
