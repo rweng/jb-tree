@@ -61,7 +61,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private int numberOfKeys;
 	private boolean valid = false;
 	
-	public InnerNode(
+	protected InnerNode(
 			RawPage rawPage, 
 			FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
 			Comparator<K> comparator,

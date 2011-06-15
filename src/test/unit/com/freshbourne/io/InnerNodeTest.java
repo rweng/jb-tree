@@ -15,10 +15,4 @@ import com.freshbourne.multimap.btree.InnerNodeTestBase;
 
 public class InnerNodeTest extends InnerNodeTestBase {
 	
-	@Test
-	public void testNewInnerNodeSplit(){
-		
-	}
-	
-
 }
