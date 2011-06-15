@@ -153,7 +153,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 			
 			// new root
 			InnerNode<K, V> newRoot = innerNodeManager.createPage();
-			newRoot.initRootState(result.getSerializedKey(), root.getId(), result.getPageId());
+			newRoot.initRootState(root.getId(), result.getSerializedKey(), result.getPageId());
 			root = newRoot;
 		}
 		

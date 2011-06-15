@@ -41,13 +41,13 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	
 	static enum Header{
 		NODE_TYPE(0){}, // char
-		NUMBER_OF_KEYS(Character.SIZE); // int
+		NUMBER_OF_KEYS(Character.SIZE / 8); // int
 		
 		private int offset;
 		Header(int offset){
 			this.offset = offset;
 		}
-		static int size(){return Character.SIZE + Integer.SIZE;}
+		static int size(){return (Character.SIZE + Integer.SIZE) / 8;} // 6
 		int getOffset(){return offset;}
 	}
 	
@@ -86,7 +86,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		
 	}
 	
-	public void initRootState(byte[] serializedKey, Integer pageId1, Integer pageId2){
+	public void initRootState(Integer pageId1, byte[] serializedKey, Integer pageId2){
 		ensureValid();
 		
 		ByteBuffer buf = rawPage().bufferForWriting(Header.size());
@@ -97,6 +97,11 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		
 		setNumberOfKeys(1);
 	}
+	
+	public void initRootState(Integer pageId1, K key, Integer pageId2){
+		initRootState(pageId1, keySerializer.serialize(key), pageId2);
+	}
+		
 	
 		/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#getNumberOfEntries()
