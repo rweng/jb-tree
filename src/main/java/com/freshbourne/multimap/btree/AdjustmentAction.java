@@ -7,18 +7,20 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.nio.ByteBuffer;
+
 import com.freshbourne.io.PagePointer;
 
 public class AdjustmentAction<K,V> {
 	public enum ACTION {INSERT_NEW_NODE, UPDATE_KEY}
 	
 	private ACTION action;
-	private PagePointer keyPointer;
+	private byte[] serializedKey;
 	private Integer pageId;
 	
-	protected AdjustmentAction(ACTION action, PagePointer keyPointer, Integer pageId){
+	protected AdjustmentAction(ACTION action, byte[] serializedKey, Integer pageId){
 		this.setAction(action);
-		this.setKey(keyPointer);
+		this.setSerializedKey(serializedKey);
 		this.setPageId(pageId);
 	}
 
@@ -35,21 +37,7 @@ public class AdjustmentAction<K,V> {
 	public ACTION getAction() {
 		return action;
 	}
-
-	/**
-	 * @param key the key to set
-	 */
-	public void setKey(PagePointer key) {
-		this.keyPointer = key;
-	}
-
-	/**
-	 * @return the key
-	 */
-	public PagePointer getKeyPointer() {
-		return keyPointer;
-	}
-
+	
 	/**
 	 * @param pageId the node to set
 	 */
@@ -62,6 +50,20 @@ public class AdjustmentAction<K,V> {
 	 */
 	public Integer getPageId() {
 		return pageId;
+	}
+
+	/**
+	 * @param serializedKey the serializedKey to set
+	 */
+	public void setSerializedKey(byte[] serializedKey) {
+		this.serializedKey = serializedKey;
+	}
+
+	/**
+	 * @return the serializedKey
+	 */
+	public byte[] getSerializedKey() {
+		return serializedKey;
 	}
 
 }

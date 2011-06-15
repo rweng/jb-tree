@@ -29,5 +29,5 @@ public interface FixLengthSerializer<InputType, ResultType> extends Serializer<I
 	 * @param c class in question
 	 * @return length of the object returned by {@link #serialize(Object)}
 	 */
-	public int serializedLength(Class<InputType> c);
+	public int getSerializedLength();
 }

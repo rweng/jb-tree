@@ -21,7 +21,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class InnerNodeManager<K, V> extends AbstractPageManager<InnerNode<K, V>> {
 
-	private final FixLengthSerializer<PagePointer, byte[]> ppSerializer;
+	private final FixLengthSerializer<K, byte[]> keySerializer;
 	
 	private final DataPageManager<K> keyPageManager;
 	
@@ -34,10 +34,10 @@ public class InnerNodeManager<K, V> extends AbstractPageManager<InnerNode<K, V>>
 			DataPageManager<K> keyPageManager,
 			DataPageManager<V> valuePageManager,
 			LeafPageManager<K, V> leafPageManager,
-			FixLengthSerializer<PagePointer, byte[]> ppSerializer,
+			FixLengthSerializer<K, byte[]> keySerializer,
 			Comparator<K> comparator) {
 		super(bpm);
-		this.ppSerializer = ppSerializer;
+		this.keySerializer = keySerializer;
         this.keyPageManager = keyPageManager;
         this.leafPageManager = leafPageManager;
         this.comparator = comparator;
@@ -48,6 +48,6 @@ public class InnerNodeManager<K, V> extends AbstractPageManager<InnerNode<K, V>>
 	 */
 	@Override
 	protected InnerNode<K, V> createObjectPage(RawPage page) {
-		return new InnerNode<K, V>(page, ppSerializer, comparator, keyPageManager, leafPageManager, this);
+		return new InnerNode<K, V>(page, keySerializer, comparator, keyPageManager, leafPageManager, this);
 	}
 }

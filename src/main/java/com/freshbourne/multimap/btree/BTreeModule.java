@@ -46,9 +46,11 @@ public class BTreeModule extends AbstractModule {
 		bind(new TypeLiteral<FixLengthSerializer<PagePointer, byte[]>>(){}).
 			toInstance(PagePointSerializer.INSTANCE);
 		
-		bind(new TypeLiteral<Serializer<Integer, byte[]>>(){}).
+		bind(new TypeLiteral<FixLengthSerializer<Integer, byte[]>>(){}).
 			toInstance(IntegerSerializer.INSTANCE);
-		
+		bind(new TypeLiteral<Serializer<Integer, byte[]>>(){}).
+		toInstance(IntegerSerializer.INSTANCE);
+	
 		bind(new TypeLiteral<Serializer<String, byte[]>>(){}).toInstance(StringSerializer.INSTANCE);
 		
 		bind(new TypeLiteral<BTree<Integer,String>>(){});

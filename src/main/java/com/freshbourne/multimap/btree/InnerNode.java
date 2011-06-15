@@ -53,17 +53,18 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	
 	private final RawPage rawPage;
 	private final Comparator<K> comparator;
-	private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
+	// private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
 	private final DataPageManager<K> keyPageManager;
 	private final PageManager<LeafNode<K, V>> leafPageManager;
 	private final PageManager<InnerNode<K, V>> innerNodePageManager;
+	private FixLengthSerializer<K, byte[]> keySerializer;
 	
 	private int numberOfKeys;
 	private boolean valid = false;
 	
 	protected InnerNode(
 			RawPage rawPage, 
-			FixLengthSerializer<PagePointer, byte[]> pointerSerializer,
+			FixLengthSerializer<K, byte[]> keySerializer,
 			Comparator<K> comparator,
 			DataPageManager<K> keyPageManager,
 			PageManager<LeafNode<K, V>> leafPageManager,
@@ -80,18 +81,18 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		this.keyPageManager = keyPageManager;
 		this.rawPage = rawPage;
 		this.comparator = comparator;
-		this.pointerSerializer = pointerSerializer;
+		this.keySerializer = keySerializer;
 		
 		
 	}
 	
-	public void initRootState(PagePointer keyPointer, Integer pageId1, Integer pageId2){
+	public void initRootState(byte[] serializedKey, Integer pageId1, Integer pageId2){
 		ensureValid();
 		
 		ByteBuffer buf = rawPage().bufferForWriting(Header.size());
 		
 		buf.putInt(pageId1);
-		buf.put(pointerSerializer.serialize(keyPointer));
+		buf.put(serializedKey);
 		buf.putInt(pageId2);
 		
 		setNumberOfKeys(1);
@@ -193,14 +194,14 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	private int getOffsetForKey(int i){
 		return Header.size() + 
 			((i+1) * getSizeOfPageId()) + // one id more that pages, the first id
-			(i * getSizeOfSerializedPointer());
+			(i * keySerializer.getSerializedLength());
 	}
 	
 	private int posOfFirstLargerOrEqualKey(K key){
 		
 		for(int i = 0; i < getNumberOfKeys(); i++){
 			
-			PagePointer pp = getPointerAtOffset(getOffsetForKey(i));
+			PagePointer pp = null;// getKeyAtOffset(getOffsetForKey(i));
 			K keyFromPointer = getKeyFromPagePointer(pp);
 			if(keyFromPointer == null){
 				throw new IllegalStateException("key " + i + " retrieved from PagePointer " + pp + " must not be null!");
@@ -222,11 +223,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private int getOffsetForRightPageIdOfKey(int i){
-		return getOffsetForKey(i) + getSizeOfSerializedPointer();
-	}
-	
-	private int getSizeOfSerializedPointer(){
-		return pointerSerializer.serializedLength(PagePointer.class);
+		return 0;//getOffsetForKey(i) + nodeKey.getSerializedSize();
 	}
 	
 	private Integer getRightPageIdOfKey(int i) {
@@ -238,11 +235,12 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		return keyPageManager.getPage(pp.getId()).get(pp.getOffset());
 	}
 
-	private PagePointer getPointerAtOffset(int offset) {
-		ByteBuffer buf = rawPage().bufferForReading(offset);
-		byte[] byteBuf = new byte[getSizeOfSerializedPointer()];
-		buf.get(byteBuf);
-		return pointerSerializer.deserialize(byteBuf);
+	private void getKeyAtOffset(int offset) {
+		//ByteBuffer buf = rawPage().bufferForReading(offset);
+		//byte[] byteBuf = new byte[nodeKey.getSerializedSize()];
+		//buf.get(byteBuf);
+		// return pointerSerializer.deserialize(byteBuf);
+		//return nodeKey.load();
 	}
 
 	/* (non-Javadoc)
@@ -356,7 +354,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 				
 				int posForInsert = posOfFirstLargerOrEqualKey == -1 ? getNumberOfKeys() : posOfFirstLargerOrEqualKey;
 				insertKeyPointerPageIdAtPosition(
-						result.getKeyPointer(), result.getPageId(),  posForInsert);
+						result.getSerializedKey(), result.getPageId(),  posForInsert);
 				
 				// no further adjustment necessary. even if we inserted to the last position, the
 				// highest key in the subtree below is still the same, because otherwise we would
@@ -373,11 +371,11 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 			
 			// decide where to insert the pointer we are supposed to insert
 			if(posOfFirstLargerOrEqualKey > getNumberOfKeys()){
-				insertKeyPointerPageIdAtPosition(result.getKeyPointer(), result.getPageId(), posOfFirstLargerOrEqualKey - getNumberOfKeys() + 1);
+				insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), posOfFirstLargerOrEqualKey - getNumberOfKeys() + 1);
 			} else {
-				insertKeyPointerPageIdAtPosition(result.getKeyPointer(), result.getPageId(), posOfFirstLargerOrEqualKey);
+				insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), posOfFirstLargerOrEqualKey);
 				
-				return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, pointerSerializer.deserialize(keyUpwardsBytes), inp.getId());
+				return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, keyUpwardsBytes, inp.getId());
 			}
 
 			throw new UnsupportedOperationException("no new child node");
@@ -402,7 +400,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		inp.setNumberOfKeys(numberOfKeys);
 		
 		// last key is dropped, get the keyPointerByteSequence
-		byte[] result = new byte[getSizeOfSerializedPointer()];
+		byte[] result = new byte[keySerializer.getSerializedLength()];
 		rawPage().bufferForReading(from - getSizeOfPageId()).get(result);
 		setNumberOfKeys(getNumberOfKeys() - numberOfKeys - 1); // one key less
 		return result;
@@ -414,19 +412,19 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 
 	/**
-	 * @param keyPointer
+	 * @param serializedKey
 	 * @param pageId
 	 * @param posOfKeyForInsert
 	 */
-	private void insertKeyPointerPageIdAtPosition(PagePointer keyPointer,
+	private void insertKeyPointerPageIdAtPosition(byte[] serializedKey,
 			Integer pageId, int posOfKeyForInsert) {
 		
 		ByteBuffer buf = rawPage().bufferForWriting(getOffsetForKey(posOfKeyForInsert));
 		
-		int spaceNeededForInsert = getSizeOfPageId() + getSizeOfSerializedPointer();
+		int spaceNeededForInsert = getSizeOfPageId() + keySerializer.getSerializedLength();
 		System.arraycopy(buf.array(), buf.position(), buf.array(), buf.position() + spaceNeededForInsert, buf.limit() - buf.position() - spaceNeededForInsert);
 		
-		buf.put(pointerSerializer.serialize(keyPointer));
+		buf.put(serializedKey);
 		buf.putInt(pageId);
 		
 		setNumberOfKeys(getNumberOfKeys() + 1);
@@ -438,7 +436,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		// size first page id
 		size -= Integer.SIZE / 8;
 		
-		return size / (Integer.SIZE / 8 + pointerSerializer.serializedLength(PagePointer.class));
+		return size / (Integer.SIZE / 8 + keySerializer.getSerializedLength());
 	}
 
 	private AdjustmentAction<K, V> updateKey(int posOfFirstLargerOrEqualKey, AdjustmentAction<K, V> result) {
@@ -453,13 +451,13 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		// We need to adjust our own key, because keys were moved to the next node.
 		// That changes the highest key in this page, so the corresponding key
 		// must be adjusted.
-		setKey(result.getKeyPointer(), posOfFirstLargerOrEqualKey);
+		setKey(result.getSerializedKey(), posOfFirstLargerOrEqualKey);
 		return null;
 	}
 	
-	private void setKey(PagePointer pointer, int pos){
+	private void setKey(byte[] serializedKey, int pos){
 		ByteBuffer buf = rawPage().bufferForWriting(getOffsetForKey(pos));
-		buf.put(pointerSerializer.serialize(pointer));
+		buf.put(serializedKey);
 	}
 
 	private void ensureValid(){

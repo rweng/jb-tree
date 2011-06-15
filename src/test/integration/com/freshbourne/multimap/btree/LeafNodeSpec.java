@@ -58,11 +58,11 @@ public class LeafNodeSpec {
 	@Test public void shouldBeAbleToGetLastKeyAndPointer(){
 		leaf.insert(key1, value1);
 		assertNotNull(leaf.getLastLeafKey());
-		assertNotNull(leaf.getLastKeyPointer());
+		assertNotNull(leaf.getLastKey());
 		
 		leaf.insert(key2, value2);
 		assertNotNull(leaf.getLastLeafKey());
-		assertNotNull(leaf.getLastKeyPointer());
+		assertNotNull(leaf.getLastKey());
 	}
 	
 	@Test public void shouldAlwaysWorkAfterReload(){
@@ -88,12 +88,8 @@ public class LeafNodeSpec {
 		assertNotNull(leaf.getLastLeafKey());
 		assertEquals(AdjustmentAction.ACTION.INSERT_NEW_NODE, action.getAction());
 		
-		assertNotNull(action.getKeyPointer());
-		assertNotNull(action.getKeyPointer().getOffset());
-		assertNotNull(action.getKeyPointer().getId());
+		assertNotNull(action.getSerializedKey());
 		
-		assertNotNull(keyPageManager.getPage(action.getKeyPointer().getId()));
-		assertNotNull(keyPageManager.getPage(action.getKeyPointer().getId()).get(action.getKeyPointer().getOffset()));
 		
 		// this should still work and not throw an exception
 		stateTest(leaf);

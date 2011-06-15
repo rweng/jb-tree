@@ -28,8 +28,8 @@ public class PagePointerSerializerTest extends TestCase {
 		byte[] b2 = serializer.serialize(p2);
 		
 		assertTrue(b1 != b2);
-		assertEquals(serializer.serializedLength(PagePointer.class), b1.length);
-		assertEquals(serializer.serializedLength(PagePointer.class), b2.length);
+		assertEquals(serializer.getSerializedLength(), b1.length);
+		assertEquals(serializer.getSerializedLength(), b2.length);
 		assertEquals(p1, serializer.deserialize(b1));
 		assertEquals(p2, serializer.deserialize(b2));
 	}

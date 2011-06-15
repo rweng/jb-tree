@@ -7,11 +7,9 @@
  */
 package com.freshbourne.serializer;
 
-import com.freshbourne.serializer.Serializer;
-
 import java.nio.ByteBuffer;
 
-public enum IntegerSerializer implements Serializer<Integer, byte[]> {
+public enum IntegerSerializer implements FixLengthSerializer<Integer, byte[]> {
 	INSTANCE;
 	
 	/* (non-Javadoc)
@@ -28,6 +26,15 @@ public enum IntegerSerializer implements Serializer<Integer, byte[]> {
 	@Override
 	public Integer deserialize(byte[] o) {
 		return ByteBuffer.wrap(o).getInt();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.serializer.FixLengthSerializer#getSerializedLength()
+	 */
+	@Override
+	public int getSerializedLength() {
+		// TODO Auto-generated method stub
+		return 4;
 	}
 
 }

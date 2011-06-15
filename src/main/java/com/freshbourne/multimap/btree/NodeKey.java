@@ -5,14 +5,19 @@
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author. 
  */
-package com.freshbourne.io;
+package com.freshbourne.multimap.btree;
 
-import org.junit.Test;
-
-
-import com.freshbourne.multimap.btree.InnerNodeTestBase;
-
-
-public class InnerNodeTest extends InnerNodeTestBase {
+public class NodeKey<T> {
 	
+	public short getSerializedSize(){
+		return 1;
+	}
+	
+	public byte[] getBytes(){
+		return null;
+	}
+	
+	public T getKey(){
+		return null;
+	}
 }
