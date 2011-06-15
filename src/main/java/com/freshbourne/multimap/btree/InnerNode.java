@@ -206,19 +206,26 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		
 		for(int i = 0; i < getNumberOfKeys(); i++){
 			
-			PagePointer pp = null;// getKeyAtOffset(getOffsetForKey(i));
-			K keyFromPointer = getKeyFromPagePointer(pp);
-			if(keyFromPointer == null){
-				throw new IllegalStateException("key " + i + " retrieved from PagePointer " + pp + " must not be null!");
-			}
-			
-			if(comparator.compare(keyFromPointer, key) >= 0){
+			byte[] sKey = getSerializedKeyAtOffset(getOffsetForKey(i));
+			if(comparator.compare(keySerializer.deserialize(sKey), key) >= 0){
 				return i;
 			}
 		}
 		return -1;
 	}
 	
+	/**
+	 * @param offsetForKey
+	 * @return
+	 */
+	private byte[] getSerializedKeyAtOffset(int offset) {
+		ByteBuffer buf = rawPage().bufferForReading(offset);
+		byte[] byteBuf = new byte[keySerializer.getSerializedLength()];
+		buf.get(byteBuf);
+		
+		return byteBuf;
+	}
+
 	private Integer getLeftPageIdOfKey(int i) {
 		return rawPage().bufferForReading(getOffsetForLeftPageIdOfKey(i)).getInt();
 	}
@@ -228,7 +235,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	private int getOffsetForRightPageIdOfKey(int i){
-		return 0;//getOffsetForKey(i) + nodeKey.getSerializedSize();
+		return getOffsetForKey(i) + keySerializer.getSerializedLength();
 	}
 	
 	private Integer getRightPageIdOfKey(int i) {
@@ -240,13 +247,6 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		return keyPageManager.getPage(pp.getId()).get(pp.getOffset());
 	}
 
-	private void getKeyAtOffset(int offset) {
-		//ByteBuffer buf = rawPage().bufferForReading(offset);
-		//byte[] byteBuf = new byte[nodeKey.getSerializedSize()];
-		//buf.get(byteBuf);
-		// return pointerSerializer.deserialize(byteBuf);
-		//return nodeKey.load();
-	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.Node#remove(java.lang.Object, java.lang.Object)
@@ -315,7 +315,6 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	@Override
 	public AdjustmentAction<K, V> insert(K key, V value) {
 		ensureValid();
-		
 		ensureRoot();
 		
 		int posOfFirstLargerOrEqualKey = posOfFirstLargerOrEqualKey(key);

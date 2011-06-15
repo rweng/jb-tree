@@ -11,6 +11,9 @@ import java.nio.ByteBuffer;
 
 import org.junit.*;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import static org.mockito.Mockito.*;
 
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.DataPageManager;
@@ -39,6 +42,7 @@ public class InnerNodeTest {
 	
 	@Before
 	public void setUp(){
+		MockitoAnnotations.initMocks(this); 
 		rawPage = new RawPage(ByteBuffer.allocate(6 + 3 * 4 + 2 * 4), 100);
 		node = new InnerNode<Integer, Integer>(rawPage, IntegerSerializer.INSTANCE,
 				IntegerComparator.INSTANCE, keyPageManager, leafPageManager, innerNodePageManager);
@@ -52,5 +56,15 @@ public class InnerNodeTest {
 		assertEquals(100, buf.getInt());
 		assertEquals(0, buf.getInt());
 		assertEquals(101, buf.getInt());
+	}
+	
+	@Test
+	public void testFirstInsert(){
+		testInitRootState();
+		LeafNode leafNode = mock(LeafNode.class);
+		when(leafPageManager.hasPage(101)).thenReturn(true);
+		when(leafPageManager.getPage(101)).thenReturn(leafNode);
+		node.insert(10, 11);
+		verify(leafNode).insert(10, 11);
 	}
 }
