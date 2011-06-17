@@ -41,15 +41,22 @@ public class LeafNodeTest {
 	
 	// dependencies
 	private RawPage rawPage;
+	private RawPage rawPage2;
 	private int minNumberOfValues = 3;
-	private int rawPageSize = 100;
+	private int rawPageSize = 34;
 	@Mock private PageManager<LeafNode<Integer, Integer>> leafPageManager;
+
+	private LeafNode<Integer, Integer> node2;
+
 	
 	@Before
 	public void setUp(){
 		MockitoAnnotations.initMocks(this); 
 		rawPage = new RawPage(ByteBuffer.allocate(rawPageSize), 100);
+		rawPage2 = new RawPage(ByteBuffer.allocate(rawPageSize), 101);
 		node = new LeafNode<Integer, Integer>(rawPage, IntegerSerializer.INSTANCE,
+				IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE, leafPageManager, minNumberOfValues);
+		node2 = new LeafNode<Integer, Integer>(rawPage2, IntegerSerializer.INSTANCE,
 				IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE, leafPageManager, minNumberOfValues);
 		node.initialize();
 	}
@@ -121,12 +128,12 @@ public class LeafNodeTest {
 	
 	@Test
 	public void firstInsert(){
-		node.insert(1, 2);
-		ensureKeyValueInRawPage(Header.size(), 1, 2);
+		node.insert(1, 101);
+		ensureKeyValueInRawPage(rawPage, Header.size(), 1, 101);
 	}
 	
-	private void ensureKeyValueInRawPage(int offset, int key, int value){
-		ByteBuffer buf = rawPage.bufferForReading(offset);
+	private void ensureKeyValueInRawPage(RawPage rp, int offset, int key, int value){
+		ByteBuffer buf = rp.bufferForReading(offset);
 		byte[] bytes = new byte[IntegerSerializer.INSTANCE.getSerializedLength()];
 		buf.get(bytes);
 		assertEquals(key, (int) IntegerSerializer.INSTANCE.deserialize(bytes));
@@ -137,23 +144,116 @@ public class LeafNodeTest {
 	@Test
 	public void secondInsert(){
 		firstInsert();
-		node.insert(3, 3);
-		ensureKeyValueInRawPage(Header.size() + 2*IntegerSerializer.INSTANCE.getSerializedLength(), 3, 3);
+		node.insert(10, 1001);
+		ensureKeyValueInRawPage(rawPage, Header.size() + 2*IntegerSerializer.INSTANCE.getSerializedLength(), 10, 1001);
 	}
 	
 	@Test
 	public void doubleInsert(){
 		secondInsert();
-		node.insert(1, 3);
-		ensureKeyValueInRawPage(Header.size(), 1, 3);
+		node.insert(1, 102);
+		ensureKeyValueInRawPage(rawPage, Header.size(), 1, 102);
 	}
 	
 	@Test
 	public void insertionInTheMiddle(){
 		secondInsert();
-		node.insert(2, 44);
-		ensureKeyValueInRawPage(Header.size() + 0*IntegerSerializer.INSTANCE.getSerializedLength(), 1, 2);
-		ensureKeyValueInRawPage(Header.size() + 2*IntegerSerializer.INSTANCE.getSerializedLength(), 2, 44);
-		ensureKeyValueInRawPage(Header.size() + 4*IntegerSerializer.INSTANCE.getSerializedLength(), 3, 3);
+		node.insert(5, 501);
+		ensureKeyValueInRawPage(rawPage, Header.size() + 0*IntegerSerializer.INSTANCE.getSerializedLength(), 1, 101);
+		ensureKeyValueInRawPage(rawPage, Header.size() + 2*IntegerSerializer.INSTANCE.getSerializedLength(), 5, 501);
+		ensureKeyValueInRawPage(rawPage, Header.size() + 4*IntegerSerializer.INSTANCE.getSerializedLength(), 10, 1001);
 	}
+
+	@Test
+	public void splitInsertNode1Pos1(){
+		insertionInTheMiddle();
+		node2.initialize();
+		when(leafPageManager.createPage()).thenReturn(node2);
+		
+		AdjustmentAction<Integer, Integer> action = node.insert(0, 001);
+		
+		verify(leafPageManager).createPage();
+		assertEquals(rawPage2.id(), action.getPageId());
+		assertEquals(rawPage2.id(), node.getNextLeafId());
+		assertEquals(3, node.getNumberOfEntries());
+		assertEquals(1, node2.getNumberOfEntries());
+		assertEquals(5, (int) IntegerSerializer.INSTANCE.deserialize(action.getSerializedKey()));
+		
+		// there where 3 entries before, 1 got pushed in the new leaf, leaves us with two plus the inserted one
+		ensureKeyValueInRawPage(rawPage, Header.size(), 0, 001);
+		ensureKeyValueInRawPage(rawPage, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 2, 1, 101);
+		ensureKeyValueInRawPage(rawPage, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 4, 5, 501);
+		
+		ensureKeyValueInRawPage(rawPage2, Header.size(), 10, 1001);
+	}
+	
+	@Test
+	public void splitInsertNode2Pos1(){
+		insertionInTheMiddle();
+		node2.initialize();
+		when(leafPageManager.createPage()).thenReturn(node2);
+		
+		AdjustmentAction<Integer, Integer> action = node.insert(6, 601);
+		
+		verify(leafPageManager).createPage();
+		assertEquals(rawPage2.id(), action.getPageId());
+		assertEquals(rawPage2.id(), node.getNextLeafId());
+		assertEquals(2, node.getNumberOfEntries());
+		assertEquals(2, node2.getNumberOfEntries());
+		assertEquals(5, (int) IntegerSerializer.INSTANCE.deserialize(action.getSerializedKey()));
+		
+		// there where 3 entries before, 1 got pushed in the new leaf, leaves us with two plus the inserted one
+		ensureKeyValueInRawPage(rawPage, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 0, 1, 101);
+		ensureKeyValueInRawPage(rawPage, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 2, 5, 501);
+		
+		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 0, 6, 601);
+		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 2, 10, 1001);
+	}
+	
+	@Test
+	public void splitInsertNode2PosLast(){
+		insertionInTheMiddle();
+		node2.initialize();
+		when(leafPageManager.createPage()).thenReturn(node2);
+		
+		AdjustmentAction<Integer, Integer> action = node.insert(11, 1101);
+		
+		verify(leafPageManager).createPage();
+		assertEquals(rawPage2.id(), action.getPageId());
+		assertEquals(rawPage2.id(), node.getNextLeafId());
+		assertEquals(2, node.getNumberOfEntries());
+		assertEquals(2, node2.getNumberOfEntries());
+		assertEquals(5, (int) IntegerSerializer.INSTANCE.deserialize(action.getSerializedKey()));
+		
+		// there where 3 entries before, 1 got pushed in the new leaf, leaves us with two plus the inserted one
+		ensureKeyValueInRawPage(rawPage, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 0, 1, 101);
+		ensureKeyValueInRawPage(rawPage, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 2, 5, 501);
+		
+		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 0, 10, 1001);
+		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 2, 11, 1101);
+	}
+	
+	@Test
+	public void moveDataToNextLeaf(){
+		splitInsertNode1Pos1();
+		
+		when(leafPageManager.getPage(rawPage2.id())).thenReturn(node2);
+		
+		AdjustmentAction<Integer, Integer> action = node.insert(2, 201);
+		
+		assertEquals(AdjustmentAction.ACTION.UPDATE_KEY, action.getAction());
+		assertEquals(1, (int) IntegerSerializer.INSTANCE.deserialize(action.getSerializedKey()));
+		assertEquals(2, node.getNumberOfEntries());
+		assertEquals(3, node2.getNumberOfEntries());
+		
+		// there where 3 entries before, 1 got pushed in the new leaf, leaves us with two plus the inserted one
+		ensureKeyValueInRawPage(rawPage, Header.size(), 0, 001);
+		ensureKeyValueInRawPage(rawPage, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 2, 1, 101);
+		
+		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 0, 2, 201);
+		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 2, 5, 501);
+		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 4, 10, 1001);
+		
+	}
+
 }

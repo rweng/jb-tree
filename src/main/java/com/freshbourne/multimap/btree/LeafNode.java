@@ -154,7 +154,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		System.arraycopy(buffer.array(), Header.size(), buffer.array(), Header.size() + totalSize, byteToMove);
 		
 		// copy from other to us
-		int sourceOffset = source.getOffsetForKeyPos(source.getNumberOfEntries() - 1 - num);
+		int sourceOffset = source.getOffsetForKeyPos(source.getNumberOfEntries() - num);
 		System.arraycopy(source.rawPage().bufferForWriting(0).array(), sourceOffset, buffer.array(), Header.size(), totalSize);
 		
 		// update headers, also sets modified
@@ -184,7 +184,9 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	}
 	
 	public K getKeyAtOffset(int offset){
-		throw new UnsupportedOperationException();
+		byte[] bytes = new byte[keySerializer.getSerializedLength()];
+		rawPage().bufferForReading(offset).get(bytes);
+		return keySerializer.deserialize(bytes);
 	}
 	
 	public K getFirstLeafKey(){
@@ -246,7 +248,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		return Header.size() + pos * (valueSerializer.getSerializedLength() + keySerializer.getSerializedLength()) ;
 	}
 	
-	private int offsetForValue(int i){
+	private int offsetForValuePos(int i){
 		return getOffsetForKeyPos(i) + valueSerializer.getSerializedLength();
 	}
 	
