@@ -41,14 +41,12 @@ public class LeafNodeTest {
 	
 	// dependencies
 	private RawPage rawPage;
-	@Mock private DataPageManager<Integer> keyPageManager;
 	@Mock private PageManager<LeafNode<Integer, Integer>> leafPageManager;
-	@Mock private DataPageManager<Integer> valuePageManager;
 	
 	@Before
 	public void setUp(){
 		MockitoAnnotations.initMocks(this); 
-		rawPage = new RawPage(ByteBuffer.allocate(22), 100);
+		rawPage = new RawPage(ByteBuffer.allocate(30), 100);
 		node = new LeafNode<Integer, Integer>(rawPage, IntegerSerializer.INSTANCE,
 				IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE, leafPageManager);
 		node.initialize();
@@ -64,11 +62,23 @@ public class LeafNodeTest {
 	
 	@Test
 	public void testFirstInsert(){
-		DataPage dPageMock = mock(DataPage.class);
-		RawPage rp = new RawPage(ByteBuffer.allocate(1000), 101);
-		when(valuePageManager.createPage()).thenReturn(dPageMock);
-		when(dPageMock.rawPage()).thenReturn(rp);
 		node.insert(1, 2);
-		verify(dPageMock).add(2);
+		ensureKeyValueInRawPage(Header.size(), 1, 2);
+	}
+	
+	private void ensureKeyValueInRawPage(int offset, int key, int value){
+		ByteBuffer buf = rawPage.bufferForReading(offset);
+		byte[] bytes = new byte[IntegerSerializer.INSTANCE.getSerializedLength()];
+		buf.get(bytes);
+		assertEquals(key, (int) IntegerSerializer.INSTANCE.deserialize(bytes));
+		buf.get(bytes);
+		assertEquals(value, (int) IntegerSerializer.INSTANCE.deserialize(bytes));
+	}
+	
+	@Test
+	public void testSecondInsert(){
+		testFirstInsert();
+		node.insert(2, 3);
+		ensureKeyValueInRawPage(Header.size() + 2*IntegerSerializer.INSTANCE.getSerializedLength(), 2, 3);
 	}
 }

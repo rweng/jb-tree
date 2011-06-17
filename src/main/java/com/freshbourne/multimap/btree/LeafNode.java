@@ -48,7 +48,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	/**
 	 * how many values must at least fit in the RawPage
 	 */
-	static final int MIN_VALUES_IN_RAWPAGE = 1;
+	static final int MIN_VALUES_IN_RAWPAGE = 2;
 	
 	
 	/**
@@ -215,8 +215,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 			offset = offsetBehindLastEntry();
 		} else {
 			// move everything including pos backwards
-			System.arraycopy(buf.array(), offset, buf.array(), offset + 2
-					* valueSerializer.getSerializedLength(), buf.capacity() - (offset + keySerializer.getSerializedLength() + valueSerializer.getSerializedLength()));
+			System.arraycopy(buf.array(), offset, buf.array(), offset + keySerializer.getSerializedLength()
+					+ valueSerializer.getSerializedLength(), buf.capacity() - (offset + keySerializer.getSerializedLength() + valueSerializer.getSerializedLength()));
 		}
 		// insert both
 		buf.position(offset);
@@ -262,7 +262,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 * @return
 	 */
 	private int offsetBehindLastEntry(){
-		return Header.size() + getNumberOfEntries() * (valueSerializer.getSerializedLength() * keySerializer.getSerializedLength());
+		return Header.size() + getNumberOfEntries() * (valueSerializer.getSerializedLength() + keySerializer.getSerializedLength());
 	}
 
 	/* (non-Javadoc)
