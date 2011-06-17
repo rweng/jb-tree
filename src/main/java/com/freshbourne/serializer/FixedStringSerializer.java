@@ -8,7 +8,10 @@
 package com.freshbourne.serializer;
 
 public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]> {
-	INSTANCE(100);
+	INSTANCE(100),
+	INSTANCE_10(10),
+	INSTANCE_100(100),
+	INSTANCE_1000(1000);
 	
 	private int length;
 	
