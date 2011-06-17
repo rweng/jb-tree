@@ -130,6 +130,9 @@ public class LeafNodeTest {
 	public void firstInsert(){
 		node.insert(1, 101);
 		ensureKeyValueInRawPage(rawPage, Header.size(), 1, 101);
+		
+		assertEquals(1, node.get(1).size());
+		assertEquals(101, (int) node.get(1).get(0));
 	}
 	
 	private void ensureKeyValueInRawPage(RawPage rp, int offset, int key, int value){
@@ -146,6 +149,13 @@ public class LeafNodeTest {
 		firstInsert();
 		node.insert(10, 1001);
 		ensureKeyValueInRawPage(rawPage, Header.size() + 2*IntegerSerializer.INSTANCE.getSerializedLength(), 10, 1001);
+		
+
+		assertEquals(1, node.get(1).size());
+		assertEquals(101, (int) node.get(1).get(0));
+
+		assertEquals(1, node.get(10).size());
+		assertEquals(1001, (int) node.get(10).get(0));
 	}
 	
 	@Test
@@ -153,6 +163,10 @@ public class LeafNodeTest {
 		secondInsert();
 		node.insert(1, 102);
 		ensureKeyValueInRawPage(rawPage, Header.size(), 1, 102);
+		
+		assertEquals(2, node.get(1).size());
+		assertEquals(102, (int) node.get(1).get(0));
+		assertEquals(101, (int) node.get(1).get(1));
 	}
 	
 	@Test
@@ -252,8 +266,7 @@ public class LeafNodeTest {
 		
 		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 0, 2, 201);
 		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 2, 5, 501);
-		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 4, 10, 1001);
-		
+		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 4, 10, 1001);		
 	}
 
 }

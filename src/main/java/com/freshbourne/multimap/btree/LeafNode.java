@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-
+import java.util.Arrays;
 /**
  * This B-Tree-Leaf stores entries by storing the keys and values in separate pages
  * and keeping track only of the pageId and offset.
@@ -263,22 +263,32 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#get(java.lang.Object)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<V> get(K key) {
 		List<V> result = new ArrayList<V>();
 		
-		byte[] bytebuf = new byte[valueSerializer.getSerializedLength()];
+		
+		byte[] keyBuf = keySerializer.serialize(key);
+		
+		byte[] tmpKeyBuf = new byte[keySerializer.getSerializedLength()];
+		byte[] tmpValBuf = new byte[valueSerializer.getSerializedLength()];
 		
 		int pos = offsetOfKey(key);
 		if( pos == NOT_FOUND)
 			return result;
 		
+		
+		
 		ByteBuffer buffer = rawPage().bufferForReading(pos);
 		
-		// read first
-		buffer.get(bytebuf);
-		V p = valueSerializer.deserialize(bytebuf);
+		
+		while(buffer.position() < offsetBehindLastEntry()){
+			buffer.get(tmpKeyBuf);
+			if(Arrays.equals(tmpKeyBuf, keyBuf)){
+				buffer.get(tmpValBuf);
+				result.add(valueSerializer.deserialize(tmpValBuf));
+			}
+		}
 		
 		return result;
 	}
