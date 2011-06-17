@@ -88,6 +88,8 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	
 	public void initRootState(Integer pageId1, byte[] serializedKey, Integer pageId2){
 		ensureValid();
+		validateLengthOfSerializedKey(serializedKey);
+		
 		
 		ByteBuffer buf = rawPage().bufferForWriting(Header.size());
 		
@@ -98,6 +100,14 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		setNumberOfKeys(1);
 	}
 	
+	/**
+	 * @param serializedKey
+	 */
+	private void validateLengthOfSerializedKey(byte[] serializedKey) {
+		if(serializedKey.length != keySerializer.getSerializedLength())
+			throw new IllegalArgumentException("serializedByteKey has " + serializedKey.length + " bytes instead of " + keySerializer.getSerializedLength());
+	}
+
 	public void initRootState(Integer pageId1, K key, Integer pageId2){
 		initRootState(pageId1, keySerializer.serialize(key), pageId2);
 	}

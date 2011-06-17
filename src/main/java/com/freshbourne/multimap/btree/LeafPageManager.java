@@ -18,24 +18,20 @@ import java.util.Comparator;
 @Singleton
 public class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 
-	private final FixLengthSerializer<PagePointer, byte[]> ppSerializer;
-	
-	private final DataPageManager<K> keyPageManager;
-	private final DataPageManager<V> valuePageManager;
+	private final FixLengthSerializer<V, byte[]> valueSerializer;
+	private final FixLengthSerializer<K, byte[]> keySerializer;
 	
 	private final Comparator<K> comparator;
 	
 	@Inject
 	public LeafPageManager(
 			PageManager<RawPage> bpm, 
-			DataPageManager<K> keyPageManager,
-			DataPageManager<V> valuePageManager,
-			FixLengthSerializer<PagePointer, byte[]> ppSerializer,
+			FixLengthSerializer<V, byte[]> valueSerializer,
+			FixLengthSerializer<K, byte[]> keySerializer,
 			Comparator<K> comparator) {
 		super(bpm);
-		this.ppSerializer = ppSerializer;
-        this.keyPageManager = keyPageManager;
-        this.valuePageManager = valuePageManager;
+		this.valueSerializer = valueSerializer;
+		this.keySerializer = keySerializer;
         this.comparator = comparator;
 	}
 
@@ -44,7 +40,7 @@ public class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 	 */
 	@Override
 	protected LeafNode<K, V> createObjectPage(RawPage page) {
-		return new LeafNode<K, V>(page, keyPageManager, valuePageManager, ppSerializer, comparator, this);
+		return new LeafNode<K, V>(page, keySerializer, valueSerializer, comparator, this);
 	}
 
 }
