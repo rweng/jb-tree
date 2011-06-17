@@ -40,7 +40,7 @@ public class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 	 */
 	@Override
 	protected LeafNode<K, V> createObjectPage(RawPage page) {
-		return new LeafNode<K, V>(page, keySerializer, valueSerializer, comparator, this);
+		return new LeafNode<K, V>(page, keySerializer, valueSerializer, comparator, this, 1);
 	}
 
 }

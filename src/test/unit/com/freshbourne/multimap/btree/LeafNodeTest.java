@@ -41,15 +41,74 @@ public class LeafNodeTest {
 	
 	// dependencies
 	private RawPage rawPage;
+	private int minNumberOfValues = 3;
+	private int rawPageSize = 100;
 	@Mock private PageManager<LeafNode<Integer, Integer>> leafPageManager;
 	
 	@Before
 	public void setUp(){
 		MockitoAnnotations.initMocks(this); 
-		rawPage = new RawPage(ByteBuffer.allocate(30), 100);
+		rawPage = new RawPage(ByteBuffer.allocate(rawPageSize), 100);
 		node = new LeafNode<Integer, Integer>(rawPage, IntegerSerializer.INSTANCE,
-				IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE, leafPageManager);
+				IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE, leafPageManager, minNumberOfValues);
 		node.initialize();
+	}
+	
+	@Test
+	public void minNumberOfValues(){
+		int tmpValues = minNumberOfValues;
+		int tmpSize = rawPageSize;
+		
+		minNumberOfValues = 1;
+		rawPageSize = Header.size() + 2*IntegerSerializer.INSTANCE.getSerializedLength();
+		
+		// this should work
+		setUp();
+		
+		// this shouldn't work
+		try{
+			rawPageSize--;
+			setUp();
+			throw new IllegalStateException("this shouldn't work");
+		} catch (Exception e) {
+		}
+		
+		minNumberOfValues = 0;
+		rawPageSize = Header.size();
+		
+		// should work
+		setUp();
+		
+		// this shouldn't work
+		try{
+			rawPageSize--;
+			setUp();
+			throw new IllegalStateException("this shouldn't work");
+		} catch (Exception e) {
+		}
+		
+		minNumberOfValues = 2;
+		rawPageSize = Header.size() + 4*IntegerSerializer.INSTANCE.getSerializedLength();
+		
+		// should work
+		setUp();
+		
+		// this shouldn't work
+		try{
+			rawPageSize--;
+			setUp();
+			throw new IllegalStateException("this shouldn't work");
+		} catch (Exception e) {
+		}
+		
+		rawPageSize +=2;
+		
+		// should work
+		setUp();
+		
+		// reset values
+		minNumberOfValues = tmpValues;
+		rawPageSize = tmpSize;
 	}
 	
 	@Test
@@ -61,7 +120,7 @@ public class LeafNodeTest {
 	}
 	
 	@Test
-	public void testFirstInsert(){
+	public void firstInsert(){
 		node.insert(1, 2);
 		ensureKeyValueInRawPage(Header.size(), 1, 2);
 	}
@@ -76,9 +135,25 @@ public class LeafNodeTest {
 	}
 	
 	@Test
-	public void testSecondInsert(){
-		testFirstInsert();
-		node.insert(2, 3);
-		ensureKeyValueInRawPage(Header.size() + 2*IntegerSerializer.INSTANCE.getSerializedLength(), 2, 3);
+	public void secondInsert(){
+		firstInsert();
+		node.insert(3, 3);
+		ensureKeyValueInRawPage(Header.size() + 2*IntegerSerializer.INSTANCE.getSerializedLength(), 3, 3);
+	}
+	
+	@Test
+	public void doubleInsert(){
+		secondInsert();
+		node.insert(1, 3);
+		ensureKeyValueInRawPage(Header.size(), 1, 3);
+	}
+	
+	@Test
+	public void insertionInTheMiddle(){
+		secondInsert();
+		node.insert(2, 44);
+		ensureKeyValueInRawPage(Header.size() + 0*IntegerSerializer.INSTANCE.getSerializedLength(), 1, 2);
+		ensureKeyValueInRawPage(Header.size() + 2*IntegerSerializer.INSTANCE.getSerializedLength(), 2, 44);
+		ensureKeyValueInRawPage(Header.size() + 4*IntegerSerializer.INSTANCE.getSerializedLength(), 3, 3);
 	}
 }

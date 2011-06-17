@@ -46,12 +46,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	}
 	
 	/**
-	 * how many values must at least fit in the RawPage
-	 */
-	static final int MIN_VALUES_IN_RAWPAGE = 2;
-	
-	
-	/**
 	 * If a leaf page is less full than this factor, it may be target of operations
 	 * where entries are moved from one page to another. 
 	 */
@@ -62,6 +56,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	private final FixLengthSerializer<V, byte[]> valueSerializer;
 	
 	private final Comparator<K> comparator;
+	
+	private final int minNumberOfValues;
 	
 	private boolean valid = false;
 	
@@ -79,11 +75,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	// counters
 	private int numberOfEntries = 0;
 	
-	private Integer lastKeyPageId = null;
-	private int lastKeyPageRemainingBytes = -1;
-	
-	private Integer lastValuePageId = null;
-	private int lastValuePageRemainingBytes = -1;
 	private final PageManager<LeafNode<K,V>> leafPageManager;
 
 	private final FixLengthSerializer<K, byte[]> keySerializer;
@@ -94,23 +85,25 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
             FixLengthSerializer<K, byte[]> keySerializer,
 			FixLengthSerializer<V, byte[]> valueSerializer,
 			Comparator<K> comparator,
-			PageManager<LeafNode<K,V>> leafPageManager
+			PageManager<LeafNode<K,V>> leafPageManager,
+			int minNumberOfValues
 			){
     	this.leafPageManager = leafPageManager;
     	this.rawPage = page;
 		this.keySerializer = keySerializer;
 		this.valueSerializer = valueSerializer;
 		this.comparator = comparator;
+		this.minNumberOfValues = minNumberOfValues;
 		
 		// one pointer to key, one to value
 		maxEntries = (rawPage.bufferForReading(0).limit() - Header.size()) / 
 			(valueSerializer.getSerializedLength() + keySerializer.getSerializedLength());
 		
-		int requiredBytes =Header.size() + MIN_VALUES_IN_RAWPAGE * 
+		int requiredBytes =Header.size() + minNumberOfValues * 
 			(keySerializer.getSerializedLength() + valueSerializer.getSerializedLength());
 		if(page.bufferForReading(0).limit() - requiredBytes < 0)
 			throw new IllegalArgumentException("The RawPage must have space for at least " + 
-					MIN_VALUES_IN_RAWPAGE + " Entries (" + requiredBytes + " bytes)");
+					minNumberOfValues + " Entries (" + requiredBytes + " bytes)");
 	}
 	
 	/**
