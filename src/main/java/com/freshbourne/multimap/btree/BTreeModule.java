@@ -16,6 +16,7 @@ import com.freshbourne.comparator.StringComparator;
 import com.freshbourne.io.DynamicDataPage;
 import com.freshbourne.io.IOModule;
 import com.freshbourne.serializer.FixLengthSerializer;
+import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
 import com.freshbourne.serializer.PagePointSerializer;
 import com.freshbourne.io.PagePointer;
@@ -51,7 +52,9 @@ public class BTreeModule extends AbstractModule {
 		bind(new TypeLiteral<Serializer<Integer, byte[]>>(){}).
 		toInstance(IntegerSerializer.INSTANCE);
 	
-		bind(new TypeLiteral<Serializer<String, byte[]>>(){}).toInstance(StringSerializer.INSTANCE);
+		
+		bind(new TypeLiteral<Serializer<String, byte[]>>(){}).toInstance(FixedStringSerializer.INSTANCE);
+		bind(new TypeLiteral<FixLengthSerializer<String, byte[]>>(){}).toInstance(FixedStringSerializer.INSTANCE);
 		
 		bind(new TypeLiteral<BTree<Integer,String>>(){});
 		

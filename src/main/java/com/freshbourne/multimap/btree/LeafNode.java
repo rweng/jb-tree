@@ -376,15 +376,15 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public int remove(K key, V value) {
-		int pos = offsetOfKey(key); //TODO: refactor pos to offset
-		if(pos == NOT_FOUND)
+		int offset = offsetOfKey(key);
+		if(offset == NOT_FOUND)
 			return 0;
 		
 		
 		int numberOfValues = get(key).size();
 		
-		ByteBuffer buffer = rawPage().bufferForWriting(pos);
-		byte[] buf1 = new byte[valueSerializer.getSerializedLength()];
+		ByteBuffer buffer = rawPage().bufferForWriting(offset);
+		byte[] buf1 = new byte[keySerializer.getSerializedLength()];
 		byte[] buf2 = new byte[valueSerializer.getSerializedLength()];
 		int removed = 0;
 		

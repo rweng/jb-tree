@@ -24,8 +24,13 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 	 */
 	@Override
 	public byte[] serialize(String o) {
-		byte[] result = new byte[length];
 		byte[] bytes = o.getBytes();
+		
+		if(bytes.length > (length - 1)){
+			throw new IllegalArgumentException("String is too long to be serialized");
+		}
+		
+		byte[] result = new byte[length];
 		result[0] = new Integer(bytes.length).byteValue();
 		System.arraycopy(bytes, 0, result, 1, bytes.length);
 		return result;
