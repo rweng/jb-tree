@@ -7,17 +7,21 @@
  */
 package com.freshbourne.multimap.btree;
 
-import com.freshbourne.io.*;
-import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
-import com.freshbourne.multimap.btree.BTree.NodeType;
-import com.freshbourne.serializer.FixLengthSerializer;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Arrays;
+
+import com.freshbourne.io.ComplexPage;
+import com.freshbourne.io.DataPage;
+import com.freshbourne.io.PageManager;
+import com.freshbourne.io.PagePointer;
+import com.freshbourne.io.RawPage;
+import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
+import com.freshbourne.multimap.btree.BTree.NodeType;
+import com.freshbourne.serializer.FixLengthSerializer;
 /**
  * This B-Tree-Leaf stores entries by storing the keys and values in separate pages
  * and keeping track only of the pageId and offset.
@@ -178,7 +182,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	
 	public byte[] getLastKey(){
 		ByteBuffer buffer = rawPage().bufferForReading(getOffsetForKeyPos(getNumberOfEntries() - 1));
-		byte[] buf = new byte[valueSerializer.getSerializedLength()];
+		byte[] buf = new byte[keySerializer.getSerializedLength()];
 		buffer.get(buf);
 		return buf;
 	}
