@@ -438,22 +438,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void destroy() {
-		byte[] buf = new byte[valueSerializer.getSerializedLength()];
-		
-		//TODO: free pages
-		for(int i = 0; i < getNumberOfEntries(); i++){
-			
-			// key page
-			ByteBuffer buffer = rawPage().bufferForWriting(getOffsetForKeyPos(i));
-			buffer.get(buf);
-			V p = valueSerializer.deserialize(buf);
-			
-			// data page
-			buffer.get(buf);
-			p = valueSerializer.deserialize(buf);
-			
-		}
-		
 		leafPageManager.removePage(rawPage().id());
 	}
 

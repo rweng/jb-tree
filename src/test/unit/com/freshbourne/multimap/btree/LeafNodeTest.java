@@ -77,6 +77,13 @@ public class LeafNodeTest {
 	}
 	
 	@Test
+	public void destroy(){
+		node.insert(1, 101);
+		node.destroy();
+		verify(leafPageManager).removePage(100);
+	}
+	
+	@Test
 	public void minNumberOfValues(){
 		int tmpValues = minNumberOfValues;
 		int tmpSize = rawPageSize;
