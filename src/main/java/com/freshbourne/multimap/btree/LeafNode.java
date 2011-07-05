@@ -681,7 +681,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 				currentKeyOffset = Header.size();
 			}
 			
-			ByteBuffer buf = currentNode.rawPage().bufferForReading(currentKeyOffset + valueSerializer.getSerializedLength());
+			ByteBuffer buf = currentNode.rawPage().bufferForReading(currentKeyOffset + keySerializer.getSerializedLength());
 			buf.get(pointerBuffer);
 			V p = valueSerializer.deserialize(pointerBuffer);
 			
