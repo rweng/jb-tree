@@ -75,7 +75,11 @@ public interface Node<K, V> {
 	 */
 	public List<V> get(K key);
 	
-	
+	/**
+	 * @param key
+	 * @return first element of get(key)
+	 */
+	public V getFirst(K key);
 	
     // Modification Operations
     

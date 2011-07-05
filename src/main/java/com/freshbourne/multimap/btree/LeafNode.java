@@ -474,7 +474,11 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 */
 	@Override
 	public void load() {
-		numberOfEntries = rawPage().bufferForReading(0).getInt();
+		ByteBuffer buf = rawPage().bufferForReading(0);
+		if(buf.getChar() != NODE_TYPE.serialize())
+			throw new IllegalStateException("The RawPage " + rawPage.id() + " doesnt have the Leaf Node Type");
+		
+		numberOfEntries = rawPage().bufferForReading(Header.NUMBER_OF_KEYS.getOffset()).getInt();
 		valid = true;
 	}
 
@@ -716,5 +720,14 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	@Override
 	public Iterator<V> getIterator(K from, K to) {
 		return new LeafNodeIterator(this, from, to);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#getFirst(java.lang.Object)
+	 */
+	@Override
+	public V getFirst(K key) {
+		List<V> res = get(key);
+		return res.size() > 0 ? res.get(0) : null;
 	}
 }

@@ -542,4 +542,13 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	public Iterator<V> getIterator(K from, K to) {
 		return getPageForPageId(getLeftPageIdOfKey(0)).getIterator(from, to);
 	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.multimap.btree.Node#getFirst(java.lang.Object)
+	 */
+	@Override
+	public V getFirst(K key) {
+		List<V> res = get(key);
+		return res.size() > 0 ? res.get(0) : null;
+	}
 }

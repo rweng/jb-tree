@@ -60,6 +60,23 @@ public class LeafNodeTest {
 	}
 	
 	@Test
+	public void load(){
+		node.insert(1, 101);
+		node.insert(2, 201);
+		assertEquals(2, node.getNumberOfEntries());
+		
+		node = new LeafNode<Integer, Integer>(rawPage, IntegerSerializer.INSTANCE,
+				IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE, leafPageManager, minNumberOfValues);
+		
+		
+		node.load();
+		assertEquals(2, node.getNumberOfEntries());
+		assertEquals(101, (int) node.getFirst(1));
+		assertEquals(201, (int) node.getFirst(2));
+		
+	}
+	
+	@Test
 	public void minNumberOfValues(){
 		int tmpValues = minNumberOfValues;
 		int tmpSize = rawPageSize;
