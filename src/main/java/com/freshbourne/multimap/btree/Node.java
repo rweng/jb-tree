@@ -1,35 +1,18 @@
 /*
- * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
- *
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author.
+ *
+ * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-/**
- * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
- * http://creativecommons.org/licenses/by-nc/3.0/
- * For alternative conditions contact the author.
- * 
- * (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
- */
-package com.freshbourne.multimap.btree;
+ackage com.freshbourne.multimap.btree;
 
 import java.util.Iterator;
 import java.util.List;
 
 import com.freshbourne.io.PagePointer;
 
-/**
- * Abstract class for all nodes of a B-Tree. It does not extend MultiMap anymore since although many methods are similar
- * the use-case is different. MultiMaps should never be full, whereas Nodes can be full. This fact changes the signatures of
- * methods like insert and remove.
- * 
- * TODO: make this interface package-wide?
- * 
- * @author "Robin Wenglewski <robin@wenglewski.de>"
- *
- */
 public interface Node<K, V> {
 	
 	/**

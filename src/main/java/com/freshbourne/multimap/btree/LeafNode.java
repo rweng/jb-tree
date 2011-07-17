@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
- *
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author.
+ *
+ * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 package com.freshbourne.multimap.btree;
 
@@ -22,17 +22,6 @@ import com.freshbourne.io.RawPage;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
-/**
- * This B-Tree-Leaf stores entries by storing the keys and values in separate pages
- * and keeping track only of the pageId and offset.
- * 
- * Looks like this in binary: NUM_OF_ENTRIES, NEXT_LEAF_ID, KEY_POINTER, VALUE_POINTER, ...
- * 
- * @author "Robin Wenglewski <robin@wenglewski.de>"
- *
- * @param <K> KeyType
- * @param <V> ValueType
- */
 public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	
 	static enum Header{

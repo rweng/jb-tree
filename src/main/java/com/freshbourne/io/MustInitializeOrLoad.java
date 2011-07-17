@@ -1,24 +1,14 @@
-/**
- * Copyright (C) 2011 Robin Wenglewski <robin@wenglewski.de>
- *
+/*
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
- * For alternative conditions contact the author. 
+ * For alternative conditions contact the author.
+ *
+ * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 package com.freshbourne.io;
 
 import java.io.IOException;
 
-/**
- * This interface is for objects that can be loaded or initialized. Note that initialize should always work.
- * If it could fail due to closed Resources, consider implementing both, this interface and MustBeOpened to
- * ensure that the Resource can be accessed.
- * 
- * Classes can implement this interface if they need to be initialized or loaded to be usable.
- * 
- * @author Robin Wenglewski <robin@wenglewski.de>
- *
- */
 public interface MustInitializeOrLoad {
 	
 	/**

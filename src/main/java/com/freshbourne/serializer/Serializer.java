@@ -1,26 +1,13 @@
 /*
- * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
- *
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author.
- */
-
-/**
- * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
- * http://creativecommons.org/licenses/by-nc/3.0/
- * For alternative conditions contact the author.
- * 
- * (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
- */
-package com.freshbourne.serializer;
-
-/**
- * Classes implementing this interface can encode and decoded the InputType to and from the ResultType
- * 
- * @author "Robin Wenglewski <robin@wenglewski.de>"
  *
+ * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
+
+ackage com.freshbourne.serializer;
+
 public interface Serializer<InputType, ResultType> {
 	
 	/**

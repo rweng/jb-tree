@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
- *
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author.
+ *
+ * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
 package com.freshbourne.io;
@@ -15,13 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-/**
- * This class wraps a byte array and usually has an id and a source
- * 
- * Long is chosen as id, although in most scenarios Integer should be sufficient. However, Long can be used in more cases.
- * Maybe this class gets refactored to enable also Integer ids.
- * 
- */
 public class RawPage {
 
     private ByteBuffer buffer;

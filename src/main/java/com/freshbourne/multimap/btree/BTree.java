@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
- *
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author.
+ *
+ * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
 package com.freshbourne.multimap.btree;
@@ -24,17 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-/**
- * An implementation of a Map that can hold more that one value for each key.
- * 
- * This class does all the rotating and balancing of the BTree so that Leafs and InnerNodes are not polluted by having
- * to create new nodes. This is done exclusively in this class.
- * 
- * @author Robin Wenglewski <robin@wenglewski.de>
- *
- * @param <K>
- * @param <V>
- */
 public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 	private static final Log LOG = LogFactory.getLog(BTree.class);

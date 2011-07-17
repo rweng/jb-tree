@@ -1,40 +1,16 @@
 /*
- * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
- *
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author.
+ *
+ * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-/**
- * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
- * http://creativecommons.org/licenses/by-nc/3.0/
- * 
- *  Robin Wenglewski <robin@wenglewski.de>"
- */
-package com.freshbourne.multimap;
+ackage com.freshbourne.multimap;
 
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * This is an Interface like the <a href="http://download.oracle.com/javase/6/docs/api/java/util/Map.html">Map</a> interface, except that
- * multiple value can be associated with one key.
- * 
- * It does not inherit from Map since in Map there are some methods that are
- * hard to implement and depend on the concrete implementation if they make sense.
- * For example entrySet(): a multi-map could store several key-value entries with 
- * the same key, or one entry with a list as value.
- * 
- * To allow method-chaining, the MultiMap is self-referential, meaning that you
- * must provide the concrete implementation when creating a MultiMap.
- * 
- * @version %I%, %G%
- * 
- * @param <K> the type of keys maintained by this map
- * @param <V> the type of mapped values
- * 
- */
 public interface MultiMap<K, V> {
 	
 	/**
