@@ -22,6 +22,10 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	protected PageManager<RawPage> getRawPageManager(){
 		return rpm;
 	}
+
+	public boolean hasRawPageManager(PageManager<RawPage> rpm){
+		return this.rpm.equals(rpm);
+	}
 	
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.PageManager#getPage(int)
@@ -52,8 +56,15 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	 */
 	@Override
 	public T createPage() {
+		return createPage(true);
+	}
+
+	public T createPage(boolean initialize){
 		T l = createObjectPage(rpm.createPage());
-		l.initialize();
+
+		if(initialize)
+			l.initialize();
+
 		cache.put(l.rawPage().id(), l);
 		return l;
 	}

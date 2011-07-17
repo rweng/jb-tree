@@ -12,6 +12,7 @@ import com.freshbourne.io.ComplexPage;
 import com.freshbourne.io.FileResourceManager;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.RawPage;
+import com.freshbourne.multimap.KeyValueObj;
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.google.inject.Inject;
@@ -94,6 +95,10 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	private void ensureValid() {
 		if(!isValid())
 			throw new IllegalStateException("Btree must be initialized or loaded");
+	}
+
+	public void bulkInsert(KeyValueObj[] kvs){
+		
 	}
 
 	/* (non-Javadoc)
