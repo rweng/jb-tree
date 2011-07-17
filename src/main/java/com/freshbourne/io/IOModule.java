@@ -6,7 +6,7 @@
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-ackage com.freshbourne.io;
+package com.freshbourne.io;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;

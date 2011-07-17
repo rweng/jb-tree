@@ -6,7 +6,7 @@
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-ackage com.freshbourne.serializer;
+package com.freshbourne.serializer;
 
 public interface Serializer<InputType, ResultType> {
 	
