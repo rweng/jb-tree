@@ -19,7 +19,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		this.rpm = rpm;
 	}
 	
-	protected PageManager<RawPage> getRawPageManager(){
+	protected PageManager<RawPage>	getRawPageManager(){
 		return rpm;
 	}
 
@@ -80,7 +80,14 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		rpm.removePage(id);
 		
 	}
-	
+
+	/**
+	 * This method is a utility method since the dependencies for the concrete page creation are
+	 * only available in the extensions of this AbstractPageManager
+	 *
+	 * @param RawPage which should be initialized with the page-specific data
+	 * @return a Complex Page
+	 */
 	protected abstract T createObjectPage(RawPage page);
 
 	/* (non-Javadoc)

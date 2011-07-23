@@ -97,8 +97,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 			throw new IllegalStateException("Btree must be initialized or loaded");
 	}
 
-	public void bulkInsert(KeyValueObj[] kvs){
-		
+	public void bulkInitialize(KeyValueObj[] kvs, boolean sorted){
+		// leafPageManager.createObjectPage(rawPage());
 	}
 
 	/* (non-Javadoc)
