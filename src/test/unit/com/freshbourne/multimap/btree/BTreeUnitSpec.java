@@ -52,9 +52,13 @@ public class BTreeUnitSpec {
 		tree.bulkInitialize(kvs, true);
 		
 		// check if its correct
+		LOG.debug("checking bulkinsert results...");
 		assertEquals(testSize, tree.getNumberOfEntries());
 		for(int i = 0; i < testSize; i++){
 
+			if(tree.get(kvs[i].getKey()).size() == 0){
+				LOG.error("tree doesn't have key " + i);
+			}
 			assertEquals("size problem with key " + i, 1, tree.get(kvs[i].getKey()).size());
 			assertEquals(kvs[i].getValue(), tree.get(kvs[i].getKey()).get(0));
 		}
