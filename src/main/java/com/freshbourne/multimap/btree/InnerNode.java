@@ -539,7 +539,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		for(int i = 0; i < entriesToInsert; i++){
 			// System.out.println("fetching rawKey " + (fromId + i) + " from array length " + rawKeys.size() + " with i=" + i);
 			buf.put(rawKeys.get(fromId)); // fromId + 1 - 1 +i
-			LOG.info("insert key: " + keySerializer.deserialize(rawKeys.get(fromId)));
+			LOG.debug("insert key: " + keySerializer.deserialize(rawKeys.get(fromId)));
 			buf.putInt(pageIds.get(fromId + 1 + i));
 		}
 		

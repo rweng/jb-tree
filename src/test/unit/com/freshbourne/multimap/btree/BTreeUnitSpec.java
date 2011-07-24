@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.logging.Logger;
 
 public class BTreeUnitSpec {
 
@@ -36,12 +37,6 @@ public class BTreeUnitSpec {
 	public void setUp() {
 		tree = injector.getInstance(
 				Key.get(new TypeLiteral<BTree<Integer, Integer>>() {}));
-	}
-
-	@Test
-	public void logger(){
-		System.err.println(LogFactory.getFactory().getAttribute("log4j.rootLogger"));
-		LOG.debug("bla");
 	}
 
 	@Test

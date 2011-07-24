@@ -127,7 +127,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 			
 			largestKeyOfNode.put(leafPage.getId(), leafPage.getLastSerializedKey());
 			rawKeys.add(leafPage.getLastSerializedKey());
-			LOG.info("largest key of page " + leafPage.getId() + " = " + leafPage.getLastLeafKey());
+
+			LOG.debug("largest key of page " + leafPage.getId() + " = " + leafPage.getLastLeafKey());
 			
 			// set nextLeafId of previous leaf
 			// dont store the first key
@@ -169,7 +170,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 				
 				inserted += node.bulkInitialize(rawKeys, pageIds, inserted);
-				System.err.println("inserted " + inserted + " in inner node, pageIds.size()=" + pageIds.size());
+				LOG.debug("inserted " + inserted + " in inner node, pageIds.size()=" + pageIds.size());
 
 			}
 			
