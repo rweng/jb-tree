@@ -115,6 +115,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		ArrayList<byte[]> rawKeys = new ArrayList<byte[]>();
 		ArrayList<Integer> pageIds = new ArrayList<Integer>();
 		HashMap<Integer, byte[]> smallestKeyOfNode = new HashMap<Integer, byte[]>();
+		HashMap<Integer, byte[]> largestKeyOfNode = new HashMap<Integer, byte[]>();
 		
 		
 		// first insert all leafs and remember the insertedLastKeys
@@ -122,22 +123,24 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		LeafNode<K, V> previousLeaf = null;
 		while(inserted < kvs.length){
 			leafPage = leafPageManager.createPage(false);
-			inserted += leafPage.bulkInitialize(kvs);
+			inserted += leafPage.bulkInitialize(kvs, inserted);
 			
-			// we always store the smallest key of each leaf so that we can
-			// create the tree better
-			smallestKeyOfNode.put(leafPage.getId(), leafPage.getFirstSerializedKey());
+			largestKeyOfNode.put(leafPage.getId(), leafPage.getLastSerializedKey());
+			rawKeys.add(leafPage.getLastSerializedKey());
+			LOG.info("largest key of page " + leafPage.getId() + " = " + leafPage.getLastLeafKey());
 			
 			// set nextLeafId of previous leaf
 			// dont store the first key
 			if(previousLeaf != null){
 				previousLeaf.setNextLeafId(leafPage.getId());
-				rawKeys.add(leafPage.getFirstSerializedKey());
+				// rawKeys.add(leafPage.getFirstSerializedKey());
 			}
 			
 			previousLeaf = leafPage;
 			pageIds.add(leafPage.getId());
 		}
+
+		rawKeys.remove(rawKeys.size() - 1);
 		
 		// we are done if everything fits in one leaf
 		if(pageIds.size() == 1){
@@ -157,11 +160,17 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 				// create a inner node and store the smallest key
 				node = innerNodeManager.createPage(false);
 				newPageIds.add(node.getId());
-				byte[] smallestKey = smallestKeyOfNode.get(pageIds.get(inserted));
-				smallestKeyOfNode.put(node.getId(), smallestKey);
-				
+
+				// byte[] smallestKey = smallestKeyOfNode.get(pageIds.get(inserted));
+				// smallestKeyOfNode.put(node.getId(), smallestKey);
+
+				byte[] largestKey = largestKeyOfNode.get(pageIds.get(inserted));
+				largestKeyOfNode.put(node.getId(), largestKey);
+
 				
 				inserted += node.bulkInitialize(rawKeys, pageIds, inserted);
+				System.err.println("inserted " + inserted + " in inner node, pageIds.size()=" + pageIds.size());
+
 			}
 			
 			// next turn, insert the ids of the pages we just created

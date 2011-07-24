@@ -22,6 +22,8 @@ import com.freshbourne.io.RawPage;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
  *
@@ -38,6 +40,7 @@ import com.freshbourne.serializer.FixLengthSerializer;
 public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	
 	private static final NodeType NODE_TYPE = NodeType.INNER_NODE;
+	private static final Log LOG = LogFactory.getLog(InnerNode.class);
 	
 	static enum Header{
 		NODE_TYPE(0){}, // char
@@ -519,7 +522,8 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 			ArrayList<Integer> pageIds, int fromId) {
 		
 		if(pageIds.size() < (fromId + 2) || rawKeys.size() != (pageIds.size() - 1))
-			throw new IllegalArgumentException("for bulkinsert, you must have at least 2 page ids and keys.size() == (pageIds.size() - 1)");
+			throw new IllegalArgumentException("for bulkinsert, you must have at least 2 page ids and keys.size() == (pageIds.size() - 1)\n" +
+				"pageIds.size()=" + pageIds.size() + ";fromId=" + fromId + ";rawKeys.size()="+rawKeys.size());
 		
 		int fromId2 = fromId;
 		
@@ -528,15 +532,19 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		buf.putInt(pageIds.get(fromId2));
 		
 		int requiredSpace = Integer.SIZE / 8 + rawKeys.get(0).length;
-		int entriesToInsert = buf.remaining() / requiredSpace;
-		
+		int spaceForEntries = buf.remaining() / requiredSpace;
+		int totalEntriesToInsert = (pageIds.size() - fromId - 1);
+		int entriesToInsert =  spaceForEntries < totalEntriesToInsert ? spaceForEntries : totalEntriesToInsert;
+
 		for(int i = 0; i < entriesToInsert; i++){
-			buf.put(rawKeys.get(fromId - 1 + i));
-			buf.putInt(fromId + i);
+			// System.out.println("fetching rawKey " + (fromId + i) + " from array length " + rawKeys.size() + " with i=" + i);
+			buf.put(rawKeys.get(fromId)); // fromId + 1 - 1 +i
+			LOG.info("insert key: " + keySerializer.deserialize(rawKeys.get(fromId)));
+			buf.putInt(pageIds.get(fromId + 1 + i));
 		}
 		
 		setNumberOfKeys(entriesToInsert);
-		return entriesToInsert;
+		return entriesToInsert + 1; // page ids
 	}
 
 	/* (non-Javadoc)

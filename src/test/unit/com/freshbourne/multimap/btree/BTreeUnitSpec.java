@@ -13,16 +13,20 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 public class BTreeUnitSpec {
 
 	private BTree<Integer, Integer> tree;
 	private static Injector injector;
+	private static final Log LOG = LogFactory.getLog(BTreeUnitSpec.class);
 
 	static {
 		injector = Guice.createInjector(new BTreeModule("/tmp/bTreeUnitSpec"));
@@ -35,8 +39,14 @@ public class BTreeUnitSpec {
 	}
 
 	@Test
+	public void logger(){
+		System.err.println(LogFactory.getFactory().getAttribute("log4j.rootLogger"));
+		LOG.debug("bla");
+	}
+
+	@Test
 	public void bulkInsert() {
-		int testSize = 5;
+		int testSize = 1000;
 		
 		KeyValueObj<Integer, Integer>[] kvs = new KeyValueObj[testSize];
 		
@@ -49,7 +59,8 @@ public class BTreeUnitSpec {
 		// check if its correct
 		assertEquals(testSize, tree.getNumberOfEntries());
 		for(int i = 0; i < testSize; i++){
-			assertEquals(1, tree.get(kvs[i].getKey()).size());
+
+			assertEquals("size problem with key " + i, 1, tree.get(kvs[i].getKey()).size());
 			assertEquals(kvs[i].getValue(), tree.get(kvs[i].getKey()).get(0));
 		}
 	}

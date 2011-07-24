@@ -23,6 +23,9 @@ import com.freshbourne.multimap.KeyValueObj;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
+
+
+
 public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	
 	static enum Header{
@@ -753,6 +756,9 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 * @return
 	 */
 	public byte[] getFirstSerializedKey() {
+		if(getNumberOfEntries() == 0)
+			throw new IllegalStateException("you must have keys to get the first serialized key");
+		
 		byte[] result = new byte[keySerializer.getSerializedLength()];
 		rawPage().bufferForReading(Header.size()).get(result);
 		return result;
