@@ -17,7 +17,9 @@ import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.google.inject.Inject;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -76,7 +78,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @param comparator
 	 */
 	@Inject
-	BTree(PageManager<RawPage> bpm, LeafPageManager<K,V> leafPageManager, InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
+	BTree(PageManager<RawPage> bpm, LeafPageManager<K,V> leafPageManager, 
+			InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
 		this.leafPageManager = leafPageManager;
 		this.innerNodeManager = innerNodeManager;
 		this.comparator = comparator;
@@ -97,8 +100,79 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 			throw new IllegalStateException("Btree must be initialized or loaded");
 	}
 
-	public void bulkInitialize(KeyValueObj[] kvs, boolean sorted){
-		// leafPageManager.createObjectPage(rawPage());
+	public void bulkInitialize(KeyValueObj<K, V>[] kvs, boolean sorted){
+		if(!sorted)
+			throw new IllegalArgumentException("KeyValueObjects must be sorted for bulkInsert to work right now");
+		
+		initialize();
+		setNumberOfEntries(kvs.length);
+		
+		if(kvs.length == 0){
+			return;
+		}
+		
+		LeafNode<K, V> leafPage;
+		ArrayList<byte[]> rawKeys = new ArrayList<byte[]>();
+		ArrayList<Integer> pageIds = new ArrayList<Integer>();
+		HashMap<Integer, byte[]> smallestKeyOfNode = new HashMap<Integer, byte[]>();
+		
+		
+		// first insert all leafs and remember the insertedLastKeys
+		int inserted = 0;
+		LeafNode<K, V> previousLeaf = null;
+		while(inserted < kvs.length){
+			leafPage = leafPageManager.createPage(false);
+			inserted += leafPage.bulkInitialize(kvs);
+			
+			// we always store the smallest key of each leaf so that we can
+			// create the tree better
+			smallestKeyOfNode.put(leafPage.getId(), leafPage.getFirstSerializedKey());
+			
+			// set nextLeafId of previous leaf
+			// dont store the first key
+			if(previousLeaf != null){
+				previousLeaf.setNextLeafId(leafPage.getId());
+				rawKeys.add(leafPage.getFirstSerializedKey());
+			}
+			
+			previousLeaf = leafPage;
+			pageIds.add(leafPage.getId());
+		}
+		
+		// we are done if everything fits in one leaf
+		if(pageIds.size() == 1){
+			root = leafPageManager.getPage(pageIds.get(0));
+			return;
+		}
+		
+		// if not, build up tree
+		inserted = 0; // page ids
+		InnerNode<K, V> node = null;
+		
+		while(pageIds.size() > 1){
+			ArrayList<Integer> newPageIds = new ArrayList<Integer>();
+			
+			while(inserted < pageIds.size()){
+				
+				// create a inner node and store the smallest key
+				node = innerNodeManager.createPage(false);
+				newPageIds.add(node.getId());
+				byte[] smallestKey = smallestKeyOfNode.get(pageIds.get(inserted));
+				smallestKeyOfNode.put(node.getId(), smallestKey);
+				
+				
+				inserted += node.bulkInitialize(rawKeys, pageIds, inserted);
+			}
+			
+			// next turn, insert the ids of the pages we just created
+			pageIds = newPageIds;
+		}
+		
+		// here, pageIds should be 1, and the page should be an inner node
+		if(pageIds.size() == 1){
+			root = innerNodeManager.getPage(pageIds.get(0));
+			return;
+		}
 	}
 
 	/* (non-Javadoc)

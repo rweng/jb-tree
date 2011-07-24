@@ -19,6 +19,7 @@ import com.freshbourne.io.DataPage;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.RawPage;
+import com.freshbourne.multimap.KeyValueObj;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
@@ -169,7 +170,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		return getKeyAtOffset(offset);
 	}
 	
-	public byte[] getLastKey(){
+	public byte[] getLastSerializedKey(){
 		ByteBuffer buffer = rawPage().bufferForReading(getOffsetForKeyPos(getNumberOfEntries() - 1));
 		byte[] buf = new byte[keySerializer.getSerializedLength()];
 		buffer.get(buf);
@@ -213,7 +214,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
         
 		setNumberOfEntries(getNumberOfEntries() + 1);
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.Node#getNumberOfEntries()
 	 */
@@ -444,6 +445,46 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		setNextLeafId(NO_NEXT_LEAF);
 		valid = true;
 	}
+	
+	
+	
+	/**
+	 * @see bulkInitialize with from = 0
+	 */
+	public int bulkInitialize(KeyValueObj<K, V>[] kvs) {
+		return bulkInitialize(kvs, 0);
+	}
+		
+	
+	
+	/**
+	 * Initializes the Leaf with data
+	 * 
+	 * @param data to insert as KeyValueObj Array
+	 * @param from from where in the array to start inserting
+	 * @return number of keys inserted
+	 */
+	public int bulkInitialize(KeyValueObj<K, V>[] kvs, int from) {
+		initialize();
+
+		int remainingToInsert = kvs.length - from;
+		if(remainingToInsert <= 0)
+			return 0;
+		
+		ByteBuffer buf = rawPage().bufferForWriting(Header.size());
+		
+		int entrySize = keySerializer.getSerializedLength() + valueSerializer.getSerializedLength();
+		int entriesThatFit = buf.remaining() / entrySize;
+		int entriesToInsert = entriesThatFit > remainingToInsert ? remainingToInsert : entriesThatFit;
+		
+		for(int i = 0; i < entriesToInsert; i++){
+			buf.put(keySerializer.serialize(kvs[from+i].getKey()));
+			buf.put(valueSerializer.serialize(kvs[from+i].getValue()));
+		}
+		
+		setNumberOfEntries(entriesToInsert);
+		return entriesToInsert;
+	}
 
 
 	/* (non-Javadoc)
@@ -505,7 +546,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 					this.insert(key, value);
 				}
 				
-				return new AdjustmentAction<K, V>(ACTION.UPDATE_KEY, this.getLastKey(), null);
+				return new AdjustmentAction<K, V>(ACTION.UPDATE_KEY, this.getLastSerializedKey(), null);
 			}
 			
 			
@@ -531,7 +572,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		
 		// just to make sure, that the adjustment action is correct:
 		AdjustmentAction<K, V> action = new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE,
-				this.getLastKey(), newLeaf.rawPage().id());
+				this.getLastSerializedKey(), newLeaf.rawPage().id());
 			
 		return action;
 	}
@@ -706,5 +747,14 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	public V getFirst(K key) {
 		List<V> res = get(key);
 		return res.size() > 0 ? res.get(0) : null;
+	}
+
+	/**
+	 * @return
+	 */
+	public byte[] getFirstSerializedKey() {
+		byte[] result = new byte[keySerializer.getSerializedLength()];
+		rawPage().bufferForReading(Header.size()).get(result);
+		return result;
 	}
 }

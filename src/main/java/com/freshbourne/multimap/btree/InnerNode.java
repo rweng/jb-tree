@@ -508,6 +508,36 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		
 		valid = true;
 	}
+	
+	/**
+	 * @param rawKeys
+	 * @param pageIds
+	 * @param inserted
+	 * @return
+	 */
+	public int bulkInitialize(ArrayList<byte[]> rawKeys,
+			ArrayList<Integer> pageIds, int fromId) {
+		
+		if(pageIds.size() < (fromId + 2) || rawKeys.size() != (pageIds.size() - 1))
+			throw new IllegalArgumentException("for bulkinsert, you must have at least 2 page ids and keys.size() == (pageIds.size() - 1)");
+		
+		int fromId2 = fromId;
+		
+		initialize();
+		ByteBuffer buf = rawPage().bufferForWriting(Header.size());
+		buf.putInt(pageIds.get(fromId2));
+		
+		int requiredSpace = Integer.SIZE / 8 + rawKeys.get(0).length;
+		int entriesToInsert = buf.remaining() / requiredSpace;
+		
+		for(int i = 0; i < entriesToInsert; i++){
+			buf.put(rawKeys.get(fromId - 1 + i));
+			buf.putInt(fromId + i);
+		}
+		
+		setNumberOfKeys(entriesToInsert);
+		return entriesToInsert;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.btree.Node#getNumberOfKeys()

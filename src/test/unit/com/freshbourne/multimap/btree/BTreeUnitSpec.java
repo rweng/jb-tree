@@ -16,6 +16,9 @@ import com.google.inject.TypeLiteral;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
+
 public class BTreeUnitSpec {
 
 	private BTree<Integer, Integer> tree;
@@ -28,15 +31,26 @@ public class BTreeUnitSpec {
 	@Before
 	public void setUp() {
 		tree = injector.getInstance(
-				Key.get(new TypeLiteral<BTree<Integer, Integer>>() {
-				}));
+				Key.get(new TypeLiteral<BTree<Integer, Integer>>() {}));
 	}
 
 	@Test
-	public void bla() {
-		KeyValueObj<Integer, Integer>[] kvs = new KeyValueObj[1];
-		tree.bulkInitialize(kvs, true);
-
+	public void bulkInsert() {
+		int testSize = 5;
 		
+		KeyValueObj<Integer, Integer>[] kvs = new KeyValueObj[testSize];
+		
+		for(int i = 0; i < testSize; i++){
+			kvs[i] = new KeyValueObj<Integer, Integer>(i, i + 10000);
+		}
+		
+		tree.bulkInitialize(kvs, true);
+		
+		// check if its correct
+		assertEquals(testSize, tree.getNumberOfEntries());
+		for(int i = 0; i < testSize; i++){
+			assertEquals(1, tree.get(kvs[i].getKey()).size());
+			assertEquals(kvs[i].getValue(), tree.get(kvs[i].getKey()).get(0));
+		}
 	}
 }
