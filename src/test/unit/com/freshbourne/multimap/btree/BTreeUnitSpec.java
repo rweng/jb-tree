@@ -41,7 +41,7 @@ public class BTreeUnitSpec {
 
 	@Test
 	public void bulkInsert() {
-		int testSize = 1000;
+		int testSize = 10000;
 		
 		KeyValueObj<Integer, Integer>[] kvs = new KeyValueObj[testSize];
 		
