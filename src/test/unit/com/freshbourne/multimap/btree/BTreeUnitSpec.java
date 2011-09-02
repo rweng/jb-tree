@@ -8,7 +8,7 @@
 
 package com.freshbourne.multimap.btree;
 
-import com.freshbourne.multimap.KeyValueObj;
+import java.util.AbstractMap.SimpleEntry;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -19,9 +19,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.logging.Logger;
 
 public class BTreeUnitSpec {
 
@@ -43,10 +40,11 @@ public class BTreeUnitSpec {
 	public void bulkInsert() {
 		int testSize = 10000;
 		
-		KeyValueObj<Integer, Integer>[] kvs = new KeyValueObj[testSize];
+		@SuppressWarnings("unchecked")
+		SimpleEntry<Integer, Integer>[] kvs = new SimpleEntry[testSize];
 		
 		for(int i = 0; i < testSize; i++){
-			kvs[i] = new KeyValueObj<Integer, Integer>(i, i + 10000);
+			kvs[i] = new SimpleEntry<Integer, Integer>(i, i + 10000);
 		}
 		
 		tree.bulkInitialize(kvs, true);

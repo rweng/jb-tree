@@ -8,6 +8,7 @@
 package com.freshbourne.multimap.btree;
 
 import java.nio.ByteBuffer;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -19,7 +20,6 @@ import com.freshbourne.io.DataPage;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.RawPage;
-import com.freshbourne.multimap.KeyValueObj;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
@@ -454,7 +454,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	/**
 	 * @see bulkInitialize with from = 0
 	 */
-	public int bulkInitialize(KeyValueObj<K, V>[] kvs) {
+	public int bulkInitialize(SimpleEntry<K, V>[] kvs) {
 		return bulkInitialize(kvs, 0);
 	}
 		
@@ -467,7 +467,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	 * @param from from where in the array to start inserting
 	 * @return number of keys inserted
 	 */
-	public int bulkInitialize(KeyValueObj<K, V>[] kvs, int from) {
+	public int bulkInitialize(SimpleEntry<K, V>[] kvs, int from) {
 		initialize();
 
 		int remainingToInsert = kvs.length - from;

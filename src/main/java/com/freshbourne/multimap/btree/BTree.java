@@ -12,12 +12,12 @@ import com.freshbourne.io.ComplexPage;
 import com.freshbourne.io.FileResourceManager;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.RawPage;
-import com.freshbourne.multimap.KeyValueObj;
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.serializer.IntegerSerializer;
 import com.google.inject.Inject;
 import java.nio.ByteBuffer;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -105,7 +105,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 			throw new IllegalStateException("Btree must be initialized or loaded");
 	}
 
-	public void bulkInitialize(KeyValueObj<K, V>[] kvs, boolean sorted){
+	public void bulkInitialize(SimpleEntry<K,V>[] kvs, boolean sorted){
 		if(!sorted)
 			throw new IllegalArgumentException("KeyValueObjects must be sorted for bulkInsert to work right now");
 		
