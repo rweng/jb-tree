@@ -86,6 +86,10 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		this.comparator = comparator;
 		this.bpm = bpm;
 	}
+
+    public Comparator<K> getKeyComparator(){
+        return this.comparator;
+    }
 	
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#size()
@@ -216,6 +220,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		
 		return root.get(key);
 	}
+
+
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.multimap.MultiMap#add(java.lang.Object, java.lang.Object)
