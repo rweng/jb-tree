@@ -177,7 +177,7 @@ public class FileResourceManager implements ResourceManager {
 	 * 
 	 * from minidb
 	 * 
-	 * @param fileHandle The random access file representing the index.
+	 * @param file The random access file representing the index.
 	 * @throws IOException Thrown, when the I/O channel could not be opened.
 	 */
 	private void initIOChannel(File file)
