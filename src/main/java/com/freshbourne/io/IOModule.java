@@ -23,31 +23,8 @@ public class IOModule extends AbstractModule{
 	private File file;
 	private int pageSize = PageSize.DEFAULT_PAGE_SIZE;
 	private int cacheSize = 10;
-	
-	public IOModule(File file){
-		super();
-		this.file = file;
-	}
-	
-	public IOModule(String path){
-		this(new File(path));
-	}
-	
-	public IOModule(File file, int pageSize){
-		this(file);
-		this.pageSize = pageSize;
-	}
-	
-	public IOModule(File file, int pageSize, int cacheSize){
-		this(file, pageSize);
-		this.cacheSize = cacheSize;
-	}
+    private boolean doLock = false;
 
-	public IOModule(String file, int pageSize, int cacheSize){
-		this(new File(file), pageSize);
-		this.cacheSize = cacheSize;
-	}
-	
     public void resourceFile(File file){this.file = file;};
     public void pageSize(int i){pageSize = i;}
 
@@ -64,7 +41,9 @@ public class IOModule extends AbstractModule{
 
         if(file != null)
 		    bind(File.class).annotatedWith(ResourceFile.class).toInstance(file);
-		
+
+        bind(Boolean.class).annotatedWith(Names.named("doLock")).toInstance(doLock);
+
 		bindConstant().annotatedWith(Names.named("cacheSize")).to(cacheSize);
 		
 		bind(new TypeLiteral<PageManager<RawPage>>(){}).to(ResourceManager.class).in(Singleton.class);
@@ -72,7 +51,7 @@ public class IOModule extends AbstractModule{
 
     @Provides @Singleton
 	public ResourceManager provideFileResourceManager() {
-		ResourceManager result = new FileResourceManager(file, pageSize, false);
+		ResourceManager result = new FileResourceManager(file, pageSize, doLock);
 		try {
 			result.open();
 		} catch (IOException e) {
@@ -82,4 +61,7 @@ public class IOModule extends AbstractModule{
 		return result;
 	}
 
+    public void setFile(File file) {
+        this.file = file;
+    }
 }

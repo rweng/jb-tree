@@ -7,6 +7,7 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.io.File;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Comparator;
@@ -60,8 +61,10 @@ public class BTreeModule extends AbstractModule {
 		
 		bind(new TypeLiteral<Comparator<Integer>>(){}).toInstance(IntegerComparator.INSTANCE);
 		bind(new TypeLiteral<Comparator<String>>(){}).toInstance(StringComparator.INSTANCE);
-		
-		binder().install(new IOModule(indexFile));
+
+        IOModule module = new IOModule();
+        module.setFile(new File(indexFile));
+		binder().install(module);
 		
 	}
 	

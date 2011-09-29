@@ -31,6 +31,7 @@ sourceSets {
 			srcDir 'src/test/integration'
 			srcDir 'src/test/performance'
 			srcDir 'src/test/unit'
+            srcDir 'src/test/java'
 			}
 	}
 }
