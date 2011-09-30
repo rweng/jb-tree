@@ -49,6 +49,7 @@ dependencies {
 	
 	compile "com.google.inject:guice:3.0@jar"
 	compile "javax.inject:javax.inject:1@jar" // dependency needed by guice
+    compile "com.google.inject.extensions:guice-assistedinject:3.0@jar"
 	compile "aopalliance:aopalliance:1.0@jar"
 	
 	compile "commons-logging:commons-logging:1.0.4@jar"

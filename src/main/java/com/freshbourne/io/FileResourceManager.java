@@ -9,6 +9,8 @@ package com.freshbourne.io;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
 
 import java.io.File;
@@ -40,7 +42,7 @@ public class FileResourceManager implements ResourceManager {
 	
 	
     @Inject
-	FileResourceManager(@ResourceFile File f, @PageSize int pageSize, @Named("doLock") boolean doLock){
+	FileResourceManager(@Assisted File f, @PageSize int pageSize, @Named("doLock") boolean doLock){
 		this.file = f;
 		this.pageSize = pageSize;
 		this.doLock = doLock;

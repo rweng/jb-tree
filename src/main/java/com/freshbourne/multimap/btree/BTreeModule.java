@@ -27,68 +27,82 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 
 public class BTreeModule extends AbstractModule {
-	
-	private final String indexFile;
-	private Long bTreePageId;
-	
-	public BTreeModule(String indexFile){
-		this(indexFile, null);
-	}
-	
-	public BTreeModule(String indexFile, Long bTreePageId){
-		this.indexFile = indexFile;
-		this.bTreePageId = bTreePageId;
-	}
 
-	/* (non-Javadoc)
-	 * @see com.google.inject.AbstractModule#configure()
-	 */
-	@Override
-	protected void configure() {
-		bind(new TypeLiteral<FixLengthSerializer<PagePointer, byte[]>>(){}).
-			toInstance(PagePointSerializer.INSTANCE);
-		
-		bind(new TypeLiteral<FixLengthSerializer<Integer, byte[]>>(){}).
-			toInstance(IntegerSerializer.INSTANCE);
-		bind(new TypeLiteral<Serializer<Integer, byte[]>>(){}).
-		toInstance(IntegerSerializer.INSTANCE);
-	
-		
-		bind(new TypeLiteral<Serializer<String, byte[]>>(){}).toInstance(FixedStringSerializer.INSTANCE);
-		bind(new TypeLiteral<FixLengthSerializer<String, byte[]>>(){}).toInstance(FixedStringSerializer.INSTANCE);
-		
-		bind(new TypeLiteral<BTree<Integer,String>>(){});
-		
-		bind(new TypeLiteral<Comparator<Integer>>(){}).toInstance(IntegerComparator.INSTANCE);
-		bind(new TypeLiteral<Comparator<String>>(){}).toInstance(StringComparator.INSTANCE);
+    private final String indexFile;
+    private       Long   bTreePageId;
+
+    public BTreeModule() {
+        this(null, null);
+    }
+
+    public BTreeModule(String indexFile) {
+        this(indexFile, null);
+    }
+
+    public BTreeModule(String indexFile, Long bTreePageId) {
+        this.indexFile = indexFile;
+        this.bTreePageId = bTreePageId;
+    }
+
+    /* (non-Javadoc)
+      * @see com.google.inject.AbstractModule#configure()
+      */
+    @Override
+    protected void configure() {
+        bind(new TypeLiteral<FixLengthSerializer<PagePointer, byte[]>>() {
+        }).
+                toInstance(PagePointSerializer.INSTANCE);
+
+        bind(new TypeLiteral<FixLengthSerializer<Integer, byte[]>>() {
+        }).
+                toInstance(IntegerSerializer.INSTANCE);
+        bind(new TypeLiteral<Serializer<Integer, byte[]>>() {
+        }).
+                toInstance(IntegerSerializer.INSTANCE);
+
+
+        bind(new TypeLiteral<Serializer<String, byte[]>>() {
+        }).toInstance(FixedStringSerializer.INSTANCE);
+        bind(new TypeLiteral<FixLengthSerializer<String, byte[]>>() {
+        }).toInstance(FixedStringSerializer.INSTANCE);
+
+        bind(new TypeLiteral<Comparator<Integer>>() {
+        }).toInstance(IntegerComparator.INSTANCE);
+        bind(new TypeLiteral<Comparator<String>>() {
+        }).toInstance(StringComparator.INSTANCE);
 
         IOModule module = new IOModule();
-        module.setFile(new File(indexFile));
-		binder().install(module);
-		
-	}
-	
-	
-	@SuppressWarnings("unchecked")
-	static <T> TypeLiteral<DynamicDataPage<T>> pageOf(final Class<T> parameterType){
-		return (TypeLiteral<DynamicDataPage<T>>) TypeLiteral.get(new ParameterizedType() {
-			
-			@Override
-			public Type getRawType() {
-				return DynamicDataPage.class;
-			}
-			
-			@Override
-			public Type getOwnerType() {
-				return null;
-			}
-			
-			@Override
-			public Type[] getActualTypeArguments() {
-				return new Type[] {parameterType};
-			}
-		});
-	}
-	
+
+        if (indexFile != null)
+            module.setFile(new File(indexFile));
+
+        binder().install(module);
+
+        bind(new TypeLiteral<BTree<Integer, String>>() {
+        });
+    }
+
+
+    @SuppressWarnings("unchecked")
+    static <T> TypeLiteral<DynamicDataPage<T>> pageOf(final Class<T> parameterType){
+        return (TypeLiteral<DynamicDataPage<T>>) TypeLiteral.get(new ParameterizedType() {
+
+            @Override
+            public Type getRawType() {
+                return DynamicDataPage.class;
+            }
+
+            @Override
+            public Type getOwnerType() {
+                return null;
+            }
+
+            @Override
+            public Type[] getActualTypeArguments() {
+                return new Type[] {parameterType};
+            }
+        });
+    }
+
 
 }

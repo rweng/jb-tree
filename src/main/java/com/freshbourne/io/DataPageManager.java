@@ -12,6 +12,7 @@ import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.Serializer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.assistedinject.Assisted;
 
 @Singleton
 public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {
@@ -21,7 +22,7 @@ public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {
     private final Serializer<T, byte[]> dataSerializer;
 
     @Inject
-    DataPageManager(
+    public DataPageManager(
     		PageManager<RawPage> bpm,
             FixLengthSerializer<PagePointer, byte[]> pointSerializer,
 			Serializer<T, byte[]> dataSerializer
