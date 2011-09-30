@@ -8,14 +8,13 @@
 
 package com.freshbourne.multimap.btree;
 
-import com.freshbourne.io.ComplexPage;
-import com.freshbourne.io.FileResourceManager;
-import com.freshbourne.io.PageManager;
-import com.freshbourne.io.RawPage;
+import com.freshbourne.io.*;
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.serializer.IntegerSerializer;
 import com.google.inject.Inject;
+
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -105,7 +104,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 			throw new IllegalStateException("Btree must be initialized or loaded");
 	}
 
-	public void bulkInitialize(SimpleEntry<K,V>[] kvs, boolean sorted){
+	public void bulkInitialize(SimpleEntry<K,V>[] kvs, boolean sorted) throws IOException {
 		if(!sorted)
 			throw new IllegalArgumentException("KeyValueObjects must be sorted for bulkInsert to work right now");
 		
@@ -306,7 +305,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @see com.freshbourne.io.ComplexPage#initialize()
 	 */
 	@Override
-	public void initialize() {
+	public void initialize() throws IOException {
 		numberOfEntries = 0;
 		valid = true;
 		
@@ -329,9 +328,14 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @see com.freshbourne.io.ComplexPage#load()
 	 */
 	@Override
-	public void load() {
+	public void load() throws IOException {
+        if(!bpm.hasPage(1)){
+            throw new IOException("Page 1 could not be found. Ensure that the BTree is initialized");
+        }
+
+
 		rawPage = bpm.getPage(1);
-		
+
 		valid = true;
 		numberOfEntries = rawPage.bufferForReading(0).getInt();
 		
@@ -341,7 +345,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		} else if(innerNodeManager.hasPage(rootId)){
 			root = innerNodeManager.getPage(rootId);
 		} else {
-			throw new IllegalStateException("the root page should exist");
+			throw new IllegalStateException("Page 1 does exist, but is neither a leafPage nor a innerNodePage. This could be the result of an unclosed B-Tree.");
 		}
 	}
 
@@ -353,9 +357,18 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		return valid ;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ComplexPage#rawPage()
-	 */
+    @Override
+    public void loadOrInitialize() throws IOException {
+        try{
+            load();
+        } catch (IOException e){
+            initialize();
+        }
+    }
+
+    /* (non-Javadoc)
+      * @see com.freshbourne.io.ComplexPage#rawPage()
+      */
 	@Override
 	public RawPage rawPage() {
 		ensureValid();

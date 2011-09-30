@@ -7,12 +7,22 @@
  */
 package com.freshbourne.io;
 
+import java.io.IOException;
+
+/**
+ *
+ * None of the methods throw an IOException.
+ * It is assumed, that the PageManager has an open Resource to which it can write.
+ *
+ * @param <T>
+ */
 public interface PageManager<T> {
-	/**
-	 * creates a new valid Page whith a valid id for which space has been reserved in
+
+    /**
+	 * creates a new valid Page with a valid id for which space has been reserved in
 	 * the resource.
 	 * 
-	 * @return HashPage
+	 * @return page
 	 */
 	public T createPage();
 	
@@ -31,13 +41,14 @@ public interface PageManager<T> {
 	public void removePage(int id);
 
 	/**
-	 * @param page id
+	 * @param id of the page
 	 * @return true, if the page exists
 	 */
 	public boolean hasPage(int id);
 	
 	/**
-	 * forces the sync of pages to resources
+	 * forces the sync of pages to resources.
+     * This is necessary because PageManager tend to cache Pages in Memory.
 	 */
 	public void sync();
 

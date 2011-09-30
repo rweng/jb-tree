@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 
@@ -44,7 +45,7 @@ public class FileResourceManagerFactoryTest {
     }
 
     @Test
-    public void get(){
+    public void get() throws IOException {
         FileResourceManager rm = factory.get(new File("/tmp/factorytestFile"));
         FileResourceManager rm2 = factory.get(new File("/tmp/factorytestFile"));
         FileResourceManager rm3 = factory.get(new File("/tmp/factorytestFile2"));

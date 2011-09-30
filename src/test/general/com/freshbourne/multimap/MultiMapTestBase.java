@@ -13,6 +13,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 
+import java.io.IOException;
+
 public class MultiMapTestBase<K,V> {
 	
 	private MultiMapProvider<K, V> provider;
@@ -48,7 +50,7 @@ public class MultiMapTestBase<K,V> {
 	}
 	
 	@Before
-	public void setUp() {
+	public void setUp() throws IOException {
 		setMultiMap(getProvider().createNewMultiMap());
 			key1 = getProvider().createRandomKey();
 		do{

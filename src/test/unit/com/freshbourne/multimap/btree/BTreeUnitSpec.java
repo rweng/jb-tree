@@ -8,6 +8,7 @@
 
 package com.freshbourne.multimap.btree;
 
+import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -37,7 +38,7 @@ public class BTreeUnitSpec {
 	}
 
 	@Test
-	public void bulkInsert() {
+	public void bulkInsert() throws IOException {
 		int testSize = 10000;
 		
 		@SuppressWarnings("unchecked")

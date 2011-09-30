@@ -15,12 +15,14 @@ import com.freshbourne.multimap.btree.BTreeModule;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.StringSerializer;
+import com.freshbourne.util.FileUtils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -29,6 +31,8 @@ public class BTreeFactoryTest {
 
     private static Injector     injector;
     private        BTreeFactory factory;
+    private File f1 = new File("/tmp/factorytestFile");
+    private File f2 = new File("/tmp/factorytestFile2");
 
     static {
         injector = Guice.createInjector(new BTreeModule());
@@ -36,6 +40,8 @@ public class BTreeFactoryTest {
 
     @Before
     public void setUp() {
+        f1.delete();
+        f2.delete();
         factory = injector.getInstance(BTreeFactory.class);
     }
 
@@ -52,16 +58,16 @@ public class BTreeFactoryTest {
 
 
     @Test
-    public void get() {
-        BTree rm = factory.get(new File("/tmp/factorytestFile"),
+    public void get() throws IOException {
+        BTree rm = factory.get(f1,
                 FixedStringSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
                 StringComparator.INSTANCE);
 
-        BTree rm2 = factory.get(new File("/tmp/factorytestFile"),
+        BTree rm2 = factory.get(f1,
                 FixedStringSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
                 StringComparator.INSTANCE);
         
-        BTree rm3 = factory.get(new File("/tmp/factorytestFile2"),
+        BTree rm3 = factory.get(f2,
                 FixedStringSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
                 StringComparator.INSTANCE);
 

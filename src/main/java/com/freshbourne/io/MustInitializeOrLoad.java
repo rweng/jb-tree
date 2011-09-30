@@ -9,12 +9,21 @@ package com.freshbourne.io;
 
 import java.io.IOException;
 
+
 public interface MustInitializeOrLoad {
 	
 	/**
-	 * create a valid object
-	 */
-	public void initialize();
+	 *
+     * Since this is an extremely generic interface,
+     * some implementations might throw an IOException, some might not.
+     *
+     * Just be be sure, the interface specifies the Exception.
+     * In the documentation of you implementation it can be specified that this
+     * Exception is never thrown.
+     *
+     * @throws java.io.IOException
+     */
+	public void initialize() throws IOException;
 	
 	/**
 	 * @throws IOException
@@ -25,4 +34,11 @@ public interface MustInitializeOrLoad {
 	 * @return if the object has been initialized or loaded
 	 */
 	public boolean isValid();
+
+    /**
+     * Loads the object if it can be loaded, otherwise initializes it
+     *
+     * @throws IOException
+     */
+    public void loadOrInitialize() throws IOException;
 }

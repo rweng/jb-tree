@@ -8,6 +8,7 @@
 package com.freshbourne.multimap.btree;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
@@ -43,7 +44,7 @@ public class BTreeProvider implements MultiMapProvider<Integer, String> {
 	
 	
 	@Override
-	public MultiMap<Integer, String> createNewMultiMap() {
+	public MultiMap<Integer, String> createNewMultiMap() throws IOException {
 		File f = new File(path);
 		if(f.exists())
 			f.delete();

@@ -128,10 +128,10 @@ public class FileResourceManager implements ResourceManager {
 	 * @param pageId
 	 * @throws PageNotFoundException 
 	 */
-	private void ensurePageExists(int pageId) throws PageNotFoundException {
+	private void ensurePageExists(int pageId) {
 		if(!header.contains(pageId))
             throw new PageNotFoundException(this, pageId);
-	}
+    }
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ResourceManager#close()

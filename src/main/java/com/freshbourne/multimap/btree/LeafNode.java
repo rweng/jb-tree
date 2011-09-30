@@ -7,6 +7,7 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -195,8 +196,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	}
 
 	/**
-	 * @param keyPointer
-	 * @param valuePointer
+	 * @param key
+	 * @param value
 	 */
 	private void addEntry(K key, V value) {
 		
@@ -452,7 +453,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	
 	
 	/**
-	 * @see bulkInitialize with from = 0
+	 * @see #bulkInitialize(java.util.AbstractMap.SimpleEntry[], int) with from = 0
 	 */
 	public int bulkInitialize(SimpleEntry<K, V>[] kvs) {
 		return bulkInitialize(kvs, 0);
@@ -463,7 +464,7 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	/**
 	 * Initializes the Leaf with data
 	 * 
-	 * @param data to insert as KeyValueObj Array
+	 * @param kvs data to insert as KeyValueObj Array
 	 * @param from from where in the array to start inserting
 	 * @return number of keys inserted
 	 */
@@ -512,10 +513,19 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		return valid;
 	}
 
+    @Override
+    public void loadOrInitialize() throws IOException {
+        try {
+            load();
+        }catch (Exception e){
+            initialize();
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ComplexPage#rawPage()
-	 */
+
+    /* (non-Javadoc)
+      * @see com.freshbourne.io.ComplexPage#rawPage()
+      */
 	@Override
 	public RawPage rawPage() {
 		return rawPage;

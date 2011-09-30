@@ -8,6 +8,7 @@
 package com.freshbourne.multimap.btree.run;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 
 import com.freshbourne.multimap.btree.BTree;
@@ -22,7 +23,7 @@ import com.google.inject.TypeLiteral;
  */
 public class PrintTree {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		
 		
 		File f = new File("/tmp/c1Index");

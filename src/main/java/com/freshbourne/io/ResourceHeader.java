@@ -22,7 +22,7 @@ import java.util.List;
  * Page Zero is reserved for the header.
  * 
  */
-public class ResourceHeader implements MustInitializeOrLoad{
+public class ResourceHeader extends AbstractMustInitializeOrLoad {
 	private int pageSize;
 	private FileChannel ioChannel;
 	private boolean valid = false;

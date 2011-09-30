@@ -10,6 +10,7 @@ package com.freshbourne.multimap.btree;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.junit.Test;
 
@@ -26,7 +27,7 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	}
 	
 	@Test
-	public void shouldBeAbleToOpenAndLoad(){
+	public void shouldBeAbleToOpenAndLoad() throws IOException {
 		Integer smaller, larger;
 		if(key1.compareTo(key2) > 0){
 			larger = key1;
@@ -40,7 +41,7 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 		shouldBeAbleToOpenAndLoad(larger, smaller);
 	}
 	
-	private void shouldBeAbleToOpenAndLoad(Integer key1, Integer key2){
+	private void shouldBeAbleToOpenAndLoad(Integer key1, Integer key2) throws IOException {
 
 		BTree<Integer, String>tree = (BTree<Integer, String>)getMultiMap();
 		

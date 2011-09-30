@@ -7,9 +7,11 @@
  */
 package com.freshbourne.multimap;
 
+import java.io.IOException;
+
 public interface MultiMapProvider<K,V> {
 
-	MultiMap<K,V> createNewMultiMap();
+	MultiMap<K,V> createNewMultiMap() throws IOException;
 	
 	K createRandomKey();
 	V createRandomValue();

@@ -10,6 +10,7 @@ package com.freshbourne.io;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.Serializer;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Random;
@@ -192,7 +193,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	 */
 	@Override
 	public void load() {
-		entries.clear();
+        entries.clear();
 		
 		ByteBuffer buffer = rawPage().bufferForReading(0);
 		int numberOfEntries = buffer.getInt();
@@ -221,10 +222,19 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	public boolean isValid() {
 		return valid;
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.DataPage#numberOfEntries()
-	 */
+
+    @Override
+    public void loadOrInitialize() throws IOException {
+        try {
+            load();
+        } catch (Exception e){
+            initialize();
+        }
+    }
+
+    /* (non-Javadoc)
+      * @see com.freshbourne.io.DataPage#numberOfEntries()
+      */
 	@Override
 	public int numberOfEntries() throws InvalidPageException {
 		ensureValid();

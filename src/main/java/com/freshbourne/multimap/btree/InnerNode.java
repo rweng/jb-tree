@@ -228,7 +228,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	}
 	
 	/**
-	 * @param offsetForKey
+	 * @param offset
 	 * @return
 	 */
 	private byte[] getSerializedKeyAtOffset(int offset) {
@@ -303,9 +303,18 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		return valid;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ComplexPage#rawPage()
-	 */
+    @Override
+    public void loadOrInitialize() throws IOException {
+        try {
+            load();
+        } catch (IOException e){
+            initialize();
+        }
+    }
+
+    /* (non-Javadoc)
+      * @see com.freshbourne.io.ComplexPage#rawPage()
+      */
 	@Override
 	public RawPage rawPage() {
 		return rawPage;
@@ -403,7 +412,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 
 	/**
 	 * @param inp
-	 * @param i
+	 * @param numberOfKeys
 	 */
 	private byte[] moveLastToNewPage(InnerNode<K, V> inp, int numberOfKeys) {
 		if(!inp.isValid())
@@ -515,7 +524,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	/**
 	 * @param rawKeys
 	 * @param pageIds
-	 * @param inserted
+	 * @param fromId
 	 * @return
 	 */
 	public int bulkInitialize(ArrayList<byte[]> rawKeys,

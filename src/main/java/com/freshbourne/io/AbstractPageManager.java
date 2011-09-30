@@ -45,6 +45,8 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 			result.load();
 			cache.put(id, result);
 		} catch (IOException e) {
+            // if the page cannot be loaded, something is off.
+            // we should only be able to fetch initialized pages from the rpm.
 			throw new IllegalArgumentException("cant load InnerNodePage with id " + id);
 		}
 		
@@ -63,9 +65,13 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		T l = createObjectPage(rpm.createPage());
 
 		if(initialize)
-			l.initialize();
+            try {
+                l.initialize();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
-		cache.put(l.rawPage().id(), l);
+        cache.put(l.rawPage().id(), l);
 		return l;
 	}
 
@@ -85,7 +91,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	 * This method is a utility method since the dependencies for the concrete page creation are
 	 * only available in the extensions of this AbstractPageManager
 	 *
-	 * @param RawPage which should be initialized with the page-specific data
+	 * @param page which should be initialized with the page-specific data
 	 * @return a Complex Page
 	 */
 	protected abstract T createObjectPage(RawPage page);

@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
 
@@ -36,7 +37,7 @@ public class BTreeFactory {
     }
 
     public <K,V> BTree<K,V> get(File file, FixLengthSerializer<K, byte[]> ks, FixLengthSerializer<V, byte[]> vs,
-                                Comparator<K> comparator){
+                                Comparator<K> comparator) throws IOException {
         if(map.containsKey(file))
             return map.get(file);
 
@@ -49,6 +50,7 @@ public class BTreeFactory {
         InnerNodeManager<K,V> npm = new InnerNodeManager<K, V>(frm, kdpm, vdpm, lpm, ks, comparator);
 
         BTree<K, V> tree = new BTree<K, V>(frm, lpm, npm, comparator);
+        tree.loadOrInitialize();
         map.put(file, tree);
 
         return tree;
