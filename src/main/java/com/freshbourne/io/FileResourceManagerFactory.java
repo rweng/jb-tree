@@ -32,6 +32,11 @@ public class FileResourceManagerFactory {
         if(map.containsKey(file))
             return map.get(file);
 
+        // this Exception would be thrown anyway, we just make the message a little bit more useful
+        if(new File(file.getParent()).isDirectory()){
+            throw new IOException("The directory for the file does not exist. File: " + file.toString());
+        }
+        
         FileResourceManager frm = new FileResourceManager(file, pageSize, doLock);
         frm.open();
         map.put(file, frm);

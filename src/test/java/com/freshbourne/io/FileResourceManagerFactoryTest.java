@@ -55,4 +55,9 @@ public class FileResourceManagerFactoryTest {
         assertEquals(rm, rm2);
         assertNotSame(rm, rm3);
     }
+
+    @Test(expected = IOException.class)
+    public void shouldThrowAnExceptionIfFileDirDoesNotExist() throws IOException {
+        factory.get(new File("/tmp/lkjsdfs/bla"));
+    }
 }
