@@ -400,11 +400,9 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 				insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), posOfFirstLargerOrEqualKey - getNumberOfKeys() + 1);
 			} else {
 				insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), posOfFirstLargerOrEqualKey);
-				
-				return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, keyUpwardsBytes, inp.getId());
 			}
-
-			throw new UnsupportedOperationException("no new child node");
+			
+			return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, keyUpwardsBytes, inp.getId());	
 		}
 		
 		throw new UnsupportedOperationException();
