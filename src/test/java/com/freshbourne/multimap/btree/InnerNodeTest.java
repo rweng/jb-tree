@@ -15,6 +15,8 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 
+import static org.junit.Assert.*;
+
 public class InnerNodeTest {
 	
 	protected final static Injector injector;
@@ -42,9 +44,4 @@ public class InnerNodeTest {
 		node.insert(key1, val1);
 	}
 	
-	
-	@Test
-	public void insertUntilNodeIsFull(){
-		// node.containsKey(key)
-	}
 }

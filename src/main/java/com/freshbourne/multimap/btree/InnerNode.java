@@ -22,8 +22,6 @@ import com.freshbourne.io.RawPage;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  *
@@ -40,7 +38,6 @@ import org.apache.commons.logging.Log;
 public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 	
 	private static final NodeType NODE_TYPE = NodeType.INNER_NODE;
-	private static final Log LOG = LogFactory.getLog(InnerNode.class);
 	
 	static enum Header{
 		NODE_TYPE(0){}, // char
@@ -361,7 +358,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		
 		if(result.getAction() == ACTION.INSERT_NEW_NODE){
 			// a new child node has been created, check for available space
-			if(getNumberOfKeys() < getMaximalNumberOfKeys()){
+			if(getNumberOfKeys() < getMaxNumberOfKeys()){
 				// space left, simply insert the key/pointer.
 				// the key replaces the old key for our node, since the split caused a different
 				// key to be the now highest in the subtree
@@ -442,7 +439,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		setNumberOfKeys(getNumberOfKeys() + 1);
 	}
 
-	private int getMaximalNumberOfKeys() {
+	public int getMaxNumberOfKeys() {
 		int size = rawPage.bufferForReading(0).limit() - Header.size();
 		
 		// size first page id
