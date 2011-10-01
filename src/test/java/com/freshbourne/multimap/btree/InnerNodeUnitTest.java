@@ -36,7 +36,7 @@ public class InnerNodeUnitTest {
 	@Mock private PageManager<LeafNode<Integer, Integer>> leafPageManager;
 	@Mock private PageManager<InnerNode<Integer, Integer>> innerNodePageManager;
 	@Mock LeafNode<Integer, Integer> leaf1, leaf2, leaf3;
-	
+    
 	@Before
 	public void setUp(){
 		MockitoAnnotations.initMocks(this); 
@@ -131,16 +131,24 @@ public class InnerNodeUnitTest {
 	}
 	
 	@Test
-	public void testLeafSplit() throws IOException {
-		loadNode();
+	public void insertAdjustmentWithSpace() throws IOException {
+		initRootState();
 
-        when(leaf2.insert(eq(1), anyInt())).thenReturn(null);
+        ByteBuffer serializedPageBuffer = ByteBuffer.allocate(4).putInt(500);
+        AdjustmentAction<Integer, Integer> adjustment =
+                new AdjustmentAction<Integer, Integer>(AdjustmentAction.ACTION.INSERT_NEW_NODE, serializedPageBuffer.array() , 102);
+
+        when(leaf2.insert(eq(1), anyInt())).thenReturn(adjustment);
         node.insert(1, 199);
-        verify(leaf2).insert(eq(1), anyInt());
 
-        // node.insert(10, 11);
-		
-		
-		// assertEquals(node.getMaxNumberOfKeys(), node.getNumberOfKeys());
+        ByteBuffer buf = rawPage.bufferForReading(InnerNode.Header.size());
+
+        assertEquals(100, buf.getInt());
+        assertEquals(0, buf.getInt());
+        assertEquals(101, buf.getInt());
+        assertEquals(500, buf.getInt());
+        assertEquals(102, buf.getInt());
+        
+		assertEquals(node.getMaxNumberOfKeys(), node.getNumberOfKeys());
 	}
 }
