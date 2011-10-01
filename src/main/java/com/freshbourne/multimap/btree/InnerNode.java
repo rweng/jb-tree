@@ -401,7 +401,9 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
         byte[] keyUpwardsBytes = moveLastToNewPage(inp, getNumberOfKeys() >> 1);
 
         // decide where to insert the pointer we are supposed to insert
-        if(posOfFirstLargerOrEqualKey > getNumberOfKeys()){
+        // if the old key position is larger than the current numberOfKeys, the
+        // entry has to go to the next node
+        if(posOfFirstLargerOrEqualKey > getNumberOfKeys() || posOfFirstLargerOrEqualKey == -1){
             insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), posOfFirstLargerOrEqualKey - getNumberOfKeys() + 1);
         } else {
             insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), posOfFirstLargerOrEqualKey);
