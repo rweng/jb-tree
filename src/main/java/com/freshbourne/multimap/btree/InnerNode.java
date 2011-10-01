@@ -30,7 +30,7 @@ import com.freshbourne.serializer.FixLengthSerializer;
  * 
  * NODE_TYPE | NUM_OF_KEYS | NODE_ID | KEY_POINTER | NODE_ID | KEY_POINTER | NODE_ID ...
  *
- * @author Robin Wenglewski <robin@wenglewski.de>
+ * If the search/insert key is equal to the currently checked key, go to the left.
  *
  * @param <K>
  * @param <V>
@@ -366,18 +366,20 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 
     /**
      * this method should be called when an insert action results in a new node that has to be inserted
-     * in this node
+     * in this node.
+     *
+     * Although this is a code-smell, it is made package-visible for testing purposes.
      *
      * @param result of the insertion
      * @param posOfFirstLargerOrEqualKey
      * @return adjustment action or null
      */
-    private AdjustmentAction<K, V> handleNewNodeAction(AdjustmentAction<K, V> result, int posOfFirstLargerOrEqualKey) {
+    AdjustmentAction<K, V> handleNewNodeAction(AdjustmentAction<K, V> result, int posOfFirstLargerOrEqualKey) {
         if(result.getAction() != ACTION.INSERT_NEW_NODE){
             throw new IllegalArgumentException("result action type must be INSERT_NEW_NODE");
         }
 
-        // a new child node has been created, check for available space
+        // a new child node has been created and a key must be inserted, check for available space
         if(getNumberOfKeys() < getMaxNumberOfKeys()){
             // space left, simply insert the key/pointer.
             // the key replaces the old key for our node, since the split caused a different

@@ -114,10 +114,10 @@ public class InnerNodeUnitTest {
 
     }
 
-    private LeafNode<Integer, Integer> getLeafForKey(int key){
-        if(key <= key1){
+    private LeafNode<Integer, Integer> getLeafForKey(int key) {
+        if (key <= key1) {
             return leaf1;
-        } else if (key <= key2){
+        } else if (key <= key2) {
             return leaf2;
         } else {
             return leaf3;
@@ -173,32 +173,48 @@ public class InnerNodeUnitTest {
         assertEquals(node1.getMaxNumberOfKeys(), node1.getNumberOfKeys());
     }
 
-    private void insertAdjustment(int key) throws IOException {
+
+    /**
+     * loads a full node, and calls insert on it. The leaf for the given key will return a
+     * new node adjustment action with the adjustmentKey as key.
+     *
+     * This method also ensures that the adjustment action returned from node.insert() is also
+     * a insert-new-node action.
+     *
+     * @param key
+     * @param adjustmentKey
+     * @return
+     * @throws IOException
+     */
+    private AdjustmentAction<Integer, Integer> insertWithNewNodeAdjustment(int key, int adjustmentKey) throws IOException {
         loadNode();
 
-        ByteBuffer serializedPageBuffer = ByteBuffer.allocate(4).putInt(key);
-        AdjustmentAction<Integer, Integer> adjustment =
-                new AdjustmentAction<Integer, Integer>(AdjustmentAction.ACTION.INSERT_NEW_NODE,
-                        serializedPageBuffer.array(), 102);
-
-
-        when(leaf2.insert(eq(1), anyInt())).thenReturn(adjustment);
+        when(getLeafForKey(key).insert(eq(1), anyInt())).thenReturn(getNewAdjustmentAction(adjustmentKey));
         when(innerNodePageManager.createPage()).thenReturn(node2);
+
+
         AdjustmentAction<Integer, Integer> result = node1.insert(key, 1);
 
         assertNotNull(result);
         assertEquals(AdjustmentAction.ACTION.INSERT_NEW_NODE, result.getAction());
         verify(innerNodePageManager).createPage();
+
+        return result;
     }
 
-    @Test
-    public void insertAdjustmentAtMiddleFirstLeaf() throws IOException {
-        insertAdjustment(500);
+    private AdjustmentAction<Integer, Integer> getNewAdjustmentAction(int key) {
+        ByteBuffer serializedPageBuffer = ByteBuffer.allocate(4).putInt(key);
+        AdjustmentAction<Integer, Integer> adjustment =
+                new AdjustmentAction<Integer, Integer>(AdjustmentAction.ACTION.INSERT_NEW_NODE,
+                        serializedPageBuffer.array(), 102);
+        return adjustment;
     }
 
-    @Test
-    public void insertAdjustmentAtMiddleSecondLeaf() throws IOException {
-        insertAdjustment(500);
+    @Test(expected = IllegalArgumentException.class)
+    public void handleNewNodeActionWithIllegalAction() throws IOException {
+        loadNode();
+        AdjustmentAction<Integer, Integer> action = getNewAdjustmentAction(100);
+        action.setAction(AdjustmentAction.ACTION.UPDATE_KEY);
+        node1.handleNewNodeAction(action, 1);
     }
-
 }
