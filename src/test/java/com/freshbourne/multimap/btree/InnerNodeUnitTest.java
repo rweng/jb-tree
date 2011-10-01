@@ -45,6 +45,18 @@ public class InnerNodeUnitTest {
 		rawPage = new RawPage(ByteBuffer.allocate(6 + 3 * 4 + 2 * 4), 100);
 		
 		node = getNewNode();
+
+        when(leafPageManager.hasPage(100)).thenReturn(true);
+        when(leafPageManager.getPage(100)).thenReturn(leaf1);
+
+
+        when(leafPageManager.hasPage(101)).thenReturn(true);
+        when(leafPageManager.getPage(101)).thenReturn(leaf2);
+
+
+        when(leafPageManager.hasPage(102)).thenReturn(true);
+        when(leafPageManager.getPage(102)).thenReturn(leaf3);
+
 	}
 
     private InnerNode<Integer, Integer> getNewNode(){
@@ -88,10 +100,8 @@ public class InnerNodeUnitTest {
         assertEquals(node.getMaxNumberOfKeys(), node.getNumberOfKeys());
 
         // check if getting the last page works
-        when(leafPageManager.hasPage(102)).thenReturn(true);
-        when(leafPageManager.getPage(102)).thenReturn(leaf1);
         node.insert(1001, 11);
-		verify(leaf1).insert(1001, 11);
+		verify(leaf3).insert(1001, 11);
 
     }
 
@@ -109,17 +119,13 @@ public class InnerNodeUnitTest {
 	@Test
 	public void testFirstInsert(){
 		initRootState();
-		when(leafPageManager.hasPage(101)).thenReturn(true);
-		when(leafPageManager.getPage(101)).thenReturn(leaf1);
 		node.insert(10, 11);
-		verify(leaf1).insert(10, 11);
+		verify(leaf2).insert(10, 11);
 	}
 	
 	@Test
 	public void whenTheKeyMatchesGoLeft(){
 		initRootState();
-		when(leafPageManager.hasPage(100)).thenReturn(true);
-		when(leafPageManager.getPage(100)).thenReturn(leaf1);
 		node.insert(0, 11);
 		verify(leaf1).insert(0, 11);
 	}
@@ -128,7 +134,9 @@ public class InnerNodeUnitTest {
 	public void testLeafSplit() throws IOException {
 		loadNode();
 
-
+        when(leaf2.insert(eq(1), anyInt())).thenReturn(null);
+        node.insert(1, 199);
+        verify(leaf2).insert(eq(1), anyInt());
 
         // node.insert(10, 11);
 		
