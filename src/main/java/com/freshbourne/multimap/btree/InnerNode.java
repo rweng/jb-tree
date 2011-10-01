@@ -358,43 +358,60 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		}
 		
 		if(result.getAction() == ACTION.INSERT_NEW_NODE){
-			// a new child node has been created, check for available space
-			if(getNumberOfKeys() < getMaxNumberOfKeys()){
-				// space left, simply insert the key/pointer.
-				// the key replaces the old key for our node, since the split caused a different
-				// key to be the now highest in the subtree
-				
-				int posForInsert = posOfFirstLargerOrEqualKey == -1 ? getNumberOfKeys() : posOfFirstLargerOrEqualKey;
-				insertKeyPointerPageIdAtPosition(
-						result.getSerializedKey(), result.getPageId(),  posForInsert);
-				
-				// no further adjustment necessary. even if we inserted to the last position, the
-				// highest key in the subtree below is still the same, because otherwise we would
-				// have never ended up here during the descend from the root, or we are in the
-				// right-most path of the subtree.
-				return null;
-			}
-			
-			// else split is required, allocate new node
-			InnerNode<K, V> inp = innerNodePageManager.createPage();
-			
-			// move half the keys/pointers to the new node. remember the dropped key.
-			byte[] keyUpwardsBytes = moveLastToNewPage(inp, getNumberOfKeys() >> 1);
-			
-			// decide where to insert the pointer we are supposed to insert
-			if(posOfFirstLargerOrEqualKey > getNumberOfKeys()){
-				insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), posOfFirstLargerOrEqualKey - getNumberOfKeys() + 1);
-			} else {
-				insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), posOfFirstLargerOrEqualKey);
-			}
-			
-			return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, keyUpwardsBytes, inp.getId());	
-		}
+            return handleNewNodeAction(result, posOfFirstLargerOrEqualKey);
+        }
 		
 		throw new UnsupportedOperationException();
 	}
 
-	/**
+    /**
+     * this method should be called when an insert action results in a new node that has to be inserted
+     * in this node
+     *
+     * @param result of the insertion
+     * @param posOfFirstLargerOrEqualKey
+     * @return adjustment action or null
+     */
+    private AdjustmentAction<K, V> handleNewNodeAction(AdjustmentAction<K, V> result, int posOfFirstLargerOrEqualKey) {
+        if(result.getAction() != ACTION.INSERT_NEW_NODE){
+            throw new IllegalArgumentException("result action type must be INSERT_NEW_NODE");
+        }
+
+        // a new child node has been created, check for available space
+        if(getNumberOfKeys() < getMaxNumberOfKeys()){
+            // space left, simply insert the key/pointer.
+            // the key replaces the old key for our node, since the split caused a different
+            // key to be the now highest in the subtree
+
+            int posForInsert = posOfFirstLargerOrEqualKey == -1 ? getNumberOfKeys() : posOfFirstLargerOrEqualKey;
+            insertKeyPointerPageIdAtPosition(
+                    result.getSerializedKey(), result.getPageId(),  posForInsert);
+
+            // no further adjustment necessary. even if we inserted to the last position, the
+            // highest key in the subtree below is still the same, because otherwise we would
+            // have never ended up here during the descend from the root, or we are in the
+            // right-most path of the subtree.
+            return null;
+        }
+
+        // else split is required, allocate new node
+        InnerNode<K, V> inp = innerNodePageManager.createPage();
+
+        // move half the keys/pointers to the new node. remember the dropped key.
+        byte[] keyUpwardsBytes = moveLastToNewPage(inp, getNumberOfKeys() >> 1);
+
+        // decide where to insert the pointer we are supposed to insert
+        if(posOfFirstLargerOrEqualKey > getNumberOfKeys()){
+            insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), posOfFirstLargerOrEqualKey - getNumberOfKeys() + 1);
+        } else {
+            insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), posOfFirstLargerOrEqualKey);
+        }
+
+        return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, keyUpwardsBytes, inp.getId());
+    }
+
+
+    /**
 	 * @param inp
 	 * @param numberOfKeys
 	 */
