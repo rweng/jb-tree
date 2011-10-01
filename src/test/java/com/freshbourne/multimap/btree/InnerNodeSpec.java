@@ -7,12 +7,38 @@
  */
 package com.freshbourne.multimap.btree;
 
+import org.junit.Before;
 import org.junit.Test;
 
-public class InnerNodeSpec extends InnerNodeTestBase {
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
+
+public class InnerNodeSpec {
 	
 	@Test(expected= IllegalStateException.class)
 	public void insertShouldRequireInitializedRoot(){
 		node.insert(key1, val1);
+	}
+	
+	protected final static Injector injector;
+	protected InnerNode<Integer, String> node;
+
+	protected int key1 = 1;
+	protected int key2 = 2;
+
+	protected String val1 = "val1";
+	protected String val2 = "value2";
+
+	static {
+		injector = Guice.createInjector(new BTreeModule("/tmp/innernode_spec"));
+	}
+
+	@Before
+	public void setUp() {
+		node = injector.getInstance(
+				Key.get(new TypeLiteral<InnerNodeManager<Integer, String>>() {
+				})).createPage();
 	}
 }
