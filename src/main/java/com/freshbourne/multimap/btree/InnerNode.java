@@ -278,6 +278,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 
 		buf.position(Header.NUMBER_OF_KEYS.getOffset());
 		numberOfKeys = buf.getInt();
+        valid = true;
 	}
 
 	/* (non-Javadoc)

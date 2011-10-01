@@ -7,6 +7,7 @@
  */
 package com.freshbourne.multimap.btree;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.junit.*;
@@ -43,25 +44,66 @@ public class InnerNodeUnitTest {
 		// allocate space for header + 2 keys + 3 pointer
 		rawPage = new RawPage(ByteBuffer.allocate(6 + 3 * 4 + 2 * 4), 100);
 		
-		node = new InnerNode<Integer, Integer>(rawPage, IntegerSerializer.INSTANCE,
-				IntegerComparator.INSTANCE, keyPageManager, leafPageManager, innerNodePageManager);
-		node.initialize();
+		node = getNewNode();
 	}
+
+    private InnerNode<Integer, Integer> getNewNode(){
+        return new InnerNode<Integer, Integer>(rawPage, IntegerSerializer.INSTANCE,
+				IntegerComparator.INSTANCE, keyPageManager, leafPageManager, innerNodePageManager);
+    }
 	
 	/**
 	 * sets up the leaf so that node requests page 100 for values < 0, page 101 for values >= 0
 	 */
-	private void initRootState(){
+    @Test
+	public void initRootState(){
+        node.initialize();
 		node.initRootState(100, 0, 101);
+        ByteBuffer buf = rawPage.bufferForReading(InnerNode.Header.size());
+		assertEquals(100, buf.getInt());
+		assertEquals(0, buf.getInt());
+		assertEquals(101, buf.getInt());
 	}
+
+    @Test
+    public void loadNode() throws IOException {
+        node.initialize();
+        node.initRootState(100, 0, 101);
+        node = getNewNode();
+
+        // after #getNewNode(), a load or initialize should be required
+        assertFalse(node.isValid());
+
+        ByteBuffer buf = rawPage.bufferForWriting(rawPage.bufferForReading(0).limit() - 8);
+        buf.putInt(1000); // key
+        buf.putInt(102); // pageid
+
+        // set the number of keys to 2
+        buf = rawPage.bufferForWriting(InnerNode.Header.NUMBER_OF_KEYS.getOffset());
+        buf.putInt(2);
+
+        node.load();
+
+        assertTrue(node.isValid());
+        assertEquals(node.getMaxNumberOfKeys(), node.getNumberOfKeys());
+
+        // check if getting the last page works
+        when(leafPageManager.hasPage(102)).thenReturn(true);
+        when(leafPageManager.getPage(102)).thenReturn(leaf1);
+        node.insert(1001, 11);
+		verify(leaf1).insert(1001, 11);
+
+    }
+
+    @Test(expected = IOException.class)
+    public void loadIllRawPageShouldThrowException() throws IOException {
+        node.load();
+    }
 	
 	@Test
 	public void testInitRootState(){
 		initRootState();
-		ByteBuffer buf = rawPage.bufferForReading(InnerNode.Header.size());
-		assertEquals(100, buf.getInt());
-		assertEquals(0, buf.getInt());
-		assertEquals(101, buf.getInt());
+
 	}
 	
 	@Test
@@ -83,10 +125,10 @@ public class InnerNodeUnitTest {
 	}
 	
 	@Test
-	public void testLeafSplit(){
-		initRootState();
-		
-		// node.insert(10, 11);
+	public void testLeafSplit() throws IOException {
+		loadNode();
+
+        // node.insert(10, 11);
 		
 		
 		// assertEquals(node.getMaxNumberOfKeys(), node.getNumberOfKeys());
