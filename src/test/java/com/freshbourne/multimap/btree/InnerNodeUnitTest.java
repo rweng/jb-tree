@@ -48,6 +48,9 @@ public class InnerNodeUnitTest {
 		node.initialize();
 	}
 	
+	/**
+	 * sets up the leaf so that node requests page 100 for values < 0, page 101 for values >= 0
+	 */
 	private void initRootState(){
 		node.initRootState(100, 0, 101);
 	}
@@ -71,8 +74,19 @@ public class InnerNodeUnitTest {
 	}
 	
 	@Test
+	public void whenTheKeyMatchesGoLeft(){
+		initRootState();
+		when(leafPageManager.hasPage(100)).thenReturn(true);
+		when(leafPageManager.getPage(100)).thenReturn(leaf1);
+		node.insert(0, 11);
+		verify(leaf1).insert(0, 11);
+	}
+	
+	@Test
 	public void testLeafSplit(){
 		initRootState();
+		
+		// node.insert(10, 11);
 		
 		
 		// assertEquals(node.getMaxNumberOfKeys(), node.getNumberOfKeys());
