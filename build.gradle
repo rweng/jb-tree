@@ -29,8 +29,7 @@ sourceSets {
 		java {
 			srcDir 'src/test/general'
 			srcDir 'src/test/integration'
-			srcDir 'src/test/unit'
-            srcDir 'src/test/java'
+			srcDir 'src/test/java'
 			}
 	}
 }
