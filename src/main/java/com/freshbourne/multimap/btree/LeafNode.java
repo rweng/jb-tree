@@ -219,10 +219,6 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		setNumberOfEntries(getNumberOfEntries() + 1);
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.btree.Node#getNumberOfEntries()
-	 */
-	@Override
 	public int getNumberOfEntries() {
 		return numberOfEntries;
 	}

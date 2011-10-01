@@ -38,11 +38,6 @@ public interface Node<K, V> {
 	public Integer getId();
 	
 	/**
-	 * @return number of values in or under a node
-	 */
-	public int getNumberOfEntries();
-	
-	/**
 	 * @return number of keys in a node
 	 */
 	public int getNumberOfKeys();

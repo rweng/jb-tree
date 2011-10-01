@@ -115,27 +115,15 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		initRootState(pageId1, keySerializer.serialize(key), pageId2);
 	}
 		
-	
-		/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMap#getNumberOfEntries()
-	 */
-	@Override
-	public int getNumberOfEntries() {
-		ensureValid();
-
-		throw new UnsupportedOperationException("recursive get number of entries not yet supported.");
-		
-	}
-	
 	private Integer getPageIdForKey(K key){
 		ByteBuffer buf = rawPage.bufferForReading(getOffsetOfPageIdForKey(key));
 		return buf.getInt();
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.MultiMap#containsKey(java.lang.Object)
+	
+	/**
+	 * Recursively check, if on of the leafs contains the given key 
 	 */
-	@Override
 	public boolean containsKey(K key) {
 		ensureValid();
 		ensureKeyNotNull(key);

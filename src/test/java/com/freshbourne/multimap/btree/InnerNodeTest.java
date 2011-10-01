@@ -17,11 +17,6 @@ import com.google.inject.TypeLiteral;
 
 public class InnerNodeTest {
 	
-	@Test(expected= IllegalStateException.class)
-	public void insertShouldRequireInitializedRoot(){
-		node.insert(key1, val1);
-	}
-	
 	protected final static Injector injector;
 	protected InnerNode<Integer, String> node;
 
@@ -40,5 +35,16 @@ public class InnerNodeTest {
 		node = injector.getInstance(
 				Key.get(new TypeLiteral<InnerNodeManager<Integer, String>>() {
 				})).createPage();
+	}
+	
+	@Test(expected= IllegalStateException.class)
+	public void insertShouldRequireInitializedRoot(){
+		node.insert(key1, val1);
+	}
+	
+	
+	@Test
+	public void insertUntilNodeIsFull(){
+		// node.containsKey(key)
 	}
 }
