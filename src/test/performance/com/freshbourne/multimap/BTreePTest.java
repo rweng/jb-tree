@@ -7,6 +7,8 @@
  */
 package com.freshbourne.multimap;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 
 import org.junit.Ignore;
@@ -15,7 +17,7 @@ import org.junit.Test;
 import com.freshbourne.multimap.btree.BTree;
 import com.freshbourne.multimap.btree.BTreeProvider;
 
-public class BTreePTest extends MultiMapPTest<Integer, String>  {
+public class BTreePTest extends MultiMapTestBase<Integer, String>  {
 	
 	private static String path = "/tmp/btree_performance_test";
 	private static BTreeProvider provider = new BTreeProvider(path);
@@ -24,6 +26,18 @@ public class BTreePTest extends MultiMapPTest<Integer, String>  {
 		super(provider);
 	}
 	
+	@Test
+	public void shouldWorkWithMassiveValues(){
+		int size = 10000;
+
+		fill(size);
+		
+		assertEquals(size, getMultiMap().getNumberOfEntries());
+		key1 = getProvider().createMaxKey();
+		simpleTests();
+		key1 = getProvider().createMinKey();
+		simpleTests();
+	}
 	
 	@Test @Ignore("does not work yet")
 	public void shouldNotHaveTooMuchOverhead(){
