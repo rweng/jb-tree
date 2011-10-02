@@ -131,7 +131,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         }
 
         public Node<K, V> getRightNode() {
-            int offset = getOffset() + Integer.SIZE / 8;
+            int offset = getOffset() + keySerializer.getSerializedLength();
             int pageId = rawPage().bufferForReading(offset).getInt();
             return pageIdToNode(pageId);
         }

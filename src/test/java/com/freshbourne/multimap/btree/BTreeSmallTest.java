@@ -10,6 +10,10 @@ package com.freshbourne.multimap.btree;
 
 import com.freshbourne.io.FileResourceManager;
 import com.freshbourne.io.PageSize;
+import com.freshbourne.serializer.FixLengthSerializer;
+import com.freshbourne.serializer.FixedStringSerializer;
+import com.freshbourne.serializer.Serializer;
+import com.freshbourne.serializer.StringSerializer;
 import com.google.inject.*;
 import com.google.inject.util.Modules;
 import org.apache.log4j.Logger;
@@ -18,7 +22,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
+import java.math.BigInteger;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -98,5 +103,45 @@ public class BTreeSmallTest {
             latest = next;
         }
         assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void testLargeKeyValues() throws IOException {
+        // create a new injector with large pagesize and string-serialization for 1000 bytes
+        Injector newInjector = Guice.createInjector(Modules.override(new BTreeModule
+       ((FILE_PATH))).with(new AbstractModule() {
+            @Override protected void configure() {
+                bind(Integer.class).annotatedWith(PageSize.class).toInstance(PageSize.DEFAULT_PAGE_SIZE);
+                bind(new TypeLiteral<Serializer<String, byte[]>>() {
+                        }).toInstance(FixedStringSerializer.INSTANCE_1000);
+                        bind(new TypeLiteral<FixLengthSerializer<String, byte[]>>() {
+                        }).toInstance(FixedStringSerializer.INSTANCE_1000);
+
+            }
+        }));
+
+        // ensure that new injector is working
+        assertEquals(1000, newInjector.getInstance(Key.get(new TypeLiteral<FixLengthSerializer<String, byte[]>>() {
+                                })).getSerializedLength());
+
+        // initialize new btree
+        new File(FILE_PATH).delete();
+        BTree<String, String> newTree = newInjector.getInstance(Key.get(new TypeLiteral<BTree<String, String>>() {
+        }));
+        newTree.initialize();
+
+
+        // do the actual test
+        int count = 100;
+        for(int i = 0; i < count; i++){
+            if(i==2)
+                LOG.debug("DEBUG");
+
+            LOG.debug("i="+i);
+            newTree.add("" + i, "" + i);
+            newTree.checkStructure();
+        }
+
+        
     }
 }
