@@ -72,6 +72,7 @@ public class BTreeSmallTest {
         for (int i = 0; i < count; i++) {
             LOG.info("i = " + i);
             tree.add(i, i);
+            LOG.info("Depth: " + tree.getDepth());
             Iterator<Integer> iterator = tree.getIterator();
 
             int latest = iterator.next();
@@ -84,7 +85,6 @@ public class BTreeSmallTest {
             assertFalse(iterator.hasNext());
         }
 
-        LOG.info("Depth: " + tree.getDepth());
 
         assertEquals(count, tree.getNumberOfEntries());
         Iterator<Integer> iterator = tree.getIterator();

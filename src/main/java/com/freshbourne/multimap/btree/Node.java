@@ -92,11 +92,15 @@ public interface Node<K, V> {
      * @return first key of first leaf
      */
     public K getFirstLeafKey();
+
+    public byte[] getFirstLeafKeySerialized();
     
     /**
      * @return last key of last leaf
      */
     public K getLastLeafKey();
+
+    public byte[] getLastLeafKeySerialized();
     
     public Iterator<V> getIterator(K from, K to);
 
@@ -104,4 +108,6 @@ public interface Node<K, V> {
      * @return 1 if the node is a leaf, otherwise the depth of the innernode
      */
     public int getDepth();
+
+
 }

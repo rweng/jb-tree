@@ -58,11 +58,11 @@ public class LeafNodeSpec {
 	@Test public void shouldBeAbleToGetLastKeyAndPointer(){
 		leaf.insert(key1, value1);
 		assertNotNull(leaf.getLastLeafKey());
-		assertNotNull(leaf.getLastSerializedKey());
+		assertNotNull(leaf.getLastLeafKeySerialized());
 		
 		leaf.insert(key2, value2);
 		assertNotNull(leaf.getLastLeafKey());
-		assertNotNull(leaf.getLastSerializedKey());
+		assertNotNull(leaf.getLastLeafKeySerialized());
 	}
 	
 	@Test public void shouldAlwaysWorkAfterReload(){

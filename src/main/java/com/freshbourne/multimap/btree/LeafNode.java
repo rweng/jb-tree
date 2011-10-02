@@ -204,7 +204,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
         return getKeyAtOffset(offset);
     }
 
-    public byte[] getLastSerializedKey() {
+    @Override public byte[] getLastLeafKeySerialized() {
         ByteBuffer buffer = rawPage().bufferForReading(getOffsetForKeyPos(getNumberOfEntries() - 1));
         byte[] buf = new byte[keySerializer.getSerializedLength()];
         buffer.get(buf);
@@ -225,6 +225,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
         return getKeyAtOffset(pos);
     }
 
+    
     /**
      * @param key
      * @param value
@@ -588,7 +589,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
                     this.insert(key, value);
                 }
 
-                return new AdjustmentAction<K, V>(ACTION.UPDATE_KEY, nextLeaf.getFirstSerializedKey(), null);
+                return new AdjustmentAction<K, V>(ACTION.UPDATE_KEY, nextLeaf.getFirstLeafKeySerialized(), null);
             }
 
 
@@ -614,7 +615,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 
         // just to make sure, that the adjustment action is correct:
         AdjustmentAction<K, V> action = new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE,
-                this.getLastSerializedKey(), newLeaf.rawPage().id());
+                this.getLastLeafKeySerialized(), newLeaf.rawPage().id());
 
         return action;
     }
@@ -796,10 +797,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
         return res.size() > 0 ? res.get(0) : null;
     }
 
-    /**
-     * @return
-     */
-    public byte[] getFirstSerializedKey() {
+    @Override public byte[] getFirstLeafKeySerialized() {
         if (getNumberOfEntries() == 0)
             throw new IllegalStateException("you must have keys to get the first serialized key");
 

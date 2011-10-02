@@ -132,8 +132,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
             leafPage = leafPageManager.createPage(false);
             inserted += leafPage.bulkInitialize(kvs, inserted);
 
-            largestKeyOfNode.put(leafPage.getId(), leafPage.getLastSerializedKey());
-            rawKeys.add(leafPage.getLastSerializedKey());
+            largestKeyOfNode.put(leafPage.getId(), leafPage.getLastLeafKeySerialized());
+            rawKeys.add(leafPage.getLastLeafKeySerialized());
 
             // LOG.debug("largest key of page " + leafPage.getId() + " = " + leafPage.getLastLeafKey());
 

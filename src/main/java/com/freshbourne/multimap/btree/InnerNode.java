@@ -508,6 +508,17 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
 
+    /**
+     *
+     * This method moves a number of keys to the given new page. However,
+     * since one key is droped, this node remains with allKeys - keysToBeMoved - 1.
+     *
+     * The most left key of the first pageId in the new Node is passed upwards;
+     * 
+     * @param newPage
+     * @param numberOfKeys
+     * @return
+     */
     private byte[] moveLastToNewPage(InnerNode<K, V> newPage, int numberOfKeys) {
         LOG.debug("moveLastToNewPage():");
         LOG.debug("currentPage: " + toString());
@@ -522,16 +533,20 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         System.arraycopy(rawPage().bufferForWriting(0).array(), from, buf.array(), to, length_to_copy);
         newPage.setNumberOfKeys(numberOfKeys);
 
-        // last key is dropped, get the keyPointerByteSequence
-        byte[] result = new byte[keySerializer.getSerializedLength()];
-        rawPage().bufferForReading(from - getSizeOfPageId()).get(result);
+        // last key is dropped
         setNumberOfKeys(getNumberOfKeys() - numberOfKeys - 1); // one key less
 
+        // get the key to be passed upwards
+        byte[] result = new byte[keySerializer.getSerializedLength()];
 
         LOG.debug("currentPage: " + toString());
         LOG.debug("newPage: " + newPage.toString());
 
-        return result;
+        return newPage.getFirstLeafKeySerialized();
+    }
+
+    public byte[] getFirstLeafKeySerialized() {
+        return getKey(0).getLeftNode().getFirstLeafKeySerialized();
     }
 
     public String toString() {
@@ -712,6 +727,10 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     @Override
     public K getLastLeafKey() {
         return getKey(getNumberOfKeys() - 1).getRightNode().getLastLeafKey();
+    }
+
+    @Override public byte[] getLastLeafKeySerialized() {
+        return getKey(getNumberOfKeys() - 1).getRightNode().getLastLeafKeySerialized();
     }
 
     /* (non-Javadoc)
