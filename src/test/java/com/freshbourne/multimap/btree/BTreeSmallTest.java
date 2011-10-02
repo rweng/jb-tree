@@ -18,9 +18,9 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class BTreeSmallTest {
 
@@ -76,6 +76,15 @@ public class BTreeSmallTest {
         LOG.info("Depth: " + tree.getDepth());
 
         assertEquals(count, tree.getNumberOfEntries());
+        Iterator<Integer> iterator = tree.getIterator();
+
+        int latest = iterator.next();
+        for(int i=0;i < count - 1 ; i++){
+            int next = iterator.next();
+            assertTrue(latest <= next);
+            latest = next;
+        }
+        assertFalse(iterator.hasNext());
     }
 
 }

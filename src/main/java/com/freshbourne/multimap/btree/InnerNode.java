@@ -125,13 +125,13 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             return pos == getNumberOfKeys() - 1;
         }
 
-        public Node getLeftNode() {
+        public Node<K,V> getLeftNode() {
             int offset = getOffset() - Integer.SIZE / 8;
             int pageId = rawPage().bufferForReading(offset).getInt();
             return pageIdToNode(pageId);
         }
 
-        public Node getRightNode(){
+        public Node<K,V> getRightNode(){
             int offset = getOffset() + Integer.SIZE / 8;
             int pageId = rawPage().bufferForReading(offset).getInt();
             return pageIdToNode(pageId);
@@ -711,8 +711,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
       */
     @Override
     public K getLastLeafKey() {
-        ByteBuffer buf = rawPage().bufferForReading(getOffsetForRightPageIdOfKey(getNumberOfKeys()) - 1);
-        return getPageForPageId(buf.getInt()).getFirstLeafKey();
+        return getKey(getNumberOfKeys() - 1).getRightNode().getLastLeafKey();
     }
 
     /* (non-Javadoc)
