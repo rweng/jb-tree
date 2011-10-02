@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -26,12 +27,13 @@ public class BTreeSmallTest {
     private static Injector                injector;
     private        BTree<Integer, Integer> tree;
     private static final Logger LOG = Logger.getLogger(BTreeSmallTest.class);
-    private static final int PAGE_SIZE = 20;
+    private static final int PAGE_SIZE = 30;
+    private static final String FILE_PATH = "/tmp/btree-small-test";
 
 
     static {
         injector = Guice.createInjector(
-                Modules.override(new BTreeModule("/tmp/btree-small-test")).with(new AbstractModule() {
+                Modules.override(new BTreeModule(FILE_PATH)).with(new AbstractModule() {
                     @Override protected void configure() {
                         bind(Integer.class).annotatedWith(PageSize.class).toInstance(PAGE_SIZE);
                     }
@@ -40,6 +42,7 @@ public class BTreeSmallTest {
 
     @Before
     public void setUp() {
+        new File(FILE_PATH).delete();
         tree = injector.getInstance(Key.get(new TypeLiteral<BTree<Integer, Integer>>() {
         }));
     }
@@ -62,7 +65,7 @@ public class BTreeSmallTest {
 
     @Test
     public void test() throws IOException {
-        int count = 1000;
+        int count = 10;
 
         tree.initialize();
 

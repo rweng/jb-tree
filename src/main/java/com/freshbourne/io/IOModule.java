@@ -8,16 +8,15 @@
 
 package com.freshbourne.io;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.TypeLiteral;
+import com.google.inject.*;
 import com.google.inject.name.Names;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 
 public class IOModule extends AbstractModule{
+    private static final Logger LOG = Logger.getLogger(IOModule.class);
 	
 	// ***** CONFIGURATION (CONSTRUCTURS) *****
 	private File file;
@@ -50,7 +49,8 @@ public class IOModule extends AbstractModule{
 	}
 
     @Provides @Singleton
-	public ResourceManager provideFileResourceManager() {
+	public ResourceManager provideFileResourceManager(@PageSize int pageSize) {
+        LOG.info("pageSize: " + pageSize);
 		ResourceManager result = new FileResourceManager(file, pageSize, doLock);
 		try {
 			result.open();

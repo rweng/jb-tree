@@ -55,10 +55,10 @@ public class ResourceHeader extends AbstractMustInitializeOrLoad {
 		ioChannel.position(0);
 		ioChannel.read(firstPage);
 		firstPage.position(0);
-		
-		int ps = firstPage.getInt();
+
+        int ps = firstPage.getInt();
 		if(pageSize != ps)
-			throw new RuntimeException("index has a different page size");
+            throw new RuntimeException("Resource has a different page size");
 		
 		lastId = firstPage.getInt();
 		valid = true;
