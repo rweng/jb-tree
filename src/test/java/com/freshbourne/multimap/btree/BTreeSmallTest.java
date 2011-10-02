@@ -70,11 +70,16 @@ public class BTreeSmallTest {
 
     @Test
     public void testMultiLevelInsertForward() throws IOException {
-        int count = 100;
+        int count = 1000;
 
         tree.initialize();
 
         for (int i = 0; i < count; i++) {
+
+            if(i == 135){
+                LOG.debug("debug");
+            }
+
             assertTrue(tree.isValid());
             LOG.info("i = " + i);
             tree.add(i, i);
@@ -107,7 +112,7 @@ public class BTreeSmallTest {
 
         @Test
     public void testMultiLevelInsertBackward() throws IOException {
-        int count = 100;
+        int count = 1000;
 
         tree.initialize();
 

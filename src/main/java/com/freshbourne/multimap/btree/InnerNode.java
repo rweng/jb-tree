@@ -36,8 +36,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
     private static final NodeType  NODE_TYPE    = NodeType.INNER_NODE;
     private static final Logger    LOG          = Logger.getLogger(InnerNode.class);
-    private              KeyStruct tmpKeyStruct = new KeyStruct();
-
+    
     static enum Header {
         NODE_TYPE(0) {}, // char
         NUMBER_OF_KEYS(Character.SIZE / 8); // int
@@ -291,6 +290,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     private int posOfFirstLargerOrEqualKey(K key) {
+        KeyStruct tmpKeyStruct = new KeyStruct();
 
         for (int i = 0; i < getNumberOfKeys(); i++) {
 
@@ -307,21 +307,12 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         return rawPage().bufferForReading(getOffsetForLeftPageIdOfKey(i)).getInt();
     }
 
-    private KeyStruct key() {
-        return tmpKeyStruct;
-    }
-
-    private KeyStruct key(int pos) {
-        tmpKeyStruct.setPos(pos);
-        return tmpKeyStruct;
-    }
-
     private int getOffsetForLeftPageIdOfKey(int i) {
-        return key(i).getOffset() - Integer.SIZE / 8;
+        return new KeyStruct(i).getOffset() - Integer.SIZE / 8;
     }
 
     private int getOffsetForRightPageIdOfKey(int i) {
-        return key(i).getOffset() + keySerializer.getSerializedLength();
+        return new KeyStruct(i).getOffset() + keySerializer.getSerializedLength();
     }
 
     private Integer getRightPageIdOfKey(int i) {
@@ -548,7 +539,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     public byte[] getFirstLeafKeySerialized() {
-        return key(0).getLeftNode().getFirstLeafKeySerialized();
+        return new KeyStruct(0).getLeftNode().getFirstLeafKeySerialized();
     }
 
     public String toString() {
@@ -556,7 +547,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         KeyStruct keyStruct = null;
         do {
             if (keyStruct == null)
-                keyStruct = key(0);
+                keyStruct = new KeyStruct(0);
             else
                 keyStruct.becomeNext();
 
@@ -578,7 +569,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     private void insertKeyPointerPageIdAtPosition(byte[] serializedKey,
                                                   Integer pageId, int posOfKeyForInsert) {
 
-        KeyStruct thisKeyStruct = key(posOfKeyForInsert);
+        KeyStruct thisKeyStruct = new KeyStruct(posOfKeyForInsert);
         ByteBuffer buf = rawPage().bufferForWriting(thisKeyStruct.getOffset());
 
         int spaceNeededForInsert = getSizeOfPageId() + keySerializer.getSerializedLength();
@@ -618,7 +609,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     private void setKey(byte[] serializedKey, int pos) {
-        ByteBuffer buf = rawPage().bufferForWriting(key(pos).getOffset());
+        ByteBuffer buf = rawPage().bufferForWriting(new KeyStruct(pos).getOffset());
         buf.put(serializedKey);
     }
 
@@ -720,11 +711,11 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
       */
     @Override
     public K getLastLeafKey() {
-        return key(getNumberOfKeys() - 1).getRightNode().getLastLeafKey();
+        return new KeyStruct(getNumberOfKeys() - 1).getRightNode().getLastLeafKey();
     }
 
     @Override public byte[] getLastLeafKeySerialized() {
-        return key(getNumberOfKeys() - 1).getRightNode().getLastLeafKeySerialized();
+        return new KeyStruct(getNumberOfKeys() - 1).getRightNode().getLastLeafKeySerialized();
     }
 
     /* (non-Javadoc)
@@ -736,7 +727,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     @Override public int getDepth() {
-        return key(0).getLeftNode().getDepth() + 1;
+        return new KeyStruct(0).getLeftNode().getDepth() + 1;
     }
 
     @Override public void checkStructure() throws IllegalStateException {
