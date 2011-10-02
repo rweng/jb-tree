@@ -70,10 +70,6 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         }
 
         public void setPos(int pos) {
-            if (pos >= getNumberOfKeys())
-                throw new IllegalArgumentException(
-                        "Key cannot be set to Position " + pos + ". The innerNode has only " + getNumberOfKeys() + " keys.");
-
             this.pos = pos;
         }
 
@@ -109,19 +105,6 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
         public String toString() {
             return "K(" + getKey() + ")";
-        }
-
-        /**
-         * the normal setPosition throws an exception when tried to set the pos to a value
-         * that is larger as the max number of keys in this innerNode.
-         *
-         * This method does not throw the exception. It should be used for s.th. like writing a new key
-         * or calculating offset etc for non-existant keys.
-         * 
-         * @param pos
-         */
-        public void forcePos(int pos) {
-            this.pos = pos;
         }
 
         public String toStringWithLeftAndRightKey() {
@@ -592,8 +575,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     private void insertKeyPointerPageIdAtPosition(byte[] serializedKey,
                                                   Integer pageId, int posOfKeyForInsert) {
 
-        Key thisKey = getKey();
-        thisKey.forcePos(posOfKeyForInsert);
+        Key thisKey = getKey(posOfKeyForInsert);
         ByteBuffer buf = rawPage().bufferForWriting(thisKey.getOffset());
 
         int spaceNeededForInsert = getSizeOfPageId() + keySerializer.getSerializedLength();

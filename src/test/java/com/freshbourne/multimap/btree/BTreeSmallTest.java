@@ -65,7 +65,7 @@ public class BTreeSmallTest {
 
     @Test
     public void test() throws IOException {
-        int count = 10;
+        int count = 100;
 
         tree.initialize();
 
