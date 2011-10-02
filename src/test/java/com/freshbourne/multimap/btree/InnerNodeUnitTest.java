@@ -209,12 +209,4 @@ public class InnerNodeUnitTest {
                         serializedPageBuffer.array(), 102);
         return adjustment;
     }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void handleNewNodeActionWithIllegalAction() throws IOException {
-        loadNode();
-        AdjustmentAction<Integer, Integer> action = getNewAdjustmentAction(100);
-        action.setAction(AdjustmentAction.ACTION.UPDATE_KEY);
-        node1.handleNewNodeAction(action, 1);
-    }
 }

@@ -37,9 +37,9 @@ import org.apache.log4j.Logger;
  */
 public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
-    private static final NodeType NODE_TYPE = NodeType.INNER_NODE;
-    private static final Logger   LOG       = Logger.getLogger(InnerNode.class);
-    private InnerNode<K, V>.Key key;
+    private static final NodeType  NODE_TYPE    = NodeType.INNER_NODE;
+    private static final Logger    LOG          = Logger.getLogger(InnerNode.class);
+    private              KeyStruct tmpKeyStruct = new KeyStruct();
 
     static enum Header {
         NODE_TYPE(0) {}, // char
@@ -61,12 +61,15 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
 
-    private class Key {
+    private class KeyStruct {
 
         private int pos;
 
-        private Key(int pos) {
+        private KeyStruct(int pos) {
             setPos(pos);
+        }
+
+        private KeyStruct() {
         }
 
         public void setPos(int pos) {
@@ -96,7 +99,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             return byteBuf;
         }
 
-        private K getKey(){
+        private K getKey() {
             ByteBuffer buf = rawPage().bufferForReading(getOffset());
             byte[] bytes = new byte[keySerializer.getSerializedLength()];
             buf.get(bytes);
@@ -109,14 +112,14 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
         public String toStringWithLeftAndRightKey() {
             String str = "";
-            if(pos > 0){
-                str += new Key(pos - 1).toString() + " - ";
+            if (pos > 0) {
+                str += new KeyStruct(pos - 1).toString() + " - ";
             }
 
             str += toString();
 
-            if(!isLastKey())
-                str += " - " + new Key(pos+1).toString();
+            if (!isLastKey())
+                str += " - " + new KeyStruct(pos + 1).toString();
 
             return str;
         }
@@ -125,31 +128,33 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             return pos == getNumberOfKeys() - 1;
         }
 
-        public Node<K,V> getLeftNode() {
+        public Node<K, V> getLeftNode() {
             int offset = getOffset() - Integer.SIZE / 8;
             int pageId = rawPage().bufferForReading(offset).getInt();
             return pageIdToNode(pageId);
         }
 
-        public Node<K,V> getRightNode(){
+        public Node<K, V> getRightNode() {
             int offset = getOffset() + Integer.SIZE / 8;
             int pageId = rawPage().bufferForReading(offset).getInt();
             return pageIdToNode(pageId);
         }
 
-        private Node<K, V> pageIdToNode(int id){
-            if(leafPageManager.hasPage(id)) {
+        private Node<K, V> pageIdToNode(int id) {
+            if (leafPageManager.hasPage(id)) {
                 return leafPageManager.getPage(id);
-            }
-            else {
+            } else {
                 return innerNodePageManager.getPage(id);
             }
+        }
+
+        public boolean isValid() {
+            return pos < getNumberOfKeys();
         }
     }
 
     private final RawPage                        rawPage;
     private final Comparator<K>                  comparator;
-    // private final FixLengthSerializer<PagePointer, byte[]> pointerSerializer;
     private final DataPageManager<K>             keyPageManager;
     private final PageManager<LeafNode<K, V>>    leafPageManager;
     private final PageManager<InnerNode<K, V>>   innerNodePageManager;
@@ -171,15 +176,12 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             throw new IllegalStateException("comparator must not be null");
         }
 
-
         this.leafPageManager = leafPageManager;
         this.innerNodePageManager = innerNodePageManager;
         this.keyPageManager = keyPageManager;
         this.rawPage = rawPage;
         this.comparator = comparator;
         this.keySerializer = keySerializer;
-
-
     }
 
     public void initRootState(Integer pageId1, byte[] serializedKey, Integer pageId2) {
@@ -296,7 +298,8 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
         for (int i = 0; i < getNumberOfKeys(); i++) {
 
-            byte[] sKey = getKey(i).getSerializedKey();
+            tmpKeyStruct.setPos(i);
+            byte[] sKey = tmpKeyStruct.getSerializedKey();
             if (comparator.compare(keySerializer.deserialize(sKey), key) >= 0) {
                 return i;
             }
@@ -308,12 +311,21 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         return rawPage().bufferForReading(getOffsetForLeftPageIdOfKey(i)).getInt();
     }
 
+    private KeyStruct key() {
+        return tmpKeyStruct;
+    }
+
+    private KeyStruct key(int pos) {
+        tmpKeyStruct.setPos(pos);
+        return tmpKeyStruct;
+    }
+
     private int getOffsetForLeftPageIdOfKey(int i) {
-        return getKey(i).getOffset() - Integer.SIZE / 8;
+        return key(i).getOffset() - Integer.SIZE / 8;
     }
 
     private int getOffsetForRightPageIdOfKey(int i) {
-        return getKey(i).getOffset() + keySerializer.getSerializedLength();
+        return key(i).getOffset() + keySerializer.getSerializedLength();
     }
 
     private Integer getRightPageIdOfKey(int i) {
@@ -398,6 +410,18 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         return getOffsetForLeftPageIdOfKey(posOfFirstLargerOrEqualKey);
     }
 
+    /**
+     * @return keyStruct or null
+     */
+    private KeyStruct getFirstLargerOrEqualKeyStruct(K key) {
+        tmpKeyStruct.pos = 0;
+        while (tmpKeyStruct.pos < getNumberOfKeys() && comparator.compare(tmpKeyStruct.getKey(), key) < 0) {
+            tmpKeyStruct.becomeNext();
+        }
+
+        return tmpKeyStruct.isValid() ? tmpKeyStruct : null;
+    }
+
     /* (non-Javadoc)
       * @see com.freshbourne.multimap.btree.Node#insert(java.lang.Object, java.lang.Object)
       */
@@ -406,23 +430,16 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         ensureValid();
         ensureRoot();
 
-        int posOfFirstLargerOrEqualKey = posOfFirstLargerOrEqualKey(key);
-        Integer pageId;
-        if (posOfFirstLargerOrEqualKey < 0) // if key is largest
-            pageId = getRightPageIdOfKey(getNumberOfKeys() - 1);
-        else
-            pageId = getLeftPageIdOfKey(posOfFirstLargerOrEqualKey);
-
-        if (pageId <= 0) {
-            throw new IllegalArgumentException(
-                    "pageId must not be 0 ( posOfFirstLargerOrEqualKey: " + posOfFirstLargerOrEqualKey + " )");
-        }
-
         Node<K, V> node;
-        if (leafPageManager.hasPage(pageId))
-            node = leafPageManager.getPage(pageId);
-        else
-            node = innerNodePageManager.getPage(pageId);
+        KeyStruct ks = getFirstLargerOrEqualKeyStruct(key);
+
+        Integer pageId;
+        if (ks == null) { // if key is largest
+            tmpKeyStruct.pos = getNumberOfKeys() - 1;
+            node = tmpKeyStruct.getRightNode();
+        } else {
+            node = ks.getLeftNode();
+        }
 
         AdjustmentAction<K, V> result;
         result = node.insert(key, value);
@@ -432,41 +449,30 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             return null;
 
         if (result.getAction() == ACTION.UPDATE_KEY) {
-            LOG.debug("ACTION.UPDATE_KEY");
-            LOG.debug("Key inserted = " + key + "at lhs of pos " + posOfFirstLargerOrEqualKey);
-            // some values have been pushed to rhs of posOfFirstLargerOrEqualKey
-            Key thisKey = getKey(posOfFirstLargerOrEqualKey);
-
-            return updateKey(posOfFirstLargerOrEqualKey, result);
+            return handleUpdateKey(tmpKeyStruct, result);
+        } else if (result.getAction() == ACTION.INSERT_NEW_NODE) {
+            return handleNewNodeAction(result, tmpKeyStruct);
+        } else {
+            throw new IllegalStateException("result action must be of type newNode or updateKey");
         }
-
-        if (result.getAction() == ACTION.INSERT_NEW_NODE) {
-            return handleNewNodeAction(result, posOfFirstLargerOrEqualKey);
-        }
-
-        throw new UnsupportedOperationException();
     }
 
     /**
      * this method should be called when an insert action results in a new node that has to be inserted
      * in this node.
      * <p/>
-     * Although this is a code-smell, it is made package-visible for testing purposes.
      *
-     * @param result                     of the insertion
-     * @param posOfFirstLargerOrEqualKey
+     * @param result of the insertion
+     * @param ks
      * @return adjustment action or null
      */
-    AdjustmentAction<K, V> handleNewNodeAction(AdjustmentAction<K, V> result, int posOfFirstLargerOrEqualKey) {
+    private AdjustmentAction<K, V> handleNewNodeAction(AdjustmentAction<K, V> result, KeyStruct ks) {
         if (result.getAction() != ACTION.INSERT_NEW_NODE) {
             throw new IllegalArgumentException("result action type must be INSERT_NEW_NODE");
         }
 
-        Key currentKey = getKey(posOfFirstLargerOrEqualKey);
-
         LOG.debug("handleNewNodeAction()");
         LOG.debug("adjustmentActionKey: " + keySerializer.deserialize(result.getSerializedKey()));
-        LOG.debug("posOfFirstLargerOrEqualKey:" + currentKey.toStringWithLeftAndRightKey());
 
         // a new child node has been created and a key must be inserted, check for available space
         if (getNumberOfKeys() < getMaxNumberOfKeys()) {
@@ -475,11 +481,9 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             // the key replaces the old key for our node, since the split caused a different
             // key to be the now highest in the subtree
 
-            int posForInsert = posOfFirstLargerOrEqualKey == -1 ? getNumberOfKeys() : posOfFirstLargerOrEqualKey;
+            int posForInsert = ks == null ? getNumberOfKeys() : ks.pos;
             insertKeyPointerPageIdAtPosition(
                     result.getSerializedKey(), result.getPageId(), posForInsert);
-            LOG.debug("key inserted: " + getKey(posForInsert).toStringWithLeftAndRightKey());
-
 
             // no further adjustment necessary. even if we inserted to the last position, the
             // highest key in the subtree below is still the same, because otherwise we would
@@ -497,11 +501,11 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         // decide where to insert the pointer we are supposed to insert
         // if the old key position is larger than the current numberOfKeys, the
         // entry has to go to the next node
-        if (posOfFirstLargerOrEqualKey > getNumberOfKeys() || posOfFirstLargerOrEqualKey == -1) {
+        if (ks == null || ks.pos > getNumberOfKeys()) {
             insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(),
-                    posOfFirstLargerOrEqualKey - getNumberOfKeys() + 1);
+                    ks.pos - getNumberOfKeys() + 1);
         } else {
-            insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), posOfFirstLargerOrEqualKey);
+            insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), ks.pos);
         }
 
         return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, keyUpwardsBytes, inp.getId());
@@ -509,12 +513,11 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
 
     /**
-     *
      * This method moves a number of keys to the given new page. However,
      * since one key is droped, this node remains with allKeys - keysToBeMoved - 1.
-     *
+     * <p/>
      * The most left key of the first pageId in the new Node is passed upwards;
-     * 
+     *
      * @param newPage
      * @param numberOfKeys
      * @return
@@ -546,35 +549,21 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     public byte[] getFirstLeafKeySerialized() {
-        return getKey(0).getLeftNode().getFirstLeafKeySerialized();
+        return key(0).getLeftNode().getFirstLeafKeySerialized();
     }
 
     public String toString() {
-        String str = "InnerNode(id: " + getId() + ", keys: " + getNumberOfKeys()+ "):";
-        Key key = null;
+        String str = "InnerNode(id: " + getId() + ", keys: " + getNumberOfKeys() + "):";
+        KeyStruct keyStruct = null;
         do {
-            if (key == null)
-                key = getKey(0);
+            if (keyStruct == null)
+                keyStruct = key(0);
             else
-                key.becomeNext();
+                keyStruct.becomeNext();
 
-            str += " " + key.toString();
-        } while (key.hasNext());
+            str += " " + keyStruct.toString();
+        } while (keyStruct.hasNext());
         return str;
-    }
-
-    private Key getKey() {
-        if (this.key != null)
-            return this.key;
-
-        key = new Key(0);
-        return key;
-    }
-
-    private Key getKey(int i) {
-        key = getKey();
-        key.setPos(i);
-        return key;
     }
 
     private void ensureRoot() {
@@ -590,8 +579,8 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     private void insertKeyPointerPageIdAtPosition(byte[] serializedKey,
                                                   Integer pageId, int posOfKeyForInsert) {
 
-        Key thisKey = getKey(posOfKeyForInsert);
-        ByteBuffer buf = rawPage().bufferForWriting(thisKey.getOffset());
+        KeyStruct thisKeyStruct = key(posOfKeyForInsert);
+        ByteBuffer buf = rawPage().bufferForWriting(thisKeyStruct.getOffset());
 
         int spaceNeededForInsert = getSizeOfPageId() + keySerializer.getSerializedLength();
         System.arraycopy(buf.array(), buf.position(), buf.array(), buf.position() + spaceNeededForInsert,
@@ -612,24 +601,25 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         return size / (Integer.SIZE / 8 + keySerializer.getSerializedLength());
     }
 
-    private AdjustmentAction<K, V> updateKey(int posOfFirstLargerOrEqualKey, AdjustmentAction<K, V> result) {
+    private AdjustmentAction<K, V> handleUpdateKey(KeyStruct ks, AdjustmentAction<K, V> result) {
         if (result.getAction() != ACTION.UPDATE_KEY)
             throw new IllegalArgumentException("action must be of type UPDATE_KEY");
 
 
-        if (posOfFirstLargerOrEqualKey < 0) { // last page
-            return result; // last page must be propagated up
+        // if we inserted this in the last leaf, then just push the result one level up
+        if (ks == null) {
+            return result;
         }
 
         // We need to adjust our own key, because keys were moved to the next node.
         // That changes the highest key in this page, so the corresponding key
         // must be adjusted.
-        setKey(result.getSerializedKey(), posOfFirstLargerOrEqualKey);
+        setKey(result.getSerializedKey(), ks.pos);
         return null;
     }
 
     private void setKey(byte[] serializedKey, int pos) {
-        ByteBuffer buf = rawPage().bufferForWriting(getKey(pos).getOffset());
+        ByteBuffer buf = rawPage().bufferForWriting(key(pos).getOffset());
         buf.put(serializedKey);
     }
 
@@ -726,11 +716,11 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
       */
     @Override
     public K getLastLeafKey() {
-        return getKey(getNumberOfKeys() - 1).getRightNode().getLastLeafKey();
+        return key(getNumberOfKeys() - 1).getRightNode().getLastLeafKey();
     }
 
     @Override public byte[] getLastLeafKeySerialized() {
-        return getKey(getNumberOfKeys() - 1).getRightNode().getLastLeafKeySerialized();
+        return key(getNumberOfKeys() - 1).getRightNode().getLastLeafKeySerialized();
     }
 
     /* (non-Javadoc)
@@ -742,7 +732,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     @Override public int getDepth() {
-        return getKey(0).getLeftNode().getDepth() + 1;
+        return key(0).getLeftNode().getDepth() + 1;
     }
 
     /* (non-Javadoc)
