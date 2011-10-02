@@ -26,8 +26,8 @@ public class BTreeSmallTest {
 
     private static Injector                injector;
     private        BTree<Integer, Integer> tree;
-    private static final Logger LOG = Logger.getLogger(BTreeSmallTest.class);
-    private static final int PAGE_SIZE = 30;
+    private static final Logger LOG       = Logger.getLogger(BTreeSmallTest.class);
+    private static final int    PAGE_SIZE = 30;
     private static final String FILE_PATH = "/tmp/btree-small-test";
 
 
@@ -48,7 +48,7 @@ public class BTreeSmallTest {
     }
 
     @Test
-    public void ensurePageSizeIsSmall(){
+    public void ensurePageSizeIsSmall() {
         assertEquals(PAGE_SIZE, injector.getInstance(FileResourceManager.class).pageSize());
     }
 
@@ -70,7 +70,18 @@ public class BTreeSmallTest {
         tree.initialize();
 
         for (int i = 0; i < count; i++) {
+            LOG.info("i = " + i);
             tree.add(i, i);
+            Iterator<Integer> iterator = tree.getIterator();
+
+            int latest = iterator.next();
+            for (int j = 0; j <= i - 1; j++) {
+                int next = iterator.next();
+                assertTrue(latest <= next);
+                latest = next;
+            }
+            
+            assertFalse(iterator.hasNext());
         }
 
         LOG.info("Depth: " + tree.getDepth());
@@ -79,7 +90,7 @@ public class BTreeSmallTest {
         Iterator<Integer> iterator = tree.getIterator();
 
         int latest = iterator.next();
-        for(int i=0;i < count - 1 ; i++){
+        for (int i = 0; i < count - 1; i++) {
             int next = iterator.next();
             assertTrue(latest <= next);
             latest = next;

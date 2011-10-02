@@ -743,7 +743,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
                 return result;
             }
 
-            if (currentKeyOffset > getOffsetForKeyPos(getNumberOfEntries() - 1)) {
+            if (currentKeyOffset > currentNode.getOffsetForKeyPos(currentNode.getNumberOfEntries() - 1)) {
                 if (currentNode.getNextLeafId() == null) {
                     return null;
                 }
