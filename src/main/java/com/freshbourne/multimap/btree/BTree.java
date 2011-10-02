@@ -227,8 +227,6 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
     public void add(K key, V value) {
         ensureValid();
 
-        LOG.debug("adding key/value: " + key.toString() + "/" + value.toString());
-
         setNumberOfEntries(getNumberOfEntries() + 1);
 
         AdjustmentAction<K, V> result = root.insert(key, value);
