@@ -435,8 +435,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
         Integer pageId;
         if (ks == null) { // if key is largest
-            tmpKeyStruct.pos = getNumberOfKeys() - 1;
-            node = tmpKeyStruct.getRightNode();
+            node = new KeyStruct(getNumberOfKeys() - 1).getRightNode();
         } else {
             node = ks.getLeftNode();
         }
