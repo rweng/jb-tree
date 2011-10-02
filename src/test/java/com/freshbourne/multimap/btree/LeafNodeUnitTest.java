@@ -34,7 +34,7 @@ import java.io.File;
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.MultiMapSpec;
 
-public class LeafNodeTest {
+public class LeafNodeUnitTest {
 	
 	private LeafNode<Integer, Integer> node;
 	
@@ -279,7 +279,11 @@ public class LeafNodeTest {
 		AdjustmentAction<Integer, Integer> action = node.insert(2, 201);
 		
 		assertEquals(AdjustmentAction.ACTION.UPDATE_KEY, action.getAction());
-		assertEquals(1, (int) IntegerSerializer.INSTANCE.deserialize(action.getSerializedKey()));
+
+        // the new key
+        assertEquals(2, (int) IntegerSerializer.INSTANCE.deserialize(action.getSerializedKey()));
+
+        // leaf1 = 2 values, leaf2 = 3 values
 		assertEquals(2, node.getNumberOfEntries());
 		assertEquals(3, node2.getNumberOfEntries());
 		
@@ -291,5 +295,5 @@ public class LeafNodeTest {
 		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 2, 5, 501);
 		ensureKeyValueInRawPage(rawPage2, Header.size() + IntegerSerializer.INSTANCE.getSerializedLength() * 4, 10, 1001);		
 	}
-
+    
 }
