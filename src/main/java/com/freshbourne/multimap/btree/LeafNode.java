@@ -24,12 +24,14 @@ import com.freshbourne.io.RawPage;
 import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
 import com.freshbourne.multimap.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
-
+import org.apache.log4j.Logger;
 
 
 public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
-	
-	static enum Header{
+
+    private static final Logger LOG = Logger.getLogger(LeafNode.class);
+
+    static enum Header{
 		NODE_TYPE(0){}, // char
 		NUMBER_OF_KEYS(Character.SIZE / 8), // int
 		NEXT_LEAF_ID((Character.SIZE + Integer.SIZE) / 8); // int
@@ -128,9 +130,19 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		System.err.println("The current LeafPage with the id " + rawPage.id() + " is not valid");
 		System.exit(1);
 	}
+
+    public String toString(){
+        String str = "leafNode(id: " + getId() + ", values: " + getNumberOfEntries() + "): ";
+        str += "firstKey: " + (getFirstLeafKey() == null ? "null" : getFirstLeafKey().toString());
+        str += ",lastKey: " + (getLastLeafKey() == null ? "null" : getLastLeafKey().toString());
+        return str;
+    }
 	
 	public void prependEntriesFromOtherPage(LeafNode<K, V> source, int num){
-		
+		LOG.debug("prependEntriesFromOtherPage() - num = " + num);
+        LOG.debug("currentLeaf: " + toString());
+        LOG.debug("sourceLeaf: " + source.toString());
+
 		// checks
 		if(num < 0)
 			throw new IllegalArgumentException("num must be > 0");
@@ -141,8 +153,9 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 		if(getNumberOfEntries() + num > maxEntries)
 			throw new IllegalArgumentException("not enough space in this leaf to prepend " + num + " entries from other leaf");
 		
-		if(getNumberOfEntries() > 0 && comparator.compare(source.getLastLeafKey(), getFirstLeafKey()) > 0)
-			throw new IllegalStateException("the last key of the provided source leaf is larger than this leafs first key");
+		if(getNumberOfEntries() > 0 && comparator.compare(source.getLastLeafKey(), getFirstLeafKey()) > 0){
+	       throw new IllegalStateException("the last key of the provided source leaf is larger than this leafs first key");
+        }
 		
 		ByteBuffer buffer = rawPage().bufferForWriting(0);
 		
@@ -167,8 +180,8 @@ public class LeafNode<K,V> implements Node<K,V>, ComplexPage {
 	
 	public K getLastLeafKey(){
 		if(getNumberOfEntries() == 0)
-			throw new IllegalStateException("you can only get the last key if there are any Keys in the Leaf");
-		
+            return null;
+
 		int offset = offsetBehindLastEntry();
 		offset -= keySerializer.getSerializedLength() + valueSerializer.getSerializedLength();
 		return getKeyAtOffset(offset);

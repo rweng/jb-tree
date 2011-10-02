@@ -79,8 +79,6 @@ public class RawPage {
 	public void sync() {
 		if (isModified())
 			getResourceManager().writePage(this);
-		else
-			LOG.debug("page not modified");
 	}
     
     

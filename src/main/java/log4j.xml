@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <!--
   ~ This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
   ~ http://creativecommons.org/licenses/by-nc/3.0/
@@ -17,8 +17,12 @@
     </layout>
   </appender>
 
+  <logger name="com.freshbourne.multimap.btree.LeafNode">
+      <level value="debug" />
+  </logger>
+    
   <root>
-    <priority value ="debug" />
+    <priority value ="info" />
     <appender-ref ref="console" />
   </root>
 

@@ -100,8 +100,15 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             return byteBuf;
         }
 
+        private K getKey(){
+            ByteBuffer buf = rawPage().bufferForReading(getOffset());
+            byte[] bytes = new byte[keySerializer.getSerializedLength()];
+            buf.get(bytes);
+            return keySerializer.deserialize(bytes);
+        }
+
         public String toString() {
-            return "";
+            return "K(" + getKey() + ")";
         }
 
         /**
@@ -403,6 +410,11 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             return null;
 
         if (result.getAction() == ACTION.UPDATE_KEY) {
+            LOG.debug("ACTION.UPDATE_KEY");
+            LOG.debug("Key inserted = " + key + "at lhs of pos " + posOfFirstLargerOrEqualKey);
+            // some values have been pushed to rhs of posOfFirstLargerOrEqualKey
+            Key thisKey = getKey(posOfFirstLargerOrEqualKey);
+
             return updateKey(posOfFirstLargerOrEqualKey, result);
         }
 
@@ -492,7 +504,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     public String toString() {
-        String str = "InnerNode(" + getId() + "):";
+        String str = "InnerNode(id: " + getId() + ", keys: " + getNumberOfKeys()+ "):";
         Key key = null;
         do {
             if (key == null)
