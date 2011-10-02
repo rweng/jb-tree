@@ -9,10 +9,7 @@ package com.freshbourne.multimap.btree;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import com.freshbourne.io.ComplexPage;
 import com.freshbourne.io.DataPageManager;
@@ -59,7 +56,6 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             return offset;
         }
     }
-
 
     private class KeyStruct {
 
@@ -391,6 +387,10 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         }
     }
 
+    public int minPageSize() {
+        return Header.size() + 3 * keySerializer.getSerializedLength() + 4 * Integer.SIZE / 8;
+    }
+
     /* (non-Javadoc)
       * @see com.freshbourne.io.ComplexPage#rawPage()
       */
@@ -448,9 +448,9 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             return null;
 
         if (result.getAction() == ACTION.UPDATE_KEY) {
-            return handleUpdateKey(tmpKeyStruct, result);
+            return handleUpdateKey(ks, result);
         } else if (result.getAction() == ACTION.INSERT_NEW_NODE) {
-            return handleNewNodeAction(result, tmpKeyStruct);
+            return handleNewNodeAction(result, ks);
         } else {
             throw new IllegalStateException("result action must be of type newNode or updateKey");
         }
@@ -500,13 +500,19 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         // decide where to insert the pointer we are supposed to insert
         // if the old key position is larger than the current numberOfKeys, the
         // entry has to go to the next node
-        if (ks == null || ks.pos > getNumberOfKeys()) {
-            insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(),
-                    ks.pos - getNumberOfKeys() + 1);
-        } else {
+        if(ks != null && ks.pos <= getNumberOfKeys()){
             insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), ks.pos);
-        }
+        } else {
+            // determine the position where the key should have to be inserted.
+            // if ks == null, then it was at the end
+            int pos = ks == null ? getMaxNumberOfKeys() : ks.pos;
 
+            // substract the number of keys in this node, and one more, the omitted one.
+            pos = pos - getNumberOfKeys() - 1;
+            inp.insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(),
+                    pos);
+        }
+        
         return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, keyUpwardsBytes, inp.getId());
     }
 
@@ -537,12 +543,6 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
         // last key is dropped
         setNumberOfKeys(getNumberOfKeys() - numberOfKeys - 1); // one key less
-
-        // get the key to be passed upwards
-        byte[] result = new byte[keySerializer.getSerializedLength()];
-
-        LOG.debug("currentPage: " + toString());
-        LOG.debug("newPage: " + newPage.toString());
 
         return newPage.getFirstLeafKeySerialized();
     }
@@ -650,6 +650,11 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
       */
     @Override
     public void initialize() {
+
+        if (rawPage().bufferForReading(0).limit() < minPageSize()) {
+            throw new IllegalStateException("rawPage is too small. It must be at least " + minPageSize() + " bytes.");
+        }
+
         ByteBuffer buf = rawPage().bufferForWriting(Header.NODE_TYPE.getOffset());
         buf.putChar(NODE_TYPE.serialize());
         setNumberOfKeys(0);
@@ -732,6 +737,32 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
     @Override public int getDepth() {
         return key(0).getLeftNode().getDepth() + 1;
+    }
+
+    @Override public void checkStructure() throws IllegalStateException {
+        KeyStruct ks = key(0);
+
+        // check structure of all nodes
+        K lastKey = null;
+        while (ks.pos < getNumberOfKeys()) {
+            if (lastKey != null && comparator.compare(lastKey, ks.getKey()) > 0) {
+                throw new IllegalStateException("last key("+lastKey +
+                        ") should be smaller or equal current Key(" + ks.getKey()+")");
+            }
+
+            lastKey = ks.getKey();
+
+            ks.getLeftNode().checkStructure();
+
+            // compare on byte-level
+            if (!Arrays.equals(ks.getSerializedKey(), ks.getRightNode().getFirstLeafKeySerialized()))
+                throw new IllegalStateException("key(" + ks.getKey() +
+                        ") should equal rhs first leaf key(" + ks.getRightNode().getFirstLeafKey() + ")");
+
+            ks.becomeNext();
+        }
+
+        ks.getLeftNode().checkStructure();
     }
 
     /* (non-Javadoc)

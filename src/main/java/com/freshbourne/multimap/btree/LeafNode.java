@@ -225,7 +225,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
         return getKeyAtOffset(pos);
     }
 
-    
+
     /**
      * @param key
      * @param value
@@ -615,7 +615,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 
         // just to make sure, that the adjustment action is correct:
         AdjustmentAction<K, V> action = new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE,
-                this.getLastLeafKeySerialized(), newLeaf.rawPage().id());
+                newLeaf.getFirstLeafKeySerialized(), newLeaf.rawPage().id());
 
         return action;
     }
@@ -788,16 +788,28 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
         return 1;
     }
 
+    @Override public void checkStructure() throws IllegalStateException {
+        K lastKey = null;
+        for (int i = 0; i < getNumberOfEntries(); i++) {
+            if (lastKey != null && comparator.compare(lastKey, getKeyAtPosition(i)) > 0)
+                throw new IllegalStateException("lastKey should be smaller or equal to current key");
+            lastKey = getKeyAtPosition(i);
+        }
+    }
+
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#getFirst(java.lang.Object)
-      */
+    * @see com.freshbourne.multimap.btree.Node#getFirst(java.lang.Object)
+    */
     @Override
-    public V getFirst(K key) {
+    public V getFirst
+    (K
+             key) {
         List<V> res = get(key);
         return res.size() > 0 ? res.get(0) : null;
     }
 
-    @Override public byte[] getFirstLeafKeySerialized() {
+    @Override public byte[] getFirstLeafKeySerialized
+            () {
         if (getNumberOfEntries() == 0)
             throw new IllegalStateException("you must have keys to get the first serialized key");
 

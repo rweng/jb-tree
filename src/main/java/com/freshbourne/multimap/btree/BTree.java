@@ -366,6 +366,10 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
         return valid;
     }
 
+    public void checkStructure() throws IllegalStateException {
+        root.checkStructure();
+    }
+
     @Override
     public void loadOrInitialize() throws IOException {
         try {

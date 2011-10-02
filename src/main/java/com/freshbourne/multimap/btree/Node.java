@@ -109,5 +109,8 @@ public interface Node<K, V> {
      */
     public int getDepth();
 
-
+    /**
+     * @return true if all sub-nodes are in the right order and are valid
+     */
+    public void checkStructure() throws IllegalStateException;
 }

@@ -27,7 +27,7 @@ public class BTreeSmallTest {
     private static Injector                injector;
     private        BTree<Integer, Integer> tree;
     private static final Logger LOG       = Logger.getLogger(BTreeSmallTest.class);
-    private static final int    PAGE_SIZE = 30;
+    private static final int    PAGE_SIZE = InnerNode.Header.size() + 3 * (2*Integer.SIZE/8) + Integer.SIZE/8; // 3 keys, 4 values
     private static final String FILE_PATH = "/tmp/btree-small-test";
 
 
@@ -64,14 +64,16 @@ public class BTreeSmallTest {
     }
 
     @Test
-    public void test() throws IOException {
+    public void testMultiLevelInsert() throws IOException {
         int count = 100;
 
         tree.initialize();
 
         for (int i = 0; i < count; i++) {
+            assertTrue(tree.isValid());
             LOG.info("i = " + i);
             tree.add(i, i);
+            tree.checkStructure();
             LOG.info("Depth: " + tree.getDepth());
             Iterator<Integer> iterator = tree.getIterator();
 
@@ -97,5 +99,4 @@ public class BTreeSmallTest {
         }
         assertFalse(iterator.hasNext());
     }
-
 }
