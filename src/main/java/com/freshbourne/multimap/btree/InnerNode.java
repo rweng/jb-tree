@@ -337,7 +337,7 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		}
 
         Node<K, V> node;
-		if(!leafPageManager.hasPage(pageId))
+		if(leafPageManager.hasPage(pageId))
 		    node = leafPageManager.getPage(pageId);
         else
             node = innerNodePageManager.getPage(pageId);

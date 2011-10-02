@@ -7,11 +7,14 @@
  */
 package com.freshbourne.io;
 
+import org.apache.log4j.Logger;
+
 import java.io.IOException;
 import java.util.Map;
 
 public abstract class AbstractPageManager<T extends ComplexPage> implements PageManager<T> {
-	
+
+    private static final Logger LOG = Logger.getLogger(AbstractPageManager.class);
 	private final PageManager<RawPage> rpm;
 	private Map<Integer, T> cache = new SoftReferenceCacheMap<Integer, T>();;
 	
@@ -72,6 +75,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
             }
 
         cache.put(l.rawPage().id(), l);
+        LOG.debug("node created: type: \t" + l.getClass().getSimpleName().toString() + "\tid: " + l.rawPage().id());
 		return l;
 	}
 
