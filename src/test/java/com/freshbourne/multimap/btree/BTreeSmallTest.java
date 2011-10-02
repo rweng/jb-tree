@@ -69,7 +69,7 @@ public class BTreeSmallTest {
     }
 
     @Test
-    public void testMultiLevelInsert() throws IOException {
+    public void testMultiLevelInsertForward() throws IOException {
         int count = 100;
 
         tree.initialize();
@@ -88,7 +88,48 @@ public class BTreeSmallTest {
                 assertTrue(latest <= next);
                 latest = next;
             }
-            
+
+            assertFalse(iterator.hasNext());
+        }
+
+
+        assertEquals(count, tree.getNumberOfEntries());
+        Iterator<Integer> iterator = tree.getIterator();
+
+        int latest = iterator.next();
+        for (int i = 0; i < count - 1; i++) {
+            int next = iterator.next();
+            assertTrue(latest <= next);
+            latest = next;
+        }
+        assertFalse(iterator.hasNext());
+    }
+
+        @Test
+    public void testMultiLevelInsertBackward() throws IOException {
+        int count = 100;
+
+        tree.initialize();
+
+        for (int i = 0; i < count; i++) {
+
+            if(i == 9)
+                LOG.debug("DEBUG");
+
+            assertTrue(tree.isValid());
+            LOG.info("i = " + i);
+            tree.add(count - i, count - i);
+            tree.checkStructure();
+            LOG.info("Depth: " + tree.getDepth());
+            Iterator<Integer> iterator = tree.getIterator();
+
+            int latest = iterator.next();
+            for (int j = 0; j <= i - 1; j++) {
+                int next = iterator.next();
+                assertTrue(latest <= next);
+                latest = next;
+            }
+
             assertFalse(iterator.hasNext());
         }
 
@@ -134,7 +175,7 @@ public class BTreeSmallTest {
         // do the actual test
         int count = 100;
         for(int i = 0; i < count; i++){
-            if(i==2)
+            if(i==24)
                 LOG.debug("DEBUG");
 
             LOG.debug("i="+i);
@@ -142,6 +183,6 @@ public class BTreeSmallTest {
             newTree.checkStructure();
         }
 
-        
+
     }
 }

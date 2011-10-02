@@ -414,12 +414,12 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
      * @return keyStruct or null
      */
     private KeyStruct getFirstLargerOrEqualKeyStruct(K key) {
-        tmpKeyStruct.pos = 0;
-        while (tmpKeyStruct.pos < getNumberOfKeys() && comparator.compare(tmpKeyStruct.getKey(), key) < 0) {
-            tmpKeyStruct.becomeNext();
+        KeyStruct ks = new KeyStruct(0);
+        while (ks.pos < getNumberOfKeys() && comparator.compare(ks.getKey(), key) < 0) {
+            ks.becomeNext();
         }
 
-        return tmpKeyStruct.isValid() ? tmpKeyStruct : null;
+        return ks.isValid() ? ks : null;
     }
 
     /* (non-Javadoc)
@@ -500,7 +500,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         // decide where to insert the pointer we are supposed to insert
         // if the old key position is larger than the current numberOfKeys, the
         // entry has to go to the next node
-        if(ks != null && ks.pos <= getNumberOfKeys()){
+        if (ks != null && ks.pos <= getNumberOfKeys()) {
             insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(), ks.pos);
         } else {
             // determine the position where the key should have to be inserted.
@@ -512,7 +512,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             inp.insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(),
                     pos);
         }
-        
+
         return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, keyUpwardsBytes, inp.getId());
     }
 
@@ -740,14 +740,14 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     @Override public void checkStructure() throws IllegalStateException {
-        KeyStruct ks = key(0);
+        KeyStruct ks = new KeyStruct(0);
 
         // check structure of all nodes
         K lastKey = null;
         while (ks.pos < getNumberOfKeys()) {
             if (lastKey != null && comparator.compare(lastKey, ks.getKey()) > 0) {
-                throw new IllegalStateException("last key("+lastKey +
-                        ") should be smaller or equal current Key(" + ks.getKey()+")");
+                throw new IllegalStateException("last key(" + lastKey +
+                        ") should be smaller or equal current Key(" + ks.getKey() + ")");
             }
 
             lastKey = ks.getKey();
@@ -758,6 +758,13 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             if (!Arrays.equals(ks.getSerializedKey(), ks.getRightNode().getFirstLeafKeySerialized()))
                 throw new IllegalStateException("key(" + ks.getKey() +
                         ") should equal rhs first leaf key(" + ks.getRightNode().getFirstLeafKey() + ")");
+
+            if (ks.getLeftNode() instanceof LeafNode) {
+                if (((LeafNode) ks.getLeftNode()).getNextLeafId() != ks.getRightNode().getId()) {
+                    throw new IllegalStateException(
+                            "in the first layer of innernodes, the nextLeafId of the lhs-node should be the id of the rhs-node");
+                }
+            }
 
             ks.becomeNext();
         }
