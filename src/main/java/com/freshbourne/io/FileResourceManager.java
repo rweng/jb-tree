@@ -282,6 +282,7 @@ public class FileResourceManager implements ResourceManager {
 		RawPage result = new RawPage(buf, header.generateId(), this);
 		
 		cache.put(result.id(), result);
+        LOG.debug("RawPage create: " + result.id());
 		return result;
 	}
 

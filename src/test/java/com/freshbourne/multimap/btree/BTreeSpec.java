@@ -60,7 +60,7 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 
 	@Test
 	public void shouldWorkWithMassiveValues(){
-		int size = 10000;
+		int size = 100000;
 
 		fill(size);
 		
