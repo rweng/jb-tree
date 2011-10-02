@@ -751,9 +751,11 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
                         ") should equal rhs first leaf key(" + ks.getRightNode().getFirstLeafKey() + ")");
 
             if (ks.getLeftNode() instanceof LeafNode) {
-                if (((LeafNode) ks.getLeftNode()).getNextLeafId() != ks.getRightNode().getId()) {
+                if (!((LeafNode) ks.getLeftNode()).getNextLeafId().equals(ks.getRightNode().getId())) {
                     throw new IllegalStateException(
-                            "in the first layer of innernodes, the nextLeafId of the lhs-node should be the id of the rhs-node");
+                            "in the first layer of innernodes, the nextLeafId of the lhs-node (" +
+                                    ((LeafNode) ks.getLeftNode()).getNextLeafId() +
+                                    ")  should be the id of the rhs-node (" + ks.getRightNode().getId() + ")");
                 }
             }
 
