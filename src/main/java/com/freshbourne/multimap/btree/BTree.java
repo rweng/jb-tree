@@ -31,6 +31,10 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
     private static final Log LOG = LogFactory.getLog(BTree.class);
 
+    public int getDepth() {
+        return root.getDepth();
+    }
+
     /**
      * This enum is used to make it possible for all nodes in the BTree to serialize and deserialize
      * in a unique fashion

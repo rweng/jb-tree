@@ -18,6 +18,6 @@ import java.lang.annotation.Target;
 import com.google.inject.BindingAnnotation;
 
 @BindingAnnotation @Target({PARAMETER, FIELD}) @Retention(RetentionPolicy.RUNTIME)
-@interface PageSize {
+public @interface PageSize {
 	public int DEFAULT_PAGE_SIZE = 4096;
 }

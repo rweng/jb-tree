@@ -141,6 +141,27 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         private boolean isLastKey() {
             return pos == getNumberOfKeys() - 1;
         }
+
+        public Node getLeftNode() {
+            int offset = getOffset() - Integer.SIZE / 8;
+            int pageId = rawPage().bufferForReading(offset).getInt();
+            return pageIdToNode(pageId);
+        }
+
+        public Node getRightNode(){
+            int offset = getOffset() + Integer.SIZE / 8;
+            int pageId = rawPage().bufferForReading(offset).getInt();
+            return pageIdToNode(pageId);
+        }
+
+        private Node<K, V> pageIdToNode(int id){
+            if(leafPageManager.hasPage(id)) {
+                return leafPageManager.getPage(id);
+            }
+            else {
+                return innerNodePageManager.getPage(id);
+            }
+        }
     }
 
     private final RawPage                        rawPage;
@@ -718,6 +739,10 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     @Override
     public Iterator<V> getIterator(K from, K to) {
         return getPageForPageId(getLeftPageIdOfKey(0)).getIterator(from, to);
+    }
+
+    @Override public int getDepth() {
+        return getKey(0).getLeftNode().getDepth() + 1;
     }
 
     /* (non-Javadoc)

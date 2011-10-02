@@ -42,7 +42,7 @@ public class FileResourceManager implements ResourceManager {
 	
 	
     @Inject
-	FileResourceManager(@Assisted File f, @PageSize int pageSize, @Named("doLock") boolean doLock){
+	FileResourceManager(@ResourceFile File f, @PageSize int pageSize, @Named("doLock") boolean doLock){
 		this.file = f;
 		this.pageSize = pageSize;
 		this.doLock = doLock;

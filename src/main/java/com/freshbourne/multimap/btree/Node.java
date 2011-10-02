@@ -99,5 +99,9 @@ public interface Node<K, V> {
     public K getLastLeafKey();
     
     public Iterator<V> getIterator(K from, K to);
-    
+
+    /**
+     * @return 1 if the node is a leaf, otherwise the depth of the innernode
+     */
+    public int getDepth();
 }

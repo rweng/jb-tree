@@ -26,10 +26,11 @@ import com.freshbourne.serializer.StringSerializer;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 
+
 public class BTreeModule extends AbstractModule {
 
-    private final String indexFile;
-    private       Long   bTreePageId;
+    private String indexFile;
+    private Long   bTreePageId;
 
     public BTreeModule() {
         this(null, null);
@@ -42,6 +43,10 @@ public class BTreeModule extends AbstractModule {
     public BTreeModule(String indexFile, Long bTreePageId) {
         this.indexFile = indexFile;
         this.bTreePageId = bTreePageId;
+    }
+
+    public void setIndexFile(String indexFile) {
+        this.indexFile = indexFile;
     }
 
     /* (non-Javadoc)
@@ -84,7 +89,7 @@ public class BTreeModule extends AbstractModule {
 
 
     @SuppressWarnings("unchecked")
-    static <T> TypeLiteral<DynamicDataPage<T>> pageOf(final Class<T> parameterType){
+    static <T> TypeLiteral<DynamicDataPage<T>> pageOf(final Class<T> parameterType) {
         return (TypeLiteral<DynamicDataPage<T>>) TypeLiteral.get(new ParameterizedType() {
 
             @Override
@@ -99,7 +104,7 @@ public class BTreeModule extends AbstractModule {
 
             @Override
             public Type[] getActualTypeArguments() {
-                return new Type[] {parameterType};
+                return new Type[]{parameterType};
             }
         });
     }

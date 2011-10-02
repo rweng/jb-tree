@@ -783,6 +783,10 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
         return new LeafNodeIterator(this, from, to);
     }
 
+    @Override public int getDepth() {
+        return 1;
+    }
+
     /* (non-Javadoc)
       * @see com.freshbourne.multimap.btree.Node#getFirst(java.lang.Object)
       */
