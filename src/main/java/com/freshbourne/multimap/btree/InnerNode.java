@@ -335,19 +335,15 @@ public class InnerNode<K, V> implements Node<K,V>, ComplexPage {
 		if(pageId <= 0){
 			throw new IllegalArgumentException("pageId must not be 0 ( posOfFirstLargerOrEqualKey: " + posOfFirstLargerOrEqualKey + " )");
 		}
-		
+
+        Node<K, V> node;
 		if(!leafPageManager.hasPage(pageId))
-			throw new UnsupportedOperationException("we cant load from next innerNode yet");
-		
-		LeafNode<K, V> leaf = leafPageManager.getPage(pageId);
+		    node = leafPageManager.getPage(pageId);
+        else
+            node = innerNodePageManager.getPage(pageId);
+        
 		AdjustmentAction<K, V> result;
-		
-		if(leaf != null){
-			result = leaf.insert(key, value);
-		} else {
-			InnerNode<K, V> innerNode = innerNodePageManager.getPage(pageId);
-			result = innerNode.insert(key, value);
-		}
+		result = node.insert(key, value);
 		
 		// insert worked fine, no adjustment
 		if(result == null)
