@@ -123,6 +123,24 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         public void forcePos(int pos) {
             this.pos = pos;
         }
+
+        public String toStringWithLeftAndRightKey() {
+            String str = "";
+            if(pos > 0){
+                str += new Key(pos - 1).toString() + " - ";
+            }
+
+            str += toString();
+
+            if(!isLastKey())
+                str += " - " + new Key(pos+1).toString();
+
+            return str;
+        }
+
+        private boolean isLastKey() {
+            return pos == getNumberOfKeys() - 1;
+        }
     }
 
     private final RawPage                        rawPage;
@@ -440,8 +458,15 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             throw new IllegalArgumentException("result action type must be INSERT_NEW_NODE");
         }
 
+        Key currentKey = getKey(posOfFirstLargerOrEqualKey);
+
+        LOG.debug("handleNewNodeAction()");
+        LOG.debug("adjustmentActionKey: " + keySerializer.deserialize(result.getSerializedKey()));
+        LOG.debug("posOfFirstLargerOrEqualKey:" + currentKey.toStringWithLeftAndRightKey());
+
         // a new child node has been created and a key must be inserted, check for available space
         if (getNumberOfKeys() < getMaxNumberOfKeys()) {
+            LOG.debug("Space available");
             // space left, simply insert the key/pointer.
             // the key replaces the old key for our node, since the split caused a different
             // key to be the now highest in the subtree
@@ -449,6 +474,8 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
             int posForInsert = posOfFirstLargerOrEqualKey == -1 ? getNumberOfKeys() : posOfFirstLargerOrEqualKey;
             insertKeyPointerPageIdAtPosition(
                     result.getSerializedKey(), result.getPageId(), posForInsert);
+            LOG.debug("key inserted: " + getKey(posForInsert).toStringWithLeftAndRightKey());
+
 
             // no further adjustment necessary. even if we inserted to the last position, the
             // highest key in the subtree below is still the same, because otherwise we would

@@ -43,5 +43,4 @@ public class InnerNodeTest {
 	public void insertShouldRequireInitializedRoot(){
 		node.insert(key1, val1);
 	}
-	
 }

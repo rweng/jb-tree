@@ -66,4 +66,8 @@ public class AdjustmentAction<K,V> {
 		return serializedKey;
 	}
 
+    public String toString(){
+        return "AdjustmentAction(type: " + action + ", pageId: " + pageId + ")";
+    }
+
 }

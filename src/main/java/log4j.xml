@@ -17,7 +17,7 @@
     </layout>
   </appender>
 
-  <logger name="com.freshbourne.multimap.btree.LeafNode">
+  <logger name="com.freshbourne.multimap.btree.InnerNode">
       <level value="debug" />
   </logger>
     

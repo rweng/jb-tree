@@ -7,23 +7,26 @@
  */
 package com.freshbourne.multimap.btree;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.AbstractMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.MultiMapSpec;
 
-public class BTreeSpec extends MultiMapSpec<Integer, String> {
+public class BTreeTest extends MultiMapSpec<Integer, Integer> {
 	
 	private static String path = "/tmp/btree_spec";
 	private static BTreeProvider provider = new BTreeProvider(path); 
-	
-	public BTreeSpec() {
+    private static final Log LOG = LogFactory.getLog(BTreeTest.class);
+
+	public BTreeTest() {
 		super(provider);
 	}
 	
@@ -44,7 +47,7 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	
 	private void shouldBeAbleToOpenAndLoad(Integer key1, Integer key2) throws IOException {
 
-		BTree<Integer, String>tree = (BTree<Integer, String>)getMultiMap();
+		BTree<Integer, Integer>tree = (BTree<Integer, Integer>)getMultiMap();
 		
 		tree.initialize();
 		tree.add(key1, value1);
@@ -74,10 +77,10 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 	@Test @Ignore("does not work yet")
 	public void shouldNotHaveTooMuchOverhead(){
 		int key = getProvider().createRandomKey();
-		String val = getProvider().createRandomValue();
+		int val = getProvider().createRandomValue();
 		
 		int sizeForKey = Integer.SIZE / 8;
-		int sizeForVal = val.length();
+		int sizeForVal = Integer.SIZE / 8;
 		
 		// insert 10.000 K/V pairs
 		int size = 100000;
@@ -100,8 +103,34 @@ public class BTreeSpec extends MultiMapSpec<Integer, String> {
 		//assertThat("current Size: " + realSizePercent + "%", realSizePercent, lessThan(1000f));
 	}
 	
-	private BTree<Integer, String> getTree(){
-		return (BTree<Integer, String>) getMultiMap();
-	}	
+	private BTree<Integer, Integer> getTree(){
+		return (BTree<Integer, Integer>) getMultiMap();
+	}
+
+    	@Test
+	public void bulkInsert() throws IOException {
+		int testSize = 10000;
+
+		@SuppressWarnings("unchecked")
+		AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[testSize];
+
+		for(int i = 0; i < testSize; i++){
+			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(i, i + 10000);
+		}
+
+		getTree().bulkInitialize(kvs, true);
+
+		// check if its correct
+		LOG.debug("checking bulkinsert results...");
+		assertEquals(testSize, getTree().getNumberOfEntries());
+		for(int i = 0; i < testSize; i++){
+
+			if(getTree().get(kvs[i].getKey()).size() == 0){
+				LOG.error("tree doesn't have key " + i);
+			}
+			assertEquals("size problem with key " + i, 1, getTree().get(kvs[i].getKey()).size());
+			assertEquals(kvs[i].getValue(), getTree().get(kvs[i].getKey()).get(0));
+		}
+	}
 	
 }

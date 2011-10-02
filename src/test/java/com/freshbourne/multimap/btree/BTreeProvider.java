@@ -19,7 +19,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 
-public class BTreeProvider implements MultiMapProvider<Integer, String> {
+public class BTreeProvider implements MultiMapProvider<Integer, Integer> {
 
 	private final Injector injector;
 	private static SecureRandom srand;
@@ -37,19 +37,19 @@ public class BTreeProvider implements MultiMapProvider<Integer, String> {
 		return srand;
 	}
 	
-	public BTree<Integer, String> getInstance(){
-		return injector.getInstance(Key.get(new TypeLiteral<BTree<Integer,String>>(){}));
+	public BTree<Integer, Integer> getInstance(){
+		return injector.getInstance(Key.get(new TypeLiteral<BTree<Integer,Integer>>(){}));
 	}
 	
 	
 	
 	@Override
-	public MultiMap<Integer, String> createNewMultiMap() throws IOException {
+	public MultiMap<Integer, Integer> createNewMultiMap() throws IOException {
 		File f = new File(path);
 		if(f.exists())
 			f.delete();
 		
-		BTree<Integer, String> tree = getInstance();
+		BTree<Integer, Integer> tree = getInstance();
 		tree.initialize();
 		return tree;
 	}
@@ -62,8 +62,12 @@ public class BTreeProvider implements MultiMapProvider<Integer, String> {
 	
 
 	@Override
-	public String createRandomValue() {
-		return (new BigInteger(130, srand())).toString(32);
+	public Integer createRandomValue() {
+		// for String:
+		// return (new BigInteger(130, srand())).toString(32);
+
+        // for Integer
+        return srand().nextInt();
 	}
 
 

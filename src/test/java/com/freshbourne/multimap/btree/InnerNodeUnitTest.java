@@ -189,7 +189,7 @@ public class InnerNodeUnitTest {
     private AdjustmentAction<Integer, Integer> insertWithNewNodeAdjustment(int key, int adjustmentKey) throws IOException {
         loadNode();
 
-        when(getLeafForKey(key).insert(eq(1), anyInt())).thenReturn(getNewAdjustmentAction(adjustmentKey));
+        when(getLeafForKey(key).insert(eq(key), anyInt())).thenReturn(getNewAdjustmentAction(adjustmentKey));
         when(innerNodePageManager.createPage()).thenReturn(node2);
 
 
