@@ -60,3 +60,7 @@ dependencies {
 	testCompile "org.hamcrest:hamcrest-library:1.2.1@jar"
 	
 }
+
+task publishJar(dependsOn: jar) << {
+    run("cp -f " + jar.archivePath + " /Users/robin/Dropbox/public/multimap-0.0.1.jar")
+}

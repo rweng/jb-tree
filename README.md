@@ -1,6 +1,9 @@
 # Description
 
-Flexible BTree-MultiMap implementation 
+This project naming is actually not correct yet.
+This repository is more about an implementation of B-Tree in line with it's interface, MultiMap.
+Every Class implementing the MultiMap interface should provide a way of storeing and accessing key-value Objects.
+The difference to a normal map is mainly that one key can have multiple values.
 
 # Dev Requirements
 
@@ -8,8 +11,9 @@ Flexible BTree-MultiMap implementation
 
 # Getting started
 
-get started by cloning the repository:
+## This Repository
 
+get started by cloning the repository:
 
     git clone git://github.com/rweng/multimap.git
     cd index
@@ -23,9 +27,14 @@ get started by cloning the repository:
     gradle javadoc
     open build/doc/javadoc/index.html
 
+## Creating a BTree Instance
+
+The easiest way of creating a BTree is with Guice. There are two ways of creating an instance of BTree
+
 # Documentation
 
-You can find the Javadoc [here](http://rweng.github.com/multimap/doc/) - If you click on Network, you can see a branch called gh-pages on which you can see the commit the Javadocs are about (not always completely up-to-date).
+You can find the Javadoc [here](http://rweng.github.com/multimap/doc/) -
+If you click on Network, you can see a branch called gh-pages on which you can see the commit the Javadocs are about (not always completely up-to-date).
 
 # Features
 
