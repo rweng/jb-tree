@@ -29,6 +29,10 @@ get started by cloning the repository:
 
 ## Creating a BTree Instance
 
+### Manually
+
+
+
 ### With the Guice BTreeModule
 
 This is kinda ugly, because getting generics from guice requires you to use Key.get together with new TypeLiteral.

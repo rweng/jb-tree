@@ -8,14 +8,14 @@
 
 package com.freshbourne.io;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.PARAMETER;
+import com.google.inject.BindingAnnotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.google.inject.BindingAnnotation;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.PARAMETER;
 
 @BindingAnnotation @Target({PARAMETER, FIELD}) @Retention(RetentionPolicy.RUNTIME)
 public @interface PageSize {

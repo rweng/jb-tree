@@ -7,23 +7,19 @@
  */
 package com.freshbourne.btree;
 
-import java.io.File;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Comparator;
-
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.comparator.StringComparator;
 import com.freshbourne.io.DynamicDataPage;
 import com.freshbourne.io.IOModule;
-import com.freshbourne.serializer.FixLengthSerializer;
-import com.freshbourne.serializer.FixedStringSerializer;
-import com.freshbourne.serializer.IntegerSerializer;
-import com.freshbourne.serializer.PagePointSerializer;
 import com.freshbourne.io.PagePointer;
-import com.freshbourne.serializer.Serializer;
+import com.freshbourne.serializer.*;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+
+import java.io.File;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Comparator;
 
 
 public class BTreeModule extends AbstractModule {

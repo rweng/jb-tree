@@ -7,18 +7,17 @@
  */
 package com.freshbourne.btree;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.AbstractMap;
-
+import com.freshbourne.multimap.MultiMapSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.freshbourne.multimap.MultiMapSpec;
+import java.io.File;
+import java.io.IOException;
+import java.util.AbstractMap;
+
+import static org.junit.Assert.assertEquals;
 
 public class BTreeTest extends MultiMapSpec<Integer, Integer> {
 	

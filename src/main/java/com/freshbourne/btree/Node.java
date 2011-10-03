@@ -8,10 +8,10 @@
 
 package com.freshbourne.btree;
 
+import com.freshbourne.io.PagePointer;
+
 import java.util.Iterator;
 import java.util.List;
-
-import com.freshbourne.io.PagePointer;
 
 public interface Node<K, V> {
 	

@@ -8,8 +8,6 @@
 
 package com.freshbourne.serializer;
 
-import com.freshbourne.serializer.Serializer;
-
 /**
  * A Serializer that serializes always to the same String/Buffer length
  * 

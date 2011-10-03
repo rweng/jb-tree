@@ -7,16 +7,16 @@
  */
 package com.freshbourne.btree.run;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-
 import com.freshbourne.btree.BTree;
 import com.freshbourne.btree.BTreeModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
 
 /**
  * Iterates over the values of a tree

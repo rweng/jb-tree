@@ -7,12 +7,13 @@
  */
 package com.freshbourne.io;
 
-import java.nio.ByteBuffer;
+import com.freshbourne.serializer.PagePointSerializer;
+import com.freshbourne.serializer.StringSerializer;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.freshbourne.serializer.PagePointSerializer;
-import com.freshbourne.serializer.StringSerializer;
+import java.nio.ByteBuffer;
+
 import static org.junit.Assert.*;
 
 public class DynamicDataPageSpec {

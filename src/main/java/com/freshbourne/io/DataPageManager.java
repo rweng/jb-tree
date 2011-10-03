@@ -12,7 +12,6 @@ import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.Serializer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.assistedinject.Assisted;
 
 @Singleton
 public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {

@@ -7,8 +7,6 @@
  */
 package com.freshbourne.btree;
 
-import java.util.Comparator;
-
 import com.freshbourne.io.AbstractPageManager;
 import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.PageManager;
@@ -16,6 +14,8 @@ import com.freshbourne.io.RawPage;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import java.util.Comparator;
 
 @Singleton
 public class InnerNodeManager<K, V> extends AbstractPageManager<InnerNode<K, V>> {

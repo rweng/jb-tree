@@ -7,16 +7,16 @@
  */
 package com.freshbourne.btree;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.SecureRandom;
-
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.MultiMapProvider;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+
+import java.io.File;
+import java.io.IOException;
+import java.security.SecureRandom;
 
 public class BTreeProvider implements MultiMapProvider<Integer, Integer> {
 

@@ -7,8 +7,6 @@
  */
 package com.freshbourne.io;
 
-import java.io.IOException;
-
 /**
  *
  * None of the methods throw an IOException.

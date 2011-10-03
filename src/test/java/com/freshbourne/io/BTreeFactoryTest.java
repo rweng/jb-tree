@@ -8,10 +8,10 @@
 
 package com.freshbourne.io;
 
-import com.freshbourne.comparator.StringComparator;
 import com.freshbourne.btree.BTree;
 import com.freshbourne.btree.BTreeFactory;
 import com.freshbourne.btree.BTreeModule;
+import com.freshbourne.comparator.StringComparator;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 public class BTreeFactoryTest {
 

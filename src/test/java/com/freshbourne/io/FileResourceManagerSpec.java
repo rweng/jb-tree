@@ -13,6 +13,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+
 import static org.junit.Assert.*;
 
 public class FileResourceManagerSpec extends ResourceManagerSpec {

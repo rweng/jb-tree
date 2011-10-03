@@ -8,8 +8,6 @@
 
 package com.freshbourne.io;
 
-import java.io.IOException;
-
 public class PageNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
