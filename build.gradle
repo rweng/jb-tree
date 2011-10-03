@@ -12,7 +12,7 @@ apply plugin: 'idea'
 
 // java
 sourceCompatibility = 1.6
-version = '0.01'
+version = '0.0.1'
 jar {
 	manifest {
 		attributes 'Implementation-Title': 'jb-tree', 'Implementation-Version': version
@@ -57,6 +57,20 @@ dependencies {
 	
 }
 
+
+//************* OWN TASKS ********************
+
 task publishJar(dependsOn: jar) << {
     run("cp -f " + jar.archivePath + " /Users/robin/Dropbox/public/jb-tree-0.0.1.jar")
+}
+
+
+//************* HELPER METHODS ********************
+
+// run a command with direct process output
+def run(command) {
+    def process = command.execute()
+    process.consumeProcessOutput(System.out, System.err)
+    process.waitForOrKill(0)
+    return process // use to get exit code et cetera
 }

@@ -29,6 +29,30 @@ get started by cloning the repository:
 
 ## Creating a BTree Instance
 
+### With a Factory (favorite)
+
+This is the favorite way of creating a btree. The factory can be reused for different files.
+One important note: getting a btree for a file that has already been used with get() will ignore
+the Serializers and the Comparator and just return the original instance.
+
+The test for creating a BTree with a factory displays this best:
+
+    @Test
+	public void factoryConstructor() throws IOException {
+		File file = new File("/tmp/defaultBTreeModule");
+		file.delete();
+
+
+		Injector i = Guice.createInjector(new BTreeModule());
+		BTreeFactory factory = i.getInstance(BTreeFactory.class);
+		BTree<Integer, String> btree = factory.get(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
+				IntegerComparator.INSTANCE);
+		btree.initialize();
+		btree.sync();
+
+		assertTrue(file.exists());
+	}
+
 ### Manually
 
     FileResourceManager pm = new FileResourceManager(file);
