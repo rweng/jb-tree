@@ -5,33 +5,26 @@
  *
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.multimap.btree;
+package com.freshbourne.btree;
 
 import java.nio.ByteBuffer;
-import java.util.Iterator;
 
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Mockito.*;
 
 import com.freshbourne.comparator.IntegerComparator;
-import com.freshbourne.io.DataPage;
-import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.RawPage;
-import com.freshbourne.multimap.btree.BTree.NodeType;
-import com.freshbourne.multimap.btree.InnerNode;
-import com.freshbourne.multimap.btree.LeafNode.Header;
+import com.freshbourne.btree.BTree.NodeType;
+import com.freshbourne.btree.LeafNode.Header;
 import com.freshbourne.serializer.IntegerSerializer;
-import com.freshbourne.serializer.PagePointSerializer;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-
-import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.MultiMapSpec;
 
 public class LeafNodeUnitTest {

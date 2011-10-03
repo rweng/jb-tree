@@ -59,7 +59,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.btree.DataPage#add(byte[])
+	 * @see com.freshbourne.btree.DataPage#add(byte[])
 	 */
 	@Override
 	public Integer add(T entry) {
@@ -97,7 +97,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.btree.DataPage#remove(int)
+	 * @see com.freshbourne.btree.DataPage#remove(int)
 	 */
 	@Override
 	public void remove(int id)  {
@@ -136,7 +136,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.btree.DataPage#get(int)
+	 * @see com.freshbourne.btree.DataPage#get(int)
 	 */
 	@Override
 	public T get(int id) {
@@ -182,7 +182,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	}
 
 		/* (non-Javadoc)
-	 * @see com.freshbourne.multimap.btree.DataPage#remaining()
+	 * @see com.freshbourne.btree.DataPage#remaining()
 	 */
 	@Override
 	public int remaining() {

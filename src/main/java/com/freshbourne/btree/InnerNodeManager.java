@@ -5,14 +5,13 @@
  *
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.multimap.btree;
+package com.freshbourne.btree;
 
 import java.util.Comparator;
 
 import com.freshbourne.io.AbstractPageManager;
 import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.PageManager;
-import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.RawPage;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.google.inject.Inject;

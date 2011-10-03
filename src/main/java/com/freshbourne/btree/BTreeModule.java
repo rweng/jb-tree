@@ -5,7 +5,7 @@
  *
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.multimap.btree;
+package com.freshbourne.btree;
 
 import java.io.File;
 import java.lang.reflect.ParameterizedType;
@@ -22,7 +22,6 @@ import com.freshbourne.serializer.IntegerSerializer;
 import com.freshbourne.serializer.PagePointSerializer;
 import com.freshbourne.io.PagePointer;
 import com.freshbourne.serializer.Serializer;
-import com.freshbourne.serializer.StringSerializer;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 

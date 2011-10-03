@@ -6,11 +6,11 @@
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-package com.freshbourne.multimap.btree;
+package com.freshbourne.btree;
 
 import com.freshbourne.io.*;
 import com.freshbourne.multimap.MultiMap;
-import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
+import com.freshbourne.btree.AdjustmentAction.ACTION;
 import com.freshbourne.serializer.IntegerSerializer;
 import com.google.inject.Inject;
 

@@ -5,7 +5,7 @@
  *
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.multimap.btree;
+package com.freshbourne.btree;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -21,8 +21,8 @@ import com.freshbourne.io.DataPage;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.RawPage;
-import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
-import com.freshbourne.multimap.btree.BTree.NodeType;
+import com.freshbourne.btree.AdjustmentAction.ACTION;
+import com.freshbourne.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
 import org.apache.log4j.Logger;
 
@@ -401,7 +401,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#remove(java.lang.Object, java.lang.Object)
+      * @see com.freshbourne.btree.Node#remove(java.lang.Object, java.lang.Object)
       */
     @Override
     public int remove(K key, V value) {
@@ -464,7 +464,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#destroy()
+      * @see com.freshbourne.btree.Node#destroy()
       */
     @Override
     public void destroy() {
@@ -562,7 +562,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#insert(java.lang.Object, java.lang.Object)
+      * @see com.freshbourne.btree.Node#insert(java.lang.Object, java.lang.Object)
       */
     @Override
     public AdjustmentAction<K, V> insert(K key, V value) {
@@ -640,7 +640,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#getKeyPointer(int)
+      * @see com.freshbourne.btree.Node#getKeyPointer(int)
       */
     @Override
     public PagePointer getKeyPointer(int pos) {
@@ -653,7 +653,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#getId()
+      * @see com.freshbourne.btree.Node#getId()
       */
     @Override
     public Integer getId() {
@@ -672,7 +672,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#getNumberOfUniqueKeys()
+      * @see com.freshbourne.btree.Node#getNumberOfUniqueKeys()
       */
     @Override
     public int getNumberOfKeys() {
@@ -798,7 +798,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-    * @see com.freshbourne.multimap.btree.Node#getFirst(java.lang.Object)
+    * @see com.freshbourne.btree.Node#getFirst(java.lang.Object)
     */
     @Override
     public V getFirst

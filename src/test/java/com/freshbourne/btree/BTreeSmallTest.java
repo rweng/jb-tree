@@ -6,14 +6,13 @@
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-package com.freshbourne.multimap.btree;
+package com.freshbourne.btree;
 
 import com.freshbourne.io.FileResourceManager;
 import com.freshbourne.io.PageSize;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.Serializer;
-import com.freshbourne.serializer.StringSerializer;
 import com.google.inject.*;
 import com.google.inject.util.Modules;
 import org.apache.log4j.Logger;
@@ -22,7 +21,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.*;
 
 import static org.junit.Assert.*;

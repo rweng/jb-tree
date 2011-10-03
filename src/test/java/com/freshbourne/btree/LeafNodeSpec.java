@@ -5,7 +5,7 @@
  *
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.multimap.btree;
+package com.freshbourne.btree;
 
 
 import static org.junit.Assert.*;

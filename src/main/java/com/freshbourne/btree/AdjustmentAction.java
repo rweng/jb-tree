@@ -5,11 +5,7 @@
  *
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.multimap.btree;
-
-import java.nio.ByteBuffer;
-
-import com.freshbourne.io.PagePointer;
+package com.freshbourne.btree;
 
 public class AdjustmentAction<K,V> {
 	public enum ACTION {INSERT_NEW_NODE, UPDATE_KEY}

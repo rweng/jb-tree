@@ -5,7 +5,7 @@
  *
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.multimap.btree;
+package com.freshbourne.btree;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -16,8 +16,8 @@ import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.PagePointer;
 import com.freshbourne.io.RawPage;
-import com.freshbourne.multimap.btree.AdjustmentAction.ACTION;
-import com.freshbourne.multimap.btree.BTree.NodeType;
+import com.freshbourne.btree.AdjustmentAction.ACTION;
+import com.freshbourne.btree.BTree.NodeType;
 import com.freshbourne.serializer.FixLengthSerializer;
 import org.apache.log4j.Logger;
 
@@ -326,7 +326,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#remove(java.lang.Object, java.lang.Object)
+      * @see com.freshbourne.btree.Node#remove(java.lang.Object, java.lang.Object)
       */
     @Override
     public int remove(K key, V value) {
@@ -414,7 +414,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#insert(java.lang.Object, java.lang.Object)
+      * @see com.freshbourne.btree.Node#insert(java.lang.Object, java.lang.Object)
       */
     @Override
     public AdjustmentAction<K, V> insert(K key, V value) {
@@ -620,7 +620,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#getKeyPointer(int)
+      * @see com.freshbourne.btree.Node#getKeyPointer(int)
       */
     @Override
     public PagePointer getKeyPointer(int pos) {
@@ -629,7 +629,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#getId()
+      * @see com.freshbourne.btree.Node#getId()
       */
     @Override
     public Integer getId() {
@@ -690,7 +690,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#getNumberOfKeys()
+      * @see com.freshbourne.btree.Node#getNumberOfKeys()
       */
     @Override
     public int getNumberOfKeys() {
@@ -698,7 +698,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#getFirstKey()
+      * @see com.freshbourne.btree.Node#getFirstKey()
       */
     @Override
     public K getFirstLeafKey() {
@@ -707,7 +707,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#getLastKey()
+      * @see com.freshbourne.btree.Node#getLastKey()
       */
     @Override
     public K getLastLeafKey() {
@@ -719,7 +719,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.multimap.btree.Node#getIterator(java.lang.Object, java.lang.Object)
+      * @see com.freshbourne.btree.Node#getIterator(java.lang.Object, java.lang.Object)
       */
     @Override
     public Iterator<V> getIterator(K from, K to) {

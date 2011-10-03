@@ -5,11 +5,10 @@
  *
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.multimap.btree;
+package com.freshbourne.btree;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import com.freshbourne.multimap.MultiMap;

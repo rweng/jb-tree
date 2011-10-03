@@ -9,13 +9,10 @@
 package com.freshbourne.io;
 
 import com.freshbourne.comparator.StringComparator;
-import com.freshbourne.multimap.btree.BTree;
-import com.freshbourne.multimap.btree.BTreeFactory;
-import com.freshbourne.multimap.btree.BTreeModule;
-import com.freshbourne.serializer.FixLengthSerializer;
+import com.freshbourne.btree.BTree;
+import com.freshbourne.btree.BTreeFactory;
+import com.freshbourne.btree.BTreeModule;
 import com.freshbourne.serializer.FixedStringSerializer;
-import com.freshbourne.serializer.StringSerializer;
-import com.freshbourne.util.FileUtils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.Before;

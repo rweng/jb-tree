@@ -5,14 +5,14 @@
  *
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.multimap.btree.run;
+package com.freshbourne.btree.run;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import com.freshbourne.multimap.btree.BTree;
-import com.freshbourne.multimap.btree.BTreeModule;
+import com.freshbourne.btree.BTree;
+import com.freshbourne.btree.BTreeModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;

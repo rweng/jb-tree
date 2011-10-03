@@ -6,14 +6,13 @@
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-package com.freshbourne.multimap.btree;
+package com.freshbourne.btree;
 
 import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.FileResourceManager;
 import com.freshbourne.io.FileResourceManagerFactory;
 import com.freshbourne.io.PagePointer;
 import com.freshbourne.serializer.FixLengthSerializer;
-import com.freshbourne.serializer.PagePointSerializer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
