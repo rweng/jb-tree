@@ -8,10 +8,14 @@
 
 package com.freshbourne.btree;
 
+import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.FileResourceManager;
+import com.freshbourne.io.PageManager;
 import com.freshbourne.io.PageSize;
+import com.freshbourne.io.RawPage;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.FixedStringSerializer;
+import com.freshbourne.serializer.IntegerSerializer;
 import com.freshbourne.serializer.Serializer;
 import com.google.inject.*;
 import com.google.inject.util.Modules;
@@ -199,5 +203,25 @@ public class BTreeSmallTest {
 		t.sync();
 
 		assertTrue(file.exists());
+	}
+
+	@Test
+	public void manualConstructor() throws IOException {
+		String filePath = "/tmp/manualConstructorTestBtree";
+		File file = new File(filePath);
+		file.delete();
+
+		FileResourceManager pm = new FileResourceManager(file);
+		pm.open();
+
+		BTree<Integer, String> btree =
+				new BTree<Integer, String>(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
+						IntegerComparator.INSTANCE);
+
+		btree.initialize();
+		btree.sync();
+
+		assertTrue(file.exists());
+
 	}
 }

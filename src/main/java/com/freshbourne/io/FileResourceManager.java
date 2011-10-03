@@ -35,10 +35,26 @@ public class FileResourceManager implements ResourceManager {
 	private boolean doLock;
 	
 	private static Log LOG = LogFactory.getLog(FileResourceManager.class);
-	
-	
+
+	/**
+	 * this constructor is for manual creation.
+	 * @param file
+	 */
+	public FileResourceManager(File file){
+		this.file = file;
+		this.pageSize = PageSize.DEFAULT_PAGE_SIZE;
+		this.doLock = false;
+	}
+
+	/**
+	 * This is the default constructor (for Guice). It contains all required dependencies.
+	 *
+	 * @param f
+	 * @param pageSize
+	 * @param doLock
+	 */
     @Inject
-	FileResourceManager(@ResourceFile File f, @PageSize int pageSize, @Named("doLock") boolean doLock){
+	public FileResourceManager(@ResourceFile File f, @PageSize int pageSize, @Named("doLock") boolean doLock){
 		this.file = f;
 		this.pageSize = pageSize;
 		this.doLock = doLock;

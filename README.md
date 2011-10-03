@@ -31,7 +31,15 @@ get started by cloning the repository:
 
 ### Manually
 
+    FileResourceManager pm = new FileResourceManager(file);
+	pm.open();
 
+	BTree<Integer, String> btree =
+		new BTree<Integer, String>(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
+	        IntegerComparator.INSTANCE);
+
+    btree.initialize();
+    btree.sync();
 
 ### With the Guice BTreeModule
 

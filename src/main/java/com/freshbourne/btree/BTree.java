@@ -9,12 +9,11 @@
 package com.freshbourne.btree;
 
 import com.freshbourne.btree.AdjustmentAction.ACTION;
-import com.freshbourne.io.ComplexPage;
-import com.freshbourne.io.FileResourceManager;
-import com.freshbourne.io.PageManager;
-import com.freshbourne.io.RawPage;
+import com.freshbourne.io.*;
 import com.freshbourne.multimap.MultiMap;
+import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
+import com.freshbourne.serializer.PagePointSerializer;
 import com.google.inject.Inject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,15 +70,43 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	private boolean valid           = false;
 	private int     numberOfEntries = 0;
 
+
 	/**
+	 * This constructor is for manual construction since it's a bit simpler than the other one. It then creates the actual
+	 * dependencies;
+	 *
+	 * @param bpm
+	 * @param keySerializer
+	 * @param valueSerializer
+	 * @param comparator
+	 */
+	public BTree(PageManager<RawPage> bpm,
+	             FixLengthSerializer<K, byte[]> keySerializer, FixLengthSerializer<V, byte[]> valueSerializer,
+	             Comparator<K> comparator) {
+
+		this.bpm = bpm;
+		this.comparator = comparator;
+
+		DataPageManager<K> keyPageManager = new DataPageManager<K>(bpm, PagePointSerializer.INSTANCE, keySerializer);
+		DataPageManager<V> valuePageManager =
+				new DataPageManager<V>(bpm, PagePointSerializer.INSTANCE, valueSerializer);
+
+		leafPageManager = new LeafPageManager<K, V>(bpm, valueSerializer, keySerializer, comparator);
+		innerNodeManager =
+				new InnerNodeManager(bpm, keyPageManager, valuePageManager, leafPageManager, keySerializer, comparator);
+	}
+
+	/**
+	 * This is the standard constructor (for Guice) that contains all real dependencies.
+	 *
 	 * @param bpm
 	 * 		for getting a rawPage for storing meta-information like size and depth of the tree and root page
 	 * @param leafPageManager
 	 * @param innerNodeManager
 	 * @param comparator
 	 */
-	@Inject BTree(PageManager<RawPage> bpm, LeafPageManager<K, V> leafPageManager,
-	              InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
+	@Inject public BTree(PageManager<RawPage> bpm, LeafPageManager<K, V> leafPageManager,
+	                     InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
 		this.leafPageManager = leafPageManager;
 		this.innerNodeManager = innerNodeManager;
 		this.comparator = comparator;
