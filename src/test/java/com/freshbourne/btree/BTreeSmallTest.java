@@ -185,7 +185,19 @@ public class BTreeSmallTest {
             newTree.add("" + i, "" + i);
             newTree.checkStructure();
         }
-
-
     }
+
+	@Test
+	public void defaultBTreeModule() throws IOException {
+		File file = new File("/tmp/defaultBTreeModule");
+		file.delete();
+
+		Injector i = Guice.createInjector(new BTreeModule(file.getAbsolutePath()));
+		BTree<Integer, Integer> t = i.getInstance(
+				Key.get(new TypeLiteral<BTree<Integer, Integer>>() {}));
+		t.initialize();
+		t.sync();
+
+		assertTrue(file.exists());
+	}
 }

@@ -29,7 +29,17 @@ get started by cloning the repository:
 
 ## Creating a BTree Instance
 
-The easiest way of creating a BTree is with Guice. There are two ways of creating an instance of BTree
+### With the Guice BTreeModule
+
+This is kinda ugly, because getting generics from guice requires you to use Key.get together with new TypeLiteral.
+If anyone knows how to enhance that, let me know!
+
+    Injector i = Guice.createInjector(new BTreeModule("/tmp/myfile"));
+    BTree<Integer, Integer> t = i.getInstance(
+        Key.get(new TypeLiteral<BTree<Integer, Integer>>() {}));
+    t.initialize();
+
+Look at the *BTreeSmallTest* class to see the code in action.
 
 # Documentation
 
