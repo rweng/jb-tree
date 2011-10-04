@@ -12,6 +12,9 @@ target/
 libs/
 *.iml
 *.ipr
+/out
+/*.iws
+
 
 #except docs
 !build/docs
