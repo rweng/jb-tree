@@ -35,7 +35,7 @@ public class BTreeSmallTest {
 	private        BTree<Integer, Integer> tree;
 	private static final Logger LOG       = Logger.getLogger(BTreeSmallTest.class);
 	private static final int    PAGE_SIZE = InnerNode.Header.size() + 3 * (2 * Integer.SIZE / 8) + Integer.SIZE / 8;
-			// 3 keys, 4 values
+	// 3 keys, 4 values
 	private static final String FILE_PATH = "/tmp/btree-small-test";
 
 
@@ -236,6 +236,18 @@ public class BTreeSmallTest {
 		BTreeFactory factory = i.getInstance(BTreeFactory.class);
 		BTree<Integer, String> btree = factory.get(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
 				IntegerComparator.INSTANCE);
+		btree.initialize();
+		btree.sync();
+
+		assertTrue(file.exists());
+	}
+
+	@Test
+	public void staticMethodConstructor() throws IOException {
+		File file = new File("/tmp/btree-test");
+		file.delete();
+
+		BTree<Integer, String> btree = BTree.create(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE, IntegerComparator.INSTANCE);
 		btree.initialize();
 		btree.sync();
 

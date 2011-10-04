@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.AbstractMap.SimpleEntry;
@@ -27,6 +28,30 @@ import java.util.*;
 public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 	private static final Log LOG = LogFactory.getLog(BTree.class);
+
+	/**
+	 * This is the probably least verbose method for creating BTrees. It accepts a file versus the FileResourceManager of
+	 * the constructor. In addition, one does not have to repeat the generic on the right hand side of the creation
+	 * assignment.
+	 *
+	 * @param file
+	 * @param keySerializer
+	 * @param valueSerializer
+	 * @param comparator
+	 * @param <K>
+	 * @param <V>
+	 * @return a new BTree instance
+	 *
+	 * @throws IOException
+	 */
+	public static <K, V> BTree<K, V> create(File file, FixLengthSerializer<K, byte[]> keySerializer,
+	                                        FixLengthSerializer<V, byte[]> valueSerializer,
+	                                        Comparator<K> comparator) throws IOException {
+		FileResourceManager frm = new FileResourceManager(file);
+		frm.open();
+
+		return new BTree<K, V>(frm, keySerializer, valueSerializer, comparator);
+	}
 
 	public int getDepth() {
 		return root.getDepth();

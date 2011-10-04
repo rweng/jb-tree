@@ -53,6 +53,22 @@ The test for creating a BTree with a factory displays this best:
 		assertTrue(file.exists());
 	}
 
+### Static method
+
+This way of creating the BTree is the most concise way. However, it does not features the caching done in the factory.
+
+	@Test
+	public void staticMethodConstructor() throws IOException {
+		File file = new File("/tmp/btree-test");
+		file.delete();
+
+		BTree<Integer, String> btree = BTree.create(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE, IntegerComparator.INSTANCE);
+		btree.initialize();
+		btree.sync();
+
+		assertTrue(file.exists());
+	}
+
 ### Manually
 
     FileResourceManager pm = new FileResourceManager(file);
