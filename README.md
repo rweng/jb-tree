@@ -95,7 +95,7 @@ Look at the *BTreeSmallTest* class to see the code in action.
 
 # Documentation
 
-You can find the Javadoc [here](http://rweng.github.com/multimap/doc/) -
+You can find the Javadoc [here](http://rweng.github.com/jb-tree/doc/) -
 If you click on Network, you can see a branch called gh-pages on which you can see the commit the Javadocs are about (not always completely up-to-date).
 
 # Features
