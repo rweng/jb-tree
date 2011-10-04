@@ -1,21 +1,12 @@
 /*
- * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
+ * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ * http://creativecommons.org/licenses/by-nc/3.0/
+ * For alternative conditions contact the author.
  *
- * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
- * http://creativecommons.org/licenses/by-nc/3.0/
- * For alternative conditions contact the author.
+ * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-/**
- * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
- * http://creativecommons.org/licenses/by-nc/3.0/
- * For alternative conditions contact the author.
- * 
- * (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
- */
 package com.freshbourne.serializer;
-
-import com.freshbourne.serializer.Serializer;
 
 /**
  * A Serializer that serializes always to the same String/Buffer length
@@ -29,5 +20,5 @@ public interface FixLengthSerializer<InputType, ResultType> extends Serializer<I
 	 * @param c class in question
 	 * @return length of the object returned by {@link #serialize(Object)}
 	 */
-	public int serializedLength(Class<InputType> c);
+	public int getSerializedLength();
 }

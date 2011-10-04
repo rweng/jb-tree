@@ -1,35 +1,18 @@
 /*
- * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
+ * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ * http://creativecommons.org/licenses/by-nc/3.0/
+ * For alternative conditions contact the author.
  *
- * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
- * http://creativecommons.org/licenses/by-nc/3.0/
- * For alternative conditions contact the author.
+ * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-/**
- * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
- * http://creativecommons.org/licenses/by-nc/3.0/
- * For alternative conditions contact the author.
- * 
- * (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
- */
-package com.freshbourne.multimap.btree;
-
-import java.io.IOException;
-import java.util.List;
+package com.freshbourne.btree;
 
 import com.freshbourne.io.PagePointer;
 
-/**
- * Abstract class for all nodes of a B-Tree. It does not extend MultiMap anymore since although many methods are similar
- * the use-case is different. MultiMaps should never be full, whereas Nodes can be full. This fact changes the signatures of
- * methods like insert and remove.
- * 
- * TODO: make this interface package-wide?
- * 
- * @author "Robin Wenglewski <robin@wenglewski.de>"
- *
- */
+import java.util.Iterator;
+import java.util.List;
+
 public interface Node<K, V> {
 	
 	/**
@@ -52,27 +35,29 @@ public interface Node<K, V> {
 	/**
 	 * @return id of this node
 	 */
-	public Long getId();
+	public Integer getId();
 	
 	/**
-	 * @return number of values
+	 * @return number of keys in a node
 	 */
-	public int getNumberOfEntries();
+	public int getNumberOfKeys();
 	
 	/**
 	 * @return boolean if the key is contained in the map
 	 */
-	public boolean containsKey(K key) throws Exception;
+	public boolean containsKey(K key);
     
 	/**
 	 * @param key
 	 * @return array of values associated with the key or an empty array if the key does not exist
-	 * @throws IOException 
-	 * @throws Exception 
 	 */
-	public List<V> get(K key) throws IOException, Exception;
+	public List<V> get(K key);
 	
-	
+	/**
+	 * @param key
+	 * @return first element of get(key)
+	 */
+	public V getFirst(K key);
 	
     // Modification Operations
     
@@ -82,24 +67,50 @@ public interface Node<K, V> {
      * 
      * @param key
      * @return number of removed values
-     * @throws Exception 
      */
-    int remove(K key) throws Exception;
+    int remove(K key);
     
     /**
      * Removes the value under key.
      * IF the key or value was not found, null is returned.
      * 
+     * Note: This method might use value.equals to determine the values to remove. Make sure this method works correctly.
+     * 
      * @param key
      * @param value
-     * @throws Exception 
+     * @return number of removed values
      */
-    void remove(K key, V value) throws Exception;
+    int remove(K key, V value);
     
     /**
      * removes all key and values, destroying all rawPages with the keyPages, valuePages, leafPages and innerNodePages
-     * @throws Exception 
      */
-    void destroy() throws Exception;
+    void destroy();
     
+    
+    /**
+     * @return first key of first leaf
+     */
+    public K getFirstLeafKey();
+
+    public byte[] getFirstLeafKeySerialized();
+    
+    /**
+     * @return last key of last leaf
+     */
+    public K getLastLeafKey();
+
+    public byte[] getLastLeafKeySerialized();
+    
+    public Iterator<V> getIterator(K from, K to);
+
+    /**
+     * @return 1 if the node is a leaf, otherwise the depth of the innernode
+     */
+    public int getDepth();
+
+    /**
+     * @return true if all sub-nodes are in the right order and are valid
+     */
+    public void checkStructure() throws IllegalStateException;
 }

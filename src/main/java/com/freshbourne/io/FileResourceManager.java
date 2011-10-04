@@ -1,13 +1,17 @@
 /*
- * Copyright (c) 2011 Robin Wenglewski <robin@wenglewski.de>
- *
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
  * http://creativecommons.org/licenses/by-nc/3.0/
  * For alternative conditions contact the author.
+ *
+ * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 package com.freshbourne.io;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,12 +20,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.util.Map;
 
 
-/**
- * Provides access to Pages stored in a RandomAccessFile.
- * 
- */
+@Singleton
 public class FileResourceManager implements ResourceManager {
 	private RandomAccessFile handle;
 	private final File file;
@@ -29,12 +31,33 @@ public class FileResourceManager implements ResourceManager {
 	private FileLock fileLock;
 	private FileChannel ioChannel;
 	private ResourceHeader header;
+	private Map<Integer, RawPage> cache;
+	private boolean doLock;
 	
-	
+	private static Log LOG = LogFactory.getLog(FileResourceManager.class);
+
+	/**
+	 * this constructor is for manual creation.
+	 * @param file
+	 */
+	public FileResourceManager(File file){
+		this.file = file;
+		this.pageSize = PageSize.DEFAULT_PAGE_SIZE;
+		this.doLock = false;
+	}
+
+	/**
+	 * This is the default constructor (for Guice). It contains all required dependencies.
+	 *
+	 * @param f
+	 * @param pageSize
+	 * @param doLock
+	 */
     @Inject
-	FileResourceManager(@ResourceFile File f, @PageSize int pageSize){
+	public FileResourceManager(@ResourceFile File f, @PageSize int pageSize, @Named("doLock") boolean doLock){
 		this.file = f;
 		this.pageSize = pageSize;
+		this.doLock = doLock;
 	}
 	
 	/* (non-Javadoc)
@@ -46,11 +69,11 @@ public class FileResourceManager implements ResourceManager {
 			throw new IllegalStateException("Resource already open");
 		
 		// if the file does not exist already
-		if(!file.exists()){
-			file.createNewFile();
+		if(!getFile().exists()){
+			getFile().createNewFile();
 		}
 		
-		initIOChannel(file);
+		initIOChannel(getFile());
 		this.header = new ResourceHeader(ioChannel, pageSize);
 		
 		
@@ -60,32 +83,43 @@ public class FileResourceManager implements ResourceManager {
 			// load header if file existed
 			header.load();
 		}
+		
+		this.cache = new SoftReferenceCacheMap<Integer, RawPage>();
 	}
 	
 	@Override
 	public void writePage(RawPage page) {
-
-        ensureOpen();
+		LOG.debug("writing page to disk: "+ page.id());
+		ensureOpen();
         ensurePageExists(page.id());
         
-        ByteBuffer buffer = page.bufferAtZero();
+        ByteBuffer buffer = page.bufferForReading(0);
 
 		try{
-			Long offset = header.getPageOffset(page.id());
+			long offset = header.getPageOffset(page.id());
 			ioChannel.write(buffer, offset);
 		} catch(IOException e){
 			throw new RuntimeException(e);
 		}
+		LOG.debug("page written");
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#readPage(int)
+	 * @see com.freshbourne.io.PageManager#getPage(long)
 	 */
 	@Override
-	public RawPage readPage(long pageId) {
+	public RawPage getPage(int pageId) {
 		
 		ensureOpen();
 		ensurePageExists(pageId);
+		
+		RawPage result;
+		
+		if(cache.containsKey(pageId)){
+			result = cache.get(pageId);
+			if(result != null)
+				return result;
+		}
 
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 		
@@ -96,17 +130,20 @@ public class FileResourceManager implements ResourceManager {
 			System.exit(1);
 		}
 		
-		return new RawPage(buf, pageId, this);
+		result = new RawPage(buf, pageId, this);
+		cache.put(pageId, result);
+		
+		return result;
 	}
 
 	/**
 	 * @param pageId
 	 * @throws PageNotFoundException 
 	 */
-	private void ensurePageExists(long pageId) throws PageNotFoundException {
+	private void ensurePageExists(int pageId) {
 		if(!header.contains(pageId))
             throw new PageNotFoundException(this, pageId);
-	}
+    }
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ResourceManager#close()
@@ -114,7 +151,10 @@ public class FileResourceManager implements ResourceManager {
 	@Override
 	public void close() throws IOException {
 		if(header != null){
-			header.writeToFile();
+			for(RawPage r : cache.values()){
+				r.sync();
+			}
+			
 			header = null;
 		}
 		
@@ -135,7 +175,6 @@ public class FileResourceManager implements ResourceManager {
 			}
 		} catch (Exception ignored) {
 		}
-		
 	}
 
 	/* (non-Javadoc)
@@ -152,7 +191,7 @@ public class FileResourceManager implements ResourceManager {
 	 * 
 	 * from minidb
 	 * 
-	 * @param fileHandle The random access file representing the index.
+	 * @param file The random access file representing the index.
 	 * @throws IOException Thrown, when the I/O channel could not be opened.
 	 */
 	private void initIOChannel(File file)
@@ -163,14 +202,11 @@ public class FileResourceManager implements ResourceManager {
 		try {
 			ioChannel = handle.getChannel();
 			try {
-				fileLock = ioChannel.tryLock();
+				if(doLock)
+					fileLock = ioChannel.tryLock();
 			}
 			catch (OverlappingFileLockException oflex) {
 				throw new IOException("Index file locked by other consumer.");
-			}
-			
-			if (fileLock == null) {
-				throw new IOException("Could acquire index file handle for exclusive usage. File locked otherwise.");
 			}
 		}
 		catch (Throwable t) {
@@ -198,7 +234,7 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public String toString(){
-		return "Resource: " + file.getAbsolutePath();
+		return "Resource: " + getFile().getAbsolutePath();
 	}
 
 	/* (non-Javadoc)
@@ -209,12 +245,10 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 		ensureCorrectPageSize(page);
 		
-		RawPage result = new RawPage(page.buffer(), RawPage.generateId(), this);
-		page.buffer().position(0);
+		RawPage result = new RawPage(page.bufferForWriting(0), header.generateId(), this);
 		
 		try {
-			ioChannel.write(page.buffer(), ioChannel.size());
-			header.add(result.id());
+			ioChannel.write(page.bufferForReading(0), ioChannel.size());
 		} catch (DuplicatePageIdException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -223,6 +257,7 @@ public class FileResourceManager implements ResourceManager {
 			System.exit(1);
 		}
 		
+		cache.put(result.id(), result);
 		return result;
 	}
 	
@@ -231,7 +266,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @throws WrongPageSizeException 
 	 */
 	private void ensureCorrectPageSize(RawPage page) {
-		if(page.buffer().limit() != pageSize)
+		if(page.bufferForReading(0).limit() != pageSize)
 			throw new WrongPageSizeException(page, pageSize);
 	}
 
@@ -256,14 +291,9 @@ public class FileResourceManager implements ResourceManager {
 		ensureOpen();
 		
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
-		RawPage result = new RawPage(buf, RawPage.generateId(), this);
-		try {
-			header.add(result.id());
-		} catch (DuplicatePageIdException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		RawPage result = new RawPage(buf, header.generateId(), this);
 		
+		cache.put(result.id(), result);
 		return result;
 	}
 
@@ -271,26 +301,51 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#removePage(long)
 	 */
 	@Override
-	public void removePage(long pageId) {
-		Long lastPageId = header.getLastPageId();
+	public void removePage(int pageId) {
 		
-		
-		// copy the last entry to this position
-		try {
-			if (pageId == lastPageId) { // last page?
-				header.removeLastId();
-				ioChannel.truncate(header.getNumberOfPages() * pageSize);
-			} else {
-				RawPage last = readPage(lastPageId);
-				header.replaceId(pageId, lastPageId);
-				header.removeLastId();
-				writePage(last);
-
-				ioChannel.truncate(header.getNumberOfPages() * pageSize);
-			}
+		cache.remove(pageId);
+	}
+	
+	@Override
+	protected void finalize() throws Throwable{
+		try{
+			close();
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
+			super.finalize();
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.PageManager#hasPage(long)
+	 */
+	@Override
+	public boolean hasPage(int id) {
+		return header.contains(id);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.freshbourne.io.PageManager#sync()
+	 */
+	@Override
+	public void sync() {
+		LOG.debug("Syncing pages to disk");
+		for(RawPage p : cache.values()){
+			LOG.debug("trying to sync page " + p.id());
+			p.sync();
+		}
+	}
+
+	/**
+	 * @return the handle
+	 */
+	public RandomAccessFile getHandle() {
+		return handle;
+	}
+
+	/**
+	 * @return the file
+	 */
+	public File getFile() {
+		return file;
 	}
 }
