@@ -124,8 +124,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	}
 
 	/**
-	 * This constructor is for manual construction since it's a bit simpler than the other one. It then creates the actual
-	 * dependencies;
+	 * This constructor is for manual construction.
 	 *
 	 * @param bpm
 	 * @param keySerializer
@@ -146,6 +145,11 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		leafPageManager = new LeafPageManager<K, V>(bpm, valueSerializer, keySerializer, comparator);
 		innerNodeManager =
 				new InnerNodeManager(bpm, keyPageManager, valuePageManager, leafPageManager, keySerializer, comparator);
+
+		LOG.debug("BTree created: ");
+		LOG.debug("key serializer: " + keySerializer);
+		LOG.debug("value serializer: " + valueSerializer);
+		LOG.debug("comparator: " + comparator);
 	}
 
 	public int getDepth() {
