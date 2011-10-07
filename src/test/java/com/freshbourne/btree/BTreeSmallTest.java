@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Iterator;
 
 import static org.junit.Assert.*;
@@ -71,6 +72,7 @@ public class BTreeSmallTest {
 		assertTrue(tree.isValid());
 	}
 
+
 	@Test
 	public void testMultiLevelInsertForward() throws IOException {
 		int count = 1000;
@@ -78,10 +80,6 @@ public class BTreeSmallTest {
 		tree.initialize();
 
 		for (int i = 0; i < count; i++) {
-
-			if (i == 135) {
-				LOG.debug("debug");
-			}
 
 			assertTrue(tree.isValid());
 			LOG.info("i = " + i);
@@ -267,8 +265,9 @@ public class BTreeSmallTest {
 		File file = new File("/tmp/btree-test");
 		file.delete();
 
-		BTree<Integer, String> btree = BTree.create(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
-				IntegerComparator.INSTANCE);
+		BTree<Integer, String> btree =
+				BTree.create(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
+						IntegerComparator.INSTANCE);
 
 		btree.initialize();
 
@@ -276,9 +275,6 @@ public class BTreeSmallTest {
 
 		for (int i = 0; i < count; i++) {
 			LOG.debug("ROUND: " + i);
-
-			if(i == 4)
-				LOG.debug("DEBUG");
 
 			btree.add(i, "" + i);
 			btree.sync();
