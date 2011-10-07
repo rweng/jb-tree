@@ -18,20 +18,12 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 	INSTANCE_1000(1000);
 	
 	private int length;
-	private ByteBuffer buffer;
 
 	private static Logger LOG = Logger.getLogger(FixedStringSerializer.class);
 	
 	
 	private FixedStringSerializer(int length) {
 		this.length = length;
-	}
-
-	private ByteBuffer getBuffer(){
-		if(buffer == null)
-			buffer = ByteBuffer.allocate(length);
-
-		return buffer;
 	}
 
 	/* (non-Javadoc)
@@ -46,10 +38,10 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 		}
 
 
-		getBuffer().position(0);
-		getBuffer().putShort((short) bytes.length);
-		getBuffer().put(bytes);
-		return getBuffer().array();
+		ByteBuffer buf = ByteBuffer.allocate(length);
+		buf.putShort((short) bytes.length);
+		buf.put(bytes);
+		return buf.array();
 	}
 
 	/* (non-Javadoc)
@@ -57,13 +49,13 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 	 */
 	@Override
 	public String deserialize(byte[] o) {
-		getBuffer().position(0);
-		short length = getBuffer().getShort();
+		ByteBuffer buf = ByteBuffer.wrap(o);
+		short length = buf.getShort();
 		
 		LOG.debug("deserialing string with arraysize " + o.length + " and str-length " + length );
 
 		byte[] bytes = new byte[length];
-		getBuffer().get(bytes);
+		buf.get(bytes);
 		return new String(bytes);
 	}
 
