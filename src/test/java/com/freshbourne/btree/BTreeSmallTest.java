@@ -190,6 +190,13 @@ public class BTreeSmallTest {
 			newTree.add("" + i, "" + i);
 			newTree.checkStructure();
 		}
+
+		Iterator<String> iterator = newTree.getIterator();
+		for (int i = 0; i < count; i++) {
+			assertTrue(iterator.hasNext());
+			LOG.debug("got value: " + iterator.next());
+		}
+		assertFalse(iterator.hasNext());
 	}
 
 	@Test

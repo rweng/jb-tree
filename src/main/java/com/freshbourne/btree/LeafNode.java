@@ -703,6 +703,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
             this.currentNode = node;
 
             pointerBuffer = new byte[(valueSerializer.getSerializedLength())];
+	        LOG.debug("pointerBuffer created. Size: " + pointerBuffer.length);
 
             this.currentKeyOffset = currentNode.offsetOfKey(from, true);
 
@@ -746,9 +747,11 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
                 currentKeyOffset = Header.size();
             }
 
+	        LOG.debug("getting next pos: " + (currentKeyOffset + keySerializer.getSerializedLength()));
             ByteBuffer buf =
                     currentNode.rawPage().bufferForReading(currentKeyOffset + keySerializer.getSerializedLength());
             buf.get(pointerBuffer);
+
             V p = valueSerializer.deserialize(pointerBuffer);
 
             currentKeyOffset = buf.position();
