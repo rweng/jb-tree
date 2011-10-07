@@ -42,13 +42,7 @@ public class BTreeFactory {
 
         FileResourceManager frm = frmFactory.get(file);
 
-        LeafPageManager<K,V> lpm = new LeafPageManager<K, V>(frm,vs, ks, comparator);
-        DataPageManager<K> kdpm = new DataPageManager<K>(frm, pagePointSerializer, ks);
-        DataPageManager<V> vdpm = new DataPageManager<V>(frm, pagePointSerializer, vs);
-
-        InnerNodeManager<K,V> npm = new InnerNodeManager<K, V>(frm, kdpm, vdpm, lpm, ks, comparator);
-
-        BTree<K, V> tree = new BTree<K, V>(frm, lpm, npm, comparator);
+        BTree<K, V> tree = new BTree<K, V>(frm, ks, vs, comparator);
         tree.loadOrInitialize();
         map.put(file, tree);
 

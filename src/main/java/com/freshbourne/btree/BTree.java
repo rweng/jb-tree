@@ -26,6 +26,11 @@ import java.util.*;
 
 
 /**
+ *
+ * The Btree page, all leafs and innernodes have to be stored in the same RawPageManager.
+ * We used to have it differently but it is simpler this way.
+ * Now The BTree can make sure that all use the same serializers and comparators.
+ * 
  * Header: NUM_OF_ENTRIES ROOT_ID (here comes serializers etc)
  *
  * @param <K>
@@ -127,7 +132,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @param valueSerializer
 	 * @param comparator
 	 */
-	public BTree(PageManager<RawPage> bpm,
+	@Inject public BTree(PageManager<RawPage> bpm,
 	             FixLengthSerializer<K, byte[]> keySerializer, FixLengthSerializer<V, byte[]> valueSerializer,
 	             Comparator<K> comparator) {
 
@@ -141,24 +146,6 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		leafPageManager = new LeafPageManager<K, V>(bpm, valueSerializer, keySerializer, comparator);
 		innerNodeManager =
 				new InnerNodeManager(bpm, keyPageManager, valuePageManager, leafPageManager, keySerializer, comparator);
-	}
-
-	/**
-	 * This is the standard constructor (for Guice) that contains all real dependencies.
-	 *
-	 * @param bpm
-	 * 		for getting a rawPage for storing meta-information like size and depth of the tree and root page
-	 * @param leafPageManager
-	 * @param innerNodeManager
-	 * @param comparator
-	 */
-	@Inject public BTree(PageManager<RawPage> bpm, LeafPageManager<K, V> leafPageManager,
-	                     InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
-
-		this.leafPageManager = leafPageManager;
-		this.innerNodeManager = innerNodeManager;
-		this.comparator = comparator;
-		this.bpm = bpm;
 	}
 
 	public int getDepth() {
