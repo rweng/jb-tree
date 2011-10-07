@@ -24,7 +24,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
     private static final Logger LOG = Logger.getLogger(LeafNode.class);
 
     static enum Header {
-        NODE_TYPE(0) {}, // char
+        NODE_TYPE(0), // char
         NUMBER_OF_KEYS(Character.SIZE / 8), // int
         NEXT_LEAF_ID((Character.SIZE + Integer.SIZE) / 8); // int
 

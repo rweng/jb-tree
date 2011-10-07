@@ -35,6 +35,26 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 	private static final Log LOG = LogFactory.getLog(BTree.class);
 
+
+	public static enum Header {
+		NUM_OF_ENTRIES(0),
+		ROOT_ID(Integer.SIZE / 8);
+		
+		private int offset;
+
+		private Header(int offset){
+			this.offset = offset;
+		}
+
+		static int size() {
+            return (2 * Integer.SIZE) / 8;
+        } // 8
+
+        int getOffset() {
+            return offset;
+        }
+	}
+
 	/**
 	 * This is the probably least verbose method for creating BTrees. It accepts a file versus the FileResourceManager of
 	 * the constructor. In addition, one does not have to repeat the generic on the right hand side of the creation
@@ -306,7 +326,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 	private void setRoot(Node<K, V> root) {
 		this.root = root;
-		rawPage().bufferForWriting(Integer.SIZE / 8).putInt(root.getId());
+		rawPage().bufferForWriting(Header.ROOT_ID.getOffset()).putInt(root.getId());
 	}
 
 	/**
@@ -325,7 +345,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	/** @param i */
 	private void setNumberOfEntries(int i) {
 		numberOfEntries = i;
-		rawPage().bufferForWriting(0).putInt(numberOfEntries);
+		rawPage().bufferForWriting(Header.NUM_OF_ENTRIES.getOffset()).putInt(numberOfEntries);
 	}
 
 	/* (non-Javadoc)
