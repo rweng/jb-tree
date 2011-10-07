@@ -400,6 +400,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		  */
 	@Override
 	public void load() throws IOException {
+		LOG.debug("loading BTree");
 		if (!bpm.hasPage(1)) {
 			throw new IOException("Page 1 could not be found. Ensure that the BTree is initialized");
 		}
@@ -419,6 +420,10 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 			throw new IllegalStateException(
 					"Page 1 does exist, but is neither a leafPage nor a innerNodePage. This could be the result of an unclosed B-Tree.");
 		}
+
+		LOG.debug("BTree loaded: ");
+		LOG.debug("Number of Values: " + numberOfEntries);
+		LOG.debug("root (id: " + root.getId() + "): " + root);
 	}
 
 	/* (non-Javadoc)
