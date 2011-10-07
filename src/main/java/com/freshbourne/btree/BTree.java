@@ -25,6 +25,12 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 
 
+/**
+ * Header: NUM_OF_ENTRIES ROOT_ID (here comes serializers etc)
+ *
+ * @param <K>
+ * @param <V>
+ */
 public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 	private static final Log LOG = LogFactory.getLog(BTree.class);
@@ -293,9 +299,14 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 			// new root
 			InnerNode<K, V> newRoot = innerNodeManager.createPage();
 			newRoot.initRootState(root.getId(), result.getSerializedKey(), result.getPageId());
-			root = newRoot;
+			setRoot(newRoot);
 		}
 
+	}
+
+	private void setRoot(Node<K, V> root) {
+		this.root = root;
+		rawPage().bufferForWriting(Integer.SIZE / 8).putInt(root.getId());
 	}
 
 	/**
@@ -358,7 +369,6 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		  */
 	@Override
 	public void initialize() throws IOException {
-		numberOfEntries = 0;
 		valid = true;
 
 		if (bpm.hasPage(1))
@@ -369,11 +379,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		if (rawPage.id() != 1)
 			throw new IllegalStateException("rawPage must have id 1");
 
-		root = leafPageManager.createPage();
-
-		ByteBuffer buffer = rawPage.bufferForWriting(0);
-		buffer.putInt(numberOfEntries);
-		buffer.putInt(root.getId());
+		setRoot(leafPageManager.createPage());
+		setNumberOfEntries(0);
 	}
 
 	/* (non-Javadoc)
@@ -446,6 +453,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		  */
 	@Override
 	public Iterator<V> getIterator() {
+		ensureValid();
 		return getIterator(root.getFirstLeafKey(), root.getLastLeafKey());
 	}
 

@@ -254,10 +254,67 @@ public class BTreeSmallTest {
 		File file = new File("/tmp/btree-test");
 		file.delete();
 
-		BTree<Integer, String> btree = BTree.create(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE, IntegerComparator.INSTANCE);
+		BTree<Integer, String> btree = BTree.create(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
+				IntegerComparator.INSTANCE);
 		btree.initialize();
 		btree.sync();
 
 		assertTrue(file.exists());
+	}
+
+	@Test
+	public void integerStringTree() throws IOException {
+		File file = new File("/tmp/btree-test");
+		file.delete();
+
+		BTree<Integer, String> btree = BTree.create(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
+				IntegerComparator.INSTANCE);
+
+		btree.initialize();
+
+		int count = 50;
+
+		for (int i = 0; i < count; i++) {
+			LOG.debug("ROUND: " + i);
+
+			if(i == 4)
+				LOG.debug("DEBUG");
+
+			btree.add(i, "" + i);
+			btree.sync();
+
+			BTree<Integer, String> btree2 =
+					BTree.create(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
+							IntegerComparator.INSTANCE);
+			btree2.load();
+
+
+			Iterator<String> iterator = btree2.getIterator();
+
+			for (int j = 0; j <= i; j++) {
+				assertTrue(iterator.hasNext());
+				LOG.debug("next value:" + iterator.next());
+			}
+
+			assertFalse(iterator.hasNext());
+
+
+		}
+
+		btree.sync();
+
+		btree = BTree.create(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
+				IntegerComparator.INSTANCE);
+		btree.load();
+
+		Iterator<String> iterator = btree.getIterator();
+
+		for (int i = 0; i < count; i++) {
+			assertTrue(iterator.hasNext());
+			LOG.debug("next value:" + iterator.next());
+		}
+
+		assertFalse(iterator.hasNext());
+
 	}
 }
