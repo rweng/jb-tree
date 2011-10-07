@@ -35,25 +35,64 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 	private static final Log LOG = LogFactory.getLog(BTree.class);
 
+	private final LeafPageManager<K, V>  leafPageManager;
+	private final InnerNodeManager<K, V> innerNodeManager;
+	private final Comparator<K>          comparator;
+	private final PageManager<RawPage>   bpm;
+	private       RawPage                rawPage;
+
+	private Node<K, V> root;
+
+	private boolean valid           = false;
+	private int     numberOfEntries = 0;
+
 
 	public static enum Header {
 		NUM_OF_ENTRIES(0),
 		ROOT_ID(Integer.SIZE / 8);
-		
+
 		private int offset;
 
-		private Header(int offset){
+		private Header(int offset) {
 			this.offset = offset;
 		}
 
 		static int size() {
-            return (2 * Integer.SIZE) / 8;
-        } // 8
+			return (2 * Integer.SIZE) / 8;
+		} // 8
 
-        int getOffset() {
-            return offset;
-        }
+		int getOffset() {
+			return offset;
+		}
 	}
+
+	/**
+	 * This enum is used to make it possible for all nodes in the BTree to serialize and deserialize in a unique fashion
+	 *
+	 * @author Robin Wenglewski <robin@wenglewski.de>
+	 */
+	public static enum NodeType {
+		LEAF_NODE('L'), INNER_NODE('I');
+
+		private final char serialized;
+
+		NodeType(char value) {
+			this.serialized = value;
+		}
+
+		public char serialize() {
+			return serialized;
+		}
+
+		public static NodeType deserialize(char serialized) {
+			for (NodeType nt : values())
+				if (nt.serialized == serialized)
+					return nt;
+
+			return null;
+		}
+	}
+
 
 	/**
 	 * This is the probably least verbose method for creating BTrees. It accepts a file versus the FileResourceManager of
@@ -78,49 +117,6 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 		return new BTree<K, V>(frm, keySerializer, valueSerializer, comparator);
 	}
-
-	public int getDepth() {
-		return root.getDepth();
-	}
-
-	/**
-	 * This enum is used to make it possible for all nodes in the BTree to serialize and deserialize in a unique fashion
-	 *
-	 * @author Robin Wenglewski <robin@wenglewski.de>
-	 */
-	public enum NodeType {
-		LEAF_NODE('L'), INNER_NODE('I');
-
-		private final char serialized;
-
-		NodeType(char value) {
-			this.serialized = value;
-		}
-
-		public char serialize() {
-			return serialized;
-		}
-
-		public static NodeType deserialize(char serialized) {
-			for (NodeType nt : values())
-				if (nt.serialized == serialized)
-					return nt;
-
-			return null;
-		}
-	}
-
-	private final LeafPageManager<K, V>  leafPageManager;
-	private final InnerNodeManager<K, V> innerNodeManager;
-	private final Comparator<K>          comparator;
-	private final PageManager<RawPage>   bpm;
-	private       RawPage                rawPage;
-
-	private Node<K, V> root;
-
-	private boolean valid           = false;
-	private int     numberOfEntries = 0;
-
 
 	/**
 	 * This constructor is for manual construction since it's a bit simpler than the other one. It then creates the actual
@@ -158,10 +154,15 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	@Inject public BTree(PageManager<RawPage> bpm, LeafPageManager<K, V> leafPageManager,
 	                     InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
+
 		this.leafPageManager = leafPageManager;
 		this.innerNodeManager = innerNodeManager;
 		this.comparator = comparator;
 		this.bpm = bpm;
+	}
+
+	public int getDepth() {
+		return root.getDepth();
 	}
 
 	public Comparator<K> getKeyComparator() {
