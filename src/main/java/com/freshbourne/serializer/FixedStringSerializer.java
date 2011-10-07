@@ -7,6 +7,10 @@
  */
 package com.freshbourne.serializer;
 
+import org.apache.log4j.Logger;
+
+import java.nio.ByteBuffer;
+
 public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]> {
 	INSTANCE(100),
 	INSTANCE_10(10),
@@ -14,9 +18,20 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 	INSTANCE_1000(1000);
 	
 	private int length;
+	private ByteBuffer buffer;
+
+	private static Logger LOG = Logger.getLogger(FixedStringSerializer.class);
+	
 	
 	private FixedStringSerializer(int length) {
 		this.length = length;
+	}
+
+	private ByteBuffer getBuffer(){
+		if(buffer == null)
+			buffer = ByteBuffer.allocate(length);
+
+		return buffer;
 	}
 
 	/* (non-Javadoc)
@@ -29,11 +44,12 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 		if(bytes.length > (length - 1)){
 			throw new IllegalArgumentException("String is too long to be serialized");
 		}
-		
-		byte[] result = new byte[length];
-		result[0] = new Integer(bytes.length).byteValue();
-		System.arraycopy(bytes, 0, result, 1, bytes.length);
-		return result;
+
+
+		getBuffer().position(0);
+		getBuffer().putShort((short) bytes.length);
+		getBuffer().put(bytes);
+		return getBuffer().array();
 	}
 
 	/* (non-Javadoc)
@@ -41,9 +57,13 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 	 */
 	@Override
 	public String deserialize(byte[] o) {
-		int length = o[0];
+		getBuffer().position(0);
+		short length = getBuffer().getShort();
+		
+		LOG.debug("deserialing string with arraysize " + o.length + " and str-length " + length );
+
 		byte[] bytes = new byte[length];
-		System.arraycopy(o, 1, bytes, 0, bytes.length);
+		getBuffer().get(bytes);
 		return new String(bytes);
 	}
 

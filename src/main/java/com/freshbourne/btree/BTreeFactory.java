@@ -35,6 +35,20 @@ public class BTreeFactory {
         this.pagePointSerializer = pps;
     }
 
+
+	/**
+	 *
+	 * returns a loaded or initialized BTree
+	 *
+	 * @param file
+	 * @param ks
+	 * @param vs
+	 * @param comparator
+	 * @param <K>
+	 * @param <V>
+	 * @return
+	 * @throws IOException
+	 */
     public <K,V> BTree<K,V> get(File file, FixLengthSerializer<K, byte[]> ks, FixLengthSerializer<V, byte[]> vs,
                                 Comparator<K> comparator) throws IOException {
         if(map.containsKey(file))
