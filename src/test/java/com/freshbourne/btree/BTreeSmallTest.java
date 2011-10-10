@@ -313,4 +313,31 @@ public class BTreeSmallTest {
 		assertFalse(iterator.hasNext());
 
 	}
+
+	@Test
+	public void iterators() throws IOException {
+		tree.initialize();
+		fillTree(tree, 100);
+		Iterator<Integer> iterator = tree.getIterator();
+		for (int i = 0; i < 100; i++)
+			assertEquals(i, (int) iterator.next());
+		assertFalse(iterator.hasNext());
+
+		iterator = tree.getIterator(-50, 50);
+		for (int i = 0; i <= 50; i++)
+			assertEquals(i, (int) iterator.next());
+		assertFalse(iterator.hasNext());
+
+		iterator = tree.getIterator(50,150);
+		for (int i = 50; i < 100; i++)
+			assertEquals(i, (int) iterator.next());
+		assertFalse(iterator.hasNext());
+
+	}
+
+	private void fillTree(BTree<Integer, Integer> tree, int count) {
+		for (int i = 0; i < count; i++) {
+			tree.add(i, i);
+		}
+	}
 }

@@ -719,7 +719,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
       */
     @Override
     public Iterator<V> getIterator(K from, K to) {
-        return getPageForPageId(getLeftPageIdOfKey(0)).getIterator(from, to);
+        return new InnerNodeIterator(from, to);
     }
 
     @Override public int getDepth() {
@@ -769,4 +769,60 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
         List<V> res = get(key);
         return res.size() > 0 ? res.get(0) : null;
     }
+
+	public class InnerNodeIterator implements Iterator<V> {
+		private K from;
+		private K to;
+		private KeyStruct ks;
+		private V next = null;
+		private Iterator<V> currentIterator;
+		
+
+		public InnerNodeIterator(K from, K to) {
+			this.from = from;
+			this.to = to;
+			ks = getFirstLargerOrEqualKeyStruct(from);
+			
+			if(ks == null)
+				ks = new KeyStruct(getNumberOfKeys());
+		}
+
+		@Override public boolean hasNext() {
+			if(next == null)
+				next = next();
+
+			return next != null;
+		}
+
+		@Override public V next() {
+			if(next != null){
+				V result = next;
+				next = null;
+				return result;
+			}
+
+			// return next if currentIterator and hasNext()
+			if(currentIterator != null){
+				if(currentIterator.hasNext())
+					return currentIterator.next();
+				currentIterator = null;
+			}
+
+			if(ks == null || ks.pos > getNumberOfKeys())
+				return null;
+
+
+			currentIterator = ks.getLeftNode().getIterator(from, to);
+			if(ks.pos < getNumberOfKeys() && comparator.compare(ks.getKey(), to) <= 0)
+				ks.becomeNext();
+			else
+				ks = null;
+			
+			return next();
+		}
+
+		@Override public void remove() {
+			throw new UnsupportedOperationException();
+		}
+	}
 }

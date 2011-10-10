@@ -26,11 +26,9 @@ import java.util.*;
 
 
 /**
- *
- * The Btree page, all leafs and innernodes have to be stored in the same RawPageManager.
- * We used to have it differently but it is simpler this way.
- * Now The BTree can make sure that all use the same serializers and comparators.
- * 
+ * The Btree page, all leafs and innernodes have to be stored in the same RawPageManager. We used to have it differently
+ * but it is simpler this way. Now The BTree can make sure that all use the same serializers and comparators.
+ * <p/>
  * Header: NUM_OF_ENTRIES ROOT_ID (here comes serializers etc)
  *
  * @param <K>
@@ -132,8 +130,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @param comparator
 	 */
 	@Inject public BTree(PageManager<RawPage> bpm,
-	             FixLengthSerializer<K, byte[]> keySerializer, FixLengthSerializer<V, byte[]> valueSerializer,
-	             Comparator<K> comparator) {
+	                     FixLengthSerializer<K, byte[]> keySerializer, FixLengthSerializer<V, byte[]> valueSerializer,
+	                     Comparator<K> comparator) {
 
 		this.bpm = bpm;
 		this.comparator = comparator;
@@ -481,6 +479,84 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	public Iterator<V> getIterator(K from, K to) {
 		Iterator<V> result = root.getIterator(from, to);
 		return result;
+	}
+
+
+	public Iterator<V> getIterator(List<Range<K>> ranges) {
+		return new BTreeIterator(ranges);
+	}
+
+	private class BTreeIterator implements Iterator<V> {
+
+		private List<Range<K>> ranges;
+		private int rangePointer = 0;
+		private Iterator<V> currentIterator = null;
+
+		public BTreeIterator(List<Range<K>> ranges) {
+			this.ranges = cleanRanges(ranges);
+
+		}
+
+		private List<Range<K>> cleanRanges(List<Range<K>> ranges) {
+			List<Range<K>> cleaned = new LinkedList<Range<K>>();
+
+			// sort ranges after from key
+			Collections.sort(ranges, new Comparator<Range<K>>() {
+				@Override public int compare(Range<K> kRange, Range<K> kRange1) {
+					return comparator.compare(kRange.getFrom(), kRange1.getFrom());
+				}
+			});
+
+			Range<K> last = null;
+			for (Range<K> r : ranges) {
+				if (cleaned.size() == 0) {
+					cleaned.add(r);
+					last = r;
+					continue;
+				}
+
+				// only if this to() is larger than last to(), extend to()
+				if(comparator.compare(last.getTo(), r.getFrom()) <= 0){
+					if(comparator.compare(last.getTo(), r.getTo()) < 0){
+						last.setTo(r.getTo());
+					}
+				} else { // separate ranges
+					cleaned.add(r);
+					last = r;
+				}
+			}
+
+			return cleaned;
+		}
+
+
+		@Override public boolean hasNext() {
+			if(currentIterator == null){
+				if(rangePointer == ranges.size() - 1)
+					return false;
+				else {
+					Range<K> range = ranges.get(++rangePointer);
+					currentIterator = root.getIterator(range.getFrom(), range.getTo());
+				}
+			}
+
+			if(currentIterator.hasNext())
+				return true;
+
+			currentIterator = null;
+			return hasNext();
+		}
+
+		@Override public V next() {
+			if(!hasNext())
+				return null;
+			else
+				return currentIterator.next();
+		}
+
+		@Override public void remove() {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	public String getPath() {
