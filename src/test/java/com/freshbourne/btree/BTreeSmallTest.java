@@ -25,8 +25,10 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -315,7 +317,49 @@ public class BTreeSmallTest {
 	}
 
 	@Test
-	public void iterators() throws IOException {
+	public void iteratorsWithoutParameters() throws IOException {
+		tree.initialize();
+		fillTree(tree, 1000);
+		Iterator<Integer> iterator = tree.getIterator();
+		for(int i = 0; i<1000;i++)
+			assertEquals(i, (int) iterator.next());
+
+		assertFalse(iterator.hasNext());
+	}
+
+	@Test
+	public void iteratorsWithRanges() throws IOException {
+		tree.initialize();
+		fillTree(tree, 100);
+		List<Range<Integer>> rangeList = new ArrayList<Range<Integer>>();
+		rangeList.add(new Range(-5, 5));
+
+		// 49 - 56
+		rangeList.add(new Range(50, 55));
+		rangeList.add(new Range(52, 53));
+		rangeList.add(new Range(49, 53));
+		rangeList.add(new Range(52, 56));
+
+		rangeList.add(new Range(95, 1000));
+
+		Iterator<Integer> iterator = tree.getIterator(rangeList);
+
+		for(int i=0;i<=5;i++){
+			assertEquals(i, (int) iterator.next());
+		}
+
+		for(int i=49; i<=56; i++)
+			assertEquals(i, (int) iterator.next());
+
+		for(int i=95;i< 100;i++){
+			assertEquals(i, (int) iterator.next());
+		}
+
+		assertFalse(iterator.hasNext());
+	}
+
+	@Test
+	public void iteratorsWithStartEndGiven() throws IOException {
 		tree.initialize();
 		fillTree(tree, 100);
 		Iterator<Integer> iterator = tree.getIterator();
@@ -332,7 +376,6 @@ public class BTreeSmallTest {
 		for (int i = 50; i < 100; i++)
 			assertEquals(i, (int) iterator.next());
 		assertFalse(iterator.hasNext());
-
 	}
 
 	private void fillTree(BTree<Integer, Integer> tree, int count) {

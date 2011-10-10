@@ -489,7 +489,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	private class BTreeIterator implements Iterator<V> {
 
 		private List<Range<K>> ranges;
-		private int rangePointer = 0;
+		private int rangePointer = -1;
 		private Iterator<V> currentIterator = null;
 
 		public BTreeIterator(List<Range<K>> ranges) {
@@ -516,7 +516,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 				}
 
 				// only if this to() is larger than last to(), extend to()
-				if(comparator.compare(last.getTo(), r.getFrom()) <= 0){
+				if(comparator.compare(last.getTo(), r.getFrom()) >= 0){
 					if(comparator.compare(last.getTo(), r.getTo()) < 0){
 						last.setTo(r.getTo());
 					}
