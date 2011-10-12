@@ -390,5 +390,6 @@ public class BTreeSmallTest {
 		fillTree(tree, 100);
 		tree.close();
 		assertFalse(tree.isValid());
+		assertFalse(tree.getResourceManager().isOpen());
 	}
 }

@@ -320,6 +320,7 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public boolean hasPage(int id) {
+		ensureOpen();
 		return header.contains(id);
 	}
 

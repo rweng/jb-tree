@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 
@@ -34,14 +33,14 @@ import java.util.*;
  * @param <K>
  * @param <V>
  */
-public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
+public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 	private static final Log LOG = LogFactory.getLog(BTree.class);
 
 	private final LeafPageManager<K, V>  leafPageManager;
 	private final InnerNodeManager<K, V> innerNodeManager;
 	private final Comparator<K>          comparator;
-	private final ResourceManager        bpm;
+	private final ResourceManager rm;
 	private       RawPage                rawPage;
 
 	private Node<K, V> root;
@@ -56,7 +55,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 */
 	public void close() throws IOException {
 		sync();
-		bpm.close();
+		rm.close();
 		valid  = false;
 	}
 
@@ -135,25 +134,25 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	/**
 	 * This constructor is for manual construction.
 	 *
-	 * @param bpm
+	 * @param rm
 	 * @param keySerializer
 	 * @param valueSerializer
 	 * @param comparator
 	 */
-	@Inject public BTree(ResourceManager bpm,
+	@Inject public BTree(ResourceManager rm,
 	                     FixLengthSerializer<K, byte[]> keySerializer, FixLengthSerializer<V, byte[]> valueSerializer,
 	                     Comparator<K> comparator) {
 
-		this.bpm = bpm;
+		this.rm = rm;
 		this.comparator = comparator;
 
-		DataPageManager<K> keyPageManager = new DataPageManager<K>(bpm, PagePointSerializer.INSTANCE, keySerializer);
+		DataPageManager<K> keyPageManager = new DataPageManager<K>(rm, PagePointSerializer.INSTANCE, keySerializer);
 		DataPageManager<V> valuePageManager =
-				new DataPageManager<V>(bpm, PagePointSerializer.INSTANCE, valueSerializer);
+				new DataPageManager<V>(rm, PagePointSerializer.INSTANCE, valueSerializer);
 
-		leafPageManager = new LeafPageManager<K, V>(bpm, valueSerializer, keySerializer, comparator);
+		leafPageManager = new LeafPageManager<K, V>(rm, valueSerializer, keySerializer, comparator);
 		innerNodeManager =
-				new InnerNodeManager(bpm, keyPageManager, valuePageManager, leafPageManager, keySerializer, comparator);
+				new InnerNodeManager(rm, keyPageManager, valuePageManager, leafPageManager, keySerializer, comparator);
 
 		LOG.debug("BTree created: ");
 		LOG.debug("key serializer: " + keySerializer);
@@ -327,7 +326,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 	private void setRoot(Node<K, V> root) {
 		this.root = root;
-		rawPage().bufferForWriting(Header.ROOT_ID.getOffset()).putInt(root.getId());
+		rawPage.bufferForWriting(Header.ROOT_ID.getOffset()).putInt(root.getId());
 	}
 
 	/**
@@ -346,7 +345,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	/** @param i */
 	private void setNumberOfEntries(int i) {
 		numberOfEntries = i;
-		rawPage().bufferForWriting(Header.NUM_OF_ENTRIES.getOffset()).putInt(numberOfEntries);
+		rawPage.bufferForWriting(Header.NUM_OF_ENTRIES.getOffset()).putInt(numberOfEntries);
 	}
 
 	/* (non-Javadoc)
@@ -382,26 +381,25 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		numberOfEntries = 0;
 	}
 
-	/** The maximum number of levels in the B-Tree. Used to prevent infinite loops when the structure is corrupted. */
-	private static final int MAX_BTREE_DEPTH = 50;
-
 	/* (non-Javadoc)
 		  * @see com.freshbourne.io.ComplexPage#initialize()
 		  */
 	@Override
 	public void initialize() throws IOException {
-		valid = true;
+		if(!rm.isOpen())
+			rm.open();
 
-		if (bpm.hasPage(1))
-			rawPage = bpm.getPage(1);
+		if (rm.hasPage(1))
+			rawPage = rm.getPage(1);
 		else
-			rawPage = bpm.createPage();
+			rawPage = rm.createPage();
 
 		if (rawPage.id() != 1)
 			throw new IllegalStateException("rawPage must have id 1");
 
 		setRoot(leafPageManager.createPage());
 		setNumberOfEntries(0);
+		valid = true;
 	}
 
 	/* (non-Javadoc)
@@ -410,17 +408,19 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	@Override
 	public void load() throws IOException {
 		LOG.debug("loading BTree");
-		if (!bpm.hasPage(1)) {
+
+		if(!rm.isOpen())
+			rm.open();
+
+		if (!rm.hasPage(1)) {
 			throw new IOException("Page 1 could not be found. Ensure that the BTree is initialized");
 		}
 
 
-		rawPage = bpm.getPage(1);
-
-		valid = true;
+		rawPage = rm.getPage(1);
 		numberOfEntries = rawPage.bufferForReading(0).getInt();
 
-		int rootId = rawPage().bufferForReading(4).getInt();
+		int rootId = rawPage.bufferForReading(4).getInt();
 		if (leafPageManager.hasPage(rootId)) {
 			root = leafPageManager.getPage(rootId);
 		} else if (innerNodeManager.hasPage(rootId)) {
@@ -429,6 +429,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 			throw new IllegalStateException(
 					"Page 1 does exist, but is neither a leafPage nor a innerNodePage. This could be the result of an unclosed B-Tree.");
 		}
+
+		valid = true;
 
 		LOG.debug("BTree loaded: ");
 		LOG.debug("Number of Values: " + numberOfEntries);
@@ -455,23 +457,13 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 			initialize();
 		}
 	}
-
-	/* (non-Javadoc)
-		  * @see com.freshbourne.io.ComplexPage#rawPage()
-		  */
-	@Override
-	public RawPage rawPage() {
-		ensureValid();
-
-		return rawPage;
-	}
-
+	
 	/* (non-Javadoc)
 		  * @see com.freshbourne.multimap.MultiMap#sync()
 		  */
 	@Override
 	public void sync() {
-		bpm.sync();
+		rm.sync();
 	}
 
 	/* (non-Javadoc)
@@ -571,6 +563,10 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	}
 
 	public String getPath() {
-		return ((FileResourceManager) bpm).getFile().getAbsolutePath();
+		return ((FileResourceManager) rm).getFile().getAbsolutePath();
+	}
+
+	ResourceManager getResourceManager(){
+		return rm;
 	}
 }
