@@ -85,7 +85,7 @@ public class FileResourceManager implements ResourceManager {
 			header.load();
 		}
 
-		this.cache = new SoftReferenceCacheMap<Integer, RawPage>();
+		this.cache = new SoftHashMap<Integer, RawPage>();
 	}
 
 	@Override
