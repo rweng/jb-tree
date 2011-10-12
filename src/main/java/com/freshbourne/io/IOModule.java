@@ -22,10 +22,10 @@ public class IOModule extends AbstractModule{
     private static final Logger LOG = Logger.getLogger(IOModule.class);
 	
 	// ***** CONFIGURATION (CONSTRUCTURS) *****
-	private File file;
-	private int pageSize = PageSize.DEFAULT_PAGE_SIZE;
-	private int cacheSize = 10;
-    private boolean doLock = false;
+	public File file;
+	public int pageSize = PageSize.DEFAULT_PAGE_SIZE;
+	public int cacheSize = 10;
+    public boolean doLock = true;
 
     public void resourceFile(File file){this.file = file;};
     public void pageSize(int i){pageSize = i;}

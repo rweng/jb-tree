@@ -88,8 +88,14 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 			e.printStackTrace();
 			fail();
 		}
-		
-		
-		
+	}
+
+	@Test(expected = IOException.class)
+	public void shouldThrowExceptionIfFileIsLocked() throws IOException {
+		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE, true);
+		rm.open();
+		FileResourceManager rm2 = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE, true);
+		rm2.open();
+		fail("FileResourceManager should throw an IOException if the file is already locked");
 	}
 }

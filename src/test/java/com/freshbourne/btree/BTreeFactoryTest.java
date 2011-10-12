@@ -6,7 +6,7 @@
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-package com.freshbourne.io;
+package com.freshbourne.btree;
 
 import com.freshbourne.btree.BTree;
 import com.freshbourne.btree.BTreeFactory;
