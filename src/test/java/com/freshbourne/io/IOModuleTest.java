@@ -10,6 +10,9 @@ package com.freshbourne.io;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 public class IOModuleTest {
     private static Injector injector;
@@ -17,4 +20,11 @@ public class IOModuleTest {
     static {
         injector = Guice.createInjector(new IOModule());
     }
+
+
+	@Test
+	public void lockingByDefault(){
+		FileResourceManagerFactory factory = injector.getInstance(FileResourceManagerFactory.class);
+		assertTrue(factory.doLock);
+	}
 }

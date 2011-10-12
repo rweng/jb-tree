@@ -19,7 +19,7 @@ import java.util.HashMap;
 @Singleton
 public class FileResourceManagerFactory {
     private int pageSize;
-    private boolean doLock;
+    public boolean doLock;
     private HashMap<File, FileResourceManager> map = new HashMap<File, FileResourceManager>();
 
     @Inject
@@ -37,4 +37,6 @@ public class FileResourceManagerFactory {
         map.put(file, frm);
         return frm;
     }
+
+
 }
