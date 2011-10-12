@@ -383,4 +383,12 @@ public class BTreeSmallTest {
 			tree.add(i, i);
 		}
 	}
+
+	@Test
+	public void close() throws IOException {
+		tree.initialize();
+		fillTree(tree, 100);
+		tree.close();
+		assertFalse(tree.isValid());
+	}
 }

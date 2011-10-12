@@ -41,13 +41,24 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	private final LeafPageManager<K, V>  leafPageManager;
 	private final InnerNodeManager<K, V> innerNodeManager;
 	private final Comparator<K>          comparator;
-	private final PageManager<RawPage>   bpm;
+	private final ResourceManager        bpm;
 	private       RawPage                rawPage;
 
 	private Node<K, V> root;
 
 	private boolean valid           = false;
 	private int     numberOfEntries = 0;
+
+	/**
+	 * sync, close the ResourceManager and set to invalid
+	 *
+	 * @throws IOException
+	 */
+	public void close() throws IOException {
+		sync();
+		bpm.close();
+		valid  = false;
+	}
 
 
 	public static enum Header {
@@ -129,7 +140,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @param valueSerializer
 	 * @param comparator
 	 */
-	@Inject public BTree(PageManager<RawPage> bpm,
+	@Inject public BTree(ResourceManager bpm,
 	                     FixLengthSerializer<K, byte[]> keySerializer, FixLengthSerializer<V, byte[]> valueSerializer,
 	                     Comparator<K> comparator) {
 
@@ -489,7 +500,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	private class BTreeIterator implements Iterator<V> {
 
 		private List<Range<K>> ranges;
-		private int rangePointer = -1;
+		private int         rangePointer    = -1;
 		private Iterator<V> currentIterator = null;
 
 		public BTreeIterator(List<Range<K>> ranges) {
@@ -516,8 +527,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 				}
 
 				// only if this to() is larger than last to(), extend to()
-				if(comparator.compare(last.getTo(), r.getFrom()) >= 0){
-					if(comparator.compare(last.getTo(), r.getTo()) < 0){
+				if (comparator.compare(last.getTo(), r.getFrom()) >= 0) {
+					if (comparator.compare(last.getTo(), r.getTo()) < 0) {
 						last.setTo(r.getTo());
 					}
 				} else { // separate ranges
@@ -531,8 +542,8 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 
 		@Override public boolean hasNext() {
-			if(currentIterator == null){
-				if(rangePointer == ranges.size() - 1)
+			if (currentIterator == null) {
+				if (rangePointer == ranges.size() - 1)
 					return false;
 				else {
 					Range<K> range = ranges.get(++rangePointer);
@@ -540,7 +551,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 				}
 			}
 
-			if(currentIterator.hasNext())
+			if (currentIterator.hasNext())
 				return true;
 
 			currentIterator = null;
@@ -548,7 +559,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		}
 
 		@Override public V next() {
-			if(!hasNext())
+			if (!hasNext())
 				return null;
 			else
 				return currentIterator.next();
