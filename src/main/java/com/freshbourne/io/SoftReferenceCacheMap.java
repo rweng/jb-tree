@@ -14,6 +14,9 @@ import java.util.*;
 /**
  *
  * Using the SoftHashMap instead of this class is recommended.
+ * Not 100% sure, but it could be that this class causes a
+ * java.util.ConcurrentModificationException when iterating over values and the Garbage Collector runs at
+ * the same time.
  *
  * @deprecated
  * @param <K>

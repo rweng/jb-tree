@@ -102,7 +102,6 @@ public class FileResourceManager implements ResourceManager {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		LOG.debug("page written");
 	}
 
 	/* (non-Javadoc)
