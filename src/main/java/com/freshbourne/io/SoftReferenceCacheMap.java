@@ -11,6 +11,14 @@ import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.util.*;
 
+/**
+ *
+ * Using the SoftHashMap instead of this class is recommended.
+ *
+ * @deprecated
+ * @param <K>
+ * @param <V>
+ */
 public class SoftReferenceCacheMap<K, V> implements Map<K, V> {
 	
 	private Map<K, Reference<V>> refs = new HashMap<K, Reference<V>>();

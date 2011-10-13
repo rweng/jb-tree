@@ -16,7 +16,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 
     private static final Logger LOG = Logger.getLogger(AbstractPageManager.class);
 	private final PageManager<RawPage> rpm;
-	private Map<Integer, T> cache = new SoftReferenceCacheMap<Integer, T>();;
+	private Map<Integer, T> cache = new SoftHashMap<Integer, T>();
 	
 	protected AbstractPageManager(PageManager<RawPage> rpm) {
 		this.rpm = rpm;
