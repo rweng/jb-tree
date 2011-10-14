@@ -105,34 +105,4 @@ public class BTreeTest extends MultiMapSpec<Integer, Integer> {
 	private BTree<Integer, Integer> getTree() {
 		return (BTree<Integer, Integer>) getMultiMap();
 	}
-
-	@Test
-	public void bulkInsert() throws IOException {
-		int testSize = 1000 * 1000;
-
-		@SuppressWarnings("unchecked")
-		AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[testSize];
-
-		for (int i = 0; i < testSize; i++) {
-			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(i, i + 10000);
-		}
-
-		getTree().bulkInitialize(kvs, true);
-
-		// check if its correct
-		LOG.debug("checking bulkinsert results...");
-		assertEquals(testSize, getTree().getNumberOfEntries());
-		for (int i = 0; i < testSize; i++) {
-
-			if (getTree().get(kvs[i].getKey()).size() == 0) {
-				LOG.error("tree doesn't have key " + i);
-			}
-			assertEquals("size problem with key " + i, 1, getTree().get(kvs[i].getKey()).size());
-			assertEquals(kvs[i].getValue(), getTree().get(kvs[i].getKey()).get(0));
-		}
-
-		LOG.info("Checking tree structure. This could take a while");
-		getTree().checkStructure();
-	}
-
 }

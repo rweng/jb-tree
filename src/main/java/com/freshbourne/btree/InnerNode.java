@@ -257,10 +257,22 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		if (getNumberOfKeys() == 0)
 			return new ArrayList<V>();
 
-		Integer pageId = getPageIdForKey(key);
-		Node<K, V> node = getPageForPageId(pageId);
+		return getNodeForKey(key).get(key);
+	}
 
-		return node.get(key);
+	private Node<K, V> getNodeForKey(K key) {
+
+		KeyStruct ks = getFirstLargerOrEqualKeyStruct(key);
+
+		// largest key
+		if(ks == null)
+			return new KeyStruct(getNumberOfKeys() - 1).getRightNode();
+		else{
+			if(comparator.compare(ks.getKey(), key) == 0){
+				return ks.getRightNode();
+			} else
+				return ks.getLeftNode();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -296,10 +308,6 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		return -1;
 	}
 
-	private Integer getLeftPageIdOfKey(int i) {
-		return rawPage().bufferForReading(getOffsetForLeftPageIdOfKey(i)).getInt();
-	}
-
 	private int getOffsetForLeftPageIdOfKey(int i) {
 		return new KeyStruct(i).getOffset() - Integer.SIZE / 8;
 	}
@@ -307,16 +315,6 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 	private int getOffsetForRightPageIdOfKey(int i) {
 		return new KeyStruct(i).getOffset() + keySerializer.getSerializedLength();
 	}
-
-	private Integer getRightPageIdOfKey(int i) {
-		int offset = getOffsetForRightPageIdOfKey(i);
-		return rawPage().bufferForReading(offset).getInt();
-	}
-
-	private K getKeyFromPagePointer(PagePointer pp) {
-		return keyPageManager.getPage(pp.getId()).get(pp.getOffset());
-	}
-
 
 	/* (non-Javadoc)
 		  * @see com.freshbourne.btree.Node#remove(java.lang.Object, java.lang.Object)
@@ -394,7 +392,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		return getOffsetForLeftPageIdOfKey(posOfFirstLargerOrEqualKey);
 	}
 
-	/** @return keyStruct or null */
+	/** @return KeyStruct or null */
 	private KeyStruct getFirstLargerOrEqualKeyStruct(K key) {
 		KeyStruct ks = new KeyStruct(0);
 		while (ks.pos < getNumberOfKeys() && comparator.compare(ks.getKey(), key) < 0) {
@@ -500,8 +498,8 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
 
 	/**
-	 * This method moves a number of keys to the given new page. However, since one key is droped, this node remains
-	 * with allKeys - keysToBeMoved - 1.
+	 * This method moves a number of keys to the given new page. However, since one key is droped, this node remains with
+	 * allKeys - keysToBeMoved - 1.
 	 * <p/>
 	 * The most left key of the first pageId in the new Node is passed upwards;
 	 *
@@ -729,7 +727,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		// check structure of all nodes
 		K lastKey = null;
 		while (ks.pos < getNumberOfKeys()) {
-			if(LOG.isDebugEnabled())
+			if (LOG.isDebugEnabled())
 				LOG.debug("checking structure of level: " + getDepth() + ", key: " + ks.pos);
 
 			if (lastKey != null && comparator.compare(lastKey, ks.getKey()) > 0) {

@@ -392,13 +392,21 @@ public class BTreeSmallTest {
 	}
 
 	@Test
-	public void bulkInsertSmall() throws IOException {
-		bulkInsert(2);
+	public void bulkInsert1Layer() throws IOException {
+		bulkInsert(2); // exactly one leaf
 	}
 
 	@Test
-	public void bulkInsertLarge() throws IOException {
-		bulkInsert(100);
+	public void bulkInsert2Layers() throws IOException {
+		bulkInsert(5);
+		assertEquals(2, tree.getDepth());
+	}
+
+	@Test
+	public void bulkInsert3Layers() throws IOException {
+		bulkInsert(30);
+		assertTrue(tree.getDepth() >= 3);
+
 	}
 
 	public void bulkInsert(int count) throws IOException {
@@ -414,17 +422,17 @@ public class BTreeSmallTest {
 		// check if its correct
 		LOG.debug("checking bulkinsert results...");
 		assertEquals(count, tree.getNumberOfEntries());
-		for (int i = 0; i < count; i++) {
 
-			if (tree.get(kvs[i].getKey()).size() == 0) {
-				LOG.error("tree doesn't have key " + i);
-			}
+		tree.checkStructure();
+		
+		for (int i = 0; i < count; i++) {
+			assertTrue("tree doesn't have key " + i, tree.get(kvs[i].getKey()).size() > 0);
 			assertEquals("size problem with key " + i, 1, tree.get(kvs[i].getKey()).size());
 			assertEquals(kvs[i].getValue(), tree.get(kvs[i].getKey()).get(0));
 		}
 
 		LOG.info("Checking tree structure. This could take a while");
-		tree.checkStructure();
+
 	}
 
 }

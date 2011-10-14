@@ -204,9 +204,9 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		}
 
 		LeafNode<K, V> leafPage;
-		ArrayList<byte[]> rawKeys = new ArrayList<byte[]>();
+		ArrayList<byte[]> keysForNextLayer = new ArrayList<byte[]>();
 		ArrayList<Integer> pageIds = new ArrayList<Integer>();
-		HashMap<Integer, byte[]> largestKeyOfNode = new HashMap<Integer, byte[]>();
+		HashMap<Integer, byte[]> pageIdToSmallestKeyMap = new HashMap<Integer, byte[]>();
 
 
 		// first insert all leafs and remember the insertedLastKeys
@@ -216,12 +216,13 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			leafPage = leafPageManager.createPage(false);
 			inserted += leafPage.bulkInitialize(kvs, inserted);
 
-			largestKeyOfNode.put(leafPage.getId(), leafPage.getLastLeafKeySerialized());
-			rawKeys.add(leafPage.getLastLeafKeySerialized());
+			pageIdToSmallestKeyMap.put(leafPage.getId(), leafPage.getFirstLeafKeySerialized());
 
 			// set nextLeafId of previous leaf
 			// dont store the first key
 			if (previousLeaf != null) {
+				// next layer doesn't need the first key
+				keysForNextLayer.add(leafPage.getFirstLeafKeySerialized());
 				previousLeaf.setNextLeafId(leafPage.getId());
 			}
 
@@ -238,50 +239,43 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		// if not, build up tree
 		InnerNode<K, V> node = null;
 
+		// for each layer, if pageId == 1, this page becomes the root
 		while (pageIds.size() > 1) {
 			if (LOG.isDebugEnabled())
 				LOG.debug("next inner node layer");
 
 			ArrayList<Integer> newPageIds = new ArrayList<Integer>();
-			ArrayList<byte[]> newRawKeys = new ArrayList<byte[]>();
+			ArrayList<byte[]> newKeysForNextLayer = new ArrayList<byte[]>();
 			inserted = 0; // page ids
 
-			// we assume that from each pageId the largest key was stored, we need to remove the last one for innernode bulkinsert
-			rawKeys.remove(rawKeys.size() - 1);
-
+			// we assume that from each pageId the smallest key was stored, we need to remove the last one for InnerNode#bulkinsert()
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("new pageIds.size: " + pageIds.size());
-				LOG.debug("new rawKeys.size: " + rawKeys.size());
+				LOG.debug("new keysForNextLayer.size: " + keysForNextLayer.size());
 			}
 
-			// fill the inner node row
+			// fill the layer row while we have pageIds to insert left
 			while (inserted < pageIds.size()) {
 
 				// create a inner node and store the smallest key
 				node = innerNodeManager.createPage(false);
 				newPageIds.add(node.getId());
+				byte[] smallestKey = pageIdToSmallestKeyMap.get(pageIds.get(inserted));
+				pageIdToSmallestKeyMap.put(node.getId(), smallestKey);
 
-				inserted += node.bulkInitialize(rawKeys, pageIds, inserted);
+				// dont insert the first small key to the keys for the next layer
+				if(inserted > 0)
+					newKeysForNextLayer.add(smallestKey);
+
+				inserted += node.bulkInitialize(keysForNextLayer, pageIds, inserted);
 
 				if (LOG.isDebugEnabled())
 					LOG.debug("inserted " + inserted + " in inner node, pageIds.size()=" + pageIds.size());
-
-				// byte[] smallestKey = smallestKeyOfNode.get(pageIds.get(inserted));
-				// smallestKeyOfNode.put(node.getId(), smallestKey);
-
-				byte[] largestKey = largestKeyOfNode.get(pageIds.get(inserted - 1));
-				largestKeyOfNode.put(node.getId(), largestKey);
-				newRawKeys.add(largestKey);
-
-				if (pageIds.size() == 4) {
-					if (LOG.isDebugEnabled())
-						LOG.debug("largest key of current node: " + IntegerSerializer.INSTANCE.deserialize(largestKey));
-				}
 			}
 
 			// next turn, insert the ids of the pages we just created
 			pageIds = newPageIds;
-			rawKeys = newRawKeys;
+			keysForNextLayer = newKeysForNextLayer;
 		}
 
 		// here, pageIds should be 1, and the page should be an inner node
