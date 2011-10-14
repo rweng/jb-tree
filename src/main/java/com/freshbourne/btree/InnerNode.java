@@ -729,6 +729,9 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		// check structure of all nodes
 		K lastKey = null;
 		while (ks.pos < getNumberOfKeys()) {
+			if(LOG.isDebugEnabled())
+				LOG.debug("checking structure of level: " + getDepth() + ", key: " + ks.pos);
+
 			if (lastKey != null && comparator.compare(lastKey, ks.getKey()) > 0) {
 				throw new IllegalStateException("last key(" + lastKey +
 						") should be smaller or equal current Key(" + ks.getKey() + ")");
@@ -737,6 +740,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 			lastKey = ks.getKey();
 
 			ks.getLeftNode().checkStructure();
+
 
 			// compare on byte-level
 			if (!Arrays.equals(ks.getSerializedKey(), ks.getRightNode().getFirstLeafKeySerialized()))

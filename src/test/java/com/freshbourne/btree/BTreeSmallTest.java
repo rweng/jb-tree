@@ -25,12 +25,10 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class BTreeSmallTest {
 
@@ -391,5 +389,34 @@ public class BTreeSmallTest {
 		tree.close();
 		assertFalse(tree.isValid());
 		assertFalse(tree.getResourceManager().isOpen());
+	}
+
+	@Test
+	public void bulkInsert() throws IOException {
+		int testSize = 100;
+
+		@SuppressWarnings("unchecked")
+		AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[testSize];
+
+		for (int i = 0; i < testSize; i++) {
+			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(i, i);
+		}
+
+		tree.bulkInitialize(kvs, true);
+
+		// check if its correct
+		LOG.debug("checking bulkinsert results...");
+		assertEquals(testSize, tree.getNumberOfEntries());
+		for (int i = 0; i < testSize; i++) {
+
+			if (tree.get(kvs[i].getKey()).size() == 0) {
+				LOG.error("tree doesn't have key " + i);
+			}
+			assertEquals("size problem with key " + i, 1, tree.get(kvs[i].getKey()).size());
+			assertEquals(kvs[i].getValue(), tree.get(kvs[i].getKey()).get(0));
+		}
+
+		LOG.info("Checking tree structure. This could take a while");
+		tree.checkStructure();
 	}
 }
