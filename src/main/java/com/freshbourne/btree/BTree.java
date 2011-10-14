@@ -195,7 +195,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		if (!sorted)
 			throw new IllegalArgumentException("KeyValueObjects must be sorted for bulkInsert to work right now");
 
-		initialize();
+		// initialize but do not create a root page or set the number of keys
+		preInitialize();
 		setNumberOfEntries(kvs.length);
 
 		if (kvs.length == 0) {
@@ -401,10 +402,12 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		preInitialize();
 		setRoot(leafPageManager.createPage());
 		setNumberOfEntries(0);
-		valid = true;
 	}
 
-	/** opens the ResourceManager and sets the rawPage */
+	/**
+	 * opens the ResourceManager, sets the rawPage and sets valid, but does not create a root leaf or set the number of
+	 * entries
+	 */
 	private void preInitialize() throws IOException {
 		if (!rm.isOpen())
 			rm.open();
@@ -416,6 +419,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 		if (rawPage.id() != 1)
 			throw new IllegalStateException("rawPage must have id 1");
+
+		valid = true;
 	}
 
 	/* (non-Javadoc)

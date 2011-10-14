@@ -392,13 +392,20 @@ public class BTreeSmallTest {
 	}
 
 	@Test
-	public void bulkInsert() throws IOException {
-		int testSize = 100;
+	public void bulkInsertSmall() throws IOException {
+		bulkInsert(2);
+	}
 
+	@Test
+	public void bulkInsertLarge() throws IOException {
+		bulkInsert(100);
+	}
+
+	public void bulkInsert(int count) throws IOException {
 		@SuppressWarnings("unchecked")
-		AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[testSize];
+		AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
 
-		for (int i = 0; i < testSize; i++) {
+		for (int i = 0; i < count; i++) {
 			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(i, i);
 		}
 
@@ -406,8 +413,8 @@ public class BTreeSmallTest {
 
 		// check if its correct
 		LOG.debug("checking bulkinsert results...");
-		assertEquals(testSize, tree.getNumberOfEntries());
-		for (int i = 0; i < testSize; i++) {
+		assertEquals(count, tree.getNumberOfEntries());
+		for (int i = 0; i < count; i++) {
 
 			if (tree.get(kvs[i].getKey()).size() == 0) {
 				LOG.error("tree doesn't have key " + i);
@@ -419,4 +426,5 @@ public class BTreeSmallTest {
 		LOG.info("Checking tree structure. This could take a while");
 		tree.checkStructure();
 	}
+
 }
