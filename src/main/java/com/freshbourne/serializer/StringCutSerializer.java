@@ -4,11 +4,11 @@ import com.freshbourne.io.SoftHashMap;
 
 import java.nio.ByteBuffer;
 
-public class StringCutSerializer implements FixLengthSerializer<String,byte[]> {
-	public static SoftHashMap<Integer, StringCutSerializer> cache = new SoftHashMap<Integer, StringCutSerializer>();
+public class StringCutSerializer implements FixLengthSerializer<String, byte[]> {
+	private static SoftHashMap<Integer, StringCutSerializer> cache = new SoftHashMap<Integer, StringCutSerializer>();
 
-	public static StringCutSerializer get(Integer size){
-		if(cache.containsKey(size))
+	public static StringCutSerializer get(Integer size) {
+		if (cache.containsKey(size))
 			return cache.get(size);
 
 		StringCutSerializer s = new StringCutSerializer(size);
@@ -16,9 +16,9 @@ public class StringCutSerializer implements FixLengthSerializer<String,byte[]> {
 		return s;
 	}
 
-private int size;
+	private int size;
 
-	private StringCutSerializer(int size){
+	private StringCutSerializer(int size) {
 		this.size = size;
 	}
 
@@ -32,7 +32,7 @@ private int size;
 
 		byte[] bytes = o.getBytes();
 		short toWrite = (short) (bytes.length > buf.remaining() ? buf.remaining() : bytes.length);
-		
+
 		buf.put(bytes, 0, toWrite);
 		buf.position(0);
 		buf.putShort(toWrite);

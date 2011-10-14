@@ -12,9 +12,12 @@ import com.freshbourne.btree.BTree;
 import com.freshbourne.btree.BTreeFactory;
 import com.freshbourne.btree.BTreeModule;
 import com.freshbourne.comparator.StringComparator;
+import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.FixedStringSerializer;
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.TypeLiteral;
 import org.junit.Before;
 import org.junit.Test;
 

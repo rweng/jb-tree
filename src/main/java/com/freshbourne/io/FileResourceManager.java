@@ -90,7 +90,8 @@ public class FileResourceManager implements ResourceManager {
 
 	@Override
 	public void writePage(RawPage page) {
-		LOG.debug("writing page to disk: " + page.id());
+		if(LOG.isDebugEnabled())
+			LOG.debug("writing page to disk: " + page.id());
 		ensureOpen();
 		ensurePageExists(page.id());
 
@@ -328,12 +329,9 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void sync() {
-		LOG.debug("Syncing pages to disk");
-
 		// ensure that the cache is not altered during our writeout
 		synchronized (cache) {
 			for (RawPage p : cache.values()) {
-				LOG.debug("trying to sync page " + p.id());
 				p.sync();
 			}
 		}

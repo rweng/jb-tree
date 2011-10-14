@@ -40,7 +40,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	private final LeafPageManager<K, V>  leafPageManager;
 	private final InnerNodeManager<K, V> innerNodeManager;
 	private final Comparator<K>          comparator;
-	private final ResourceManager rm;
+	private final ResourceManager        rm;
 	private       RawPage                rawPage;
 
 	private Node<K, V> root;
@@ -56,7 +56,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	public void close() throws IOException {
 		sync();
 		rm.close();
-		valid  = false;
+		valid = false;
 	}
 
 
@@ -154,10 +154,12 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		innerNodeManager =
 				new InnerNodeManager(rm, keyPageManager, valuePageManager, leafPageManager, keySerializer, comparator);
 
-		LOG.debug("BTree created: ");
-		LOG.debug("key serializer: " + keySerializer);
-		LOG.debug("value serializer: " + valueSerializer);
-		LOG.debug("comparator: " + comparator);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("BTree created: ");
+			LOG.debug("key serializer: " + keySerializer);
+			LOG.debug("value serializer: " + valueSerializer);
+			LOG.debug("comparator: " + comparator);
+		}
 	}
 
 	public int getDepth() {
@@ -196,7 +198,6 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		LeafNode<K, V> leafPage;
 		ArrayList<byte[]> rawKeys = new ArrayList<byte[]>();
 		ArrayList<Integer> pageIds = new ArrayList<Integer>();
-		HashMap<Integer, byte[]> smallestKeyOfNode = new HashMap<Integer, byte[]>();
 		HashMap<Integer, byte[]> largestKeyOfNode = new HashMap<Integer, byte[]>();
 
 
@@ -210,13 +211,10 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			largestKeyOfNode.put(leafPage.getId(), leafPage.getLastLeafKeySerialized());
 			rawKeys.add(leafPage.getLastLeafKeySerialized());
 
-			// LOG.debug("largest key of page " + leafPage.getId() + " = " + leafPage.getLastLeafKey());
-
 			// set nextLeafId of previous leaf
 			// dont store the first key
 			if (previousLeaf != null) {
 				previousLeaf.setNextLeafId(leafPage.getId());
-				// rawKeys.add(leafPage.getFirstSerializedKey());
 			}
 
 			previousLeaf = leafPage;
@@ -233,7 +231,9 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		InnerNode<K, V> node = null;
 
 		while (pageIds.size() > 1) {
-			LOG.debug("next inner node layer");
+			if (LOG.isDebugEnabled())
+				LOG.debug("next inner node layer");
+
 			ArrayList<Integer> newPageIds = new ArrayList<Integer>();
 			ArrayList<byte[]> newRawKeys = new ArrayList<byte[]>();
 			inserted = 0; // page ids
@@ -241,9 +241,10 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			// we assume that from each pageId the largest key was stored, we need to remove the last one for innernode bulkinsert
 			rawKeys.remove(rawKeys.size() - 1);
 
-			LOG.debug("new pageIds.size: " + pageIds.size());
-			LOG.debug("new rawKeys.size: " + rawKeys.size());
-
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("new pageIds.size: " + pageIds.size());
+				LOG.debug("new rawKeys.size: " + rawKeys.size());
+			}
 			// fill the inner node row
 			while (inserted < pageIds.size()) {
 
@@ -252,7 +253,9 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 				newPageIds.add(node.getId());
 
 				inserted += node.bulkInitialize(rawKeys, pageIds, inserted);
-				LOG.debug("inserted " + inserted + " in inner node, pageIds.size()=" + pageIds.size());
+
+				if (LOG.isDebugEnabled())
+					LOG.debug("inserted " + inserted + " in inner node, pageIds.size()=" + pageIds.size());
 
 				// byte[] smallestKey = smallestKeyOfNode.get(pageIds.get(inserted));
 				// smallestKeyOfNode.put(node.getId(), smallestKey);
@@ -262,7 +265,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 				newRawKeys.add(largestKey);
 
 				if (pageIds.size() == 4) {
-					LOG.debug("largest key of current node: " + IntegerSerializer.INSTANCE.deserialize(largestKey));
+					if (LOG.isDebugEnabled())
+						LOG.debug("largest key of current node: " + IntegerSerializer.INSTANCE.deserialize(largestKey));
 				}
 			}
 
@@ -386,7 +390,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  */
 	@Override
 	public void initialize() throws IOException {
-		if(!rm.isOpen())
+		if (!rm.isOpen())
 			rm.open();
 
 		if (rm.hasPage(1))
@@ -407,9 +411,10 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  */
 	@Override
 	public void load() throws IOException {
+		if(LOG.isDebugEnabled())
 		LOG.debug("loading BTree");
 
-		if(!rm.isOpen())
+		if (!rm.isOpen())
 			rm.open();
 
 		if (!rm.hasPage(1)) {
@@ -432,9 +437,11 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 		valid = true;
 
+		if(LOG.isDebugEnabled()){
 		LOG.debug("BTree loaded: ");
 		LOG.debug("Number of Values: " + numberOfEntries);
 		LOG.debug("root (id: " + root.getId() + "): " + root);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -457,10 +464,10 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			initialize();
 		}
 	}
-	
+
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#sync()
-		  */
+			  * @see com.freshbourne.multimap.MultiMap#sync()
+			  */
 	@Override
 	public void sync() {
 		rm.sync();
@@ -566,7 +573,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		return ((FileResourceManager) rm).getFile().getAbsolutePath();
 	}
 
-	ResourceManager getResourceManager(){
+	ResourceManager getResourceManager() {
 		return rm;
 	}
 }

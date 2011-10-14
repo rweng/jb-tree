@@ -51,8 +51,6 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 	public String deserialize(byte[] o) {
 		ByteBuffer buf = ByteBuffer.wrap(o);
 		short length = buf.getShort();
-		
-		LOG.debug("deserialing string with arraysize " + o.length + " and str-length " + length );
 
 		byte[] bytes = new byte[length];
 		buf.get(bytes);

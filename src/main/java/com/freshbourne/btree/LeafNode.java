@@ -135,12 +135,6 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 	}
 
 	public void prependEntriesFromOtherPage(LeafNode<K, V> source, int num) {
-		if (false) {
-			LOG.debug("---");
-			LOG.debug("prependEntriesFromOtherPage(): num = " + num);
-			LOG.debug("currentLeaf: " + toString());
-			LOG.debug("sourceLeaf: " + source.toString());
-		}
 		// checks
 		if (num < 0)
 			throw new IllegalArgumentException("num must be > 0");
@@ -172,13 +166,6 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 		// update headers, also sets modified
 		source.setNumberOfEntries(source.getNumberOfEntries() - num);
 		setNumberOfEntries(getNumberOfEntries() + num);
-
-		if (false) {
-			LOG.debug("---");
-			LOG.debug("currentLeaf: " + toString());
-			LOG.debug("sourceLeaf: " + source.toString());
-		}
-
 	}
 
 	private void setNumberOfEntries(int num) {
