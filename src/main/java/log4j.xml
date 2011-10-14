@@ -18,11 +18,6 @@
     </appender>
 
 
-    <logger name="com.freshbourne">
-          <level value="debug"/>
-      </logger>
-
-
     <root>
         <priority value="info"/>
         <appender-ref ref="console"/>

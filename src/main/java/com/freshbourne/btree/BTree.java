@@ -184,6 +184,13 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			throw new IllegalStateException("Btree must be initialized or loaded");
 	}
 
+	/**
+	 * Bulk initialize first creates all leafs, then goes the tree up to create the InnerNodes.
+	 *
+	 * @param kvs
+	 * @param sorted
+	 * @throws IOException
+	 */
 	public void bulkInitialize(SimpleEntry<K, V>[] kvs, boolean sorted) throws IOException {
 		if (!sorted)
 			throw new IllegalArgumentException("KeyValueObjects must be sorted for bulkInsert to work right now");
@@ -245,6 +252,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 				LOG.debug("new pageIds.size: " + pageIds.size());
 				LOG.debug("new rawKeys.size: " + rawKeys.size());
 			}
+
 			// fill the inner node row
 			while (inserted < pageIds.size()) {
 
@@ -390,6 +398,14 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  */
 	@Override
 	public void initialize() throws IOException {
+		preInitialize();
+		setRoot(leafPageManager.createPage());
+		setNumberOfEntries(0);
+		valid = true;
+	}
+
+	/** opens the ResourceManager and sets the rawPage */
+	private void preInitialize() throws IOException {
 		if (!rm.isOpen())
 			rm.open();
 
@@ -400,10 +416,6 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 		if (rawPage.id() != 1)
 			throw new IllegalStateException("rawPage must have id 1");
-
-		setRoot(leafPageManager.createPage());
-		setNumberOfEntries(0);
-		valid = true;
 	}
 
 	/* (non-Javadoc)
@@ -411,8 +423,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  */
 	@Override
 	public void load() throws IOException {
-		if(LOG.isDebugEnabled())
-		LOG.debug("loading BTree");
+		if (LOG.isDebugEnabled())
+			LOG.debug("loading BTree");
 
 		if (!rm.isOpen())
 			rm.open();
@@ -437,10 +449,10 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 		valid = true;
 
-		if(LOG.isDebugEnabled()){
-		LOG.debug("BTree loaded: ");
-		LOG.debug("Number of Values: " + numberOfEntries);
-		LOG.debug("root (id: " + root.getId() + "): " + root);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("BTree loaded: ");
+			LOG.debug("Number of Values: " + numberOfEntries);
+			LOG.debug("root (id: " + root.getId() + "): " + root);
 		}
 	}
 
