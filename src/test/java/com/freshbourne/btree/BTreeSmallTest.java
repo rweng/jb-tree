@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -319,7 +320,7 @@ public class BTreeSmallTest {
 		tree.initialize();
 		fillTree(tree, 1000);
 		Iterator<Integer> iterator = tree.getIterator();
-		for(int i = 0; i<1000;i++)
+		for (int i = 0; i < 1000; i++)
 			assertEquals(i, (int) iterator.next());
 
 		assertFalse(iterator.hasNext());
@@ -342,14 +343,14 @@ public class BTreeSmallTest {
 
 		Iterator<Integer> iterator = tree.getIterator(rangeList);
 
-		for(int i=0;i<=5;i++){
+		for (int i = 0; i <= 5; i++) {
 			assertEquals(i, (int) iterator.next());
 		}
 
-		for(int i=49; i<=56; i++)
+		for (int i = 49; i <= 56; i++)
 			assertEquals(i, (int) iterator.next());
 
-		for(int i=95;i< 100;i++){
+		for (int i = 95; i < 100; i++) {
 			assertEquals(i, (int) iterator.next());
 		}
 
@@ -370,7 +371,7 @@ public class BTreeSmallTest {
 			assertEquals(i, (int) iterator.next());
 		assertFalse(iterator.hasNext());
 
-		iterator = tree.getIterator(50,150);
+		iterator = tree.getIterator(50, 150);
 		for (int i = 50; i < 100; i++)
 			assertEquals(i, (int) iterator.next());
 		assertFalse(iterator.hasNext());
@@ -410,7 +411,39 @@ public class BTreeSmallTest {
 
 		// just to make sure that the test is really checking 3 layers
 		assertTrue(tree.getDepth() >= 3);
+	}
 
+	@Test
+	public void bulkInsertWithSort() throws IOException {
+		int count = 30;
+		AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
+		SecureRandom srand = new SecureRandom();
+
+		List<Integer> keys = new LinkedList<Integer>();
+
+		for (int i = 0; i < count; i++) {
+			int newKey = srand.nextInt();
+
+			while (keys.contains(newKey)) {
+				newKey = srand.nextInt();
+			}
+
+			keys.add(newKey);
+			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(newKey, newKey);
+		}
+
+		tree.bulkInitialize(kvs, false);
+
+		assertEquals(count, tree.getNumberOfEntries());
+		tree.checkStructure();
+
+		Collections.sort(keys, IntegerComparator.INSTANCE);
+		for (int i = 0; i < count; i++) {
+			assertEquals("size problem with key " + i, 1, tree.get(keys.get(i)).size());
+			assertEquals(kvs[i].getValue(), tree.get(keys.get(i)).get(0));
+		}
+
+		LOG.info("Checking tree structure. This could take a while");
 	}
 
 	public void bulkInsert(int count) throws IOException {
@@ -428,7 +461,7 @@ public class BTreeSmallTest {
 		assertEquals(count, tree.getNumberOfEntries());
 
 		tree.checkStructure();
-		
+
 		for (int i = 0; i < count; i++) {
 			assertTrue("tree doesn't have key " + i, tree.get(kvs[i].getKey()).size() > 0);
 			assertEquals("size problem with key " + i, 1, tree.get(kvs[i].getKey()).size());
