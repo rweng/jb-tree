@@ -25,19 +25,17 @@ import java.util.HashMap;
 @Singleton
 public class BTreeFactory {
 
-    private FileResourceManagerFactory frmFactory;
-    private HashMap<File, BTree> map = new HashMap<File, BTree>();
-    private FixLengthSerializer<PagePointer, byte[]> pagePointSerializer;
+	private FileResourceManagerFactory frmFactory;
+	private HashMap<File, BTree> map = new HashMap<File, BTree>();
+	private FixLengthSerializer<PagePointer, byte[]> pagePointSerializer;
 
-    @Inject
-    BTreeFactory(FileResourceManagerFactory frmFactory, FixLengthSerializer<PagePointer, byte[]> pps){
-        this.frmFactory = frmFactory;
-        this.pagePointSerializer = pps;
-    }
+	@Inject BTreeFactory(FileResourceManagerFactory frmFactory, FixLengthSerializer<PagePointer, byte[]> pps) {
+		this.frmFactory = frmFactory;
+		this.pagePointSerializer = pps;
+	}
 
 
 	/**
-	 *
 	 * returns a loaded or initialized BTree
 	 *
 	 * @param file
@@ -47,19 +45,28 @@ public class BTreeFactory {
 	 * @param <K>
 	 * @param <V>
 	 * @return
+	 *
 	 * @throws IOException
 	 */
-    public <K,V> BTree<K,V> get(File file, FixLengthSerializer<K, byte[]> ks, FixLengthSerializer<V, byte[]> vs,
-                                Comparator<K> comparator) throws IOException {
-        if(map.containsKey(file))
-            return map.get(file);
+	public <K, V> BTree<K, V> get(File file, FixLengthSerializer<K, byte[]> ks, FixLengthSerializer<V, byte[]> vs,
+	                              Comparator<K> comparator, boolean loadOrInitialize) throws IOException {
+		if (map.containsKey(file))
+			return map.get(file);
 
-        FileResourceManager frm = frmFactory.get(file);
+		FileResourceManager frm = frmFactory.get(file);
 
-        BTree<K, V> tree = new BTree<K, V>(frm, ks, vs, comparator);
-        tree.loadOrInitialize();
-        map.put(file, tree);
+		BTree<K, V> tree = new BTree<K, V>(frm, ks, vs, comparator);
 
-        return tree;
-    }
+		if (loadOrInitialize)
+			tree.loadOrInitialize();
+
+		map.put(file, tree);
+
+		return tree;
+	}
+
+	public <K, V> BTree<K, V> get(File file, FixLengthSerializer<K, byte[]> ks, FixLengthSerializer<V, byte[]> vs,
+	                              Comparator<K> comparator) throws IOException {
+		return get(file, ks, vs, comparator, true);
+	}
 }
