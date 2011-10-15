@@ -399,12 +399,16 @@ public class BTreeSmallTest {
 	@Test
 	public void bulkInsert2Layers() throws IOException {
 		bulkInsert(5);
+
+		// make sure the test is checking 2 layers
 		assertEquals(2, tree.getDepth());
 	}
 
 	@Test
 	public void bulkInsert3Layers() throws IOException {
 		bulkInsert(30);
+
+		// just to make sure that the test is really checking 3 layers
 		assertTrue(tree.getDepth() >= 3);
 
 	}
