@@ -239,7 +239,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 		// we are done if everything fits in one leaf
 		if (pageIds.size() == 1) {
-			root = leafPageManager.getPage(pageIds.get(0));
+			setRoot(leafPageManager.getPage(pageIds.get(0)));
 			return;
 		}
 
@@ -287,7 +287,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 		// here, pageIds should be 1, and the page should be an inner node
 		if (pageIds.size() == 1) {
-			root = innerNodeManager.getPage(pageIds.get(0));
+			setRoot(innerNodeManager.getPage(pageIds.get(0)));
 			return;
 		}
 	}

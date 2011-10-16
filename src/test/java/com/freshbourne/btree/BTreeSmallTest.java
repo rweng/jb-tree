@@ -414,7 +414,7 @@ public class BTreeSmallTest {
 	}
 
 	@Test
-	public void bulkInsertWithSort() throws IOException {
+	public void bulkInsertWithSortAndClose() throws IOException {
 		int count = 30;
 		AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
 		SecureRandom srand = new SecureRandom();
@@ -443,7 +443,20 @@ public class BTreeSmallTest {
 			assertEquals(kvs[i].getValue(), tree.get(keys.get(i)).get(0));
 		}
 
-		LOG.info("Checking tree structure. This could take a while");
+		tree.close();
+		tree = injector.getInstance(Key.get(new TypeLiteral<BTree<Integer, Integer>>() {
+		}));
+		tree.load();
+
+		// test everything again
+		assertEquals(count, tree.getNumberOfEntries());
+		tree.checkStructure();
+
+		Collections.sort(keys, IntegerComparator.INSTANCE);
+		for (int i = 0; i < count; i++) {
+			assertEquals("size problem with key " + i, 1, tree.get(keys.get(i)).size());
+			assertEquals(kvs[i].getValue(), tree.get(keys.get(i)).get(0));
+		}
 	}
 
 	public void bulkInsert(int count) throws IOException {
