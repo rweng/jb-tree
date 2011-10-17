@@ -669,6 +669,12 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		int totalEntriesToInsert = (pageIds.size() - fromId - 1);
 		int entriesToInsert = spaceForEntries < totalEntriesToInsert ? spaceForEntries : totalEntriesToInsert;
 
+		// make sure that not exactly one pageId remains, because that can't be inserted alone in the next
+		// InnerNode. == 2 because
+		int remaining = pageIds.size() - fromId - (entriesToInsert + 1);
+		if(remaining == 1)
+			entriesToInsert--;
+
 		for (int i = 0; i < entriesToInsert; i++) {
 			// System.out.println("fetching rawKey " + (fromId + i) + " from array length " + rawKeys.size() + " with i=" + i);
 			buf.put(rawKeys.get(fromId + i)); // fromId + 1 - 1 +i

@@ -12,7 +12,6 @@ import com.freshbourne.btree.AdjustmentAction.ACTION;
 import com.freshbourne.io.*;
 import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.serializer.FixLengthSerializer;
-import com.freshbourne.serializer.IntegerSerializer;
 import com.freshbourne.serializer.PagePointSerializer;
 import com.google.inject.Inject;
 import org.apache.commons.logging.Log;
@@ -47,6 +46,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 	private boolean valid           = false;
 	private int     numberOfEntries = 0;
+	private FixLengthSerializer<K, byte[]> keySerializer;
+	private FixLengthSerializer<V, byte[]> valueSerializer;
 
 	/**
 	 * sync, close the ResourceManager and set to invalid
@@ -57,6 +58,16 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		sync();
 		rm.close();
 		valid = false;
+	}
+
+	public int getMaxInnerKeys() {
+		int realSize = rm.getPageSize() - InnerNode.Header.size() - Integer.SIZE / 8;
+		return realSize / (Integer.SIZE / 8 + keySerializer.getSerializedLength());
+	}
+
+	public int getMaxLeafKeys() {
+		int realSize = rm.getPageSize() - LeafNode.Header.size();
+		return realSize / (keySerializer.getSerializedLength() + valueSerializer.getSerializedLength());
 	}
 
 
@@ -144,6 +155,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	                     Comparator<K> comparator) {
 
 		this.rm = rm;
+		this.keySerializer = keySerializer;
+		this.valueSerializer = valueSerializer;
 		this.comparator = comparator;
 
 		DataPageManager<K> keyPageManager = new DataPageManager<K>(rm, PagePointSerializer.INSTANCE, keySerializer);

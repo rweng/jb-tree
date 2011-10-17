@@ -182,7 +182,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#getPageSize()
 	 */
 	@Override
-	public int pageSize() {
+	public int getPageSize() {
 		return pageSize;
 	}
 

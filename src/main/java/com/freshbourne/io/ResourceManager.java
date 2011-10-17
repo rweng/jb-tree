@@ -37,7 +37,7 @@ public interface ResourceManager extends PageManager<RawPage> {
 	/**
 	 * @return size of the pages in this resource
 	 */
-	public int pageSize();
+	public int getPageSize();
 	
 	public void open() throws IOException;
 	public boolean isOpen();

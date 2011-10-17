@@ -53,7 +53,7 @@ public class IOModule extends AbstractModule{
 
     @Provides @Singleton
 	public ResourceManager provideFileResourceManager(@PageSize int pageSize) {
-        LOG.info("pageSize: " + pageSize);
+        LOG.info("getPageSize: " + pageSize);
 		ResourceManager result = new FileResourceManager(file, pageSize, doLock);
 		try {
 			result.open();

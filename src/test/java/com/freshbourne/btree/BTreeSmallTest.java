@@ -10,9 +10,7 @@ package com.freshbourne.btree;
 
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.FileResourceManager;
-import com.freshbourne.io.PageManager;
 import com.freshbourne.io.PageSize;
-import com.freshbourne.io.RawPage;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
@@ -59,7 +57,7 @@ public class BTreeSmallTest {
 
 	@Test
 	public void ensurePageSizeIsSmall() {
-		assertEquals(PAGE_SIZE, injector.getInstance(FileResourceManager.class).pageSize());
+		assertEquals(PAGE_SIZE, injector.getInstance(FileResourceManager.class).getPageSize());
 	}
 
 	@Test
@@ -394,20 +392,29 @@ public class BTreeSmallTest {
 
 	@Test
 	public void bulkInsert1Layer() throws IOException {
-		bulkInsert(2); // exactly one leaf
+		bulkInsert(tree.getMaxLeafKeys()); // exactly one leaf
 	}
 
 	@Test
 	public void bulkInsert2Layers() throws IOException {
-		bulkInsert(5);
+		bulkInsert((tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys());
 
 		// make sure the test is checking 2 layers
 		assertEquals(2, tree.getDepth());
 	}
 
+	/**
+	 * causes java.lang.IllegalArgumentException: for bulkinsert, you must have at least 2 page ids and keys.size() ==
+	 * (pageIds.size() - 1)
+	 */
+	@Test
+	public void bulkInsertWithOnlyOnePageForNextInnerNode() throws IOException {
+		bulkInsert((tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys() + 1);
+	}
+
 	@Test
 	public void bulkInsert3Layers() throws IOException {
-		bulkInsert(30);
+		bulkInsert((tree.getMaxInnerKeys() + 1) * (tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys());
 
 		// just to make sure that the test is really checking 3 layers
 		assertTrue(tree.getDepth() >= 3);
@@ -482,7 +489,6 @@ public class BTreeSmallTest {
 		}
 
 		LOG.info("Checking tree structure. This could take a while");
-
 	}
 
 }

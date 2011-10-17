@@ -40,7 +40,7 @@ public abstract class ResourceManagerSpec {
 	@Test
 	public void shouldBeEmptyAtFirst() throws IOException{
 		assertTrue(rm != null);
-		assertEquals(PageSize.DEFAULT_PAGE_SIZE, rm.pageSize());
+		assertEquals(PageSize.DEFAULT_PAGE_SIZE, rm.getPageSize());
 		assertEquals(0, rm.numberOfPages()); // 0 pages
 	}
 	

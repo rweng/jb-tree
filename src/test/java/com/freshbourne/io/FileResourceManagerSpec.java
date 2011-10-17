@@ -72,7 +72,7 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 		
 		RandomAccessFile handle = rm.getHandle();
 		try {
-			handle.seek(rm.pageSize());
+			handle.seek(rm.getPageSize());
 		
 			assertFalse(testInt == handle.readInt());
 		} catch (IOException ignored) { // ignore, we dont care whether the empty page has been written or not
@@ -82,7 +82,7 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 		rm.sync();
 		
 		try {
-			handle.seek(rm.pageSize());
+			handle.seek(rm.getPageSize());
 			assertEquals(testInt, handle.readInt());
 		} catch (IOException e) {
 			e.printStackTrace();
