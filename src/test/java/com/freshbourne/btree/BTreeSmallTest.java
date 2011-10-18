@@ -17,6 +17,7 @@ import com.freshbourne.serializer.IntegerSerializer;
 import com.freshbourne.serializer.Serializer;
 import com.google.inject.*;
 import com.google.inject.util.Modules;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
@@ -420,9 +421,14 @@ public class BTreeSmallTest {
 		assertTrue(tree.getDepth() >= 3);
 	}
 
+
 	@Test
-	public void bulkInsertWithSortAndClose() throws IOException {
-		int count = 30;
+	public void bulkInsertWithSortAndCloseAndRange() throws IOException {
+		int count = 50;
+		int from = 10;
+		int to = 39;
+		int realCount = to - from + 1;
+
 		AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
 		SecureRandom srand = new SecureRandom();
 
@@ -435,19 +441,20 @@ public class BTreeSmallTest {
 				newKey = srand.nextInt();
 			}
 
-			keys.add(newKey);
+			if (i >= from && i <= to)
+				keys.add(newKey);
 			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(newKey, newKey);
 		}
 
-		tree.bulkInitialize(kvs, false);
+		tree.bulkInitialize(kvs, from, to, false);
 
-		assertEquals(count, tree.getNumberOfEntries());
+		assertEquals(to - from + 1, tree.getNumberOfEntries());
 		tree.checkStructure();
 
 		Collections.sort(keys, IntegerComparator.INSTANCE);
-		for (int i = 0; i < count; i++) {
+		for (int i = 0; i < realCount; i++) {
 			assertEquals("size problem with key " + i, 1, tree.get(keys.get(i)).size());
-			assertEquals(kvs[i].getValue(), tree.get(keys.get(i)).get(0));
+			assertEquals(keys.get(i), tree.get(keys.get(i)).get(0));
 		}
 
 		tree.close();
@@ -456,13 +463,12 @@ public class BTreeSmallTest {
 		tree.load();
 
 		// test everything again
-		assertEquals(count, tree.getNumberOfEntries());
+		assertEquals(realCount, tree.getNumberOfEntries());
 		tree.checkStructure();
 
-		Collections.sort(keys, IntegerComparator.INSTANCE);
-		for (int i = 0; i < count; i++) {
+		for (int i = 0; i < realCount; i++) {
 			assertEquals("size problem with key " + i, 1, tree.get(keys.get(i)).size());
-			assertEquals(kvs[i].getValue(), tree.get(keys.get(i)).get(0));
+			assertEquals(keys.get(i), tree.get(keys.get(i)).get(0));
 		}
 	}
 
@@ -490,5 +496,6 @@ public class BTreeSmallTest {
 
 		LOG.info("Checking tree structure. This could take a while");
 	}
+
 
 }

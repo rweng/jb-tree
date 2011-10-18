@@ -202,30 +202,36 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/**
-	 * Bulk initialize first creates all leafs, then goes the tree up to create the InnerNodes.
+	 * Bulk initialize first creates all leafs, then goes the tree up toIndex create the InnerNodes.
 	 *
 	 * @param kvs
-	 * @param from including
-	 * @param to including
+	 * @param fromIndex
+	 * 		including
+	 * @param toIndex
+	 * 		including
 	 * @param sorted
 	 * @throws IOException
 	 */
-	public void bulkInitialize(SimpleEntry<K, V>[] kvs, int from, int to, boolean sorted) throws IOException {
-		int count = to - from + 1;
+	public void bulkInitialize(SimpleEntry<K, V>[] kvs, int fromIndex, int toIndex, boolean sorted) throws IOException {
+		int count = toIndex - fromIndex + 1;
+		if (count < 0)
+			throw new IllegalArgumentException(
+					"fromIndex(" + fromIndex + ") must be smaller or equal to toIndex(" + toIndex + ")");
 
 		// sort if not already sorted
-		if (!sorted){
-			Arrays.sort(kvs, from, count, new Comparator<SimpleEntry<K, V>>() {
-				@Override
-				public int compare(SimpleEntry<K, V> kvSimpleEntry, SimpleEntry<K, V> kvSimpleEntry1) {
-					return comparator.compare(kvSimpleEntry.getKey(), kvSimpleEntry1.getKey());
-				}
-			});
+		if (!sorted) {
+			Arrays.sort(kvs, fromIndex, toIndex + 1, // +1 because excluding toIndex
+					new Comparator<SimpleEntry<K, V>>() {
+						@Override
+						public int compare(SimpleEntry<K, V> kvSimpleEntry, SimpleEntry<K, V> kvSimpleEntry1) {
+							return comparator.compare(kvSimpleEntry.getKey(), kvSimpleEntry1.getKey());
+						}
+					});
 		}
 
 		// initialize but do not create a root page or set the number of keys
 		preInitialize();
-		setNumberOfEntries(count < 0 ? 0 : count);
+		setNumberOfEntries(count);
 
 		if (getNumberOfEntries() == 0) {
 			return;
@@ -242,8 +248,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		LeafNode<K, V> previousLeaf = null;
 		while (inserted < getNumberOfEntries()) {
 			leafPage = leafPageManager.createPage(false);
-			
-			inserted += leafPage.bulkInitialize(kvs, inserted + from);
+
+			inserted += leafPage.bulkInitialize(kvs, inserted + fromIndex);
 
 			pageIdToSmallestKeyMap.put(leafPage.getId(), leafPage.getFirstLeafKeySerialized());
 
@@ -277,7 +283,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			ArrayList<byte[]> newKeysForNextLayer = new ArrayList<byte[]>();
 			inserted = 0; // page ids
 
-			// we assume that from each pageId the smallest key was stored, we need to remove the last one for InnerNode#bulkinsert()
+			// we assume that fromIndex each pageId the smallest key was stored, we need to remove the last one for InnerNode#bulkinsert()
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("new pageIds.size: " + pageIds.size());
 				LOG.debug("new keysForNextLayer.size: " + keysForNextLayer.size());
@@ -293,7 +299,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 				pageIdToSmallestKeyMap.put(node.getId(), smallestKey);
 
 				// dont insert the first small key to the keys for the next layer
-				if(inserted > 0)
+				if (inserted > 0)
 					newKeysForNextLayer.add(smallestKey);
 
 				inserted += node.bulkInitialize(keysForNextLayer, pageIds, inserted);
