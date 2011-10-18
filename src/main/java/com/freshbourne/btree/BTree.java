@@ -197,17 +197,23 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			throw new IllegalStateException("Btree must be initialized or loaded");
 	}
 
+	public void bulkInitialize(SimpleEntry<K, V>[] kvs, boolean sorted) throws IOException {
+		bulkInitialize(kvs, 0, kvs.length - 1, sorted);
+	}
+
 	/**
 	 * Bulk initialize first creates all leafs, then goes the tree up to create the InnerNodes.
 	 *
 	 * @param kvs
+	 * @param from including
+	 * @param to including
 	 * @param sorted
 	 * @throws IOException
 	 */
-	public void bulkInitialize(SimpleEntry<K, V>[] kvs, boolean sorted) throws IOException {
+	public void bulkInitialize(SimpleEntry<K, V>[] kvs, int from, int to, boolean sorted) throws IOException {
 		// sort if not already sorted
 		if (!sorted){
-			Arrays.sort(kvs, new Comparator<SimpleEntry<K, V>>() {
+			Arrays.sort(kvs, from, to, new Comparator<SimpleEntry<K, V>>() {
 				@Override
 				public int compare(SimpleEntry<K, V> kvSimpleEntry, SimpleEntry<K, V> kvSimpleEntry1) {
 					return comparator.compare(kvSimpleEntry.getKey(), kvSimpleEntry1.getKey());
@@ -217,9 +223,10 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 		// initialize but do not create a root page or set the number of keys
 		preInitialize();
-		setNumberOfEntries(kvs.length);
+		int count = to - from + 1;
+		setNumberOfEntries(count < 0 ? 0 : count);
 
-		if (kvs.length == 0) {
+		if (getNumberOfEntries() == 0) {
 			return;
 		}
 
@@ -232,9 +239,10 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		// first insert all leafs and remember the insertedLastKeys
 		int inserted = 0;
 		LeafNode<K, V> previousLeaf = null;
-		while (inserted < kvs.length) {
+		while (inserted < getNumberOfEntries()) {
 			leafPage = leafPageManager.createPage(false);
-			inserted += leafPage.bulkInitialize(kvs, inserted);
+			
+			inserted += leafPage.bulkInitialize(kvs, inserted + from);
 
 			pageIdToSmallestKeyMap.put(leafPage.getId(), leafPage.getFirstLeafKeySerialized());
 
