@@ -211,9 +211,11 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @throws IOException
 	 */
 	public void bulkInitialize(SimpleEntry<K, V>[] kvs, int from, int to, boolean sorted) throws IOException {
+		int count = to - from + 1;
+
 		// sort if not already sorted
 		if (!sorted){
-			Arrays.sort(kvs, from, to, new Comparator<SimpleEntry<K, V>>() {
+			Arrays.sort(kvs, from, count, new Comparator<SimpleEntry<K, V>>() {
 				@Override
 				public int compare(SimpleEntry<K, V> kvSimpleEntry, SimpleEntry<K, V> kvSimpleEntry1) {
 					return comparator.compare(kvSimpleEntry.getKey(), kvSimpleEntry1.getKey());
@@ -223,7 +225,6 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 		// initialize but do not create a root page or set the number of keys
 		preInitialize();
-		int count = to - from + 1;
 		setNumberOfEntries(count < 0 ? 0 : count);
 
 		if (getNumberOfEntries() == 0) {
