@@ -9,15 +9,15 @@
 package com.freshbourne.btree;
 
 import com.freshbourne.comparator.IntegerComparator;
+import com.freshbourne.comparator.StringComparator;
 import com.freshbourne.io.FileResourceManager;
+import com.freshbourne.io.FileResourceManagerFactory;
 import com.freshbourne.io.PageSize;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
-import com.freshbourne.serializer.Serializer;
 import com.google.inject.*;
 import com.google.inject.util.Modules;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,31 +34,38 @@ public class BTreeSmallTest {
 
 	private static Injector                injector;
 	private        BTree<Integer, Integer> tree;
-	private static final Logger LOG       = Logger.getLogger(BTreeSmallTest.class);
-	private static final int    PAGE_SIZE = InnerNode.Header.size() + 3 * (2 * Integer.SIZE / 8) + Integer.SIZE / 8;
-	// 3 keys, 4 values
-	private static final String FILE_PATH = "/tmp/btree-small-test";
+	private static final Logger LOG = Logger.getLogger(BTreeSmallTest.class);
 
+	// 3 keys, 4 values
+	private static final int PAGE_SIZE = InnerNode.Header.size() + 3 * (2 * Integer.SIZE / 8) + Integer.SIZE / 8;
+
+
+	private static BTreeFactory factory;
 
 	static {
 		injector = Guice.createInjector(
-				Modules.override(new BTreeModule(FILE_PATH)).with(new AbstractModule() {
+				Modules.override(new BTreeModule()).with(new AbstractModule() {
 					@Override protected void configure() {
 						bind(Integer.class).annotatedWith(PageSize.class).toInstance(PAGE_SIZE);
 					}
 				}));
+		factory = injector.getInstance(BTreeFactory.class);
+	}
+
+	private static File getFile() {
+		return new File("/tmp/btree-small-test-" + System.currentTimeMillis());
 	}
 
 	@Before
-	public void setUp() {
-		new File(FILE_PATH).delete();
-		tree = injector.getInstance(Key.get(new TypeLiteral<BTree<Integer, Integer>>() {
-		}));
+	public void setUp() throws IOException {
+		getFile().delete();
+		tree = factory.get(getFile(), IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
+				IntegerComparator.INSTANCE, false);
 	}
 
 	@Test
-	public void ensurePageSizeIsSmall() {
-		assertEquals(PAGE_SIZE, injector.getInstance(FileResourceManager.class).getPageSize());
+	public void ensurePageSizeIsSmall() throws IOException {
+		assertEquals(PAGE_SIZE, injector.getInstance(FileResourceManagerFactory.class).get(getFile()).getPageSize());
 	}
 
 	@Test
@@ -156,27 +163,23 @@ public class BTreeSmallTest {
 	public void testLargeKeyValues() throws IOException {
 		// create a new injector with large pagesize and string-serialization for 1000 bytes
 		Injector newInjector = Guice.createInjector(Modules.override(new BTreeModule
-				((FILE_PATH))).with(new AbstractModule() {
+				()).with(new AbstractModule() {
 			@Override protected void configure() {
 				bind(Integer.class).annotatedWith(PageSize.class).toInstance(PageSize.DEFAULT_PAGE_SIZE);
-				bind(new TypeLiteral<Serializer<String, byte[]>>() {
-				}).toInstance(FixedStringSerializer.INSTANCE_1000);
-				bind(new TypeLiteral<FixLengthSerializer<String, byte[]>>() {
-				}).toInstance(FixedStringSerializer.INSTANCE_1000);
-
 			}
 		}));
 
-		// ensure that new injector is working
-		assertEquals(1000, newInjector.getInstance(Key.get(new TypeLiteral<FixLengthSerializer<String, byte[]>>() {
-		})).getSerializedLength());
-
 		// initialize new btree
-		new File(FILE_PATH).delete();
-		BTree<String, String> newTree = newInjector.getInstance(Key.get(new TypeLiteral<BTree<String, String>>() {
-		}));
-		newTree.initialize();
+		getFile().delete();
+		BTree<String, String> newTree =
+				newInjector.getInstance(BTreeFactory.class).get(getFile(), FixedStringSerializer.INSTANCE_1000,
+						FixedStringSerializer.INSTANCE_1000,
+						StringComparator.INSTANCE, false);
 
+		assertEquals(1000, newTree.getKeySerializer().getSerializedLength());
+		assertEquals(1000, newTree.getValueSerializer().getSerializedLength());
+
+		newTree.initialize();
 
 		// do the actual test
 		int count = 100;
@@ -458,8 +461,6 @@ public class BTreeSmallTest {
 		}
 
 		tree.close();
-		tree = injector.getInstance(Key.get(new TypeLiteral<BTree<Integer, Integer>>() {
-		}));
 		tree.load();
 
 		// test everything again

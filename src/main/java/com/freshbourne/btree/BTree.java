@@ -70,6 +70,13 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		return realSize / (keySerializer.getSerializedLength() + valueSerializer.getSerializedLength());
 	}
 
+	public FixLengthSerializer<K, byte[]> getKeySerializer() {
+		return keySerializer;
+	}
+
+	public FixLengthSerializer<V, byte[]> getValueSerializer() {
+		return valueSerializer;
+	}
 
 	public static enum Header {
 		NUM_OF_ENTRIES(0),
