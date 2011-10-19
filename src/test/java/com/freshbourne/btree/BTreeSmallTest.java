@@ -89,10 +89,8 @@ public class BTreeSmallTest {
 		for (int i = 0; i < count; i++) {
 
 			assertTrue(tree.isValid());
-			LOG.info("i = " + i);
 			tree.add(i, i);
 			tree.checkStructure();
-			LOG.info("Depth: " + tree.getDepth());
 			Iterator<Integer> iterator = tree.getIterator();
 
 			int latest = iterator.next();
@@ -126,14 +124,9 @@ public class BTreeSmallTest {
 
 		for (int i = 0; i < count; i++) {
 
-			if (i == 9)
-				LOG.debug("DEBUG");
-
 			assertTrue(tree.isValid());
-			LOG.info("i = " + i);
 			tree.add(count - i, count - i);
 			tree.checkStructure();
-			LOG.info("Depth: " + tree.getDepth());
 			Iterator<Integer> iterator = tree.getIterator();
 
 			int latest = iterator.next();
@@ -494,8 +487,6 @@ public class BTreeSmallTest {
 			assertEquals("size problem with key " + i, 1, tree.get(kvs[i].getKey()).size());
 			assertEquals(kvs[i].getValue(), tree.get(kvs[i].getKey()).get(0));
 		}
-
-		LOG.info("Checking tree structure. This could take a while");
 	}
 
 
