@@ -463,9 +463,9 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 	}
 
 
-	/** @see #bulkInitialize(java.util.AbstractMap.SimpleEntry[], int) with from = 0 */
+	/** @see #bulkInitialize(java.util.AbstractMap.SimpleEntry[], int, int) with from = 0 */
 	public int bulkInitialize(SimpleEntry<K, V>[] kvs) {
-		return bulkInitialize(kvs, 0);
+		return bulkInitialize(kvs, 0, kvs.length - 1);
 	}
 
 
@@ -476,12 +476,14 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 	 * 		data to insert as KeyValueObj Array
 	 * @param from
 	 * 		from where in the array to start inserting
+	 * 	@param maxTo
+	 * 	    usually lvs.length - 1
 	 * @return number of keys inserted
 	 */
-	public int bulkInitialize(SimpleEntry<K, V>[] kvs, int from) {
+	public int bulkInitialize(SimpleEntry<K, V>[] kvs, int from, int maxTo) {
 		initialize();
 
-		int remainingToInsert = kvs.length - from;
+		int remainingToInsert = maxTo - from + 1;
 		if (remainingToInsert <= 0)
 			return 0;
 

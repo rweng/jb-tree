@@ -249,7 +249,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		while (inserted < getNumberOfEntries()) {
 			leafPage = leafPageManager.createPage(false);
 
-			inserted += leafPage.bulkInitialize(kvs, inserted + fromIndex);
+			inserted += leafPage.bulkInitialize(kvs, inserted + fromIndex, toIndex);
 
 			pageIdToSmallestKeyMap.put(leafPage.getId(), leafPage.getFirstLeafKeySerialized());
 
