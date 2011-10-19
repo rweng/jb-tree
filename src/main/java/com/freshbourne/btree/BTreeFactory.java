@@ -49,16 +49,21 @@ public class BTreeFactory {
 	 * @throws IOException
 	 */
 	public <K, V> BTree<K, V> get(File file, FixLengthSerializer<K, byte[]> ks, FixLengthSerializer<V, byte[]> vs,
-	                              Comparator<K> comparator) throws IOException {
+	                              Comparator<K> comparator, boolean lockFile) throws IOException {
 		if (map.containsKey(file))
 			return map.get(file);
 
-		FileResourceManager frm = frmFactory.get(file);
+		FileResourceManager frm = frmFactory.get(file, lockFile);
 
 		BTree<K, V> tree = new BTree<K, V>(frm, ks, vs, comparator);
 
 		map.put(file, tree);
 
 		return tree;
+	}
+
+	public <K, V> BTree<K, V> get(File file, FixLengthSerializer<K, byte[]> ks, FixLengthSerializer<V, byte[]> vs,
+	                              Comparator<K> comparator) throws IOException {
+		return get(file, ks, vs, comparator, true);
 	}
 }

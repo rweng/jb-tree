@@ -19,16 +19,14 @@ import java.util.HashMap;
 @Singleton
 public class FileResourceManagerFactory {
     private int pageSize;
-    public boolean doLock;
     private HashMap<File, FileResourceManager> map = new HashMap<File, FileResourceManager>();
 
     @Inject
-    FileResourceManagerFactory(@PageSize int pageSize, @Named("doLock") boolean doLock){
+    FileResourceManagerFactory(@PageSize int pageSize){
         this.pageSize = pageSize;
-        this.doLock = doLock;
     }
 
-    public FileResourceManager get(File file) throws IOException {
+    public FileResourceManager get(File file, boolean doLock) throws IOException {
         if(map.containsKey(file))
             return map.get(file);
 

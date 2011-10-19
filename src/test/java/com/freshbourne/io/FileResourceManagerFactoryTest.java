@@ -46,9 +46,9 @@ public class FileResourceManagerFactoryTest {
 
     @Test
     public void get() throws IOException {
-        FileResourceManager rm = factory.get(new File("/tmp/factorytestFile"));
-        FileResourceManager rm2 = factory.get(new File("/tmp/factorytestFile"));
-        FileResourceManager rm3 = factory.get(new File("/tmp/factorytestFile2"));
+        FileResourceManager rm = factory.get(new File("/tmp/factorytestFile"), false);
+        FileResourceManager rm2 = factory.get(new File("/tmp/factorytestFile"), false);
+        FileResourceManager rm3 = factory.get(new File("/tmp/factorytestFile2"), false);
 
 
         assertNotNull(rm);
@@ -58,6 +58,6 @@ public class FileResourceManagerFactoryTest {
 
     @Test(expected = IOException.class)
     public void shouldThrowAnExceptionIfFileDirDoesNotExist() throws IOException {
-        factory.get(new File("/tmp/lkjsdfs/bla"));
+        factory.get(new File("/tmp/lkjsdfs/bla"), false);
     }
 }

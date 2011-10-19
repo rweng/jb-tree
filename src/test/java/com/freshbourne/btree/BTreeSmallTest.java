@@ -65,7 +65,7 @@ public class BTreeSmallTest {
 
 	@Test
 	public void ensurePageSizeIsSmall() throws IOException {
-		assertEquals(PAGE_SIZE, injector.getInstance(FileResourceManagerFactory.class).get(getFile()).getPageSize());
+		assertEquals(PAGE_SIZE, injector.getInstance(FileResourceManagerFactory.class).get(getFile(), false).getPageSize());
 	}
 
 	@Test

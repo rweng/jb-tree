@@ -20,11 +20,4 @@ public class IOModuleTest {
     static {
         injector = Guice.createInjector(new IOModule());
     }
-
-
-	@Test
-	public void lockingByDefault(){
-		FileResourceManagerFactory factory = injector.getInstance(FileResourceManagerFactory.class);
-		assertTrue(factory.doLock);
-	}
 }
