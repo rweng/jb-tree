@@ -49,7 +49,7 @@ public class BTreeFactory {
 	 * @throws IOException
 	 */
 	public <K, V> BTree<K, V> get(File file, FixLengthSerializer<K, byte[]> ks, FixLengthSerializer<V, byte[]> vs,
-	                              Comparator<K> comparator, boolean loadOrInitialize) throws IOException {
+	                              Comparator<K> comparator) throws IOException {
 		if (map.containsKey(file))
 			return map.get(file);
 
@@ -57,16 +57,8 @@ public class BTreeFactory {
 
 		BTree<K, V> tree = new BTree<K, V>(frm, ks, vs, comparator);
 
-		if (loadOrInitialize)
-			tree.loadOrInitialize();
-
 		map.put(file, tree);
 
 		return tree;
-	}
-
-	public <K, V> BTree<K, V> get(File file, FixLengthSerializer<K, byte[]> ks, FixLengthSerializer<V, byte[]> vs,
-	                              Comparator<K> comparator) throws IOException {
-		return get(file, ks, vs, comparator, true);
 	}
 }

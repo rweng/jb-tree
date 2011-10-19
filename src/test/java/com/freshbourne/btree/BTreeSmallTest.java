@@ -60,7 +60,7 @@ public class BTreeSmallTest {
 	public void setUp() throws IOException {
 		getFile().delete();
 		tree = factory.get(getFile(), IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
-				IntegerComparator.INSTANCE, false);
+				IntegerComparator.INSTANCE);
 	}
 
 	@Test
@@ -167,7 +167,7 @@ public class BTreeSmallTest {
 		BTree<String, String> newTree =
 				newInjector.getInstance(BTreeFactory.class).get(getFile(), FixedStringSerializer.INSTANCE_1000,
 						FixedStringSerializer.INSTANCE_1000,
-						StringComparator.INSTANCE, false);
+						StringComparator.INSTANCE);
 
 		assertEquals(1000, newTree.getKeySerializer().getSerializedLength());
 		assertEquals(1000, newTree.getValueSerializer().getSerializedLength());
