@@ -23,7 +23,10 @@ import java.nio.ByteBuffer;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 
-public class LeafNodeUnitTestDeprecated {
+/**
+ * @deprecated 
+ */
+public class LeafNodeUnitTest {
 	
 	private LeafNode<Integer, Integer> node;
 	

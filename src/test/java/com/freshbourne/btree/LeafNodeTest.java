@@ -125,8 +125,8 @@ public class LeafNodeTest {
 	@Test
 	public void iterators() {
 		fillLeaf(leafInt, 10);
-		Iterator<Integer> iterator = leafInt.getIterator(-5, 5);
 
+		Iterator<Integer> iterator = leafInt.getIterator(-5, 5);
 		for (int i = 0; i <= 5; i++)
 			assertEquals(i, (int) iterator.next());
 		assertFalse(iterator.hasNext());
@@ -140,7 +140,24 @@ public class LeafNodeTest {
 		for (int i = 0; i < 10; i++)
 			assertEquals(i, (int) iterator.next());
 		assertFalse(iterator.hasNext());
+
+
+		iterator = leafInt.getIterator(5, null);
+		for (int i = 5; i < 10; i++)
+			assertEquals(i, (int) iterator.next());
+		assertFalse(iterator.hasNext());
+
+		iterator = leafInt.getIterator(null, 5);
+		for (int i = 0; i <= 5; i++)
+			assertEquals(i, (int) iterator.next());
+		assertFalse(iterator.hasNext());
+
+		iterator = leafInt.getIterator(null, null);
+		for (int i = 0; i < 10; i++)
+			assertEquals(i, (int) iterator.next());
+		assertFalse(iterator.hasNext());
 	}
+
 
 	private void fillLeaf(LeafNode<Integer, Integer> leaf, int count) {
 		for (int i = 0; i < count; i++) {

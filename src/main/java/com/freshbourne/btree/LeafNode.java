@@ -722,8 +722,12 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 		public LeafNodeIterator(K from, K to) {
 			this.from = from;
 			this.to = to;
+
+			if(from != null)
+				currentKeyStruct = firstKeyStructEqualOrLargerThan(from);
+			else
+				currentKeyStruct = new KeyStruct();
 			
-			currentKeyStruct = firstKeyStructEqualOrLargerThan(from);
 			if(currentKeyStruct == null)
 				LOG.warn("iterator requested from a key that is larger than this leafs largest key");
 		}
@@ -757,7 +761,7 @@ public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 				return null;
 
 			// if we are at the end of the leaf, or the current key is larger than the to we were looking for
-			if(currentKeyStruct.position >= getNumberOfEntries() || (comparator.compare(currentKeyStruct.getKey(), to) > 0)){
+			if(currentKeyStruct.position >= getNumberOfEntries() || (to != null && comparator.compare(currentKeyStruct.getKey(), to) > 0)){
 				return null;
 			}
 			
