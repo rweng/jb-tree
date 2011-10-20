@@ -563,6 +563,11 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		private List<Range<K>> cleanRanges(List<Range<K>> ranges) {
 			List<Range<K>> cleaned = new LinkedList<Range<K>>();
 
+			if(ranges == null){
+				cleaned.add(new Range());
+				return cleaned;
+			}
+
 			// sort ranges after from key
 			Collections.sort(ranges, new Comparator<Range<K>>() {
 				@Override public int compare(Range<K> kRange, Range<K> kRange1) {

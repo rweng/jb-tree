@@ -396,6 +396,22 @@ public class BTreeSmallTest {
 			assertNotNull(iterator.next());
 		}
 		assertNull(iterator.next());
+
+
+		// with null as search range
+		iterator = tree.getIterator(null);
+		for (int i = 0; i <= 99; i++) {
+			assertNotNull(iterator.next());
+		}
+		assertNull(iterator.next());
+
+		// with an empty list as search range
+		rangeList.clear();
+		iterator = tree.getIterator(rangeList);
+		for (int i = 0; i <= 99; i++) {
+			assertNotNull(iterator.next());
+		}
+		assertNull(iterator.next());
 	}
 
 	@Test
