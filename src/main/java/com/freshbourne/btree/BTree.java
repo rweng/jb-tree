@@ -566,6 +566,16 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			// sort ranges after from key
 			Collections.sort(ranges, new Comparator<Range<K>>() {
 				@Override public int compare(Range<K> kRange, Range<K> kRange1) {
+					if (kRange.getFrom() == null) {
+						if (kRange1.getFrom() == null)
+							return 0;
+						else
+							return -1;
+					}
+
+					if (kRange1.getFrom() == null)
+						return 1;
+
 					return comparator.compare(kRange.getFrom(), kRange1.getFrom());
 				}
 			});
@@ -579,15 +589,22 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 				}
 
 				// only if this to() is larger than last to(), extend to()
-				if (comparator.compare(last.getTo(), r.getFrom()) >= 0) {
-					if (comparator.compare(last.getTo(), r.getTo()) < 0) {
-						last.setTo(r.getTo());
+				if (last.getTo() != null) {
+					if ((r.getFrom() == null || comparator.compare(last.getTo(), r.getFrom()) >= 0)) {
+						if (r.getTo() == null)
+							last.setTo(null);
+						else if (comparator.compare(last.getTo(), r.getTo()) < 0) {
+							last.setTo(r.getTo());
+						}
+					} else { // separate ranges
+						cleaned.add(r);
+						last = r;
 					}
-				} else { // separate ranges
-					cleaned.add(r);
-					last = r;
 				}
 			}
+
+			if (cleaned.size() == 0)
+				cleaned.add(new Range<K>());
 
 			return cleaned;
 		}

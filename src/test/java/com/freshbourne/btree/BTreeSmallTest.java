@@ -65,7 +65,8 @@ public class BTreeSmallTest {
 
 	@Test
 	public void ensurePageSizeIsSmall() throws IOException {
-		assertEquals(PAGE_SIZE, injector.getInstance(FileResourceManagerFactory.class).get(getFile(), false).getPageSize());
+		assertEquals(PAGE_SIZE,
+				injector.getInstance(FileResourceManagerFactory.class).get(getFile(), false).getPageSize());
 	}
 
 	@Test
@@ -322,7 +323,7 @@ public class BTreeSmallTest {
 	}
 
 	@Test
-	public void iteratorsWithRanges() throws IOException {
+	public void ranges() throws IOException {
 		tree.initialize();
 		fillTree(tree, 100);
 		List<Range<Integer>> rangeList = new ArrayList<Range<Integer>>();
@@ -348,8 +349,53 @@ public class BTreeSmallTest {
 		for (int i = 95; i < 100; i++) {
 			assertEquals(i, (int) iterator.next());
 		}
-
 		assertFalse(iterator.hasNext());
+
+
+		rangeList.clear();
+		iterator = tree.getIterator(rangeList);
+		for (int i = 0; i < 100; i++) {
+			assertNotNull(iterator.next());
+		}
+		assertNull(iterator.next());
+
+		rangeList.add(new Range(null, 50));
+		iterator = tree.getIterator(rangeList);
+		for (int i = 0; i <= 50; i++) {
+			assertNotNull(iterator.next());
+		}
+		assertNull(iterator.next());
+
+		rangeList.add(new Range<Integer>(0, 75));
+		iterator = tree.getIterator(rangeList);
+		for (int i = 0; i <= 75; i++) {
+			assertNotNull(iterator.next());
+		}
+		assertNull(iterator.next());
+
+		rangeList.clear();
+		rangeList.add(new Range(50, null));
+		iterator = tree.getIterator(rangeList);
+		for (int i = 50; i <= 99; i++) {
+			assertNotNull(iterator.next());
+		}
+		assertNull(iterator.next());
+
+		rangeList.add(new Range(25, 99));
+		iterator = tree.getIterator(rangeList);
+		for (int i = 25; i <= 99; i++) {
+			assertNotNull(iterator.next());
+		}
+		assertNull(iterator.next());
+
+
+		rangeList.add(new Range(null, null));
+		rangeList.add(new Range(null, 23));
+		iterator = tree.getIterator(rangeList);
+		for (int i = 0; i <= 99; i++) {
+			assertNotNull(iterator.next());
+		}
+		assertNull(iterator.next());
 	}
 
 	@Test

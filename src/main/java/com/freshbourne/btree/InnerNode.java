@@ -786,7 +786,11 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		public InnerNodeIterator(K from, K to) {
 			this.from = from;
 			this.to = to;
-			ks = getFirstLargerOrEqualKeyStruct(from);
+			
+			if(from == null)
+				ks = new KeyStruct();
+			else
+				ks = getFirstLargerOrEqualKeyStruct(from);
 
 			if (ks == null)
 				ks = new KeyStruct(getNumberOfKeys());
@@ -818,7 +822,7 @@ public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
 
 			currentIterator = ks.getLeftNode().getIterator(from, to);
-			if (ks.pos < getNumberOfKeys() && comparator.compare(ks.getKey(), to) <= 0)
+			if (ks.pos < getNumberOfKeys() && (to == null || comparator.compare(ks.getKey(), to) <= 0))
 				ks.becomeNext();
 			else
 				ks = null;
