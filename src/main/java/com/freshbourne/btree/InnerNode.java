@@ -28,7 +28,7 @@ import java.util.*;
  * @param <K>
  * @param <V>
  */
-public class InnerNode<K, V> implements Node<K, V>, ComplexPage {
+class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
 	private static final NodeType NODE_TYPE = NodeType.INNER_NODE;
 	private static final Logger   LOG       = Logger.getLogger(InnerNode.class);

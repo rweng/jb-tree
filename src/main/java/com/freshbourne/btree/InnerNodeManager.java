@@ -18,7 +18,7 @@ import com.google.inject.Singleton;
 import java.util.Comparator;
 
 @Singleton
-public class InnerNodeManager<K, V> extends AbstractPageManager<InnerNode<K, V>> {
+class InnerNodeManager<K, V> extends AbstractPageManager<InnerNode<K, V>> {
 
 	private final FixLengthSerializer<K, byte[]> keySerializer;
 	

@@ -18,7 +18,7 @@ import com.google.inject.Singleton;
 import java.util.Comparator;
 
 @Singleton
-public class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
+class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 
 	private final FixLengthSerializer<V, byte[]> valueSerializer;
 	private final FixLengthSerializer<K, byte[]> keySerializer;

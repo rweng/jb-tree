@@ -19,7 +19,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 
 
-public class LeafNode<K, V> implements Node<K, V>, ComplexPage {
+class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 
 	private static final Logger LOG = Logger.getLogger(LeafNode.class);
 

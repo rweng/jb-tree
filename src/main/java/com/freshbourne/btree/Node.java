@@ -13,7 +13,7 @@ import com.freshbourne.io.PagePointer;
 import java.util.Iterator;
 import java.util.List;
 
-public interface Node<K, V> {
+interface Node<K, V> {
 	
 	/**
 	 * inserts the key and value into the node

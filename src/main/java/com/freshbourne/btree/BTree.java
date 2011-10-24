@@ -78,7 +78,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		return valueSerializer;
 	}
 
-	public static enum Header {
+	static enum Header {
 		NUM_OF_ENTRIES(0),
 		ROOT_ID(Integer.SIZE / 8);
 
@@ -102,7 +102,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 *
 	 * @author Robin Wenglewski <robin@wenglewski.de>
 	 */
-	public static enum NodeType {
+	static enum NodeType {
 		LEAF_NODE('L'), INNER_NODE('I');
 
 		private final char serialized;

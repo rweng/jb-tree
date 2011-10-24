@@ -7,7 +7,7 @@
  */
 package com.freshbourne.btree;
 
-public class AdjustmentAction<K,V> {
+class AdjustmentAction<K,V> {
 	public enum ACTION {INSERT_NEW_NODE, UPDATE_KEY}
 	
 	private ACTION action;
