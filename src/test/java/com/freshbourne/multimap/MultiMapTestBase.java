@@ -7,6 +7,7 @@
  */
 package com.freshbourne.multimap;
 
+import com.freshbourne.btree.MultiMap;
 import org.junit.Before;
 
 import java.io.IOException;

@@ -234,7 +234,7 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#containsKey(java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#containsKey(java.lang.Object)
 		  */
 	@Override
 	public boolean containsKey(K key) {
@@ -357,7 +357,7 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#remove(java.lang.Object)
 		  */
 	@Override
 	public int remove(K key) {

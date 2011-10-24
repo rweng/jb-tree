@@ -6,7 +6,7 @@
  * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-package com.freshbourne.multimap;
+package com.freshbourne.btree;
 
 import java.util.Iterator;
 import java.util.List;

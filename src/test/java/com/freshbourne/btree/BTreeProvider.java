@@ -7,7 +7,6 @@
  */
 package com.freshbourne.btree;
 
-import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.multimap.MultiMapProvider;
 import com.google.inject.Guice;
 import com.google.inject.Injector;

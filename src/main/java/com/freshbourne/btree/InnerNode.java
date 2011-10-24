@@ -248,7 +248,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#get(java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#get(java.lang.Object)
 		  */
 	@Override
 	public List<V> get(K key) {
@@ -276,7 +276,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#remove(java.lang.Object)
 		  */
 	@Override
 	public int remove(K key) {
@@ -327,7 +327,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#clear()
+		  * @see com.freshbourne.btree.MultiMap#clear()
 		  */
 	@Override
 	public void destroy() {

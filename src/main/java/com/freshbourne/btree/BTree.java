@@ -10,7 +10,6 @@ package com.freshbourne.btree;
 
 import com.freshbourne.btree.AdjustmentAction.ACTION;
 import com.freshbourne.io.*;
-import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.PagePointSerializer;
 import com.google.inject.Inject;
@@ -191,7 +190,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#size()
+		  * @see com.freshbourne.btree.MultiMap#size()
 		  */
 	@Override
 	public int getNumberOfEntries() {
@@ -328,7 +327,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#containsKey(java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#containsKey(java.lang.Object)
 		  */
 	@Override
 	public boolean containsKey(K key) {
@@ -338,7 +337,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#get(java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#get(java.lang.Object)
 		  */
 	@Override
 	public List<V> get(K key) {
@@ -349,7 +348,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#add(java.lang.Object, java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#add(java.lang.Object, java.lang.Object)
 		  */
 	@Override
 	public void add(K key, V value) {
@@ -398,7 +397,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#remove(java.lang.Object)
 		  */
 	@Override
 	public void remove(K key) {
@@ -408,7 +407,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object, java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#remove(java.lang.Object, java.lang.Object)
 		  */
 	@Override
 	public void remove(K key, V value) {
@@ -418,7 +417,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#clear()
+		  * @see com.freshbourne.btree.MultiMap#clear()
 		  */
 	@Override
 	public void clear() {
@@ -519,7 +518,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-			  * @see com.freshbourne.multimap.MultiMap#sync()
+			  * @see com.freshbourne.btree.MultiMap#sync()
 			  */
 	@Override
 	public void sync() {
@@ -527,7 +526,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#getIterator()
+		  * @see com.freshbourne.btree.MultiMap#getIterator()
 		  */
 	@Override
 	public Iterator<V> getIterator() {
@@ -536,7 +535,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#getIterator(java.lang.Object, java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#getIterator(java.lang.Object, java.lang.Object)
 		  */
 	@Override
 	public Iterator<V> getIterator(K from, K to) {

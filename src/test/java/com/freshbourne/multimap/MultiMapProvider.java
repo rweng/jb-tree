@@ -7,6 +7,8 @@
  */
 package com.freshbourne.multimap;
 
+import com.freshbourne.btree.MultiMap;
+
 import java.io.IOException;
 
 public interface MultiMapProvider<K,V> {
