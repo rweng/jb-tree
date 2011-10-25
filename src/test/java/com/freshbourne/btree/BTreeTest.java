@@ -9,21 +9,27 @@
  */
 package com.freshbourne.btree;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.Iterator;
 
 import static org.testng.Assert.*;
 import static org.testng.Assert.assertEquals;
 
+
 public class BTreeTest {
 
 	private static       String        path     = "/tmp/btree_spec";
-	private static       BTreeProvider provider = new BTreeProvider(path);
 	private static final Log           LOG      = LogFactory.getLog(BTreeTest.class);
 
 	protected Integer key1;
@@ -33,20 +39,71 @@ public class BTreeTest {
 	protected Integer value2;
 	private BTree<Integer, Integer> tree;
 
+	private static Injector injector;
+	private static SecureRandom srand;
 
-	private BTreeProvider getProvider(){
-		return provider;
+	static {
+			injector = Guice.createInjector(new BTreeModule(path));
+	}
+
+	private BTree<Integer, Integer> createNewMultiMap() throws IOException {
+		File f = new File(path);
+		if(f.exists())
+			f.delete();
+
+		BTree<Integer, Integer> tree = getInstance();
+		tree.initialize();
+		return tree;
+	}
+
+		private static SecureRandom srand(){
+		if(srand == null)
+			srand = new SecureRandom();
+
+		return srand;
+	}
+
+	public BTree<Integer, Integer> getInstance(){
+		return injector.getInstance(Key.get(new TypeLiteral<BTree<Integer, Integer>>() {
+		}));
+	}
+
+
+
+
+	public Integer createRandomKey() {
+		return srand().nextInt();
+	}
+
+
+
+	public Integer createRandomValue() {
+		// for String:
+		// return (new BigInteger(130, srand())).toString(32);
+
+        // for Integer
+        return srand().nextInt();
+	}
+
+
+	public Integer createMaxKey() {
+		return Integer.MAX_VALUE;
+	}
+
+
+	public Integer createMinKey() {
+		return Integer.MIN_VALUE;
 	}
 
 	@BeforeMethod
 	public void setUp() throws IOException {
-		this.tree = getProvider().createNewMultiMap();
-			key1 = getProvider().createRandomKey();
+		this.tree = createNewMultiMap();
+			key1 = createRandomKey();
 		do{
-			key2 = getProvider().createRandomKey();
+			key2 = createRandomKey();
 		} while (key2.equals(key1));
-		value1 = getProvider().createRandomValue();
-		value2 = getProvider().createRandomValue();
+		value1 = createRandomValue();
+		value2 = createRandomValue();
 	}
 
 	protected void simpleTests(){
@@ -65,7 +122,7 @@ public class BTreeTest {
 
 	protected void fill(int size){
 		for(int i = 0; i < size; i++){
-			getMultiMap().add(getProvider().createRandomKey(), getProvider().createRandomValue());
+			getMultiMap().add(createRandomKey(), createRandomValue());
 		}
 	}
 
@@ -76,12 +133,12 @@ public class BTreeTest {
 		return tree;
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void shouldBeEmptyAfterCreation(){
 		assertEquals(0, getMultiMap().getNumberOfEntries());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void shouldContainAddedEntries() {
 		getMultiMap().add(key1, value1);
 		assertTrue(getMultiMap().containsKey(key1));
@@ -105,12 +162,12 @@ public class BTreeTest {
 		assertEquals(3, getMultiMap().getNumberOfEntries());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void shouldReturnEmptyArrayIfKeyNotFound() {
 		assertEquals(0, getMultiMap().get(key1).size());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void shouldBeAbleToRemoveInsertedEntries() {
 		getMultiMap().add(key1, value1);
 		assertTrue(getMultiMap().containsKey(key1));
@@ -119,7 +176,7 @@ public class BTreeTest {
 		assertEquals(0, getMultiMap().getNumberOfEntries());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void clearShouldRemoveAllElements() {
 		getMultiMap().add(key1, value1);
 		getMultiMap().add(key2, value2);
@@ -128,10 +185,10 @@ public class BTreeTest {
 		assertEquals(0, getMultiMap().getNumberOfEntries());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void removeWithValueArgumentShouldRemoveOnlyThisValue(){
-		key1 = getProvider().createMaxKey();
-		key2 = getProvider().createMinKey();
+		key1 = createMaxKey();
+		key2 = createMinKey();
 		removeWithValueArgumentShouldRemoveOnlyThisValue(key1, key2);
 		getMultiMap().clear();
 		removeWithValueArgumentShouldRemoveOnlyThisValue(key2, key1);
@@ -153,7 +210,7 @@ public class BTreeTest {
 		assertEquals(value2, getMultiMap().get(key2).get(0));
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void removeWithOnlyKeyArgumentShouldRemoveAllValues() {
 		getMultiMap().add(key1, value1);
 		getMultiMap().add(key1, value2);
@@ -165,7 +222,7 @@ public class BTreeTest {
 		assertEquals(0, getMultiMap().get(key1).size());
 	}
 
-	@org.testng.annotations.Test public void shouldWorkOnTheEdgeToCreateNewInnerNode(){
+	@Test public void shouldWorkOnTheEdgeToCreateNewInnerNode(){
 		int size = 170;
 		fill(size);
 
@@ -173,11 +230,11 @@ public class BTreeTest {
 		simpleTests();
 	}
 
-	@org.testng.annotations.Test public void iterator(){
+	@Test public void iterator(){
 		Integer val;
 
-		key1 = getProvider().createMinKey();
-		key2 = getProvider().createMaxKey();
+		key1 = createMinKey();
+		key2 = createMaxKey();
 
 		getMultiMap().add(key1, value1);
 		getMultiMap().add(key1, value2);
@@ -195,7 +252,7 @@ public class BTreeTest {
 		assertFalse(i.hasNext());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void shouldBeAbleToOpenAndLoad() throws IOException {
 		Integer smaller, larger;
 		if (key1.compareTo(key2) > 0) {
@@ -219,30 +276,30 @@ public class BTreeTest {
 		tree.add(key2, value2);
 		tree.sync();
 
-		tree = provider.getInstance();
+		tree = getInstance();
 		tree.load();
 		assertEquals(2, tree.getNumberOfEntries());
 		assertEquals(value1, tree.get(key1).get(0));
 		assertEquals(value2, tree.get(key2).get(0));
 	}
 
-	@org.testng.annotations.Test
+	@Test(groups = "slow")
 	public void shouldWorkWithMassiveValues() {
 		int size = 100000;
 
 		fill(size);
 
 		assertEquals(size, getMultiMap().getNumberOfEntries());
-		key1 = getProvider().createMaxKey();
+		key1 = createMaxKey();
 		simpleTests();
-		key1 = getProvider().createMinKey();
+		key1 = createMinKey();
 		simpleTests();
 	}
 
-	@org.testng.annotations.Test(enabled = false)
+	@Test(enabled = false)
 	public void shouldNotHaveTooMuchOverhead() {
-		int key = getProvider().createRandomKey();
-		int val = getProvider().createRandomValue();
+		int key = createRandomKey();
+		int val = createRandomValue();
 
 		int sizeForKey = Integer.SIZE / 8;
 		int sizeForVal = Integer.SIZE / 8;
