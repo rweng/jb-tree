@@ -16,6 +16,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
+import org.apache.jcs.admin.CacheElementInfo;
+import org.apache.jcs.admin.JCSAdminBean;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +26,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.Map;
 
 
@@ -167,9 +171,9 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void close() throws IOException {
-		if(!isOpen())
+		if (!isOpen())
 			return;
-		
+
 		if (cache != null) {
 			sync();
 			try {
@@ -368,9 +372,19 @@ public class FileResourceManager implements ResourceManager {
 	@Override
 	public void sync() {
 		ensureOpen();
-		for (Object pageId : cache.getGroupKeys(cacheRegionName)) {
-			RawPage rawPage = (RawPage) cache.get(pageId);
-			rawPage.sync();
+
+		try {
+			//TODO: research if there is another way to do this.
+			JCSAdminBean admin = new JCSAdminBean();
+			LinkedList linkedList = admin.buildElementInfo(cacheRegionName);
+			ListIterator iterator = linkedList.listIterator();
+			while (iterator.hasNext()) {
+				Integer pageId = Integer.valueOf(((CacheElementInfo) iterator.next()).getKey());
+				RawPage r = (RawPage) cache.get(pageId);
+				r.sync();
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
 		}
 	}
 

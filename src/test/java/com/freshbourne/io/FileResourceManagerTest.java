@@ -89,7 +89,7 @@ public class FileResourceManagerTest {
 			handle.seek(rm.getPageSize());
 			assertEquals(testInt, handle.readInt());
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOG.error(e.getMessage(), e);
 			fail();
 		}
 	}

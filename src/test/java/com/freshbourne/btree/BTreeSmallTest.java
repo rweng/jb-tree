@@ -21,6 +21,7 @@ import com.google.inject.*;
 import com.google.inject.util.Modules;
 import org.apache.log4j.Logger;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,25 +64,25 @@ public class BTreeSmallTest {
 				IntegerComparator.INSTANCE);
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void ensurePageSizeIsSmall() throws IOException {
 		assertEquals(PAGE_SIZE,
 				injector.getInstance(FileResourceManagerFactory.class).get(getFile(), false).getPageSize());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void testsWorking() {
 		assertTrue(true);
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void testInitialize() throws IOException {
 		tree.initialize();
 		assertTrue(tree.isValid());
 	}
 
 
-	@org.testng.annotations.Test
+	@Test
 	public void testMultiLevelInsertForward() throws IOException {
 		int count = 100;
 
@@ -117,7 +118,7 @@ public class BTreeSmallTest {
 		assertFalse(iterator.hasNext());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void testMultiLevelInsertBackward() throws IOException {
 		int count = 100;
 
@@ -153,7 +154,7 @@ public class BTreeSmallTest {
 		assertFalse(iterator.hasNext());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void testLargeKeyValues() throws IOException {
 		// create a new injector with large pagesize and string-serialization for 1000 bytes
 		Injector newInjector = Guice.createInjector(Modules.override(new BTreeModule
@@ -194,7 +195,7 @@ public class BTreeSmallTest {
 		assertFalse(iterator.hasNext());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void defaultBTreeModule() throws IOException {
 		File file = new File("/tmp/defaultBTreeModule");
 		file.delete();
@@ -209,7 +210,7 @@ public class BTreeSmallTest {
 		assertTrue(file.exists());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void manualConstructor() throws IOException {
 		String filePath = "/tmp/manualConstructorTestBtree";
 		File file = new File(filePath);
@@ -228,7 +229,7 @@ public class BTreeSmallTest {
 		assertTrue(file.exists());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void factoryConstructor() throws IOException {
 		File file = new File("/tmp/defaultBTreeModule");
 		file.delete();
@@ -244,7 +245,7 @@ public class BTreeSmallTest {
 		assertTrue(file.exists());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void staticMethodConstructor() throws IOException {
 		File file = new File("/tmp/btree-test");
 		file.delete();
@@ -257,7 +258,7 @@ public class BTreeSmallTest {
 		assertTrue(file.exists());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void integerStringTree() throws IOException {
 		File file = new File("/tmp/btree-test");
 		file.delete();
@@ -311,7 +312,7 @@ public class BTreeSmallTest {
 
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void iteratorsWithoutParameters() throws IOException {
 		tree.initialize();
 		fillTree(tree, 1000);
@@ -322,7 +323,7 @@ public class BTreeSmallTest {
 		assertFalse(iterator.hasNext());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void ranges() throws IOException {
 		tree.initialize();
 		fillTree(tree, 100);
@@ -414,7 +415,7 @@ public class BTreeSmallTest {
 		assertNull(iterator.next());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void iteratorsWithStartEndGiven() throws IOException {
 		tree.initialize();
 		fillTree(tree, 100);
@@ -440,7 +441,7 @@ public class BTreeSmallTest {
 		}
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void close() throws IOException {
 		tree.initialize();
 		fillTree(tree, 100);
@@ -449,12 +450,12 @@ public class BTreeSmallTest {
 		assertFalse(tree.getResourceManager().isOpen());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void bulkInsert1Layer() throws IOException {
 		bulkInsert(tree.getMaxLeafKeys()); // exactly one leaf
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void bulkInsert2Layers() throws IOException {
 		bulkInsert((tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys());
 
@@ -466,12 +467,12 @@ public class BTreeSmallTest {
 	 * causes java.lang.IllegalArgumentException: for bulkinsert, you must have at least 2 page ids and keys.size() ==
 	 * (pageIds.size() - 1)
 	 */
-	@org.testng.annotations.Test
+	@Test
 	public void bulkInsertWithOnlyOnePageForNextInnerNode() throws IOException {
 		bulkInsert((tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys() + 1);
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void bulkInsert3Layers() throws IOException {
 		bulkInsert((tree.getMaxInnerKeys() + 1) * (tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys());
 
@@ -480,7 +481,7 @@ public class BTreeSmallTest {
 	}
 
 
-	@org.testng.annotations.Test
+	@Test
 	public void bulkInsertWithSortAndCloseAndRange() throws IOException {
 		int count = 50;
 		int from = 10;
