@@ -105,75 +105,75 @@ public class BTreeTest {
 	}
 
 	protected void simpleTests() {
-		int numOfEntries = getTree().getNumberOfEntries();
+		int numOfEntries = tree.getNumberOfEntries();
 
-		getTree().add(key1, value2);
-		assertTrue(getTree().containsKey(key1));
-		assertEquals(value2, getTree().get(key1).get(0));
-		assertEquals(numOfEntries + 1, getTree().getNumberOfEntries());
+		tree.add(key1, value2);
+		assertTrue(tree.containsKey(key1));
+		assertEquals(value2, tree.get(key1).get(0));
+		assertEquals(numOfEntries + 1, tree.getNumberOfEntries());
 
-		getTree().remove(key1);
-		assertFalse(getTree().containsKey(key1));
-		assertEquals(0, getTree().get(key1).size());
-		assertEquals(numOfEntries, getTree().getNumberOfEntries());
+		tree.remove(key1);
+		assertFalse(tree.containsKey(key1));
+		assertEquals(0, tree.get(key1).size());
+		assertEquals(numOfEntries, tree.getNumberOfEntries());
 	}
 
 	protected void fill(int size) {
 		for (int i = 0; i < size; i++) {
-			getTree().add(createRandomKey(), createRandomValue());
+			tree.add(createRandomKey(), createRandomValue());
 		}
 	}
 
 	@Test
 	public void shouldBeEmptyAfterCreation() {
-		assertEquals(0, getTree().getNumberOfEntries());
+		assertEquals(0, tree.getNumberOfEntries());
 	}
 
 	@Test
 	public void shouldContainAddedEntries() {
-		getTree().add(key1, value1);
-		assertTrue(getTree().containsKey(key1));
-		assertEquals(1, getTree().get(key1).size());
-		assertEquals(value1, getTree().get(key1).get(0));
-		assertEquals(1, getTree().getNumberOfEntries());
+		tree.add(key1, value1);
+		assertTrue(tree.containsKey(key1));
+		assertEquals(1, tree.get(key1).size());
+		assertEquals(value1, tree.get(key1).get(0));
+		assertEquals(1, tree.getNumberOfEntries());
 
-		getTree().add(key1, value2);
-		assertTrue(getTree().containsKey(key1));
-		assertEquals(2, getTree().get(key1).size());
-		assertTrue(getTree().get(key1).contains(value1));
-		assertTrue(getTree().get(key1).contains(value2));
-		assertEquals(2, getTree().getNumberOfEntries());
+		tree.add(key1, value2);
+		assertTrue(tree.containsKey(key1));
+		assertEquals(2, tree.get(key1).size());
+		assertTrue(tree.get(key1).contains(value1));
+		assertTrue(tree.get(key1).contains(value2));
+		assertEquals(2, tree.getNumberOfEntries());
 
-		getTree().add(key2, value2);
-		assertTrue(getTree().containsKey(key2));
-		assertEquals(1, getTree().get(key2).size());
-		assertTrue(getTree().get(key1).contains(value2));
-		assertTrue(getTree().get(key1).contains(value1));
-		assertTrue(getTree().get(key1).size() == 2);
-		assertEquals(3, getTree().getNumberOfEntries());
+		tree.add(key2, value2);
+		assertTrue(tree.containsKey(key2));
+		assertEquals(1, tree.get(key2).size());
+		assertTrue(tree.get(key1).contains(value2));
+		assertTrue(tree.get(key1).contains(value1));
+		assertTrue(tree.get(key1).size() == 2);
+		assertEquals(3, tree.getNumberOfEntries());
 	}
 
 	@Test
 	public void shouldReturnEmptyArrayIfKeyNotFound() {
-		assertEquals(0, getTree().get(key1).size());
+		assertEquals(0, tree.get(key1).size());
 	}
 
 	@Test
 	public void shouldBeAbleToRemoveInsertedEntries() {
-		getTree().add(key1, value1);
-		assertTrue(getTree().containsKey(key1));
-		getTree().remove(key1);
-		assertFalse(getTree().containsKey(key1));
-		assertEquals(0, getTree().getNumberOfEntries());
+		tree.add(key1, value1);
+		assertTrue(tree.containsKey(key1));
+		tree.remove(key1);
+		assertFalse(tree.containsKey(key1));
+		assertEquals(0, tree.getNumberOfEntries());
 	}
 
 	@Test
 	public void clearShouldRemoveAllElements() {
-		getTree().add(key1, value1);
-		getTree().add(key2, value2);
-		assertEquals(2, getTree().getNumberOfEntries());
-		getTree().clear();
-		assertEquals(0, getTree().getNumberOfEntries());
+		tree.add(key1, value1);
+		tree.add(key2, value2);
+		assertEquals(2, tree.getNumberOfEntries());
+		tree.clear();
+		assertEquals(0, tree.getNumberOfEntries());
 	}
 
 	@Test
@@ -181,43 +181,43 @@ public class BTreeTest {
 		key1 = createMaxKey();
 		key2 = createMinKey();
 		removeWithValueArgumentShouldRemoveOnlyThisValue(key1, key2);
-		getTree().clear();
+		tree.clear();
 		removeWithValueArgumentShouldRemoveOnlyThisValue(key2, key1);
 	}
 
 	public void removeWithValueArgumentShouldRemoveOnlyThisValue(Integer key1, Integer key2) {
-		getTree().add(key1, value1);
-		getTree().add(key1, value2);
-		getTree().add(key2, value2);
+		tree.add(key1, value1);
+		tree.add(key1, value2);
+		tree.add(key2, value2);
 
-		assertEquals(3, getTree().getNumberOfEntries());
-		assertEquals(2, getTree().get(key1).size());
-		assertEquals(1, getTree().get(key2).size());
+		assertEquals(3, tree.getNumberOfEntries());
+		assertEquals(2, tree.get(key1).size());
+		assertEquals(1, tree.get(key2).size());
 
-		getTree().remove(key1, value2);
-		assertEquals(2, getTree().getNumberOfEntries());
-		assertEquals(1, getTree().get(key1).size());
-		assertEquals(value1, getTree().get(key1).get(0));
-		assertEquals(value2, getTree().get(key2).get(0));
+		tree.remove(key1, value2);
+		assertEquals(2, tree.getNumberOfEntries());
+		assertEquals(1, tree.get(key1).size());
+		assertEquals(value1, tree.get(key1).get(0));
+		assertEquals(value2, tree.get(key2).get(0));
 	}
 
 	@Test
 	public void removeWithOnlyKeyArgumentShouldRemoveAllValues() {
-		getTree().add(key1, value1);
-		getTree().add(key1, value2);
-		getTree().add(key2, value2);
+		tree.add(key1, value1);
+		tree.add(key1, value2);
+		tree.add(key2, value2);
 
-		assertEquals(3, getTree().getNumberOfEntries());
-		getTree().remove(key1);
-		assertEquals(1, getTree().getNumberOfEntries());
-		assertEquals(0, getTree().get(key1).size());
+		assertEquals(3, tree.getNumberOfEntries());
+		tree.remove(key1);
+		assertEquals(1, tree.getNumberOfEntries());
+		assertEquals(0, tree.get(key1).size());
 	}
 
 	@Test public void shouldWorkOnTheEdgeToCreateNewInnerNode() {
 		int size = 170;
 		fill(size);
 
-		assertEquals(size, getTree().getNumberOfEntries());
+		assertEquals(size, tree.getNumberOfEntries());
 		simpleTests();
 	}
 
@@ -227,11 +227,11 @@ public class BTreeTest {
 		key1 = createMinKey();
 		key2 = createMaxKey();
 
-		getTree().add(key1, value1);
-		getTree().add(key1, value2);
-		getTree().add(key2, value2);
+		tree.add(key1, value1);
+		tree.add(key1, value2);
+		tree.add(key2, value2);
 
-		Iterator<Integer> i = getTree().getIterator();
+		Iterator<Integer> i = tree.getIterator();
 		assertTrue(i.hasNext());
 		val = i.next();
 		assertTrue(val.equals(value1) || val.equals(value2));
@@ -260,8 +260,6 @@ public class BTreeTest {
 
 	private void shouldBeAbleToOpenAndLoad(Integer key1, Integer key2) throws IOException {
 
-		BTree<Integer, Integer> tree = (BTree<Integer, Integer>) getTree();
-
 		tree.initialize();
 		tree.add(key1, value1);
 		tree.add(key2, value2);
@@ -280,7 +278,7 @@ public class BTreeTest {
 
 		fill(size);
 
-		assertEquals(size, getTree().getNumberOfEntries());
+		assertEquals(size, tree.getNumberOfEntries());
 		key1 = createMaxKey();
 		simpleTests();
 		key1 = createMinKey();
@@ -299,10 +297,10 @@ public class BTreeTest {
 		int size = 100000;
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < size; i++) {
-			getTree().add(key, val);
+			tree.add(key, val);
 		}
 
-		getTree().sync();
+		tree.sync();
 		long end = System.currentTimeMillis();
 
 		File file = new File(path);
@@ -314,9 +312,5 @@ public class BTreeTest {
 		System.out.println("fileSize: " + file.length() / 1024 + "k (" + realSizePercent + "%)");
 		System.out.println("time for insert w/ sync in millis: " + (end - start));
 		//assertThat("current Size: " + realSizePercent + "%", realSizePercent, lessThan(1000f));
-	}
-
-	private BTree<Integer, Integer> getTree() {
-		return tree;
 	}
 }
