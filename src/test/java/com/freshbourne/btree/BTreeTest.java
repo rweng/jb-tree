@@ -9,23 +9,190 @@
  */
 package com.freshbourne.btree;
 
-import com.freshbourne.multimap.MultiMapSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
 import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
-public class BTreeTest extends MultiMapSpec<Integer, Integer> {
+public class BTreeTest {
 
 	private static       String        path     = "/tmp/btree_spec";
 	private static       BTreeProvider provider = new BTreeProvider(path);
 	private static final Log           LOG      = LogFactory.getLog(BTreeTest.class);
 
-	public BTreeTest() {
-		super(provider);
+	protected Integer key1;
+	protected Integer key2;
+
+	protected Integer value1;
+	protected Integer value2;
+	private BTree<Integer, Integer> tree;
+
+
+	private BTreeProvider getProvider(){
+		return provider;
+	}
+
+	@BeforeMethod
+	public void setUp() throws IOException {
+		this.tree = getProvider().createNewMultiMap();
+			key1 = getProvider().createRandomKey();
+		do{
+			key2 = getProvider().createRandomKey();
+		} while (key2.equals(key1));
+		value1 = getProvider().createRandomValue();
+		value2 = getProvider().createRandomValue();
+	}
+
+	protected void simpleTests(){
+		int numOfEntries = getMultiMap().getNumberOfEntries();
+
+		getMultiMap().add(key1, value2);
+		assertTrue(getMultiMap().containsKey(key1));
+		assertEquals(value2, getMultiMap().get(key1).get(0));
+		assertEquals(numOfEntries + 1, getMultiMap().getNumberOfEntries());
+
+		getMultiMap().remove(key1);
+		assertFalse(getMultiMap().containsKey(key1));
+		assertEquals(0, getMultiMap().get(key1).size());
+		assertEquals(numOfEntries, getMultiMap().getNumberOfEntries());
+	}
+
+	protected void fill(int size){
+		for(int i = 0; i < size; i++){
+			getMultiMap().add(getProvider().createRandomKey(), getProvider().createRandomValue());
+		}
+	}
+
+	/**
+	 * @return the multiMap
+	 */
+	public BTree<Integer, Integer> getMultiMap() {
+		return tree;
+	}
+
+	@org.testng.annotations.Test
+	public void shouldBeEmptyAfterCreation(){
+		assertEquals(0, getMultiMap().getNumberOfEntries());
+	}
+
+	@org.testng.annotations.Test
+	public void shouldContainAddedEntries() {
+		getMultiMap().add(key1, value1);
+		assertTrue(getMultiMap().containsKey(key1));
+		assertEquals(1, getMultiMap().get(key1).size());
+		assertEquals(value1, getMultiMap().get(key1).get(0));
+		assertEquals(1, getMultiMap().getNumberOfEntries());
+
+		getMultiMap().add(key1, value2);
+		assertTrue(getMultiMap().containsKey(key1));
+		assertEquals(2, getMultiMap().get(key1).size());
+		assertTrue(getMultiMap().get(key1).contains(value1));
+		assertTrue(getMultiMap().get(key1).contains(value2));
+		assertEquals(2, getMultiMap().getNumberOfEntries());
+
+		getMultiMap().add(key2, value2);
+		assertTrue(getMultiMap().containsKey(key2));
+		assertEquals(1, getMultiMap().get(key2).size());
+		assertTrue(getMultiMap().get(key1).contains(value2));
+		assertTrue(getMultiMap().get(key1).contains(value1));
+		assertTrue(getMultiMap().get(key1).size() == 2);
+		assertEquals(3, getMultiMap().getNumberOfEntries());
+	}
+
+	@org.testng.annotations.Test
+	public void shouldReturnEmptyArrayIfKeyNotFound() {
+		assertEquals(0, getMultiMap().get(key1).size());
+	}
+
+	@org.testng.annotations.Test
+	public void shouldBeAbleToRemoveInsertedEntries() {
+		getMultiMap().add(key1, value1);
+		assertTrue(getMultiMap().containsKey(key1));
+		getMultiMap().remove(key1);
+		assertFalse(getMultiMap().containsKey(key1));
+		assertEquals(0, getMultiMap().getNumberOfEntries());
+	}
+
+	@org.testng.annotations.Test
+	public void clearShouldRemoveAllElements() {
+		getMultiMap().add(key1, value1);
+		getMultiMap().add(key2, value2);
+		assertEquals(2, getMultiMap().getNumberOfEntries());
+		getMultiMap().clear();
+		assertEquals(0, getMultiMap().getNumberOfEntries());
+	}
+
+	@org.testng.annotations.Test
+	public void removeWithValueArgumentShouldRemoveOnlyThisValue(){
+		key1 = getProvider().createMaxKey();
+		key2 = getProvider().createMinKey();
+		removeWithValueArgumentShouldRemoveOnlyThisValue(key1, key2);
+		getMultiMap().clear();
+		removeWithValueArgumentShouldRemoveOnlyThisValue(key2, key1);
+	}
+
+	public void removeWithValueArgumentShouldRemoveOnlyThisValue(Integer key1, Integer key2) {
+		getMultiMap().add(key1, value1);
+		getMultiMap().add(key1, value2);
+		getMultiMap().add(key2, value2);
+
+		assertEquals(3, getMultiMap().getNumberOfEntries());
+		assertEquals(2, getMultiMap().get(key1).size());
+		assertEquals(1, getMultiMap().get(key2).size());
+
+		getMultiMap().remove(key1, value2);
+		assertEquals(2, getMultiMap().getNumberOfEntries());
+		assertEquals(1, getMultiMap().get(key1).size());
+		assertEquals(value1, getMultiMap().get(key1).get(0));
+		assertEquals(value2, getMultiMap().get(key2).get(0));
+	}
+
+	@org.testng.annotations.Test
+	public void removeWithOnlyKeyArgumentShouldRemoveAllValues() {
+		getMultiMap().add(key1, value1);
+		getMultiMap().add(key1, value2);
+		getMultiMap().add(key2, value2);
+
+		assertEquals(3, getMultiMap().getNumberOfEntries());
+		getMultiMap().remove(key1);
+		assertEquals(1, getMultiMap().getNumberOfEntries());
+		assertEquals(0, getMultiMap().get(key1).size());
+	}
+
+	@org.testng.annotations.Test public void shouldWorkOnTheEdgeToCreateNewInnerNode(){
+		int size = 170;
+		fill(size);
+
+		assertEquals(size, getMultiMap().getNumberOfEntries());
+		simpleTests();
+	}
+
+	@org.testng.annotations.Test public void iterator(){
+		Integer val;
+
+		key1 = getProvider().createMinKey();
+		key2 = getProvider().createMaxKey();
+
+		getMultiMap().add(key1, value1);
+		getMultiMap().add(key1, value2);
+		getMultiMap().add(key2, value2);
+
+		Iterator<Integer> i = getMultiMap().getIterator();
+		assertTrue(i.hasNext());
+		val = i.next();
+		assertTrue(val.equals(value1) || val.equals(value2));
+		assertTrue(i.hasNext());
+		val = i.next();
+		assertTrue(val.equals(value1) || val.equals(value2));
+		assertTrue(i.hasNext());
+		assertEquals(value2, i.next());
+		assertFalse(i.hasNext());
 	}
 
 	@org.testng.annotations.Test

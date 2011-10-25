@@ -9,7 +9,6 @@
  */
 package com.freshbourne.btree;
 
-import com.freshbourne.multimap.MultiMapProvider;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -19,7 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.SecureRandom;
 
-public class BTreeProvider implements MultiMapProvider<Integer, Integer> {
+public class BTreeProvider {
 
 	private final Injector injector;
 	private static SecureRandom srand;
@@ -43,8 +42,7 @@ public class BTreeProvider implements MultiMapProvider<Integer, Integer> {
 	
 	
 	
-	@Override
-	public MultiMap<Integer, Integer> createNewMultiMap() throws IOException {
+	public BTree<Integer, Integer> createNewMultiMap() throws IOException {
 		File f = new File(path);
 		if(f.exists())
 			f.delete();
@@ -54,14 +52,12 @@ public class BTreeProvider implements MultiMapProvider<Integer, Integer> {
 		return tree;
 	}
 
-	@Override
 	public Integer createRandomKey() {
 		return srand().nextInt();
 	}
 	
 	
 
-	@Override
 	public Integer createRandomValue() {
 		// for String:
 		// return (new BigInteger(130, srand())).toString(32);
@@ -71,13 +67,11 @@ public class BTreeProvider implements MultiMapProvider<Integer, Integer> {
 	}
 
 
-	@Override
 	public Integer createMaxKey() {
 		return Integer.MAX_VALUE;
 	}
 
 
-	@Override
 	public Integer createMinKey() {
 		return Integer.MIN_VALUE;
 	}
