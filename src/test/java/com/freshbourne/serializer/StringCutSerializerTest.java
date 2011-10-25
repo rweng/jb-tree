@@ -1,6 +1,17 @@
+/*
+ * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ *
+ * http://creativecommons.org/licenses/by-nc/3.0/
+ *
+ * For alternative conditions contact the author.
+ *
+ * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
+ */
+
 package com.freshbourne.serializer;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
@@ -12,30 +23,30 @@ public class StringCutSerializerTest {
 		serializer = StringCutSerializer.get(10);
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void shouldBeSingleton() {
 		assertSame(serializer, StringCutSerializer.get(10));
 		assertNotSame(serializer, StringCutSerializer.get(11));
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void serializeAcceptableStringsShouldWork() {
 		assertEquals(testStr, serializer.deserialize(serializer.serialize(testStr)));
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void fillCompletely() {
 		final String filled = "12345678";
 		assertEquals(filled, serializer.deserialize(serializer.serialize(filled)));
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void tooLongIsCut() {
 		final String tooLong = "123456789000";
 		assertEquals("12345678", serializer.deserialize(serializer.serialize(tooLong)));
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void emptyString() {
 		final String empty = "";
 		assertEquals(empty, serializer.deserialize(serializer.serialize(empty)));
