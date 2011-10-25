@@ -9,8 +9,8 @@ package com.freshbourne.io;
 
 import com.freshbourne.serializer.PagePointSerializer;
 import com.freshbourne.serializer.StringSerializer;
-import org.junit.Before;
-import org.junit.Test;
+import org.omg.CORBA.DynAnyPackage.Invalid;
+import org.testng.annotations.BeforeMethod;
 
 import java.nio.ByteBuffer;
 
@@ -25,12 +25,12 @@ public class DynamicDataPageSpec {
 	private String s2 = "blast";
 	private String s3 = "ups";
 	
-	@Before
+	@BeforeMethod
 	public void setUp(){
 		page = new DynamicDataPage<String>(new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 1), PagePointSerializer.INSTANCE, StringSerializer.INSTANCE);
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void shouldHaveToInitialize(){
 		assertFalse(page.isValid());
 		page.initialize();
@@ -38,7 +38,7 @@ public class DynamicDataPageSpec {
 		checkAndSetModified(page);
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void shouldBeEmptyAfterInitialize() throws InvalidPageException{
 		page.initialize();
 		assertEquals(0, page.numberOfEntries());
@@ -50,12 +50,12 @@ public class DynamicDataPageSpec {
 	}
 	
 	
-	@Test(expected= Exception.class)
+	@org.testng.annotations.Test(expectedExceptions = InvalidPageException.class)
 	public void shouldThrowAnExceptionIfInvalidEntryId() throws Exception{
 		page.get(432);
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void remainingShouldGetSmallerWhenInsertingSomething() throws NoSpaceException, InvalidPageException{
 		page.initialize();
 		checkAndSetModified(page);
@@ -66,23 +66,23 @@ public class DynamicDataPageSpec {
 		assertTrue(rest > page.remaining());
 	}
 	
-	@Test(expected= InvalidPageException.class)
+	@org.testng.annotations.Test(expectedExceptions = InvalidPageException.class)
 	public void shouldThrowAnExceptionOnAddIfNotValid() throws NoSpaceException, InvalidPageException{
 		page.add(s1);
 		checkAndSetModified(page);
 	}
 	
-	@Test(expected= InvalidPageException.class)
+	@org.testng.annotations.Test(expectedExceptions = InvalidPageException.class)
 	public void shouldThrowAnExceptionOnGetIfNotValid() throws Exception{
 		page.get(0);
 	}
 	
-	@Test(expected= InvalidPageException.class)
+	@org.testng.annotations.Test(expectedExceptions = InvalidPageException.class)
 	public void shouldThrowAnExceptionOnNumberOfEntriesIfNotValid() throws Exception{
 		page.numberOfEntries();
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void shouldBeAbleToReturnInsertedItems() throws Exception{
 		
 		page.initialize();
@@ -112,7 +112,7 @@ public class DynamicDataPageSpec {
 		assertEquals(s3, page.get(id3));
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void shouldReturnNullIfEntryWasRemoved() throws Exception {
 		
 		page.initialize();
@@ -126,7 +126,7 @@ public class DynamicDataPageSpec {
 		
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void remainingMethodShouldAdjustWhenInsertingOrRemovingEntries() throws NoSpaceException, InvalidPageException{
 		page.initialize();
 		
@@ -143,7 +143,7 @@ public class DynamicDataPageSpec {
 		assertEquals(r1, page.remaining());
 	}
 	
-	@Test public void remainingValueShouldBeCorrectAfterReload() throws NoSpaceException, InvalidPageException{
+	@org.testng.annotations.Test public void remainingValueShouldBeCorrectAfterReload() throws NoSpaceException, InvalidPageException{
 		page.initialize();
 		
 		page.add(s1);
@@ -154,7 +154,7 @@ public class DynamicDataPageSpec {
 		assertEquals(r, page.remaining());
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void shouldHaveSameSizeAfterInsertAndRemove() throws NoSpaceException, InvalidPageException{
 		page.initialize();
 		
@@ -165,7 +165,7 @@ public class DynamicDataPageSpec {
 		assertEquals(remaining, page.remaining());
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void shouldLoadCorrectly() throws Exception{
 		assertFalse(page.isValid());
 		page.initialize();

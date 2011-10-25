@@ -13,10 +13,9 @@ import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.RawPage;
 import com.freshbourne.serializer.IntegerSerializer;
-import org.junit.Before;
-import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.testng.annotations.BeforeMethod;
 
 import java.nio.ByteBuffer;
 
@@ -40,7 +39,7 @@ public class LeafNodeUnitTest {
 	private LeafNode<Integer, Integer> node2;
 
 	
-	@Before
+	@BeforeMethod
 	public void setUp(){
 		MockitoAnnotations.initMocks(this); 
 		rawPage = new RawPage(ByteBuffer.allocate(rawPageSize), 100);
@@ -52,7 +51,7 @@ public class LeafNodeUnitTest {
 		node.initialize();
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void load(){
 		node.insert(1, 101);
 		node.insert(2, 201);
@@ -69,14 +68,14 @@ public class LeafNodeUnitTest {
 		
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void destroy(){
 		node.insert(1, 101);
 		node.destroy();
 		verify(leafPageManager).removePage(100);
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void minNumberOfValues(){
 		int tmpValues = minNumberOfValues;
 		int tmpSize = rawPageSize;
@@ -133,7 +132,7 @@ public class LeafNodeUnitTest {
 		rawPageSize = tmpSize;
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void testInitialize(){
 		ByteBuffer buf = rawPage.bufferForReading(0);
 		assertEquals(NodeType.LEAF_NODE.serialize(), buf.getChar());
@@ -141,7 +140,7 @@ public class LeafNodeUnitTest {
 		assertEquals((int)LeafNode.NO_NEXT_LEAF, buf.getInt());
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void firstInsert(){
 		node.insert(1, 101);
 		ensureKeyValueInRawPage(rawPage, Header.size(), 1, 101);
@@ -159,7 +158,7 @@ public class LeafNodeUnitTest {
 		assertEquals(value, (int) IntegerSerializer.INSTANCE.deserialize(bytes));
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void secondInsert(){
 		firstInsert();
 		node.insert(10, 1001);
@@ -173,7 +172,7 @@ public class LeafNodeUnitTest {
 		assertEquals(1001, (int) node.get(10).get(0));
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void doubleInsert(){
 		secondInsert();
 		node.insert(1, 102);
@@ -184,7 +183,7 @@ public class LeafNodeUnitTest {
 		assertEquals(101, (int) node.get(1).get(1));
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void insertionInTheMiddle(){
 		secondInsert();
 		node.insert(5, 501);

@@ -7,13 +7,11 @@
  */
 package com.freshbourne.serializer;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 
 
 public class FixedStringSerializerTest {
-	@Test
+	@org.testng.annotations.Test
 	public void result(){
 		String s = "bla";
 		byte[] bytes = FixedStringSerializer.INSTANCE_1000.serialize(s);

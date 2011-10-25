@@ -8,8 +8,6 @@
 
 package com.freshbourne.multimap;
 
-import org.junit.Test;
-
 import java.util.Iterator;
 
 import static org.junit.Assert.*;
@@ -21,12 +19,12 @@ public abstract class MultiMapSpec<K, V> extends MultiMapTestBase<K,V> {
 		super(provider);
 	}
 
-	@Test
+	@org.testng.annotations.Test
 	public void shouldBeEmptyAfterCreation(){
 		assertEquals(0, getMultiMap().getNumberOfEntries());
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void shouldContainAddedEntries() {
 		getMultiMap().add(key1, value1);
 		assertTrue(getMultiMap().containsKey(key1));
@@ -50,12 +48,12 @@ public abstract class MultiMapSpec<K, V> extends MultiMapTestBase<K,V> {
 		assertEquals(3, getMultiMap().getNumberOfEntries());
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void shouldReturnEmptyArrayIfKeyNotFound() {
 		assertEquals(0, getMultiMap().get(key1).size());
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void shouldBeAbleToRemoveInsertedEntries() {
 		getMultiMap().add(key1, value1);
 		assertTrue(getMultiMap().containsKey(key1));
@@ -64,7 +62,7 @@ public abstract class MultiMapSpec<K, V> extends MultiMapTestBase<K,V> {
 		assertEquals(0, getMultiMap().getNumberOfEntries());
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void clearShouldRemoveAllElements() {
 		getMultiMap().add(key1, value1);
 		getMultiMap().add(key2, value2);
@@ -73,7 +71,7 @@ public abstract class MultiMapSpec<K, V> extends MultiMapTestBase<K,V> {
 		assertEquals(0, getMultiMap().getNumberOfEntries());
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void removeWithValueArgumentShouldRemoveOnlyThisValue(){
 		key1 = getProvider().createMaxKey();
 		key2 = getProvider().createMinKey();
@@ -98,7 +96,7 @@ public abstract class MultiMapSpec<K, V> extends MultiMapTestBase<K,V> {
 		assertEquals(value2, getMultiMap().get(key2).get(0));
 	}
 	
-	@Test
+	@org.testng.annotations.Test
 	public void removeWithOnlyKeyArgumentShouldRemoveAllValues() {
 		getMultiMap().add(key1, value1);
 		getMultiMap().add(key1, value2);
@@ -110,7 +108,7 @@ public abstract class MultiMapSpec<K, V> extends MultiMapTestBase<K,V> {
 		assertEquals(0, getMultiMap().get(key1).size());
 	}
 	
-	@Test public void shouldWorkOnTheEdgeToCreateNewInnerNode(){
+	@org.testng.annotations.Test public void shouldWorkOnTheEdgeToCreateNewInnerNode(){
 		int size = 170;
 		fill(size);
 		
@@ -118,7 +116,7 @@ public abstract class MultiMapSpec<K, V> extends MultiMapTestBase<K,V> {
 		simpleTests();
 	}
 	
-	@Test public void iterator(){
+	@org.testng.annotations.Test public void iterator(){
 		V val;
 		
 		key1 = getProvider().createMinKey();

@@ -13,8 +13,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
 import java.util.Iterator;
@@ -44,7 +43,7 @@ public class LeafNodeTest {
 		injector = Guice.createInjector(new BTreeModule(path));
 	}
 
-	@Before public void setUp() {
+	@BeforeMethod public void setUp() {
 		lpmStr = injector.getInstance(Key.get(new TypeLiteral<LeafPageManager<Integer, String>>() {
 		}));
 		leafStr = lpmStr.createPage();
@@ -53,7 +52,7 @@ public class LeafNodeTest {
 		leafInt = lpmInt.createPage();
 	}
 
-	@Test public void shouldBeAbleToInsertAndGet() {
+	@org.testng.annotations.Test public void shouldBeAbleToInsertAndGet() {
 		leafStr.insert(key1, value1);
 		assertTrue(leafStr.containsKey(key1));
 		assertEquals(1, leafStr.getNumberOfEntries());
@@ -61,7 +60,7 @@ public class LeafNodeTest {
 		assertEquals(value1, leafStr.get(key1).get(0));
 	}
 
-	@Test public void shouldBeAbleToGetLastKeyAndPointer() {
+	@org.testng.annotations.Test public void shouldBeAbleToGetLastKeyAndPointer() {
 		leafStr.insert(key1, value1);
 		assertNotNull(leafStr.getLastLeafKey());
 		assertNotNull(leafStr.getLastLeafKeySerialized());
@@ -71,7 +70,7 @@ public class LeafNodeTest {
 		assertNotNull(leafStr.getLastLeafKeySerialized());
 	}
 
-	@Test public void shouldAlwaysWorkAfterReload() {
+	@org.testng.annotations.Test public void shouldAlwaysWorkAfterReload() {
 		for (int i = 0; i < 5; i++) {
 			leafStr.insert(key1, value1);
 		}
@@ -83,7 +82,7 @@ public class LeafNodeTest {
 
 	}
 
-	@Test public void shouldAtSomePointReturnAValidAdjustmentAction() {
+	@org.testng.annotations.Test public void shouldAtSomePointReturnAValidAdjustmentAction() {
 		AdjustmentAction<Integer, String> action;
 		do {
 			action = leafStr.insert(key1, value1);
@@ -122,7 +121,7 @@ public class LeafNodeTest {
 
 	}
 
-	@Test
+	@org.testng.annotations.Test
 	public void iterators() {
 		fillLeaf(leafInt, 10);
 
@@ -165,7 +164,7 @@ public class LeafNodeTest {
 		}
 	}
 
-	@Test
+	@org.testng.annotations.Test
 	public void shouldContainAddedEntries() {
 		leafStr.insert(key1, value1);
 		assertTrue(leafStr.containsKey(key1));
@@ -189,7 +188,7 @@ public class LeafNodeTest {
 		assertEquals(3, leafStr.getNumberOfEntries());
 	}
 
-	@Test
+	@org.testng.annotations.Test
 	public void removeWithValueArgumentShouldRemoveOnlyThisValue() {
 		leafStr.insert(key1, value1);
 		leafStr.insert(key1, value2);
@@ -203,7 +202,7 @@ public class LeafNodeTest {
 	}
 
 
-	@Test
+	@org.testng.annotations.Test
 	public void prependEntriesShouldWork() {
 		LeafNode<Integer, String> leaf2 = lpmStr.createPage();
 

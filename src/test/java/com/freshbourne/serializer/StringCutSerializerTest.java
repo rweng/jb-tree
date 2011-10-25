@@ -1,7 +1,6 @@
 package com.freshbourne.serializer;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
 
 import static org.junit.Assert.*;
 
@@ -13,34 +12,34 @@ public class StringCutSerializerTest {
 		serializer = StringCutSerializer.get(10);
 	}
 
-	@Before
+	@BeforeMethod
 	public void setUp(){
 	}
 
-	@Test
+	@org.testng.annotations.Test
 	public void shouldBeSingleton(){
 		assertSame(serializer, StringCutSerializer.get(10));
 		assertNotSame(serializer, StringCutSerializer.get(11));
 	}
 
-	@Test
+	@org.testng.annotations.Test
 	public void serializeAcceptableStringsShouldWork(){
 		assertEquals(testStr, serializer.deserialize(serializer.serialize(testStr)));
 	}
 
-	@Test
+	@org.testng.annotations.Test
 	public void fillCompletely(){
 		String filled = "12345678";
 		assertEquals(filled, serializer.deserialize(serializer.serialize(filled)));
 	}
 
-	@Test
+	@org.testng.annotations.Test
 	public void tooLongIsCut(){
 		String tooLong = "123456789000";
 		assertEquals("12345678", serializer.deserialize(serializer.serialize(tooLong)));
 	}
 
-	@Test
+	@org.testng.annotations.Test
 	public void emptyString(){
 		String empty = "";
 		assertEquals(empty, serializer.deserialize(serializer.serialize(empty)));

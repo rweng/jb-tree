@@ -11,11 +11,9 @@ import com.freshbourne.multimap.MultiMapSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
-import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.AbstractMap;
 
 import static org.junit.Assert.assertEquals;
 
@@ -29,7 +27,7 @@ public class BTreeTest extends MultiMapSpec<Integer, Integer> {
 		super(provider);
 	}
 
-	@Test
+	@org.testng.annotations.Test
 	public void shouldBeAbleToOpenAndLoad() throws IOException {
 		Integer smaller, larger;
 		if (key1.compareTo(key2) > 0) {
@@ -60,7 +58,7 @@ public class BTreeTest extends MultiMapSpec<Integer, Integer> {
 		assertEquals(value2, tree.get(key2).get(0));
 	}
 
-	@Test
+	@org.testng.annotations.Test
 	public void shouldWorkWithMassiveValues() {
 		int size = 100000;
 
@@ -73,7 +71,7 @@ public class BTreeTest extends MultiMapSpec<Integer, Integer> {
 		simpleTests();
 	}
 
-	@Test @Ignore("does not work yet")
+	@org.testng.annotations.Test @Ignore("does not work yet")
 	public void shouldNotHaveTooMuchOverhead() {
 		int key = getProvider().createRandomKey();
 		int val = getProvider().createRandomValue();

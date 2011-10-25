@@ -7,8 +7,7 @@
  */
 package com.freshbourne.io;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
 
 import java.util.Map;
 
@@ -21,7 +20,7 @@ public class SoftReferenceCacheMapTest {
 	private Integer k1, k2, v1, v2, v3;
 
 
-	@Before
+	@BeforeMethod
 	public void setUp() {
 		map = new SoftHashMap<Integer, Integer>();
 
@@ -32,7 +31,7 @@ public class SoftReferenceCacheMapTest {
 		v3 = 33;
 	}
 
-	@Test
+	@org.testng.annotations.Test
 	public void basicOperations() {
 		assertEquals(0, map.size());
 		map.put(k1, v1);

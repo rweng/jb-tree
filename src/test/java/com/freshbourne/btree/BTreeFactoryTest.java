@@ -8,18 +8,11 @@
 
 package com.freshbourne.btree;
 
-import com.freshbourne.btree.BTree;
-import com.freshbourne.btree.BTreeFactory;
-import com.freshbourne.btree.BTreeModule;
 import com.freshbourne.comparator.StringComparator;
-import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.FixedStringSerializer;
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.TypeLiteral;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,26 +30,26 @@ public class BTreeFactoryTest {
         injector = Guice.createInjector(new BTreeModule());
     }
 
-    @Before
+    @BeforeMethod
     public void setUp() {
         f1.delete();
         f2.delete();
         factory = injector.getInstance(BTreeFactory.class);
     }
 
-    @Test
+    @org.testng.annotations.Test
     public void creation() {
         assertNotNull(factory);
     }
 
-    @Test
+    @org.testng.annotations.Test
     public void factoryIsSingleton() {
         BTreeFactory factory2 = injector.getInstance(BTreeFactory.class);
         assertEquals(factory, factory2);
     }
 
 
-    @Test
+    @org.testng.annotations.Test
     public void get() throws IOException {
         BTree rm = factory.get(f1,
                 FixedStringSerializer.INSTANCE, FixedStringSerializer.INSTANCE,

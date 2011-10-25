@@ -8,7 +8,7 @@
 package com.freshbourne.multimap;
 
 import com.freshbourne.btree.MultiMap;
-import org.junit.Before;
+import org.testng.annotations.BeforeMethod;
 
 import java.io.IOException;
 
@@ -48,7 +48,7 @@ public class MultiMapTestBase<K,V> {
 		return provider;
 	}
 	
-	@Before
+	@BeforeMethod
 	public void setUp() throws IOException {
 		setMultiMap(getProvider().createNewMultiMap());
 			key1 = getProvider().createRandomKey();
