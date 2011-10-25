@@ -29,26 +29,26 @@ import static org.testng.Assert.assertEquals;
 
 public class BTreeTest {
 
-	private static       String        path     = "/tmp/btree_spec";
-	private static final Log           LOG      = LogFactory.getLog(BTreeTest.class);
+	private static       String path = "/tmp/btree_spec";
+	private static final Log    LOG  = LogFactory.getLog(BTreeTest.class);
 
 	protected Integer key1;
 	protected Integer key2;
 
-	protected Integer value1;
-	protected Integer value2;
-	private BTree<Integer, Integer> tree;
+	protected Integer                 value1;
+	protected Integer                 value2;
+	private   BTree<Integer, Integer> tree;
 
-	private static Injector injector;
+	private static Injector     injector;
 	private static SecureRandom srand;
 
 	static {
-			injector = Guice.createInjector(new BTreeModule(path));
+		injector = Guice.createInjector(new BTreeModule(path));
 	}
 
 	private BTree<Integer, Integer> createNewMultiMap() throws IOException {
 		File f = new File(path);
-		if(f.exists())
+		if (f.exists())
 			f.delete();
 
 		BTree<Integer, Integer> tree = getInstance();
@@ -56,19 +56,17 @@ public class BTreeTest {
 		return tree;
 	}
 
-		private static SecureRandom srand(){
-		if(srand == null)
+	private static SecureRandom srand() {
+		if (srand == null)
 			srand = new SecureRandom();
 
 		return srand;
 	}
 
-	public BTree<Integer, Integer> getInstance(){
+	public BTree<Integer, Integer> getInstance() {
 		return injector.getInstance(Key.get(new TypeLiteral<BTree<Integer, Integer>>() {
 		}));
 	}
-
-
 
 
 	public Integer createRandomKey() {
@@ -76,13 +74,12 @@ public class BTreeTest {
 	}
 
 
-
 	public Integer createRandomValue() {
 		// for String:
 		// return (new BigInteger(130, srand())).toString(32);
 
-        // for Integer
-        return srand().nextInt();
+		// for Integer
+		return srand().nextInt();
 	}
 
 
@@ -95,18 +92,19 @@ public class BTreeTest {
 		return Integer.MIN_VALUE;
 	}
 
-	@BeforeMethod
+	@BeforeMethod(alwaysRun = true)
 	public void setUp() throws IOException {
 		this.tree = createNewMultiMap();
-			key1 = createRandomKey();
-		do{
+
+		key1 = createRandomKey();
+		do {
 			key2 = createRandomKey();
 		} while (key2.equals(key1));
 		value1 = createRandomValue();
 		value2 = createRandomValue();
 	}
 
-	protected void simpleTests(){
+	protected void simpleTests() {
 		int numOfEntries = getMultiMap().getNumberOfEntries();
 
 		getMultiMap().add(key1, value2);
@@ -120,21 +118,19 @@ public class BTreeTest {
 		assertEquals(numOfEntries, getMultiMap().getNumberOfEntries());
 	}
 
-	protected void fill(int size){
-		for(int i = 0; i < size; i++){
+	protected void fill(int size) {
+		for (int i = 0; i < size; i++) {
 			getMultiMap().add(createRandomKey(), createRandomValue());
 		}
 	}
 
-	/**
-	 * @return the multiMap
-	 */
+	/** @return the multiMap */
 	public BTree<Integer, Integer> getMultiMap() {
 		return tree;
 	}
 
 	@Test
-	public void shouldBeEmptyAfterCreation(){
+	public void shouldBeEmptyAfterCreation() {
 		assertEquals(0, getMultiMap().getNumberOfEntries());
 	}
 
@@ -186,7 +182,7 @@ public class BTreeTest {
 	}
 
 	@Test
-	public void removeWithValueArgumentShouldRemoveOnlyThisValue(){
+	public void removeWithValueArgumentShouldRemoveOnlyThisValue() {
 		key1 = createMaxKey();
 		key2 = createMinKey();
 		removeWithValueArgumentShouldRemoveOnlyThisValue(key1, key2);
@@ -222,7 +218,7 @@ public class BTreeTest {
 		assertEquals(0, getMultiMap().get(key1).size());
 	}
 
-	@Test public void shouldWorkOnTheEdgeToCreateNewInnerNode(){
+	@Test public void shouldWorkOnTheEdgeToCreateNewInnerNode() {
 		int size = 170;
 		fill(size);
 
@@ -230,7 +226,7 @@ public class BTreeTest {
 		simpleTests();
 	}
 
-	@Test public void iterator(){
+	@Test public void iterator() {
 		Integer val;
 
 		key1 = createMinKey();
