@@ -105,80 +105,75 @@ public class BTreeTest {
 	}
 
 	protected void simpleTests() {
-		int numOfEntries = getMultiMap().getNumberOfEntries();
+		int numOfEntries = getTree().getNumberOfEntries();
 
-		getMultiMap().add(key1, value2);
-		assertTrue(getMultiMap().containsKey(key1));
-		assertEquals(value2, getMultiMap().get(key1).get(0));
-		assertEquals(numOfEntries + 1, getMultiMap().getNumberOfEntries());
+		getTree().add(key1, value2);
+		assertTrue(getTree().containsKey(key1));
+		assertEquals(value2, getTree().get(key1).get(0));
+		assertEquals(numOfEntries + 1, getTree().getNumberOfEntries());
 
-		getMultiMap().remove(key1);
-		assertFalse(getMultiMap().containsKey(key1));
-		assertEquals(0, getMultiMap().get(key1).size());
-		assertEquals(numOfEntries, getMultiMap().getNumberOfEntries());
+		getTree().remove(key1);
+		assertFalse(getTree().containsKey(key1));
+		assertEquals(0, getTree().get(key1).size());
+		assertEquals(numOfEntries, getTree().getNumberOfEntries());
 	}
 
 	protected void fill(int size) {
 		for (int i = 0; i < size; i++) {
-			getMultiMap().add(createRandomKey(), createRandomValue());
+			getTree().add(createRandomKey(), createRandomValue());
 		}
-	}
-
-	/** @return the multiMap */
-	public BTree<Integer, Integer> getMultiMap() {
-		return tree;
 	}
 
 	@Test
 	public void shouldBeEmptyAfterCreation() {
-		assertEquals(0, getMultiMap().getNumberOfEntries());
+		assertEquals(0, getTree().getNumberOfEntries());
 	}
 
 	@Test
 	public void shouldContainAddedEntries() {
-		getMultiMap().add(key1, value1);
-		assertTrue(getMultiMap().containsKey(key1));
-		assertEquals(1, getMultiMap().get(key1).size());
-		assertEquals(value1, getMultiMap().get(key1).get(0));
-		assertEquals(1, getMultiMap().getNumberOfEntries());
+		getTree().add(key1, value1);
+		assertTrue(getTree().containsKey(key1));
+		assertEquals(1, getTree().get(key1).size());
+		assertEquals(value1, getTree().get(key1).get(0));
+		assertEquals(1, getTree().getNumberOfEntries());
 
-		getMultiMap().add(key1, value2);
-		assertTrue(getMultiMap().containsKey(key1));
-		assertEquals(2, getMultiMap().get(key1).size());
-		assertTrue(getMultiMap().get(key1).contains(value1));
-		assertTrue(getMultiMap().get(key1).contains(value2));
-		assertEquals(2, getMultiMap().getNumberOfEntries());
+		getTree().add(key1, value2);
+		assertTrue(getTree().containsKey(key1));
+		assertEquals(2, getTree().get(key1).size());
+		assertTrue(getTree().get(key1).contains(value1));
+		assertTrue(getTree().get(key1).contains(value2));
+		assertEquals(2, getTree().getNumberOfEntries());
 
-		getMultiMap().add(key2, value2);
-		assertTrue(getMultiMap().containsKey(key2));
-		assertEquals(1, getMultiMap().get(key2).size());
-		assertTrue(getMultiMap().get(key1).contains(value2));
-		assertTrue(getMultiMap().get(key1).contains(value1));
-		assertTrue(getMultiMap().get(key1).size() == 2);
-		assertEquals(3, getMultiMap().getNumberOfEntries());
+		getTree().add(key2, value2);
+		assertTrue(getTree().containsKey(key2));
+		assertEquals(1, getTree().get(key2).size());
+		assertTrue(getTree().get(key1).contains(value2));
+		assertTrue(getTree().get(key1).contains(value1));
+		assertTrue(getTree().get(key1).size() == 2);
+		assertEquals(3, getTree().getNumberOfEntries());
 	}
 
 	@Test
 	public void shouldReturnEmptyArrayIfKeyNotFound() {
-		assertEquals(0, getMultiMap().get(key1).size());
+		assertEquals(0, getTree().get(key1).size());
 	}
 
 	@Test
 	public void shouldBeAbleToRemoveInsertedEntries() {
-		getMultiMap().add(key1, value1);
-		assertTrue(getMultiMap().containsKey(key1));
-		getMultiMap().remove(key1);
-		assertFalse(getMultiMap().containsKey(key1));
-		assertEquals(0, getMultiMap().getNumberOfEntries());
+		getTree().add(key1, value1);
+		assertTrue(getTree().containsKey(key1));
+		getTree().remove(key1);
+		assertFalse(getTree().containsKey(key1));
+		assertEquals(0, getTree().getNumberOfEntries());
 	}
 
 	@Test
 	public void clearShouldRemoveAllElements() {
-		getMultiMap().add(key1, value1);
-		getMultiMap().add(key2, value2);
-		assertEquals(2, getMultiMap().getNumberOfEntries());
-		getMultiMap().clear();
-		assertEquals(0, getMultiMap().getNumberOfEntries());
+		getTree().add(key1, value1);
+		getTree().add(key2, value2);
+		assertEquals(2, getTree().getNumberOfEntries());
+		getTree().clear();
+		assertEquals(0, getTree().getNumberOfEntries());
 	}
 
 	@Test
@@ -186,43 +181,43 @@ public class BTreeTest {
 		key1 = createMaxKey();
 		key2 = createMinKey();
 		removeWithValueArgumentShouldRemoveOnlyThisValue(key1, key2);
-		getMultiMap().clear();
+		getTree().clear();
 		removeWithValueArgumentShouldRemoveOnlyThisValue(key2, key1);
 	}
 
 	public void removeWithValueArgumentShouldRemoveOnlyThisValue(Integer key1, Integer key2) {
-		getMultiMap().add(key1, value1);
-		getMultiMap().add(key1, value2);
-		getMultiMap().add(key2, value2);
+		getTree().add(key1, value1);
+		getTree().add(key1, value2);
+		getTree().add(key2, value2);
 
-		assertEquals(3, getMultiMap().getNumberOfEntries());
-		assertEquals(2, getMultiMap().get(key1).size());
-		assertEquals(1, getMultiMap().get(key2).size());
+		assertEquals(3, getTree().getNumberOfEntries());
+		assertEquals(2, getTree().get(key1).size());
+		assertEquals(1, getTree().get(key2).size());
 
-		getMultiMap().remove(key1, value2);
-		assertEquals(2, getMultiMap().getNumberOfEntries());
-		assertEquals(1, getMultiMap().get(key1).size());
-		assertEquals(value1, getMultiMap().get(key1).get(0));
-		assertEquals(value2, getMultiMap().get(key2).get(0));
+		getTree().remove(key1, value2);
+		assertEquals(2, getTree().getNumberOfEntries());
+		assertEquals(1, getTree().get(key1).size());
+		assertEquals(value1, getTree().get(key1).get(0));
+		assertEquals(value2, getTree().get(key2).get(0));
 	}
 
 	@Test
 	public void removeWithOnlyKeyArgumentShouldRemoveAllValues() {
-		getMultiMap().add(key1, value1);
-		getMultiMap().add(key1, value2);
-		getMultiMap().add(key2, value2);
+		getTree().add(key1, value1);
+		getTree().add(key1, value2);
+		getTree().add(key2, value2);
 
-		assertEquals(3, getMultiMap().getNumberOfEntries());
-		getMultiMap().remove(key1);
-		assertEquals(1, getMultiMap().getNumberOfEntries());
-		assertEquals(0, getMultiMap().get(key1).size());
+		assertEquals(3, getTree().getNumberOfEntries());
+		getTree().remove(key1);
+		assertEquals(1, getTree().getNumberOfEntries());
+		assertEquals(0, getTree().get(key1).size());
 	}
 
 	@Test public void shouldWorkOnTheEdgeToCreateNewInnerNode() {
 		int size = 170;
 		fill(size);
 
-		assertEquals(size, getMultiMap().getNumberOfEntries());
+		assertEquals(size, getTree().getNumberOfEntries());
 		simpleTests();
 	}
 
@@ -232,11 +227,11 @@ public class BTreeTest {
 		key1 = createMinKey();
 		key2 = createMaxKey();
 
-		getMultiMap().add(key1, value1);
-		getMultiMap().add(key1, value2);
-		getMultiMap().add(key2, value2);
+		getTree().add(key1, value1);
+		getTree().add(key1, value2);
+		getTree().add(key2, value2);
 
-		Iterator<Integer> i = getMultiMap().getIterator();
+		Iterator<Integer> i = getTree().getIterator();
 		assertTrue(i.hasNext());
 		val = i.next();
 		assertTrue(val.equals(value1) || val.equals(value2));
@@ -265,7 +260,7 @@ public class BTreeTest {
 
 	private void shouldBeAbleToOpenAndLoad(Integer key1, Integer key2) throws IOException {
 
-		BTree<Integer, Integer> tree = (BTree<Integer, Integer>) getMultiMap();
+		BTree<Integer, Integer> tree = (BTree<Integer, Integer>) getTree();
 
 		tree.initialize();
 		tree.add(key1, value1);
@@ -285,7 +280,7 @@ public class BTreeTest {
 
 		fill(size);
 
-		assertEquals(size, getMultiMap().getNumberOfEntries());
+		assertEquals(size, getTree().getNumberOfEntries());
 		key1 = createMaxKey();
 		simpleTests();
 		key1 = createMinKey();
@@ -304,7 +299,7 @@ public class BTreeTest {
 		int size = 100000;
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < size; i++) {
-			getMultiMap().add(key, val);
+			getTree().add(key, val);
 		}
 
 		getTree().sync();
@@ -322,6 +317,6 @@ public class BTreeTest {
 	}
 
 	private BTree<Integer, Integer> getTree() {
-		return (BTree<Integer, Integer>) getMultiMap();
+		return tree;
 	}
 }
