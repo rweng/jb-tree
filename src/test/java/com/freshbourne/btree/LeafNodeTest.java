@@ -16,6 +16,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.util.Iterator;
@@ -54,7 +55,7 @@ public class LeafNodeTest {
 		leafInt = lpmInt.createPage();
 	}
 
-	@org.testng.annotations.Test public void shouldBeAbleToInsertAndGet() {
+	@Test public void shouldBeAbleToInsertAndGet() {
 		leafStr.insert(key1, value1);
 		assertTrue(leafStr.containsKey(key1));
 		assertEquals(1, leafStr.getNumberOfEntries());
@@ -62,7 +63,7 @@ public class LeafNodeTest {
 		assertEquals(value1, leafStr.get(key1).get(0));
 	}
 
-	@org.testng.annotations.Test public void shouldBeAbleToGetLastKeyAndPointer() {
+	@Test public void shouldBeAbleToGetLastKeyAndPointer() {
 		leafStr.insert(key1, value1);
 		assertNotNull(leafStr.getLastLeafKey());
 		assertNotNull(leafStr.getLastLeafKeySerialized());
@@ -72,7 +73,7 @@ public class LeafNodeTest {
 		assertNotNull(leafStr.getLastLeafKeySerialized());
 	}
 
-	@org.testng.annotations.Test public void shouldAlwaysWorkAfterReload() {
+	@Test public void shouldAlwaysWorkAfterReload() {
 		for (int i = 0; i < 5; i++) {
 			leafStr.insert(key1, value1);
 		}
@@ -84,7 +85,7 @@ public class LeafNodeTest {
 
 	}
 
-	@org.testng.annotations.Test public void shouldAtSomePointReturnAValidAdjustmentAction() {
+	@Test public void shouldAtSomePointReturnAValidAdjustmentAction() {
 		AdjustmentAction<Integer, String> action;
 		do {
 			action = leafStr.insert(key1, value1);
@@ -123,7 +124,7 @@ public class LeafNodeTest {
 
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void iterators() {
 		fillLeaf(leafInt, 10);
 
@@ -166,7 +167,7 @@ public class LeafNodeTest {
 		}
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void shouldContainAddedEntries() {
 		leafStr.insert(key1, value1);
 		assertTrue(leafStr.containsKey(key1));
@@ -190,7 +191,7 @@ public class LeafNodeTest {
 		assertEquals(3, leafStr.getNumberOfEntries());
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void removeWithValueArgumentShouldRemoveOnlyThisValue() {
 		leafStr.insert(key1, value1);
 		leafStr.insert(key1, value2);
@@ -204,7 +205,7 @@ public class LeafNodeTest {
 	}
 
 
-	@org.testng.annotations.Test
+	@Test
 	public void prependEntriesShouldWork() {
 		LeafNode<Integer, String> leaf2 = lpmStr.createPage();
 
