@@ -217,8 +217,10 @@ public class LeafNodeTest {
 			totalInserted++;
 		}
 
+		// in testPrepend, one entry is inserted
 		testPrepend(leafStr, leaf2);
 		totalInserted++;
+
 		assertEquals(totalInserted, leafStr.getNumberOfEntries() + leaf2.getNumberOfEntries());
 
 		// should work again, when we have to actually move some entries in leaf2
@@ -235,6 +237,7 @@ public class LeafNodeTest {
 
 	}
 
+	/** in testPrepend, one entry is inserted* */
 	private void testPrepend(LeafNode<Integer, String> leaf1, LeafNode<Integer, String> leaf2) {
 		leaf1.setNextLeafId(leaf2.getId());
 
