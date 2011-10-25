@@ -7,8 +7,9 @@
  *
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
+package com.freshbourne.serializer;
 
+import com.freshbourne.io.PagePointer;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.PagePointSerializer;
 import org.testng.Assert;

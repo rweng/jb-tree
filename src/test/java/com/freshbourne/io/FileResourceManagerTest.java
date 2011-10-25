@@ -23,7 +23,7 @@ import java.util.List;
 
 import static org.testng.Assert.*;
 
-public class FileResourceManagerSpec {
+public class FileResourceManagerTest {
 	
 	private final static String filePath = "/tmp/frm_test";
 	private final File file = new File(filePath);

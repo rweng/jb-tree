@@ -19,7 +19,7 @@ import java.nio.ByteBuffer;
 
 import static org.testng.Assert.*;
 
-public class DynamicDataPageSpec {
+public class DynamicDataPageTest {
 	
 	private DynamicDataPage<String> page;
 	
