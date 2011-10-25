@@ -14,6 +14,8 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.jcs.JCS;
+import org.apache.jcs.access.exception.CacheException;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,14 +29,16 @@ import java.util.Map;
 
 @Singleton
 public class FileResourceManager implements ResourceManager {
-	private       RandomAccessFile      handle;
-	private final File                  file;
-	private final int                   pageSize;
-	private       FileLock              fileLock;
-	private       FileChannel           ioChannel;
-	private       ResourceHeader        header;
-	private       Map<Integer, RawPage> cache;
-	private       boolean               doLock;
+	private static final String cacheRegionName = "page";
+
+	private       RandomAccessFile handle;
+	private final File             file;
+	private final int              pageSize;
+	private       FileLock         fileLock;
+	private       FileChannel      ioChannel;
+	private       ResourceHeader   header;
+	private       JCS              cache;
+	private       boolean          doLock;
 
 	private static Log LOG = LogFactory.getLog(FileResourceManager.class);
 
@@ -87,12 +91,18 @@ public class FileResourceManager implements ResourceManager {
 			header.load();
 		}
 
-		this.cache = new SoftHashMap<Integer, RawPage>();
+		// initialize the cache
+		try {
+			cache = JCS.getInstance(cacheRegionName);
+		} catch (CacheException e) {
+			LOG.error("Problem initializing cache for region name ["
+					+ cacheRegionName + "].", e);
+		}
 	}
 
 	@Override
 	public void writePage(RawPage page) {
-		if(LOG.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 			LOG.debug("writing page to disk: " + page.id());
 		ensureOpen();
 		ensurePageExists(page.id());
@@ -118,11 +128,10 @@ public class FileResourceManager implements ResourceManager {
 
 		RawPage result;
 
-		if (cache.containsKey(pageId)) {
-			result = cache.get(pageId);
-			if (result != null)
-				return result;
-		}
+		result = (RawPage) cache.get(pageId);
+		if (result != null)
+			return result;
+
 
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 
@@ -134,7 +143,12 @@ public class FileResourceManager implements ResourceManager {
 		}
 
 		result = new RawPage(buf, pageId, this);
-		cache.put(pageId, result);
+		try {
+			cache.put(pageId, result);
+		} catch (CacheException e) {
+			LOG.error("Problem putting "
+					+ result + " in the cache, for key " + pageId, e);
+		}
 
 		return result;
 	}
@@ -153,11 +167,19 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void close() throws IOException {
-		if (header != null) {
-			for (RawPage r : cache.values()) {
-				r.sync();
+		if(!isOpen())
+			return;
+		
+		if (cache != null) {
+			sync();
+			try {
+				cache.clear();
+			} catch (CacheException e) {
+				e.printStackTrace();
 			}
+		}
 
+		if (header != null) {
 			header = null;
 		}
 
@@ -259,7 +281,11 @@ public class FileResourceManager implements ResourceManager {
 			System.exit(1);
 		}
 
-		cache.put(result.id(), result);
+		try {
+			cache.put(result.id(), result);
+		} catch (CacheException e) {
+			e.printStackTrace();
+		}
 		return result;
 	}
 
@@ -295,7 +321,11 @@ public class FileResourceManager implements ResourceManager {
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 		RawPage result = new RawPage(buf, header.generateId(), this);
 
-		cache.put(result.id(), result);
+		try {
+			cache.put(result.id(), result);
+		} catch (CacheException e) {
+			e.printStackTrace();
+		}
 		return result;
 	}
 
@@ -305,7 +335,13 @@ public class FileResourceManager implements ResourceManager {
 	@Override
 	public void removePage(int pageId) {
 
-		cache.remove(pageId);
+		try {
+			cache.remove(pageId);
+		} catch (CacheException e) {
+			e.printStackTrace();
+		}
+
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -331,11 +367,10 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void sync() {
-		// ensure that the cache is not altered during our writeout
-		synchronized (cache) {
-			for (RawPage p : cache.values()) {
-				p.sync();
-			}
+		ensureOpen();
+		for (Object pageId : cache.getGroupKeys(cacheRegionName)) {
+			RawPage rawPage = (RawPage) cache.get(pageId);
+			rawPage.sync();
 		}
 	}
 

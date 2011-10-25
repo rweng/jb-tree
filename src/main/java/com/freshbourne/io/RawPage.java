@@ -13,10 +13,11 @@ package com.freshbourne.io;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 
 
-public class RawPage {
+public class RawPage implements Serializable {
 
     private ByteBuffer buffer;
     private int id;

@@ -18,6 +18,11 @@ import java.lang.ref.*;
 import java.util.*;
 import java.io.Serializable;
 
+/**
+ * @deprecated 
+ * @param <K>
+ * @param <V>
+ */
 public class SoftHashMap<K, V> extends AbstractMap<K, V>
 		implements Serializable {
 	/** The internal HashMap that will hold the SoftReference. */

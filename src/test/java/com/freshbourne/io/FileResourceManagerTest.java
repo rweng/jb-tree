@@ -10,6 +10,8 @@
 
 package com.freshbourne.io;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -20,6 +22,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static org.testng.Assert.*;
 
@@ -29,6 +32,7 @@ public class FileResourceManagerTest {
 	private final File file = new File(filePath);
 	private FileResourceManager rm;
 	private RawPage page;
+	private static final Log LOG = LogFactory.getLog(FileResourceManagerTest.class);
 
 	
 	protected FileResourceManager createNewOpenResourceManager() {
@@ -227,5 +231,15 @@ public class FileResourceManagerTest {
 			Integer id = ids.get(0);
 			assertEquals(id, rm.getPage(id).id());
 		}
+	}
+
+	@Test(groups = "slow")
+	public void ensureNoHeapOverflowExeptionIsThrown() throws IOException {
+		int count = 100000;
+		for(int i = 0;i<count;i++){
+				rm.createPage();
+		}
+		rm.close();
+		assertTrue(rm.getFile().getTotalSpace() > count * PageSize.DEFAULT_PAGE_SIZE);
 	}
 }
