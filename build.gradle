@@ -19,6 +19,10 @@ jar {
 	}
 }
 
+test{
+    useTestNG()
+}
+
 sourceSets {
 	main {
 		java {
@@ -48,7 +52,7 @@ dependencies {
 
 	compile "log4j:log4j:1.2.16@jar"
 	
-	testCompile "junit:junit:4.8.2@jar"
+	// testCompile "junit:junit:4.8.2@jar"
     testCompile "org.testng:testng:6.3@jar"
     testCompile "org.mockito:mockito-all:1.8.5@jar"
 	

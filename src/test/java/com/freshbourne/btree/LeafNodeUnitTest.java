@@ -19,7 +19,7 @@ import org.testng.annotations.BeforeMethod;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.*;
 import static org.mockito.Mockito.verify;
 
 /**

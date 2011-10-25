@@ -12,7 +12,7 @@ import org.testng.annotations.BeforeMethod;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class MultiMapTestBase<K,V> {
 	

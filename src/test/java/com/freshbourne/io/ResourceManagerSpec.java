@@ -7,7 +7,6 @@
  */
 package com.freshbourne.io;
 
-import org.junit.Ignore;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
@@ -16,7 +15,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public abstract class ResourceManagerSpec {
 	private ResourceManager rm;

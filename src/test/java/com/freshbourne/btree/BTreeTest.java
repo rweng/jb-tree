@@ -10,12 +10,11 @@ package com.freshbourne.btree;
 import com.freshbourne.multimap.MultiMapSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Ignore;
 
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 public class BTreeTest extends MultiMapSpec<Integer, Integer> {
 
@@ -71,7 +70,7 @@ public class BTreeTest extends MultiMapSpec<Integer, Integer> {
 		simpleTests();
 	}
 
-	@org.testng.annotations.Test @Ignore("does not work yet")
+	@org.testng.annotations.Test(enabled = false)
 	public void shouldNotHaveTooMuchOverhead() {
 		int key = getProvider().createRandomKey();
 		int val = getProvider().createRandomValue();

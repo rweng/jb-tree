@@ -18,7 +18,7 @@ import org.testng.annotations.BeforeMethod;
 import java.io.File;
 import java.util.Iterator;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class LeafNodeTest {
 

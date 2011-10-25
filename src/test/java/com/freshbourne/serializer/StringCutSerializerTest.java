@@ -2,7 +2,7 @@ package com.freshbourne.serializer;
 
 import org.testng.annotations.BeforeMethod;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class StringCutSerializerTest {
 	private static final StringCutSerializer serializer;

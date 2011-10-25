@@ -25,9 +25,8 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
-// import static org.testng.AssertJUnit.*;
 
 public class BTreeSmallTest {
 
@@ -510,7 +509,7 @@ public class BTreeSmallTest {
 
 		Collections.sort(keys, IntegerComparator.INSTANCE);
 		for (int i = 0; i < realCount; i++) {
-			assertEquals("size problem with key " + i, 1, tree.get(keys.get(i)).size());
+			assertEquals(1, tree.get(keys.get(i)).size(), "size problem with key " + i);
 			assertEquals(keys.get(i), tree.get(keys.get(i)).get(0));
 		}
 
@@ -522,7 +521,7 @@ public class BTreeSmallTest {
 		tree.checkStructure();
 
 		for (int i = 0; i < realCount; i++) {
-			assertEquals("size problem with key " + i, 1, tree.get(keys.get(i)).size());
+			assertEquals(1, tree.get(keys.get(i)).size(), "size problem with key " + i);
 			assertEquals(keys.get(i), tree.get(keys.get(i)).get(0));
 		}
 	}
@@ -544,8 +543,8 @@ public class BTreeSmallTest {
 		tree.checkStructure();
 
 		for (int i = 0; i < count; i++) {
-			assertTrue("tree doesn't have key " + i, tree.get(kvs[i].getKey()).size() > 0);
-			assertEquals("size problem with key " + i, 1, tree.get(kvs[i].getKey()).size());
+			assertTrue(tree.get(kvs[i].getKey()).size() > 0, "tree doesn't have key " + i);
+			assertEquals(1, tree.get(kvs[i].getKey()).size(), "size problem with key " + i);
 			assertEquals(kvs[i].getValue(), tree.get(kvs[i].getKey()).get(0));
 		}
 	}

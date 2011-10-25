@@ -11,7 +11,7 @@ import org.testng.annotations.BeforeMethod;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class SoftReferenceCacheMapTest {
 

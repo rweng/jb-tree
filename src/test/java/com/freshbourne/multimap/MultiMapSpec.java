@@ -10,7 +10,7 @@ package com.freshbourne.multimap;
 
 import java.util.Iterator;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public abstract class MultiMapSpec<K, V> extends MultiMapTestBase<K,V> {
 	
