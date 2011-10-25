@@ -11,6 +11,7 @@ package com.freshbourne.io;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -23,12 +24,12 @@ public abstract class ResourceManagerSpec {
 	private ResourceManager rm;
 	private RawPage page;
 	
-	@BeforeMethod
+	@BeforeMethod(alwaysRun = true)
 	public void setUp() throws IOException {
 		rm = createNewOpenResourceManager();
 	}
 	
-	@AfterMethod
+	@AfterMethod(alwaysRun = true)
 	public void tearDown() throws IOException{
 		rm.close();
 	}
@@ -37,7 +38,7 @@ public abstract class ResourceManagerSpec {
 	
 // ******** TESTS **********
 	
-	@org.testng.annotations.Test
+	@Test
 	public void shouldBeEmptyAtFirst() throws IOException{
 		assertTrue(rm != null);
 		assertEquals(PageSize.DEFAULT_PAGE_SIZE, rm.getPageSize());
@@ -45,24 +46,24 @@ public abstract class ResourceManagerSpec {
 	}
 	
 	
-	@org.testng.annotations.Test(expectedExceptions = IllegalStateException.class)
+	@Test(expectedExceptions = IllegalStateException.class)
 	public void shouldThrowExceptionIfResourceClosed() throws IOException{
 		rm.close();
 		rm.createPage();
 	}
 	
-	@org.testng.annotations.Test(expectedExceptions = PageNotFoundException.class)
+	@Test(expectedExceptions = PageNotFoundException.class)
 	public void shouldThrowExceptionIfPageToWriteDoesNotExist() throws IOException{
         page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 3423);
         rm.writePage(page);
 	}
 	
-	@org.testng.annotations.Test
+	@Test
 	public void shouldGenerateDifferentIdsForEachPage() throws IOException{
 		assertTrue(rm.createPage().id() != rm.createPage().id());
 	}
 	
-	@org.testng.annotations.Test
+	@Test
 	public void shouldReadWrittenPages() throws IOException{
 		page = rm.createPage();
 		page.bufferForWriting(0).putInt(1234);
@@ -71,14 +72,14 @@ public abstract class ResourceManagerSpec {
 		assertEquals(rm.getPage(page.id()).bufferForWriting(0), page.bufferForWriting(0));
 	}
 	
-	@org.testng.annotations.Test
+	@Test
 	public void addingAPageShouldIncreaseNumberOfPages() throws IOException{
 		int num = rm.numberOfPages();
 		rm.createPage();
 		assertEquals(num + 1, rm.numberOfPages());
 	}
 	
-	@org.testng.annotations.Test
+	@Test
 	public void shouldBeAbleToReadPagesAfterReopen() throws IOException{
 		assertEquals(0, rm.numberOfPages());
 		page = rm.createPage();
@@ -103,13 +104,13 @@ public abstract class ResourceManagerSpec {
 		assertEquals(longToCompare, rm.getPage(page.id()).bufferForWriting(0).getLong());
 	}
 	
-	@org.testng.annotations.Test(expectedExceptions = WrongPageSizeException.class)
+	@Test(expectedExceptions = WrongPageSizeException.class)
 	public void shouldThrowExceptionIfWrongPageSize() throws IOException{
 		page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE + 1), 1);
         rm.addPage(page);
 	}
 	
-	@org.testng.annotations.Test(enabled = false)
+	@Test(enabled = false)
 	public void shouldBeAbleToRemovePages() throws Exception{
 		RawPage p1 = rm.createPage();
 		RawPage p2 = rm.createPage();
@@ -130,7 +131,7 @@ public abstract class ResourceManagerSpec {
 		assertEquals(i - 1, rm.numberOfPages());
 	}
 	
-	@org.testng.annotations.Test
+	@Test(groups = "slow")
 	public void shouldBeAbleToCreateAMassiveNumberOfPages(){
 		List<Integer> ids = new ArrayList<Integer>();
 		RawPage p1 = rm.createPage();
@@ -172,6 +173,6 @@ public abstract class ResourceManagerSpec {
 	/**
 	 * implement the test for Sync
 	 */
-	@org.testng.annotations.Test public abstract void testSync();
+	@Test public abstract void testSync();
 	
 }
