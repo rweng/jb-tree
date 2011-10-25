@@ -425,10 +425,11 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	public void clear() {
 		ensureValid();
 
-		root.destroy();
-
+		// just set another root, the other pages stay in the file
+		LOG.info("BTree#clear() is not fully implemented yet because" +
+				" it is not possible to remove entries from the FileResourceManager");
 		root = leafPageManager.createPage();
-		numberOfEntries = 0;
+		setNumberOfEntries(0);
 	}
 
 	/* (non-Javadoc)
@@ -564,7 +565,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		private List<Range<K>> cleanRanges(List<Range<K>> ranges) {
 			List<Range<K>> cleaned = new LinkedList<Range<K>>();
 
-			if(ranges == null){
+			if (ranges == null) {
 				cleaned.add(new Range());
 				return cleaned;
 			}
