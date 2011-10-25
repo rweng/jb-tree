@@ -12,13 +12,11 @@ package com.freshbourne.io;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.util.Map;
 
 public abstract class AbstractPageManager<T extends ComplexPage> implements PageManager<T> {
 
 	private static final Logger LOG = Logger.getLogger(AbstractPageManager.class);
 	private final PageManager<RawPage> rpm;
-	private Map<Integer, T> cache = new SoftHashMap<Integer, T>();
 
 	protected AbstractPageManager(PageManager<RawPage> rpm) {
 		this.rpm = rpm;
@@ -39,16 +37,10 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	public T getPage(int id) {
 		T result;
 
-		if (cache.containsKey(id)) {
-			result = cache.get(id);
-			return result;
-		}
-
 		result = createObjectPage(rpm.getPage(id));
 
 		try {
 			result.load();
-			cache.put(id, result);
 		} catch (IOException e) {
 			// if the page cannot be loaded, something is off.
 			// we should only be able to fetch initialized pages from the rpm.
@@ -76,8 +68,6 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 				throw new RuntimeException(e);
 			}
 
-		cache.put(l.rawPage().id(), l);
-
 		if (LOG.isDebugEnabled())
 			LOG.debug("node created: type: \t" + l.getClass().getSimpleName().toString() + "\tid: " + l.rawPage().id());
 		return l;
@@ -89,7 +79,6 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		 */
 	@Override
 	public void removePage(int id) {
-		cache.remove(id);
 		rpm.removePage(id);
 
 	}
@@ -112,13 +101,9 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		if (!rpm.hasPage(id))
 			return false;
 
-		if (cache.containsKey(id))
-			return true;
-
 		try {
 			T page = createObjectPage(rpm.getPage(id));
 			page.load();
-			cache.put(page.rawPage().id(), page);
 		} catch (Exception e) {
 			return false;
 		}

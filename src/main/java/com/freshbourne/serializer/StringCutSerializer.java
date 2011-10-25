@@ -10,19 +10,12 @@
 
 package com.freshbourne.serializer;
 
-import com.freshbourne.io.SoftHashMap;
-
 import java.nio.ByteBuffer;
 
 public class StringCutSerializer implements FixLengthSerializer<String, byte[]> {
-	private static SoftHashMap<Integer, StringCutSerializer> cache = new SoftHashMap<Integer, StringCutSerializer>();
 
 	public static StringCutSerializer get(Integer size) {
-		if (cache.containsKey(size))
-			return cache.get(size);
-
 		StringCutSerializer s = new StringCutSerializer(size);
-		cache.put(size, s);
 		return s;
 	}
 
