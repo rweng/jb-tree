@@ -10,6 +10,8 @@
 
 package com.freshbourne.io;
 
+import org.testng.annotations.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -20,7 +22,6 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 	
 	private final static String filePath = "/tmp/frm_test";
 	private final File file = new File(filePath);
-	private RawPage page;
 	private FileResourceManager rm;
 
 	/* (non-Javadoc)
@@ -48,7 +49,7 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 		return rm;
 	}
 	
-	@org.testng.annotations.Test
+	@Test
 	public void shouldWriteOutHeaderCorrectly() throws IOException{
 		rm = (FileResourceManager) createNewOpenResourceManager();
 		rm.createPage();
@@ -63,7 +64,7 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.ResourceManagerSpec#testSync()
 	 */
-	@Override @org.testng.annotations.Test
+	@Override @Test
 	public void testSync() {
 		rm = (FileResourceManager) createNewOpenResourceManager();
 		RawPage p = rm.createPage();
@@ -90,7 +91,7 @@ public class FileResourceManagerSpec extends ResourceManagerSpec {
 		}
 	}
 
-	@org.testng.annotations.Test(expectedExceptions = IOException.class)
+	@Test(expectedExceptions = IOException.class)
 	public void shouldThrowExceptionIfFileIsLocked() throws IOException {
 		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE, true);
 		rm.open();

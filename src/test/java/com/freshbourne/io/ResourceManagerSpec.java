@@ -151,10 +151,6 @@ public abstract class ResourceManagerSpec {
 			Integer id = ids.get(0);
 			assertEquals(id, rm.getPage(id).id());
 		}
-		
-		
-		
-		
 	}
 
 	

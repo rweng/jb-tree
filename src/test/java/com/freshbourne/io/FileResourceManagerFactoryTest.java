@@ -13,6 +13,7 @@ package com.freshbourne.io;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,18 +35,18 @@ public class FileResourceManagerFactoryTest {
         factory = injector.getInstance(FileResourceManagerFactory.class);
     }
 
-    @org.testng.annotations.Test
+    @Test
     public void creation(){
         assertNotNull(factory);
     }
 
-    @org.testng.annotations.Test
+    @Test
     public void factoryIsSingleton(){
         FileResourceManagerFactory factory2 = injector.getInstance(FileResourceManagerFactory.class);
         assertEquals(factory, factory2);
     }
 
-    @org.testng.annotations.Test
+    @Test
     public void get() throws IOException {
         FileResourceManager rm = factory.get(new File("/tmp/factorytestFile"), false);
         FileResourceManager rm2 = factory.get(new File("/tmp/factorytestFile"), false);
@@ -57,7 +58,7 @@ public class FileResourceManagerFactoryTest {
         assertNotSame(rm, rm3);
     }
 
-    @org.testng.annotations.Test(expectedExceptions = IOException.class)
+    @Test(expectedExceptions = IOException.class)
     public void shouldThrowAnExceptionIfFileDirDoesNotExist() throws IOException {
         factory.get(new File("/tmp/lkjsdfs/bla"), false);
     }

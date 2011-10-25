@@ -10,6 +10,7 @@
 package com.freshbourne.io;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public class SoftReferenceCacheMapTest {
 		v3 = 33;
 	}
 
-	@org.testng.annotations.Test
+	@Test
 	public void basicOperations() {
 		assertEquals(0, map.size());
 		map.put(k1, v1);
@@ -59,6 +60,7 @@ public class SoftReferenceCacheMapTest {
 	}
 
 	// dosnt work somehow, wonder how we could test this
+	@Test(enabled = false)
 	public void caching() {
 		map.put(k1, v1);
 		assertEquals(1, map.size());
