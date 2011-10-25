@@ -10,12 +10,23 @@
 
 package com.freshbourne.serializer;
 
+import com.google.common.collect.MapMaker;
+
 import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentMap;
 
 public class StringCutSerializer implements FixLengthSerializer<String, byte[]> {
+	private static ConcurrentMap<Integer, StringCutSerializer> cache = null;
 
 	public static StringCutSerializer get(Integer size) {
+		if (cache == null) {
+			cache = new MapMaker().weakValues().makeMap();
+		} else if (cache.containsKey(size)) {
+			return cache.get(size);
+		}
+
 		StringCutSerializer s = new StringCutSerializer(size);
+		cache.put(size, s);
 		return s;
 	}
 

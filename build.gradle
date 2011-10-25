@@ -54,6 +54,8 @@ dependencies {
     compile "org.apache.jcs:jcs:1.3@jar"
 
 	compile "log4j:log4j:1.2.16@jar"
+
+    compile group: 'com.google.guava', name: 'guava', version: '10.0.1'
 	
 	// testCompile "junit:junit:4.8.2@jar"
     testCompile "org.testng:testng:6.3@jar"
