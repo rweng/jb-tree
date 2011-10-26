@@ -14,6 +14,7 @@ import com.freshbourne.btree.AdjustmentAction.ACTION;
 import com.freshbourne.io.*;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.PagePointSerializer;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -77,6 +78,16 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 	public FixLengthSerializer<V, byte[]> getValueSerializer() {
 		return valueSerializer;
+	}
+
+	@VisibleForTesting
+	public LeafPageManager<K, V> getLeafPageManager() {
+		return leafPageManager;
+	}
+
+	@VisibleForTesting
+	public InnerNodeManager<K, V> getInnerNodeManager() {
+		return innerNodeManager;
 	}
 
 	static enum Header {
