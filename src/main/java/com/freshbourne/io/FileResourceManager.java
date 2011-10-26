@@ -9,15 +9,15 @@
  */
 package com.freshbourne.io;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
-import org.apache.jcs.admin.CacheElementInfo;
-import org.apache.jcs.admin.JCSAdminBean;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,23 +26,18 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import java.util.LinkedList;
-import java.util.ListIterator;
 import java.util.Map;
 
 
 @Singleton
 public class FileResourceManager implements ResourceManager {
-	private static final String cacheRegionName = "page";
-
-	private       RandomAccessFile handle;
-	private final File             file;
-	private final int              pageSize;
-	private       FileLock         fileLock;
-	private       FileChannel      ioChannel;
-	private       ResourceHeader   header;
-	private       JCS              cache;
-	private       boolean          doLock;
+	private       RandomAccessFile      handle;
+	private final File                  file;
+	private final int                   pageSize;
+	private       FileLock              fileLock;
+	private       FileChannel           ioChannel;
+	private       ResourceHeader        header;
+	private       boolean               doLock;
 
 	private static Log LOG = LogFactory.getLog(FileResourceManager.class);
 
@@ -52,9 +47,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @param file
 	 */
 	public FileResourceManager(File file) {
-		this.file = file;
-		this.pageSize = PageSize.DEFAULT_PAGE_SIZE;
-		this.doLock = false;
+		this(file, PageSize.DEFAULT_PAGE_SIZE, true);
 	}
 
 	/**
@@ -94,19 +87,11 @@ public class FileResourceManager implements ResourceManager {
 			// load header if file existed
 			header.load();
 		}
-
-		// initialize the cache
-		try {
-			cache = JCS.getInstance(cacheRegionName);
-		} catch (CacheException e) {
-			LOG.error("Problem initializing cache for region name ["
-					+ cacheRegionName + "].", e);
-		}
 	}
 
 	@Override
 	public void writePage(RawPage page) {
-		if (LOG.isDebugEnabled())
+		if(LOG.isDebugEnabled())
 			LOG.debug("writing page to disk: " + page.id());
 		ensureOpen();
 		ensurePageExists(page.id());
@@ -132,11 +117,6 @@ public class FileResourceManager implements ResourceManager {
 
 		RawPage result;
 
-		result = (RawPage) cache.get(pageId);
-		if (result != null)
-			return result;
-
-
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 
 		try {
@@ -147,13 +127,6 @@ public class FileResourceManager implements ResourceManager {
 		}
 
 		result = new RawPage(buf, pageId, this);
-		try {
-			cache.put(pageId, result);
-		} catch (CacheException e) {
-			LOG.error("Problem putting "
-					+ result + " in the cache, for key " + pageId, e);
-		}
-
 		return result;
 	}
 
@@ -171,18 +144,6 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void close() throws IOException {
-		if (!isOpen())
-			return;
-
-		if (cache != null) {
-			sync();
-			try {
-				cache.clear();
-			} catch (CacheException e) {
-				e.printStackTrace();
-			}
-		}
-
 		if (header != null) {
 			header = null;
 		}
@@ -285,11 +246,6 @@ public class FileResourceManager implements ResourceManager {
 			System.exit(1);
 		}
 
-		try {
-			cache.put(result.id(), result);
-		} catch (CacheException e) {
-			e.printStackTrace();
-		}
 		return result;
 	}
 
@@ -325,11 +281,6 @@ public class FileResourceManager implements ResourceManager {
 		ByteBuffer buf = ByteBuffer.allocate(pageSize);
 		RawPage result = new RawPage(buf, header.generateId(), this);
 
-		try {
-			cache.put(result.id(), result);
-		} catch (CacheException e) {
-			e.printStackTrace();
-		}
 		return result;
 	}
 
@@ -338,13 +289,6 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void removePage(int pageId) {
-
-		try {
-			cache.remove(pageId);
-		} catch (CacheException e) {
-			e.printStackTrace();
-		}
-
 		throw new UnsupportedOperationException();
 	}
 
@@ -371,21 +315,7 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void sync() {
-		ensureOpen();
 
-		try {
-			//TODO: research if there is another way to do this.
-			JCSAdminBean admin = new JCSAdminBean();
-			LinkedList linkedList = admin.buildElementInfo(cacheRegionName);
-			ListIterator iterator = linkedList.listIterator();
-			while (iterator.hasNext()) {
-				Integer pageId = Integer.valueOf(((CacheElementInfo) iterator.next()).getKey());
-				RawPage r = (RawPage) cache.get(pageId);
-				r.sync();
-			}
-		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
 	}
 
 	/** @return the handle */
