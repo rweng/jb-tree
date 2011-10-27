@@ -67,7 +67,7 @@ public class FileResourceManagerTest {
 		rFile.close();
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void testSync() {
 		rm = (FileResourceManager) createNewOpenResourceManager();
 		RawPage p = rm.createPage();
