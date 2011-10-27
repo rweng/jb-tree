@@ -82,4 +82,8 @@ public class CachedResourceManager implements ResourceManager {
 	@Override public void sync() {
 		rm.sync();
 	}
+
+	public ResourceManager getResourceManager() {
+		return rm;
+	}
 }

@@ -29,6 +29,9 @@ import java.nio.channels.OverlappingFileLockException;
 import java.util.Map;
 
 
+/**
+ * Writes Pages to a File. It does not cache, and Pages have to be written back manually or the changes will not be written to disk.
+ */
 @Singleton
 public class FileResourceManager implements ResourceManager {
 	private       RandomAccessFile      handle;
@@ -41,21 +44,36 @@ public class FileResourceManager implements ResourceManager {
 
 	private static Log LOG = LogFactory.getLog(FileResourceManager.class);
 
+	FileResourceManager(ResourceManagerBuilder builder){
+		this.file = builder.getFile();
+		this.pageSize = builder.getPageSize();
+		this.doLock = builder.useLock();
+	}
+
 	/**
-	 * this constructor is for manual creation.
+	 * Use Builder instead.
+	 * this constructor was for manual creation.
+	 *
+	 * TODO: remove this constructor
 	 *
 	 * @param file
+	 * @deprecated 
 	 */
 	public FileResourceManager(File file) {
 		this(file, PageSize.DEFAULT_PAGE_SIZE, true);
 	}
 
 	/**
+	 * Use Builder instead.
 	 * This is the default constructor (for Guice). It contains all required dependencies.
+	 *
+	 * TODO: remove this constructor
 	 *
 	 * @param f
 	 * @param pageSize
 	 * @param doLock
+	 *
+	 * @deprecated
 	 */
 	@Inject
 	public FileResourceManager(@ResourceFile File f, @PageSize int pageSize, @Named("doLock") boolean doLock) {

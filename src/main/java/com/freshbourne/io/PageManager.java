@@ -27,8 +27,6 @@ public interface PageManager<T> {
 	public T createPage();
 	
 	/**
-	 * IMPORTANT NOTE: A PageManager should cache so it can return the same Object here.
-	 * 
 	 * @param id of the page to be fetched
 	 * @return page with given id from resource or cache, null if page could not be found
 	 */
@@ -49,6 +47,8 @@ public interface PageManager<T> {
 	/**
 	 * forces the sync of pages to resources.
      * This is necessary because PageManager tend to cache Pages in Memory.
+	 *
+	 * Uncached Resource Managers just do nothing in here.
 	 */
 	public void sync();
 

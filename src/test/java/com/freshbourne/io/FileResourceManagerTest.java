@@ -34,6 +34,17 @@ public class FileResourceManagerTest {
 	private RawPage page;
 	private static final Log LOG = LogFactory.getLog(FileResourceManagerTest.class);
 
+
+	@BeforeMethod(alwaysRun = true)
+	public void setUp() throws IOException {
+		rm = createNewOpenResourceManager();
+	}
+
+	@AfterMethod(alwaysRun = true)
+	public void tearDown() throws IOException{
+		rm.close();
+	}
+
 	
 	protected FileResourceManager createNewOpenResourceManager() {
 		if(file.exists()){
@@ -101,17 +112,6 @@ public class FileResourceManagerTest {
 		FileResourceManager rm2 = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE, true);
 		rm2.open();
 		fail("FileResourceManager should throw an IOException if the file is already locked");
-	}
-
-
-	@BeforeMethod(alwaysRun = true)
-	public void setUp() throws IOException {
-		rm = createNewOpenResourceManager();
-	}
-
-	@AfterMethod(alwaysRun = true)
-	public void tearDown() throws IOException{
-		rm.close();
 	}
 
 

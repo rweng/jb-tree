@@ -18,13 +18,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+/**
+ * This Factory is used for easy creation of FileResourceManagers.
+ *
+ * @deprecated 
+ */
 @Singleton
 public class FileResourceManagerFactory {
     private int pageSize;
     private HashMap<File, FileResourceManager> map = new HashMap<File, FileResourceManager>();
 
     @Inject
-    FileResourceManagerFactory(@PageSize int pageSize){
+    private FileResourceManagerFactory(@PageSize int pageSize){
         this.pageSize = pageSize;
     }
 
