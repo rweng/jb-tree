@@ -285,9 +285,9 @@ public class BTreeTest {
 		fillTree(tree, 1000);
 		Iterator<Integer> iterator = tree.getIterator();
 		for (int i = 0; i < 1000; i++)
-			assertEquals(i, (int) iterator.next());
+			assertThat(iterator.next()).isEqualTo(i);
 
-		assertFalse(iterator.hasNext());
+		assertThat(iterator.hasNext()).isFalse();
 	}
 
 	@Test
