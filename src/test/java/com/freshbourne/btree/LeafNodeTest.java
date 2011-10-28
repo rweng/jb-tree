@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import static org.fest.assertions.Assertions.assertThat;
 import static org.testng.Assert.*;
 
 public class LeafNodeTest {
@@ -210,7 +211,7 @@ public class LeafNodeTest {
 
 		// fill leafStr
 		for (int i = 0; i < leafStr.getMaximalNumberOfEntries(); i++) {
-			assertNull(leafStr.insert(i, "val"));
+			assertThat(leafStr.insert(i, "val")).isNull();
 			totalInserted++;
 		}
 
@@ -218,19 +219,18 @@ public class LeafNodeTest {
 		testPrepend(leafStr, leaf2);
 		totalInserted++;
 
-		assertEquals(totalInserted, leafStr.getNumberOfEntries() + leaf2.getNumberOfEntries());
+		assertThat(leafStr.getNumberOfEntries() + leaf2.getNumberOfEntries()).isEqualTo(totalInserted);
 
 		// should work again, when we have to actually move some entries in leaf2
 		for (int i = leafStr.getNumberOfEntries(); i < leafStr
 				.getMaximalNumberOfEntries(); i++) {
-			assertNull(leafStr.insert(-1 * i, "val"));
+			assertThat(leafStr.insert(-1 * i, "val")).isNull();
 			totalInserted++;
 		}
 
 		testPrepend(leafStr, leaf2);
 		totalInserted++;
-		assertEquals(totalInserted,
-				leafStr.getNumberOfEntries() + leaf2.getNumberOfEntries());
+		assertThat(leafStr.getNumberOfEntries() + leaf2.getNumberOfEntries()).isEqualTo(totalInserted);
 
 	}
 
