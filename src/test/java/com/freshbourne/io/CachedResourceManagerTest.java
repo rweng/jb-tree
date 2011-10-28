@@ -10,28 +10,43 @@
 
 package com.freshbourne.io;
 
+import com.google.common.io.Files;
+import com.google.inject.Provider;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
+
+import java.io.File;
+import java.io.IOException;
 
 public class CachedResourceManagerTest {
 
 	private ResourceManager rm;
 
 	@BeforeMethod
-	public void setUp(){
-		rm = new ResourceManagerBuilder().file("/tmp/CachedResourceManagerTest").useCache(true).build();
+	public void setUp() throws IOException {
+		File file = new File("/tmp/CachedResourceManagerTest");
+		file.delete();
+		rm = new ResourceManagerBuilder().file(file).useCache(true).build();
 	}
 
 	@Test
-	public void emtpy(){
-
+	public void emtpy() {
 	}
 
 	@Factory
-	public ResourceManagerTest[] resourceManagerInterface(){
-		setUp();
-		ResourceManagerTest[] tests = {new ResourceManagerTest(rm)};
-		return tests;
+	public ResourceManagerTest[] resourceManagerInterface() {
+		ResourceManagerTest[] test = {new ResourceManagerTest(new Provider<ResourceManager>() {
+			@Override public ResourceManager get() {
+				try {
+					setUp();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				return rm;
+			}
+		})};
+
+		return test;
 	}
 }

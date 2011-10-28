@@ -10,6 +10,7 @@
 
 package com.freshbourne.io;
 
+import com.google.inject.Provider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.AfterMethod;
@@ -237,9 +238,18 @@ public class FileResourceManagerTest {
 	}
 
 	@Factory
-	public ResourceManagerTest[] interfaceTests() throws IOException {
-		setUp();
-		ResourceManagerTest[] test = { new ResourceManagerTest(rm) };
+	public ResourceManagerTest[] resourceManagerInterface() {
+		ResourceManagerTest[] test = {new ResourceManagerTest(new Provider<ResourceManager>() {
+			@Override public ResourceManager get() {
+				try {
+					setUp();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				return rm;
+			}
+		})};
+
 		return test;
 	}
 }

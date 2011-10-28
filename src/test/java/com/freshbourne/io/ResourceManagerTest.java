@@ -10,12 +10,15 @@
 
 package com.freshbourne.io;
 
+import com.google.inject.Provider;
 import org.apache.log4j.Logger;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.Random;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.fest.assertions.Assertions.assertThat;
@@ -23,16 +26,23 @@ import static org.fest.assertions.Assertions.assertThat;
 public class ResourceManagerTest {
 	private ResourceManager rm;
 	private static Logger LOG = Logger.getLogger(ResourceManagerTest.class);
+	private Provider<ResourceManager> provider;
 
-	ResourceManagerTest(ResourceManager rm){
-		checkNotNull(rm);
-		this.rm = rm;
+	ResourceManagerTest(Provider<ResourceManager> provider){
+		checkNotNull(provider);
+		this.provider = provider;
 	}
 
 	@BeforeMethod
 	public void setUp() throws IOException {
+		rm = provider.get();
 		if(!rm.isOpen())
 			rm.open();
+	}
+
+	@AfterMethod
+	public void tearDown() throws IOException {
+		rm.close();
 	}
 
 	@Test
@@ -44,10 +54,10 @@ public class ResourceManagerTest {
 
 	@Test(groups = "bla")
 	public void performance(){
-		int count = 100000;
+		int count = 10000;
 		RawPage[] pages = new RawPage[count];
 
-		SecureRandom srand = new SecureRandom();
+		Random rand = new Random();
 
 		long createStart = System.currentTimeMillis();
 		// create pages
@@ -60,7 +70,7 @@ public class ResourceManagerTest {
 		// randomly write to pages
 		long writeStart = System.currentTimeMillis();
 		for(int i=0; i < count; i++){
-			int page = srand.nextInt() % count;
+			int page = rand.nextInt(count);
 			pages[page].bufferForWriting(0).putInt(i);
 			rm.writePage(pages[page]);
 		}
