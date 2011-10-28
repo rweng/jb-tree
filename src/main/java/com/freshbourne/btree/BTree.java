@@ -15,6 +15,7 @@ import com.freshbourne.io.*;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.PagePointSerializer;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Objects;
 import com.google.inject.Inject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -467,6 +468,15 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		preInitialize();
 		setRoot(leafPageManager.createPage());
 		setNumberOfEntries(0);
+	}
+
+	public String toString(){
+		Objects.ToStringHelper helper = Objects.toStringHelper(this);
+		helper.add("numberOfEntries", getNumberOfEntries());
+		helper.add("root", root);
+		helper.add("resourceManager", rm);
+		helper.add("valid", valid);
+		return helper.toString();
 	}
 
 	/**

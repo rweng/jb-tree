@@ -288,9 +288,9 @@ public class BTreeTest {
 
 	@Test
 	public void iteratorsWithoutParameters() throws IOException {
-		fillTree(tree, 1000);
+		fillTree(tree, 10000);
 		Iterator<Integer> iterator = tree.getIterator();
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < 10000; i++)
 			assertThat(iterator.next()).isEqualTo(i);
 
 		assertThat(iterator.hasNext()).isFalse();
