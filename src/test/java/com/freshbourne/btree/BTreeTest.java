@@ -13,15 +13,14 @@ package com.freshbourne.btree;
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.comparator.StringComparator;
 import com.freshbourne.io.AutoSaveResourceManager;
-import com.freshbourne.io.PageSize;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
-import com.freshbourne.serializer.PagePointSerializer;
-import com.google.inject.*;
-import com.google.inject.util.Modules;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import org.apache.log4j.Logger;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -36,10 +35,10 @@ import static org.testng.Assert.*;
 
 public class BTreeTest {
 
-	private        BTree<Integer, Integer> tree;
+	private BTree<Integer, Integer> tree;
 	private static final Logger LOG  = Logger.getLogger(BTreeTest.class);
 	private static final File   file = new File("/tmp/btree-small-test");
-	
+
 
 	private static final Integer key1 = 1;
 	private static final Integer key2 = 2;
@@ -51,7 +50,7 @@ public class BTreeTest {
 	private static final int PAGE_SIZE = InnerNode.Header.size() + 3 * (2 * Integer.SIZE / 8) + Integer.SIZE / 8;
 	private static AutoSaveResourceManager rm;
 
-	BTreeTest(){
+	BTreeTest() {
 		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).buildAutoSave();
 	}
 
@@ -152,8 +151,8 @@ public class BTreeTest {
 		file.delete();
 		AutoSaveResourceManager newRm = new ResourceManagerBuilder().file(file).buildAutoSave();
 		BTree<String, String> newTree = BTree.create(newRm, FixedStringSerializer.INSTANCE_1000,
-						FixedStringSerializer.INSTANCE_1000,
-						StringComparator.INSTANCE);
+				FixedStringSerializer.INSTANCE_1000,
+				StringComparator.INSTANCE);
 
 		assertEquals(1000, newTree.getKeySerializer().getSerializedLength());
 		assertEquals(1000, newTree.getValueSerializer().getSerializedLength());
@@ -472,7 +471,7 @@ public class BTreeTest {
 		assertEquals(0, tree.get(key1).size());
 	}
 
-		protected void simpleTests(Integer keyToAdd) {
+	protected void simpleTests(Integer keyToAdd) {
 		int numOfEntries = tree.getNumberOfEntries();
 
 		tree.add(keyToAdd, value2);
@@ -504,22 +503,22 @@ public class BTreeTest {
 		Integer val;
 
 		int k1 = Integer.MAX_VALUE;
-				int k2 = Integer.MIN_VALUE;
-		
+		int k2 = Integer.MIN_VALUE;
+
 		tree.add(k1, value1);
 		tree.add(k1, value2);
 		tree.add(k2, value2);
 
 		Iterator<Integer> i = tree.getIterator();
-		assertTrue(i.hasNext());
+		assertThat(i.hasNext()).isTrue();
 		val = i.next();
-		assertTrue(val.equals(value1) || val.equals(value2));
-		assertTrue(i.hasNext());
+		assertThat(val.equals(value1) || val.equals(value2)).isTrue();
+		assertThat(i.hasNext()).isTrue();
 		val = i.next();
-		assertTrue(val.equals(value1) || val.equals(value2));
-		assertTrue(i.hasNext());
-		assertEquals(value2, i.next());
-		assertFalse(i.hasNext());
+		assertThat(val.equals(value1) || val.equals(value2)).isTrue();
+		assertThat(i.hasNext()).isTrue();
+		assertThat(i.next()).isEqualTo(value2);
+		assertThat(i.hasNext()).isFalse();
 	}
 
 	@Test(groups = "slow")
