@@ -671,6 +671,9 @@ public class BTreeTest {
 			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(newKey, newKey);
 		}
 
+		tree.close();
+		file.delete();
+		
 		tree.bulkInitialize(kvs, from, to, false);
 
 		assertEquals(to - from + 1, tree.getNumberOfEntries());
