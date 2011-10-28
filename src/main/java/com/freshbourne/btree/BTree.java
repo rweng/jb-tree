@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 
 /**
  * The Btree page, all leafs and innernodes have to be stored in the same RawPageManager. We used to have it differently
@@ -172,6 +175,13 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	@Inject public BTree(ResourceManager rm,
 	                     FixLengthSerializer<K, byte[]> keySerializer, FixLengthSerializer<V, byte[]> valueSerializer,
 	                     Comparator<K> comparator) {
+
+		checkNotNull(rm);
+		checkNotNull(keySerializer);
+		checkNotNull(valueSerializer);
+		checkNotNull(comparator);
+
+		checkArgument(rm instanceof AutoSaveResourceManager, "The ResourceManager must be an AutoSaveResourceManager");
 
 		this.rm = rm;
 		this.keySerializer = keySerializer;
