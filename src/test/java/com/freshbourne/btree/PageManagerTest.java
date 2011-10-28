@@ -11,8 +11,6 @@
 package com.freshbourne.btree;
 
 import com.freshbourne.comparator.StringComparator;
-import com.freshbourne.io.FileResourceManager;
-import com.freshbourne.io.FileResourceManagerFactory;
 import com.freshbourne.io.ResourceManager;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.google.inject.Guice;

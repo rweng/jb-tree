@@ -57,7 +57,7 @@ public class FileResourceManagerTest {
 	}
 	
 	protected FileResourceManager createOpenResourceManager(){
-		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE, false);
+		rm = (FileResourceManager) new ResourceManagerBuilder().file(file).useCache(false).build();
 		
 		try {
 			rm.open();
@@ -109,9 +109,9 @@ public class FileResourceManagerTest {
 
 	@Test(expectedExceptions = IOException.class)
 	public void shouldThrowExceptionIfFileIsLocked() throws IOException {
-		rm = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE, true);
+		rm = (FileResourceManager) new ResourceManagerBuilder().file(file).useCache(false).build();
 		rm.open();
-		FileResourceManager rm2 = new FileResourceManager(file, PageSize.DEFAULT_PAGE_SIZE, true);
+		FileResourceManager rm2 = (FileResourceManager) new ResourceManagerBuilder().file(file).useCache(false).build();
 		rm2.open();
 		fail("FileResourceManager should throw an IOException if the file is already locked");
 	}

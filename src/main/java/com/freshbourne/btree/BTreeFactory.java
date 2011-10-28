@@ -10,10 +10,10 @@
 
 package com.freshbourne.btree;
 
-import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.FileResourceManager;
-import com.freshbourne.io.FileResourceManagerFactory;
 import com.freshbourne.io.PagePointer;
+import com.freshbourne.io.ResourceManager;
+import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,12 +27,10 @@ import java.util.HashMap;
 @Singleton
 public class BTreeFactory {
 
-	private FileResourceManagerFactory frmFactory;
 	private HashMap<File, BTree> map = new HashMap<File, BTree>();
 	private FixLengthSerializer<PagePointer, byte[]> pagePointSerializer;
 
-	@Inject BTreeFactory(FileResourceManagerFactory frmFactory, FixLengthSerializer<PagePointer, byte[]> pps) {
-		this.frmFactory = frmFactory;
+	@Inject BTreeFactory(FixLengthSerializer<PagePointer, byte[]> pps) {
 		this.pagePointSerializer = pps;
 	}
 
@@ -55,7 +53,8 @@ public class BTreeFactory {
 		if (map.containsKey(file))
 			return map.get(file);
 
-		FileResourceManager frm = frmFactory.get(file, lockFile);
+
+		ResourceManager frm = new ResourceManagerBuilder().file(file).useCache(false).useLock(lockFile).build();
 
 		BTree<K, V> tree = new BTree<K, V>(frm, ks, vs, comparator);
 

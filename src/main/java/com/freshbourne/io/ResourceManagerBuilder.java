@@ -61,7 +61,7 @@ public class ResourceManagerBuilder {
 	public ResourceManager build() {
 		checkNotNull(file, "file must be set");
 
-		ResourceManager rm = new FileResourceManager(file, pageSize, useLock);
+		ResourceManager rm = new FileResourceManager(this);
 		if (useCache) {
 			rm = new CachedResourceManager(rm, cacheSize);
 		}

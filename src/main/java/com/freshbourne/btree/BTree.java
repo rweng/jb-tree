@@ -142,7 +142,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * the constructor. In addition, one does not have to repeat the generic on the right hand side of the creation
 	 * assignment.
 	 *
-	 * @param file
+	 * @param frm resourceManager
 	 * @param keySerializer
 	 * @param valueSerializer
 	 * @param comparator
@@ -152,11 +152,11 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 *
 	 * @throws IOException
 	 */
-	public static <K, V> BTree<K, V> create(File file, FixLengthSerializer<K, byte[]> keySerializer,
+	public static <K, V> BTree<K, V> create(ResourceManager frm, FixLengthSerializer<K, byte[]> keySerializer,
 	                                        FixLengthSerializer<V, byte[]> valueSerializer,
 	                                        Comparator<K> comparator) throws IOException {
-		FileResourceManager frm = new FileResourceManager(file);
-		frm.open();
+		if(!frm.isOpen())
+			frm.open();
 
 		return new BTree<K, V>(frm, keySerializer, valueSerializer, comparator);
 	}
