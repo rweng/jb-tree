@@ -289,10 +289,14 @@ public class BTreeTest {
 	@Test
 	public void iteratorsWithoutParameters() throws IOException {
 		fillTree(tree, 10000);
+		tree.checkStructure();
+		
 		Iterator<Integer> iterator = tree.getIterator();
-		for (int i = 0; i < 10000; i++)
+		for (int i = 0; i < 10000; i++){
+			if(i == 192)
+				LOG.debug("dbeug");
 			assertThat(iterator.next()).isEqualTo(i);
-
+		}
 		assertThat(iterator.hasNext()).isFalse();
 	}
 
@@ -593,12 +597,6 @@ public class BTreeTest {
 		assertFalse(iterator.hasNext());
 	}
 
-	private void fillTree(BTree<Integer, Integer> tree, int count) {
-		for (int i = 0; i < count; i++) {
-			tree.add(i, i);
-		}
-	}
-
 	@Test
 	public void close() throws IOException {
 		fillTree(tree, 100);
@@ -725,4 +723,10 @@ public class BTreeTest {
 		assertEquals(value2, tree.get(key2).get(0));
 	}
 
+
+	private void fillTree(BTree<Integer, Integer> tree, int count) {
+		for (int i = 0; i < count; i++) {
+			tree.add(i, i);
+		}
+	}
 }

@@ -133,13 +133,6 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 			return pageIdToNode(pageId);
 		}
 
-		private Node<K, V> pageIdToNode(int id) {
-			if (leafPageManager.hasPage(id)) {
-				return leafPageManager.getPage(id);
-			} else {
-				return innerNodePageManager.getPage(id);
-			}
-		}
 
 		public boolean isValid() {
 			return pos < getNumberOfKeys();
@@ -267,10 +260,10 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		KeyStruct ks = getFirstLargerOrEqualKeyStruct(key);
 
 		// largest key
-		if(ks == null)
+		if (ks == null)
 			return new KeyStruct(getNumberOfKeys() - 1).getRightNode();
-		else{
-			if(comparator.compare(ks.getKey(), key) == 0){
+		else {
+			if (comparator.compare(ks.getKey(), key) == 0) {
 				return ks.getRightNode();
 			} else
 				return ks.getLeftNode();
@@ -674,7 +667,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		// make sure that not exactly one pageId remains, because that can't be inserted alone in the next
 		// InnerNode. == 2 because
 		int remaining = pageIds.size() - fromId - (entriesToInsert + 1);
-		if(remaining == 1)
+		if (remaining == 1)
 			entriesToInsert--;
 
 		for (int i = 0; i < entriesToInsert; i++) {
@@ -777,63 +770,98 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		return res.size() > 0 ? res.get(0) : null;
 	}
 
+	private LeafNode<K, V> getLeafNodeForKey(K key) {
+		Integer pageId = getPageIdForKey(key);
+		Node<K, V> node = pageIdToNode(pageId);
+		if (node instanceof LeafNode)
+			return (LeafNode<K, V>) node;
+		return ((InnerNode<K, V>) node).getLeafNodeForKey(key);
+	}
+
+
+	/**
+	 * goes down to the LeafNode for the from key and creates an iterator for this leaf.
+	 * When the Iterator does not have any more values within the from-to range, it goes to the next leaf.
+	 * If the next leaf has no values, too, it sets the currentLeaf to null and returns null;
+	 */
 	public class InnerNodeIterator implements Iterator<V> {
 		private K         from;
 		private K         to;
 		private KeyStruct ks;
-		private V next = null;
-		private Iterator<V> currentIterator;
+		private V next    = null;
+		private Iterator<V>    currentIterator;
+		private LeafNode<K, V> currentLeaf;
 
 
 		public InnerNodeIterator(K from, K to) {
+			if (from == null)
+				from = getFirstLeafKey();
+
+			if (to == null)
+				to = getLastLeafKey();
+
+			currentLeaf = getLeafNodeForKey(from);
+			currentIterator = currentLeaf.getIterator(from, to);
+
 			this.from = from;
 			this.to = to;
-			
-			if(from == null)
-				ks = new KeyStruct();
-			else
-				ks = getFirstLargerOrEqualKeyStruct(from);
-
-			if (ks == null)
-				ks = new KeyStruct(getNumberOfKeys());
 		}
 
-		@Override public boolean hasNext() {
+		@Override
+		public boolean hasNext() {
 			if (next == null)
 				next = next();
 
 			return next != null;
 		}
 
-		@Override public V next() {
+		@Override
+		public V next() {
+			V result;
+			
 			if (next != null) {
-				V result = next;
+				result = next;
 				next = null;
 				return result;
 			}
 
-			// return next if currentIterator and hasNext()
-			if (currentIterator != null) {
-				if (currentIterator.hasNext())
-					return currentIterator.next();
-				currentIterator = null;
-			}
-
-			if (ks == null || ks.pos > getNumberOfKeys())
+			// end condition
+			if (currentLeaf == null)
 				return null;
 
 
-			currentIterator = ks.getLeftNode().getIterator(from, to);
-			if (ks.pos < getNumberOfKeys() && (to == null || comparator.compare(ks.getKey(), to) <= 0))
-				ks.becomeNext();
-			else
-				ks = null;
+			// return next if currentIterator and hasNext()
+			if (currentIterator.hasNext())
+				return currentIterator.next();
 
-			return next();
+			// if there is next leaf, return
+			if (!currentLeaf.hasNextLeaf())
+				return null;
+
+			currentLeaf = leafPageManager.getPage(currentLeaf.getNextLeafId());
+			currentIterator = currentLeaf.getIterator(from, to);
+			result = currentIterator.next();
+
+			if (result == null) {
+				currentLeaf = null;
+				currentIterator = null;
+			}
+
+			return result;
 		}
 
 		@Override public void remove() {
 			throw new UnsupportedOperationException();
 		}
 	}
+
+
+	private Node<K, V> pageIdToNode(int id) {
+		if (leafPageManager.hasPage(id)) {
+			return leafPageManager.getPage(id);
+		} else {
+			return innerNodePageManager.getPage(id);
+		}
+	}
+
 }
