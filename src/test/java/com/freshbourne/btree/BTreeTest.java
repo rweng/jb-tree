@@ -502,8 +502,8 @@ public class BTreeTest {
 	@Test public void iterator() {
 		Integer val;
 
-		int k1 = Integer.MAX_VALUE;
-		int k2 = Integer.MIN_VALUE;
+		int k1 = Integer.MIN_VALUE;
+		int k2 = Integer.MAX_VALUE;
 
 		tree.add(k1, value1);
 		tree.add(k1, value2);
