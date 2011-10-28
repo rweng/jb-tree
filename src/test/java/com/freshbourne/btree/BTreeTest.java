@@ -77,8 +77,6 @@ public class BTreeTest {
 	public void testMultiLevelInsertForward() throws IOException {
 		int count = 100;
 
-		tree.initialize();
-
 		for (int i = 0; i < count; i++) {
 
 			assertTrue(tree.isValid());
@@ -112,8 +110,6 @@ public class BTreeTest {
 	@Test
 	public void testMultiLevelInsertBackward() throws IOException {
 		int count = 100;
-
-		tree.initialize();
 
 		for (int i = 0; i < count; i++) {
 
@@ -292,7 +288,6 @@ public class BTreeTest {
 
 	@Test
 	public void iteratorsWithoutParameters() throws IOException {
-		tree.initialize();
 		fillTree(tree, 1000);
 		Iterator<Integer> iterator = tree.getIterator();
 		for (int i = 0; i < 1000; i++)
@@ -303,7 +298,6 @@ public class BTreeTest {
 
 	@Test
 	public void ranges() throws IOException {
-		tree.initialize();
 		fillTree(tree, 100);
 		List<Range<Integer>> rangeList = new ArrayList<Range<Integer>>();
 		rangeList.add(new Range(-5, 5));
@@ -581,7 +575,6 @@ public class BTreeTest {
 
 	@Test
 	public void iteratorsWithStartEndGiven() throws IOException {
-		tree.initialize();
 		fillTree(tree, 100);
 		Iterator<Integer> iterator = tree.getIterator();
 		for (int i = 0; i < 100; i++)
@@ -607,7 +600,6 @@ public class BTreeTest {
 
 	@Test
 	public void close() throws IOException {
-		tree.initialize();
 		fillTree(tree, 100);
 		tree.close();
 		assertFalse(tree.isValid());
@@ -721,7 +713,6 @@ public class BTreeTest {
 		Integer value1 = 1;
 		Integer value2 = 2;
 
-		tree.initialize();
 		tree.add(key1, value1);
 		tree.add(key2, value2);
 		tree.close();
