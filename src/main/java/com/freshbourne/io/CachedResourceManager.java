@@ -10,33 +10,38 @@
 
 package com.freshbourne.io;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
+import com.google.common.cache.*;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 /**
- * This class caches RawPages coming from a ResourceManager.
- * Through the caching, we can ensure that pages are written back to the ResourceManager even if they
- * are not explicitly persisted in the using class.
- *
- * CachedResourceManager works with all kinds of ResourceManagers, although usually used with a
- * {@link FileResourceManager}
+ * This class caches RawPages coming from a ResourceManager. Through the caching, we can ensure that pages are written
+ * back to the ResourceManager even if they are not explicitly persisted in the using class.
+ * <p/>
+ * CachedResourceManager works with all kinds of ResourceManagers, although usually used with a {@link
+ * FileResourceManager}
  */
 public class CachedResourceManager implements AutoSaveResourceManager {
 
-	private final ResourceManager rm;
+	private final ResourceManager         rm;
 	private final Cache<Integer, RawPage> cache;
 
-	CachedResourceManager(ResourceManager _rm, int cacheSize){
+	CachedResourceManager(ResourceManager _rm, int cacheSize) {
 		this.rm = _rm;
-		this.cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build(new CacheLoader<Integer, RawPage>() {
-			@Override public RawPage load(Integer key) throws Exception {
-				return rm.getPage(key);
-			}
-		});
+		this.cache = CacheBuilder.newBuilder().maximumSize(cacheSize)
+				.removalListener(new RemovalListener<Integer, RawPage>() {
+					@Override
+					public void onRemoval(RemovalNotification<Integer, RawPage> integerRawPageRemovalNotification) {
+						RawPage rawPage = integerRawPageRemovalNotification.getValue();
+						rawPage.sync();
+					}
+				})
+				.build(new CacheLoader<Integer, RawPage>() {
+					@Override public RawPage load(Integer key) throws Exception {
+						return rm.getPage(key);
+					}
+				});
 	}
 
 	@Override public void writePage(RawPage page) {
@@ -60,6 +65,7 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 	}
 
 	@Override public void close() throws IOException {
+		sync();
 		rm.close();
 	}
 
@@ -88,6 +94,10 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 	}
 
 	@Override public void sync() {
+		for(RawPage p : cache.asMap().values()){
+			p.sync();
+		}
+
 		rm.sync();
 	}
 
