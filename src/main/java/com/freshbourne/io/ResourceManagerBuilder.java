@@ -11,6 +11,7 @@
 package com.freshbourne.io;
 
 import java.io.File;
+import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -21,6 +22,7 @@ public class ResourceManagerBuilder {
 	private boolean useLock   = true;
 	private int     cacheSize = 100;
 	private int     pageSize  = PageSize.DEFAULT_PAGE_SIZE;
+	private boolean open = false;
 
 	private File file = null;
 
@@ -66,9 +68,21 @@ public class ResourceManagerBuilder {
 			rm = new CachedResourceManager(rm, cacheSize);
 		}
 
+		if(open){
+			try {
+				rm.open();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
 		return rm;
 	}
 
+	public ResourceManagerBuilder open(){
+		this.open = true;
+		return this;
+	}
 
 	int getCacheSize() {
 		return cacheSize;
