@@ -226,8 +226,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	private void ensureValid() {
-		if (!isValid())
-			throw new IllegalStateException("Btree must be initialized or loaded");
+		checkArgument(isValid(), "Btree must be initialized or loaded");
 	}
 
 	public void bulkInitialize(SimpleEntry<K, V>[] kvs, boolean sorted) throws IOException {

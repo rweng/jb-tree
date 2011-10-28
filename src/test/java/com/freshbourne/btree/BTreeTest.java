@@ -9,6 +9,10 @@
  */
 package com.freshbourne.btree;
 
+import com.freshbourne.comparator.IntegerComparator;
+import com.freshbourne.io.AutoSaveResourceManager;
+import com.freshbourne.io.ResourceManagerBuilder;
+import com.freshbourne.serializer.IntegerSerializer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -29,7 +33,6 @@ import static org.testng.Assert.assertEquals;
 
 public class BTreeTest {
 
-	private static       String path = "/tmp/btree_spec";
 	private static final Log    LOG  = LogFactory.getLog(BTreeTest.class);
 
 	protected Integer key1;
@@ -42,16 +45,14 @@ public class BTreeTest {
 	private static Injector     injector;
 	private static SecureRandom srand;
 
-	static {
-		injector = Guice.createInjector(new BTreeModule(path));
-	}
+	private static final File file = new File("/tmp/btree_spec");
 
 	private BTree<Integer, Integer> createNewMultiMap() throws IOException {
-		File f = new File(path);
-		if (f.exists())
-			f.delete();
+		file.delete();
 
-		BTree<Integer, Integer> tree = getInstance();
+		AutoSaveResourceManager rm = new ResourceManagerBuilder().file(file).buildAutoSave();
+		BTree<Integer, Integer> tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
+				IntegerComparator.INSTANCE);
 		tree.initialize();
 		return tree;
 	}
@@ -62,12 +63,6 @@ public class BTreeTest {
 
 		return srand;
 	}
-
-	public BTree<Integer, Integer> getInstance() {
-		return injector.getInstance(Key.get(new TypeLiteral<BTree<Integer, Integer>>() {
-		}));
-	}
-
 
 	public Integer createRandomKey() {
 		return srand().nextInt();
@@ -263,9 +258,9 @@ public class BTreeTest {
 		tree.initialize();
 		tree.add(key1, value1);
 		tree.add(key2, value2);
-		tree.sync();
+		tree.close();
 
-		tree = getInstance();
+		tree = createNewMultiMap();
 		tree.load();
 		assertEquals(2, tree.getNumberOfEntries());
 		assertEquals(value1, tree.get(key1).get(0));
@@ -303,7 +298,6 @@ public class BTreeTest {
 		tree.sync();
 		long end = System.currentTimeMillis();
 
-		File file = new File(path);
 		Long sizeOfData = (long) (size * (sizeForKey + sizeForVal));
 		float realSizePercent = file.length() / sizeOfData * 100;
 
