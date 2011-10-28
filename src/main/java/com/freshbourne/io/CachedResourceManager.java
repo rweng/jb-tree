@@ -86,4 +86,8 @@ public class CachedResourceManager implements ResourceManager {
 	public ResourceManager getResourceManager() {
 		return rm;
 	}
+
+	public Cache<Integer, RawPage> getCache() {
+		return cache;
+	}
 }

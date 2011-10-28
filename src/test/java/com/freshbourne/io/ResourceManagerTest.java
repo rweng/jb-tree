@@ -22,6 +22,7 @@ import java.util.Random;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.Fail.fail;
 
 public class ResourceManagerTest {
 	private ResourceManager rm;
@@ -40,11 +41,6 @@ public class ResourceManagerTest {
 			rm.open();
 	}
 
-	@AfterMethod
-	public void tearDown() throws IOException {
-		rm.close();
-	}
-
 	@Test
 	public void shouldBeEmptyAtFirst() throws IOException {
 		assertThat(rm.numberOfPages()).isZero();
@@ -54,6 +50,7 @@ public class ResourceManagerTest {
 
 	@Test(groups = "bla")
 	public void performance(){
+		LOG.info(rm);
 		int count = 10000;
 		RawPage[] pages = new RawPage[count];
 
