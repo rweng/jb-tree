@@ -51,9 +51,9 @@ public class BTreeFactory {
 			return map.get(file);
 
 
-		ResourceManager frm = new ResourceManagerBuilder().file(file).useLock(lockFile).build();
+		AutoSaveResourceManager frm = new ResourceManagerBuilder().file(file).useLock(lockFile).buildAutoSave();
 
-		BTree<K, V> tree = new BTree<K, V>(frm, ks, vs, comparator);
+		BTree<K, V> tree = BTree.create(frm, ks, vs, comparator);
 
 		map.put(file, tree);
 

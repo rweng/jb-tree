@@ -79,6 +79,11 @@ public class ResourceManagerBuilder {
 		return rm;
 	}
 
+	public AutoSaveResourceManager buildAutoSave(){
+		checkArgument(useCache, "To create an autoSaveResourceManager, useCache must be true");
+		return (AutoSaveResourceManager) build();
+	}
+
 	public ResourceManagerBuilder open(){
 		this.open = true;
 		return this;

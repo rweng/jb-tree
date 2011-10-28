@@ -12,8 +12,8 @@ package com.freshbourne.btree;
 
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.comparator.StringComparator;
+import com.freshbourne.io.AutoSaveResourceManager;
 import com.freshbourne.io.PageSize;
-import com.freshbourne.io.ResourceManager;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
@@ -210,11 +210,10 @@ public class BTreeSmallTest {
 		File file = new File(filePath);
 		file.delete();
 
-		ResourceManager pm = new ResourceManagerBuilder().file(file).useCache(false).build();
+		AutoSaveResourceManager pm = new ResourceManagerBuilder().file(file).buildAutoSave();
 		pm.open();
 
-		BTree<Integer, String> btree =
-				new BTree<Integer, String>(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
+		BTree<Integer, String> btree = BTree.create(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
 						IntegerComparator.INSTANCE);
 
 		btree.initialize();
@@ -249,11 +248,10 @@ public class BTreeSmallTest {
 		btree.sync();
 	}
 
-	private ResourceManager createResourceManager() {
+	private AutoSaveResourceManager createResourceManager() {
 		File file = new File("/tmp/btree-test");
 		file.delete();
-		ResourceManager resourceManager = new ResourceManagerBuilder().useCache(false).file(file).build();
-		return resourceManager;
+		return new ResourceManagerBuilder().file(file).buildAutoSave();
 	}
 
 	@Test

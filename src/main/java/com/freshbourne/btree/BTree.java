@@ -145,7 +145,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * the constructor. In addition, one does not have to repeat the generic on the right hand side of the creation
 	 * assignment.
 	 *
-	 * @param frm resourceManager
+	 * @param rm
+	 * 		resourceManager
 	 * @param keySerializer
 	 * @param valueSerializer
 	 * @param comparator
@@ -155,13 +156,22 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 *
 	 * @throws IOException
 	 */
-	public static <K, V> BTree<K, V> create(ResourceManager frm, FixLengthSerializer<K, byte[]> keySerializer,
+	public static <K, V> BTree<K, V> create(AutoSaveResourceManager rm, FixLengthSerializer<K, byte[]> keySerializer,
 	                                        FixLengthSerializer<V, byte[]> valueSerializer,
 	                                        Comparator<K> comparator) throws IOException {
-		if(!frm.isOpen())
-			frm.open();
 
-		return new BTree<K, V>(frm, keySerializer, valueSerializer, comparator);
+		checkNotNull(rm);
+		checkNotNull(keySerializer);
+		checkNotNull(valueSerializer);
+		checkNotNull(comparator);
+
+		checkArgument(rm instanceof AutoSaveResourceManager, "The ResourceManager must be an AutoSaveResourceManager");
+
+
+		if (!rm.isOpen())
+			rm.open();
+
+		return new BTree<K, V>(rm, keySerializer, valueSerializer, comparator);
 	}
 
 	/**
@@ -172,16 +182,10 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @param valueSerializer
 	 * @param comparator
 	 */
-	@Inject public BTree(ResourceManager rm,
-	                     FixLengthSerializer<K, byte[]> keySerializer, FixLengthSerializer<V, byte[]> valueSerializer,
-	                     Comparator<K> comparator) {
-
-		checkNotNull(rm);
-		checkNotNull(keySerializer);
-		checkNotNull(valueSerializer);
-		checkNotNull(comparator);
-
-		checkArgument(rm instanceof AutoSaveResourceManager, "The ResourceManager must be an AutoSaveResourceManager");
+	@Inject
+	private BTree(ResourceManager rm,
+	              FixLengthSerializer<K, byte[]> keySerializer, FixLengthSerializer<V, byte[]> valueSerializer,
+	              Comparator<K> comparator) {
 
 		this.rm = rm;
 		this.keySerializer = keySerializer;
