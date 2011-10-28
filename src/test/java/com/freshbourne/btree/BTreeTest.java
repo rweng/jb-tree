@@ -49,7 +49,7 @@ public class BTreeTest {
 	// 3 keys, 4 values
 	private static final int PAGE_SIZE = InnerNode.Header.size() + 3 * (2 * Integer.SIZE / 8) + Integer.SIZE / 8;
 	private static AutoSaveResourceManager rm;
-
+	
 	BTreeTest() {
 		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).buildAutoSave();
 	}
@@ -142,7 +142,7 @@ public class BTreeTest {
 	}
 
 	@Test
-	public void testLargeKeyValues() throws IOException {
+	public void testLargeKeyValues() throws IOException, InterruptedException {
 		// initialize new btree
 		file.delete();
 		AutoSaveResourceManager newRm = new ResourceManagerBuilder().file(file).buildAutoSave();
@@ -150,8 +150,8 @@ public class BTreeTest {
 				FixedStringSerializer.INSTANCE_1000,
 				StringComparator.INSTANCE);
 
-		assertEquals(1000, newTree.getKeySerializer().getSerializedLength());
-		assertEquals(1000, newTree.getValueSerializer().getSerializedLength());
+		assertThat(newTree.getKeySerializer().getSerializedLength()).isEqualTo(1000);
+		assertThat(newTree.getValueSerializer().getSerializedLength()).isEqualTo(1000);
 
 		newTree.initialize();
 
@@ -161,17 +161,19 @@ public class BTreeTest {
 			if (i == 24)
 				LOG.debug("DEBUG");
 
-			LOG.debug("i=" + i);
+			// LOG.info("i=" + i);
 			newTree.add("" + i, "" + i);
 			newTree.checkStructure();
 		}
 
 		Iterator<String> iterator = newTree.getIterator();
 		for (int i = 0; i < count; i++) {
-			assertTrue(iterator.hasNext());
-			LOG.debug("got value: " + iterator.next());
+			assertThat(iterator.hasNext()).isTrue();
+			String next = iterator.next();
+			assertThat(next).isNotNull();
+			// LOG.debug("got value: " + next);
 		}
-		assertFalse(iterator.hasNext());
+		assertThat(iterator.hasNext()).isFalse();
 	}
 
 	@Test
@@ -288,11 +290,11 @@ public class BTreeTest {
 
 	@Test
 	public void iteratorsWithoutParameters() throws IOException {
-		fillTree(tree, 10000);
+		fillTree(tree, 100000);
 		tree.checkStructure();
 		
 		Iterator<Integer> iterator = tree.getIterator();
-		for (int i = 0; i < 10000; i++){
+		for (int i = 0; i < 100000; i++){
 			if(i == 192)
 				LOG.debug("dbeug");
 			assertThat(iterator.next()).isEqualTo(i);
@@ -486,7 +488,7 @@ public class BTreeTest {
 		tree.add(keyToAdd, value2);
 		assertThat(tree.containsKey(keyToAdd)).isTrue();
 		assertThat(tree.get(keyToAdd).get(0)).isEqualTo(value2);
-		assertThat(tree.getNumberOfEntries()).isEqualTo(numOfEntries+1);
+		assertThat(tree.getNumberOfEntries()).isEqualTo(numOfEntries + 1);
 
 		tree.remove(keyToAdd);
 		assertThat(tree.containsKey(keyToAdd)).isFalse();
