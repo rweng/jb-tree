@@ -74,7 +74,9 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 	}
 
 	@Override public RawPage createPage() {
-		return rm.createPage();
+		RawPage page = rm.createPage();
+		cache.asMap().put(page.id(), page);
+		return page;
 	}
 
 	@Override public RawPage getPage(int id) {

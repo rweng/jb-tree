@@ -80,33 +80,6 @@ public class FileResourceManagerTest {
 		rFile.close();
 	}
 
-	@Test(enabled = false)
-	public void testSync() {
-		rm = (FileResourceManager) createNewOpenResourceManager();
-		RawPage p = rm.createPage();
-		int testInt = 5343;
-		p.bufferForWriting(0).putInt(testInt);
-
-		RandomAccessFile handle = rm.getHandle();
-		try {
-			handle.seek(rm.getPageSize());
-
-			assertFalse(testInt == handle.readInt());
-		} catch (IOException ignored) { // ignore, we dont care whether the empty page has been written or not
-		}
-
-
-		rm.sync();
-
-		try {
-			handle.seek(rm.getPageSize());
-			assertEquals(testInt, handle.readInt());
-		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-			fail();
-		}
-	}
-
 	@Test(expectedExceptions = IOException.class)
 	public void shouldThrowExceptionIfFileIsLocked() throws IOException {
 		rm = (FileResourceManager) new ResourceManagerBuilder().file(file).useCache(false).build();

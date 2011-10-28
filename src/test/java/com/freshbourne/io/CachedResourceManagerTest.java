@@ -14,16 +14,20 @@ import com.google.common.cache.Cache;
 import com.google.common.io.Files;
 import com.google.inject.Provider;
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Random;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 
 public class CachedResourceManagerTest {
@@ -61,7 +65,6 @@ public class CachedResourceManagerTest {
 		return test;
 	}
 
-
 	@Test(dependsOnMethods = "open")
 	public void cache() throws IOException {
 		open();
@@ -82,7 +85,29 @@ public class CachedResourceManagerTest {
 			rm.getPage(pages[random.nextInt(10)].id());
 		}
 
-		// createPage does unfortunately not add to the cache, so the first time misses in the loop above
-		assertThat(cache.stats().hitCount()).isEqualTo(count * 9);
+		assertThat(cache.stats().hitCount()).isEqualTo(count * 10);
 	}
+
+
+	/*
+	@Test
+	public void testSync() {
+		CachedResourceManager crm = (CachedResourceManager) rm;
+		crm.getCache().asMap().
+		RawPage p = rm.createPage();
+		int testInt = 5343;
+		p.bufferForWriting(0).putInt(testInt);
+
+
+		rm.sync();
+
+		try {
+			handle.seek(rm.getPageSize());
+			assertEquals(testInt, handle.readInt());
+		} catch (IOException e) {
+			LOG.error(e.getMessage(), e);
+			Assert.fail();
+		}
+	}
+	*/
 }
