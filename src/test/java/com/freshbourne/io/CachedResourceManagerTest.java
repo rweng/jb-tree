@@ -111,19 +111,10 @@ public class CachedResourceManagerTest {
 	}
 
 	@Test
-	public void findCacheProblem() throws IOException {
+	public void closeShouldInvalidateCache() throws IOException {
+		RawPage page = rm.createPage();
 		rm.close();
-		rm = new ResourceManagerBuilder().file(file).useCache(true).cacheSize(5).open().build();
-		List<Integer> list = Lists.newArrayList();
-		for(int i = 0;i < 1250;i++){
-			RawPage page = rm.createPage();
-			list.add(page.id());
-			page.bufferForWriting(0).putInt(i);
-		}
-		rm.sync();
-		for(int i = 0;i < 1250;i++){
-			RawPage page = rm.getPage(list.get(i));
-			assertThat(page.bufferForReading(0).getInt()).isEqualTo(i);
-		}
+		rm.open();
+		assertThat(rm.getPage(page.id())).isNotSameAs(page);
 	}
 }

@@ -46,7 +46,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	private final LeafPageManager<K, V>  leafPageManager;
 	private final InnerNodeManager<K, V> innerNodeManager;
 	private final Comparator<K>          comparator;
-	private final ResourceManager        rm;
+	private final AutoSaveResourceManager        rm;
 	private       RawPage                rawPage;
 
 	private Node<K, V> root;
@@ -185,7 +185,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @param comparator
 	 */
 	@Inject
-	private BTree(ResourceManager rm,
+	private BTree(AutoSaveResourceManager rm,
 	              FixLengthSerializer<K, byte[]> keySerializer, FixLengthSerializer<V, byte[]> valueSerializer,
 	              Comparator<K> comparator) {
 
@@ -691,7 +691,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		return ((FileResourceManager) rm).getFile().getAbsolutePath();
 	}
 
-	ResourceManager getResourceManager() {
+	AutoSaveResourceManager getResourceManager() {
 		return rm;
 	}
 }

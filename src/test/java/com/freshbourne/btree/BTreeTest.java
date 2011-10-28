@@ -23,6 +23,7 @@ import com.google.inject.TypeLiteral;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -579,17 +580,6 @@ public class BTreeTest {
 	}
 
 	@Test
-	public void shouldBeAbleToOpenAndLoad() throws IOException {
-		Integer smaller, larger;
-
-		smaller = 10;
-		larger = 20;
-
-		shouldBeAbleToOpenAndLoad(smaller, larger);
-		shouldBeAbleToOpenAndLoad(larger, smaller);
-	}
-
-	@Test
 	public void iteratorsWithStartEndGiven() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		Iterator<Integer> iterator = tree.getIterator();
@@ -721,11 +711,15 @@ public class BTreeTest {
 		}
 	}
 
-
-	private void shouldBeAbleToOpenAndLoad(Integer key1, Integer key2) throws IOException {
+	@Test(dataProvider = "shouldBeAbleToOpenAndLoadProvider")
+	public void shouldBeAbleToOpenAndLoad(Integer key1, Integer key2) throws IOException {
 		Integer value1 = 1;
 		Integer value2 = 2;
 
+		tree.close();
+		file.delete();
+		
+		tree.initialize();
 		tree.add(key1, value1);
 		tree.add(key2, value2);
 		tree.close();
@@ -735,6 +729,14 @@ public class BTreeTest {
 		assertEquals(2, tree.getNumberOfEntries());
 		assertEquals(value1, tree.get(key1).get(0));
 		assertEquals(value2, tree.get(key2).get(0));
+	}
+
+	@DataProvider
+	public Object[][] shouldBeAbleToOpenAndLoadProvider(){
+		return new Object[][]{
+				{20, 10},
+				{10, 20}
+		};
 	}
 
 

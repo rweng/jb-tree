@@ -80,6 +80,7 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 
 	@Override public void close() throws IOException {
 		sync();
+		cache.invalidateAll();
 		rm.close();
 	}
 
@@ -102,6 +103,7 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 	}
 
 	@Override public void removePage(int id) {
+		cache.invalidate(id);
 		rm.removePage(id);
 	}
 
