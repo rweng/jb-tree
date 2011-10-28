@@ -476,18 +476,19 @@ public class BTreeTest {
 		assertEquals(0, tree.get(key1).size());
 	}
 
-	protected void simpleTests(Integer keyToAdd) {
+	private void simpleTests(Integer keyToAdd) {
 		int numOfEntries = tree.getNumberOfEntries();
 
 		tree.add(keyToAdd, value2);
-		assertTrue(tree.containsKey(keyToAdd));
-		assertEquals(value2, tree.get(keyToAdd).get(0));
-		assertEquals(numOfEntries + 1, tree.getNumberOfEntries());
+		assertThat(tree.containsKey(keyToAdd)).isTrue();
+		assertThat(tree.get(keyToAdd).get(0)).isEqualTo(value2);
+		assertThat(tree.getNumberOfEntries()).isEqualTo(numOfEntries+1);
 
 		tree.remove(keyToAdd);
-		assertFalse(tree.containsKey(keyToAdd));
-		assertEquals(0, tree.get(keyToAdd).size());
-		assertEquals(numOfEntries, tree.getNumberOfEntries());
+		assertThat(tree.containsKey(keyToAdd)).isFalse();
+
+		assertThat(tree.get(keyToAdd).size()).isEqualTo(0);
+		assertThat(tree.getNumberOfEntries()).isEqualTo(numOfEntries);
 	}
 
 	protected void fill(int size) {
@@ -500,8 +501,8 @@ public class BTreeTest {
 		int size = 170;
 		fill(size);
 
-		assertEquals(size, tree.getNumberOfEntries());
-		simpleTests(key1);
+		assertThat(tree.getNumberOfEntries()).isEqualTo(size);
+		simpleTests(5000);
 	}
 
 	@Test public void iterator() {
