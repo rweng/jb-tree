@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.*;
 
+import static org.fest.assertions.Assertions.assertThat;
 import static org.testng.Assert.*;
 
 
@@ -59,12 +60,17 @@ public class BTreeTest {
 		file.delete();
 		tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
 				IntegerComparator.INSTANCE);
+		tree.initialize();
 	}
 
-	@Test
+	@Test(groups = "skipBeforeFilter")
 	public void testInitialize() throws IOException {
+		file.delete();
+		tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
+				IntegerComparator.INSTANCE);
+		assertThat(tree.isValid()).isFalse();
 		tree.initialize();
-		assertTrue(tree.isValid());
+		assertThat(tree.isValid()).isTrue();
 	}
 
 
