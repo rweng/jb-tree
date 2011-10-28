@@ -10,10 +10,7 @@
 
 package com.freshbourne.btree;
 
-import com.freshbourne.io.FileResourceManager;
-import com.freshbourne.io.PagePointer;
-import com.freshbourne.io.ResourceManager;
-import com.freshbourne.io.ResourceManagerBuilder;
+import com.freshbourne.io.*;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -54,7 +51,7 @@ public class BTreeFactory {
 			return map.get(file);
 
 
-		ResourceManager frm = new ResourceManagerBuilder().file(file).useCache(false).useLock(lockFile).build();
+		ResourceManager frm = new ResourceManagerBuilder().file(file).useLock(lockFile).build();
 
 		BTree<K, V> tree = new BTree<K, V>(frm, ks, vs, comparator);
 

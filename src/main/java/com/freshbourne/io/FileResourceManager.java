@@ -9,13 +9,6 @@
  */
 package com.freshbourne.io;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.collect.MapMaker;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -26,14 +19,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import java.util.Map;
 
 
 /**
  * Writes Pages to a File.
  * It does not cache, and Pages have to be written back manually or the changes will not be written to disk.
  */
-@Singleton
 public class FileResourceManager implements ResourceManager {
 	private       RandomAccessFile      handle;
 	private final File                  file;
@@ -303,7 +294,7 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void sync() {
-
+		// empty because no caching is done, pages have to be saved manually
 	}
 
 	/** @return the handle */

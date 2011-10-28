@@ -50,6 +50,8 @@ public class PageManagerTest {
 		lpm = tree.getLeafPageManager();
 		inm = tree.getInnerNodeManager();
 		rm = tree.getResourceManager();
+		if(!rm.isOpen())
+			rm.open();
 	}
 
 	@Test
