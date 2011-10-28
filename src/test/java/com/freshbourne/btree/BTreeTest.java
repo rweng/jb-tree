@@ -238,35 +238,6 @@ public class BTreeTest {
 		assertFalse(i.hasNext());
 	}
 
-	@Test
-	public void shouldBeAbleToOpenAndLoad() throws IOException {
-		Integer smaller, larger;
-		if (key1.compareTo(key2) > 0) {
-			larger = key1;
-			smaller = key2;
-		} else {
-			smaller = key1;
-			larger = key2;
-		}
-
-		shouldBeAbleToOpenAndLoad(smaller, larger);
-		shouldBeAbleToOpenAndLoad(larger, smaller);
-	}
-
-	private void shouldBeAbleToOpenAndLoad(Integer key1, Integer key2) throws IOException {
-
-		tree.initialize();
-		tree.add(key1, value1);
-		tree.add(key2, value2);
-		tree.close();
-
-		tree = createNewMultiMap();
-		tree.load();
-		assertEquals(2, tree.getNumberOfEntries());
-		assertEquals(value1, tree.get(key1).get(0));
-		assertEquals(value2, tree.get(key2).get(0));
-	}
-
 	@Test(groups = "slow")
 	public void shouldWorkWithMassiveValues() {
 		int size = 100000;

@@ -29,6 +29,7 @@ import java.security.SecureRandom;
 import java.util.*;
 
 import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 
 public class BTreeSmallTest {
@@ -407,6 +408,17 @@ public class BTreeSmallTest {
 	}
 
 	@Test
+	public void shouldBeAbleToOpenAndLoad() throws IOException {
+		Integer smaller, larger;
+
+		smaller = 10;
+		larger = 20;
+
+		shouldBeAbleToOpenAndLoad(smaller, larger);
+		shouldBeAbleToOpenAndLoad(larger, smaller);
+	}
+
+	@Test
 	public void iteratorsWithStartEndGiven() throws IOException {
 		tree.initialize();
 		fillTree(tree, 100);
@@ -543,5 +555,21 @@ public class BTreeSmallTest {
 		}
 	}
 
+
+	private void shouldBeAbleToOpenAndLoad(Integer key1, Integer key2) throws IOException {
+		Integer value1 = 1;
+		Integer value2 = 2;
+
+		tree.initialize();
+		tree.add(key1, value1);
+		tree.add(key2, value2);
+		tree.close();
+
+		tree = factory.get(file, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE);
+		tree.load();
+		assertEquals(2, tree.getNumberOfEntries());
+		assertEquals(value1, tree.get(key1).get(0));
+		assertEquals(value2, tree.get(key2).get(0));
+	}
 
 }
