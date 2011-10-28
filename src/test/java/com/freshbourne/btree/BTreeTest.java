@@ -38,6 +38,7 @@ public class BTreeTest {
 	private        BTree<Integer, Integer> tree;
 	private static final Logger LOG  = Logger.getLogger(BTreeTest.class);
 	private static final File   file = new File("/tmp/btree-small-test");
+	
 
 	private static final Integer key1 = 1;
 	private static final Integer key2 = 2;
@@ -47,19 +48,16 @@ public class BTreeTest {
 
 	// 3 keys, 4 values
 	private static final int PAGE_SIZE = InnerNode.Header.size() + 3 * (2 * Integer.SIZE / 8) + Integer.SIZE / 8;
+	private static AutoSaveResourceManager rm;
 
-
-	private static BTreeFactory factory;
-
-	@BeforeClass
-	public void setUpClass(){
-		factory = new BTreeFactory(PagePointSerializer.INSTANCE);
+	BTreeTest(){
+		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).buildAutoSave();
 	}
 
 	@BeforeMethod
 	public void setUp() throws IOException {
 		file.delete();
-		tree = factory.get(file, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
+		tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
 				IntegerComparator.INSTANCE);
 	}
 
@@ -144,18 +142,10 @@ public class BTreeTest {
 
 	@Test
 	public void testLargeKeyValues() throws IOException {
-		// create a new injector with large pagesize and string-serialization for 1000 bytes
-		Injector newInjector = Guice.createInjector(Modules.override(new BTreeModule
-				()).with(new AbstractModule() {
-			@Override protected void configure() {
-				bind(Integer.class).annotatedWith(PageSize.class).toInstance(PageSize.DEFAULT_PAGE_SIZE);
-			}
-		}));
-
 		// initialize new btree
 		file.delete();
-		BTree<String, String> newTree =
-				newInjector.getInstance(BTreeFactory.class).get(file, FixedStringSerializer.INSTANCE_1000,
+		AutoSaveResourceManager newRm = new ResourceManagerBuilder().file(file).buildAutoSave();
+		BTree<String, String> newTree = BTree.create(newRm, FixedStringSerializer.INSTANCE_1000,
 						FixedStringSerializer.INSTANCE_1000,
 						StringComparator.INSTANCE);
 
@@ -210,22 +200,6 @@ public class BTreeTest {
 		BTree<Integer, String> btree = BTree.create(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
 				IntegerComparator.INSTANCE);
 
-		btree.initialize();
-		btree.sync();
-
-		assertTrue(file.exists());
-	}
-
-	@Test
-	public void factoryConstructor() throws IOException {
-		File file = new File("/tmp/defaultBTreeModule");
-		file.delete();
-
-
-		Injector i = Guice.createInjector(new BTreeModule());
-		BTreeFactory factory = i.getInstance(BTreeFactory.class);
-		BTree<Integer, String> btree = factory.get(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
-				IntegerComparator.INSTANCE);
 		btree.initialize();
 		btree.sync();
 
@@ -736,7 +710,7 @@ public class BTreeTest {
 		tree.add(key2, value2);
 		tree.close();
 
-		tree = factory.get(file, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE);
+		tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE);
 		tree.load();
 		assertEquals(2, tree.getNumberOfEntries());
 		assertEquals(value1, tree.get(key1).get(0));

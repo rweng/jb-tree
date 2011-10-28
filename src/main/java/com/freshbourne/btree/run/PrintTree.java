@@ -10,9 +10,10 @@
 package com.freshbourne.btree.run;
 
 import com.freshbourne.btree.BTree;
-import com.freshbourne.btree.BTreeFactory;
 import com.freshbourne.btree.BTreeModule;
 import com.freshbourne.comparator.IntegerComparator;
+import com.freshbourne.io.AutoSaveResourceManager;
+import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
 import com.google.inject.Guice;
@@ -41,11 +42,9 @@ public class PrintTree {
 		File f = new File("/tmp/indexha");
 		if(!f.exists())
 			throw new IllegalArgumentException("File does not exist");
-		
-		Injector injector = Guice.createInjector(new BTreeModule());
-		BTreeFactory factory = injector.getInstance(BTreeFactory.class);
 
-		BTree<Integer, String> tree = factory.get(f, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
+		AutoSaveResourceManager resourceManager = new ResourceManagerBuilder().file(f).buildAutoSave();
+		BTree<Integer, String> tree = BTree.create(resourceManager, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
 				IntegerComparator.INSTANCE);
 		
 		Iterator<String> it = tree.getIterator();

@@ -11,7 +11,9 @@
 package com.freshbourne.btree;
 
 import com.freshbourne.comparator.StringComparator;
+import com.freshbourne.io.AutoSaveResourceManager;
 import com.freshbourne.io.ResourceManager;
+import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -31,7 +33,6 @@ public class PageManagerTest {
 	private static Injector injector;
 	private static String path = "/tmp/PageManagerTest";
 	private static File file = new File(path);
-	private BTreeFactory factory;
 	private ResourceManager rm;
 	private BTree<String, String> tree;
 	private LeafPageManager<String, String> lpm;
@@ -43,10 +44,11 @@ public class PageManagerTest {
 
 	@BeforeMethod
 	public void setUp() throws IOException {
-		factory = injector.getInstance(BTreeFactory.class);
 		file.delete();
-		tree = factory.get(file, FixedStringSerializer.INSTANCE_1000, FixedStringSerializer.INSTANCE_1000,
-				StringComparator.INSTANCE, true);
+		AutoSaveResourceManager manager = new ResourceManagerBuilder().file(file).buildAutoSave();
+		tree = BTree.create(manager, FixedStringSerializer.INSTANCE_1000,
+				FixedStringSerializer.INSTANCE_1000,
+				StringComparator.INSTANCE);
 		lpm = tree.getLeafPageManager();
 		inm = tree.getInnerNodeManager();
 		rm = tree.getResourceManager();
