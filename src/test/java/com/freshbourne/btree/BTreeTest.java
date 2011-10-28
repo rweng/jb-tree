@@ -17,9 +17,11 @@ import com.freshbourne.io.PageSize;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
+import com.freshbourne.serializer.PagePointSerializer;
 import com.google.inject.*;
 import com.google.inject.util.Modules;
 import org.apache.log4j.Logger;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -29,21 +31,19 @@ import java.security.SecureRandom;
 import java.util.*;
 
 import static org.testng.Assert.*;
-import static org.testng.Assert.assertEquals;
 
 
-public class BTreeSmallTest {
+public class BTreeTest {
 
-	private static Injector                injector;
 	private        BTree<Integer, Integer> tree;
-	private static final Logger LOG  = Logger.getLogger(BTreeSmallTest.class);
+	private static final Logger LOG  = Logger.getLogger(BTreeTest.class);
 	private static final File   file = new File("/tmp/btree-small-test");
 
-	private final Integer key1 = 1;
-	private final Integer key2 = 2;
+	private static final Integer key1 = 1;
+	private static final Integer key2 = 2;
 
-	private final Integer value1 = 55;
-	private final Integer value2 = 99;
+	private static final Integer value1 = 55;
+	private static final Integer value2 = 99;
 
 	// 3 keys, 4 values
 	private static final int PAGE_SIZE = InnerNode.Header.size() + 3 * (2 * Integer.SIZE / 8) + Integer.SIZE / 8;
@@ -51,14 +51,9 @@ public class BTreeSmallTest {
 
 	private static BTreeFactory factory;
 
-	static {
-		injector = Guice.createInjector(
-				Modules.override(new BTreeModule()).with(new AbstractModule() {
-					@Override protected void configure() {
-						bind(Integer.class).annotatedWith(PageSize.class).toInstance(PAGE_SIZE);
-					}
-				}));
-		factory = injector.getInstance(BTreeFactory.class);
+	@BeforeClass
+	public void setUpClass(){
+		factory = new BTreeFactory(PagePointSerializer.INSTANCE);
 	}
 
 	@BeforeMethod
@@ -66,11 +61,6 @@ public class BTreeSmallTest {
 		file.delete();
 		tree = factory.get(file, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
 				IntegerComparator.INSTANCE);
-	}
-
-	@Test
-	public void testsWorking() {
-		assertTrue(true);
 	}
 
 	@Test
