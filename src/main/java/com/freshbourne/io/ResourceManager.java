@@ -12,6 +12,13 @@ package com.freshbourne.io;
 
 import java.io.IOException;
 
+/**
+ * Provides RawPages from a Resource.
+ * It is not ensured that the pages are automatically persisted.
+ * To make sure that this is the case, call #writePage().
+ *
+ * An alternative Interface is {@link AutoSaveResourceManager}.
+ */
 public interface ResourceManager extends PageManager<RawPage> {
 	
 	

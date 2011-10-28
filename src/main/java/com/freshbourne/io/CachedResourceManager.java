@@ -17,7 +17,15 @@ import com.google.common.cache.CacheLoader;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-public class CachedResourceManager implements ResourceManager {
+/**
+ * This class caches RawPages coming from a ResourceManager.
+ * Through the caching, we can ensure that pages are written back to the ResourceManager even if they
+ * are not explicitly persisted in the using class.
+ *
+ * CachedResourceManager works with all kinds of ResourceManagers, although usually used with a
+ * {@link FileResourceManager}
+ */
+public class CachedResourceManager implements AutoSaveResourceManager {
 
 	private final ResourceManager rm;
 	private final Cache<Integer, RawPage> cache;
