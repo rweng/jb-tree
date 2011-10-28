@@ -45,10 +45,8 @@ public interface PageManager<T> {
 	public boolean hasPage(int id);
 	
 	/**
-	 * forces the sync of pages to resources.
-     * This is necessary because PageManager tend to cache Pages in Memory.
-	 *
-	 * Uncached Resource Managers just do nothing in here.
+	 * Forces the sync of pages to resources.
+     * If the ResouceManager does not cache, this implementation remains empty.
 	 */
 	public void sync();
 

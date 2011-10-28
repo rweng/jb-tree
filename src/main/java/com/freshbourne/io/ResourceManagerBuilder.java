@@ -52,6 +52,12 @@ public class ResourceManagerBuilder {
 		return this;
 	}
 
+	public ResourceManagerBuilder file(String file) {
+		checkNotNull(file, "file must not be null");
+		this.file = new File(file);
+		return this;
+	}
+
 	public ResourceManager build() {
 		checkNotNull(file, "file must be set");
 

@@ -10,16 +10,28 @@
 
 package com.freshbourne.io;
 
-import com.google.inject.Guice;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertNull;
-
 public class CachedResourceManagerTest {
-	
+
+	private ResourceManager rm;
+
 	@BeforeMethod
 	public void setUp(){
-		// rm = new ResourceManagerBuilder().useCache();
+		rm = new ResourceManagerBuilder().file("/tmp/CachedResourceManagerTest").useCache(true).build();
+	}
+
+	@Test
+	public void emtpy(){
+
+	}
+
+	@Factory
+	public ResourceManagerTest[] resourceManagerInterface(){
+		setUp();
+		ResourceManagerTest[] tests = {new ResourceManagerTest(rm)};
+		return tests;
 	}
 }

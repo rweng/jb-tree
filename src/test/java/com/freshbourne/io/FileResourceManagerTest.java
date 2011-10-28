@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -117,14 +118,6 @@ public class FileResourceManagerTest {
 
 
 // ******** TESTS **********
-
-	@Test
-	public void shouldBeEmptyAtFirst() throws IOException{
-		assertTrue(rm != null);
-		assertEquals(PageSize.DEFAULT_PAGE_SIZE, rm.getPageSize());
-		assertEquals(0, rm.numberOfPages()); // 0 pages
-	}
-
 
 	@Test(expectedExceptions = IllegalStateException.class)
 	public void shouldThrowExceptionIfResourceClosed() throws IOException{
@@ -241,5 +234,12 @@ public class FileResourceManagerTest {
 		}
 		rm.close();
 		assertTrue(rm.getFile().getTotalSpace() > count * PageSize.DEFAULT_PAGE_SIZE);
+	}
+
+	@Factory
+	public ResourceManagerTest[] interfaceTests() throws IOException {
+		setUp();
+		ResourceManagerTest[] test = { new ResourceManagerTest(rm) };
+		return test;
 	}
 }

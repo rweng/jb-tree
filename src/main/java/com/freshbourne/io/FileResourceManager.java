@@ -286,6 +286,7 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public int numberOfPages() {
+		ensureOpen();
 		return header.getNumberOfPages();
 	}
 
