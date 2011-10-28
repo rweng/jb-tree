@@ -35,7 +35,8 @@ public class BTreeSmallTest {
 
 	private static Injector                injector;
 	private        BTree<Integer, Integer> tree;
-	private static final Logger LOG = Logger.getLogger(BTreeSmallTest.class);
+	private static final Logger LOG  = Logger.getLogger(BTreeSmallTest.class);
+	private static final File   file = new File("/tmp/btree-small-test");
 
 	// 3 keys, 4 values
 	private static final int PAGE_SIZE = InnerNode.Header.size() + 3 * (2 * Integer.SIZE / 8) + Integer.SIZE / 8;
@@ -53,14 +54,10 @@ public class BTreeSmallTest {
 		factory = injector.getInstance(BTreeFactory.class);
 	}
 
-	private static File getFile() {
-		return new File("/tmp/btree-small-test-" + System.currentTimeMillis());
-	}
-
 	@BeforeMethod
 	public void setUp() throws IOException {
-		getFile().delete();
-		tree = factory.get(getFile(), IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
+		file.delete();
+		tree = factory.get(file, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
 				IntegerComparator.INSTANCE);
 	}
 
@@ -159,9 +156,9 @@ public class BTreeSmallTest {
 		}));
 
 		// initialize new btree
-		getFile().delete();
+		file.delete();
 		BTree<String, String> newTree =
-				newInjector.getInstance(BTreeFactory.class).get(getFile(), FixedStringSerializer.INSTANCE_1000,
+				newInjector.getInstance(BTreeFactory.class).get(file, FixedStringSerializer.INSTANCE_1000,
 						FixedStringSerializer.INSTANCE_1000,
 						StringComparator.INSTANCE);
 
@@ -214,7 +211,7 @@ public class BTreeSmallTest {
 		pm.open();
 
 		BTree<Integer, String> btree = BTree.create(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
-						IntegerComparator.INSTANCE);
+				IntegerComparator.INSTANCE);
 
 		btree.initialize();
 		btree.sync();
@@ -242,24 +239,24 @@ public class BTreeSmallTest {
 	public void staticMethodConstructor() throws IOException {
 
 		BTree<Integer, String> btree =
-				BTree.create(createResourceManager(), IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
+				BTree.create(createResourceManager(true), IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
 						IntegerComparator.INSTANCE);
 		btree.initialize();
 		btree.sync();
 	}
 
-	private AutoSaveResourceManager createResourceManager() {
-		File file = new File("/tmp/btree-test");
-		file.delete();
+	private AutoSaveResourceManager createResourceManager(boolean reset) {
+		if (reset)
+			file.delete();
 		return new ResourceManagerBuilder().file(file).buildAutoSave();
 	}
 
 	@Test
 	public void integerStringTree() throws IOException {
+		AutoSaveResourceManager rm = createResourceManager(true);
 		BTree<Integer, String> btree =
-				BTree.create(createResourceManager(), IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
+				BTree.create(rm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
 						IntegerComparator.INSTANCE);
-
 		btree.initialize();
 
 		int count = 50;
@@ -271,7 +268,7 @@ public class BTreeSmallTest {
 			btree.sync();
 
 			BTree<Integer, String> btree2 =
-					BTree.create(createResourceManager(), IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
+					BTree.create(rm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
 							IntegerComparator.INSTANCE);
 			btree2.load();
 
@@ -290,7 +287,8 @@ public class BTreeSmallTest {
 
 		btree.sync();
 
-		btree = BTree.create(createResourceManager(), IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
+		btree = BTree.create(rm, IntegerSerializer.INSTANCE,
+				FixedStringSerializer.INSTANCE_1000,
 				IntegerComparator.INSTANCE);
 		btree.load();
 
