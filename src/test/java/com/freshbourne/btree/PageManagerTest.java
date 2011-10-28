@@ -30,17 +30,12 @@ import static org.testng.Assert.assertTrue;
 
 public class PageManagerTest {
 
-	private static Injector injector;
 	private static String path = "/tmp/PageManagerTest";
 	private static File file = new File(path);
 	private ResourceManager rm;
 	private BTree<String, String> tree;
 	private LeafPageManager<String, String> lpm;
 	private InnerNodeManager<String, String> inm;
-
-	static{
-		injector = Guice.createInjector(new BTreeModule());
-	}
 
 	@BeforeMethod
 	public void setUp() throws IOException {

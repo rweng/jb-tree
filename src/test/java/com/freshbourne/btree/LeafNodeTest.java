@@ -10,23 +10,25 @@
 package com.freshbourne.btree;
 
 
+import com.freshbourne.comparator.IntegerComparator;
+import com.freshbourne.io.AutoSaveResourceManager;
 import com.freshbourne.io.DataPageManager;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
+import com.freshbourne.io.ResourceManagerBuilder;
+import com.freshbourne.serializer.FixedStringSerializer;
+import com.freshbourne.serializer.IntegerSerializer;
+import com.freshbourne.serializer.PagePointSerializer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 
 import static org.testng.Assert.*;
 
 public class LeafNodeTest {
 
-	private final static Injector injector;
-	private final static String path = "/tmp/leaf_spec";
+	private final static File file = new File("/tmp/LeafNodeTest");
 	private LeafNode<Integer, String>         leafStr;
 	private LeafNode<Integer, Integer>        leafInt;
 	private LeafPageManager<Integer, String>  lpmStr;
@@ -37,21 +39,18 @@ public class LeafNodeTest {
 
 	private String value1 = "val1";
 	private String value2 = "value2";
+	private AutoSaveResourceManager rm;
 
-
-	static {
-		if ((new File(path)).exists())
-			(new File(path)).delete();
-
-		injector = Guice.createInjector(new BTreeModule(path));
+	LeafNodeTest(){
+		this.rm = new ResourceManagerBuilder().file(file).buildAutoSave();
 	}
 
-	@BeforeMethod public void setUp() {
-		lpmStr = injector.getInstance(Key.get(new TypeLiteral<LeafPageManager<Integer, String>>() {
-		}));
+	@BeforeMethod
+	public void setUp() throws IOException {
+		lpmStr = BTree.create(rm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE, IntegerComparator.INSTANCE).getLeafPageManager();
 		leafStr = lpmStr.createPage();
-		lpmInt = injector.getInstance(Key.get(new TypeLiteral<LeafPageManager<Integer, Integer>>() {
-		}));
+
+		lpmInt = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE).getLeafPageManager();
 		leafInt = lpmInt.createPage();
 	}
 
@@ -91,9 +90,7 @@ public class LeafNodeTest {
 			action = leafStr.insert(key1, value1);
 		} while (action == null);
 
-		DataPageManager<Integer> keyPageManager =
-				injector.getInstance(Key.get(new TypeLiteral<DataPageManager<Integer>>() {
-				}));
+		DataPageManager<Integer> keyPageManager = new DataPageManager<Integer>(rm, PagePointSerializer.INSTANCE, IntegerSerializer.INSTANCE);
 
 		assertNotNull(leafStr.getLastLeafKey());
 		assertEquals(AdjustmentAction.ACTION.INSERT_NEW_NODE, action.getAction());
