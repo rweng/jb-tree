@@ -41,13 +41,13 @@ public class LeafNodeTest {
 	private AutoSaveResourceManager rm;
 
 	LeafNodeTest(){
-		this.rm = new ResourceManagerBuilder().file(file).buildAutoSave();
+		file.delete();
+		this.rm = new ResourceManagerBuilder().file(file).open().buildAutoSave();
 	}
 
 	@BeforeMethod
 	public void setUp() throws IOException {
-		file.delete();
-		rm.open();
+		rm.clear();
 		lpm = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE).getLeafPageManager();
 		leaf = lpm.createPage();
 	}

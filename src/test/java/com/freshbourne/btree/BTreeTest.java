@@ -53,12 +53,13 @@ public class BTreeTest {
 	private static AutoSaveResourceManager rm;
 	
 	BTreeTest() {
-		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).cacheSize(100).buildAutoSave();
+		file.delete();
+		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).cacheSize(100).open().buildAutoSave();
 	}
 
 	@BeforeMethod
 	public void setUp() throws IOException {
-		file.delete();
+		rm.clear();
 		tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
 				IntegerComparator.INSTANCE);
 		tree.initialize();
@@ -66,7 +67,7 @@ public class BTreeTest {
 
 	@Test(groups = "skipBeforeFilter")
 	public void testInitialize() throws IOException {
-		file.delete();
+		rm.clear();
 		tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
 				IntegerComparator.INSTANCE);
 		assertThat(tree.isValid()).isFalse();
@@ -608,6 +609,8 @@ public class BTreeTest {
 
 	@Test
 	public void bulkInsert1Layer() throws IOException {
+		tree.close();
+		file.delete();
 		bulkInsert(tree.getMaxLeafKeys()); // exactly one leaf
 	}
 
@@ -696,6 +699,8 @@ public class BTreeTest {
 			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(i, i);
 		}
 
+		tree.close();
+		rm.clear();
 		tree.bulkInitialize(kvs, true);
 
 		// check if its correct
@@ -717,7 +722,7 @@ public class BTreeTest {
 		Integer value2 = 2;
 
 		tree.close();
-		file.delete();
+		rm.clear();
 		
 		tree.initialize();
 		tree.add(key1, value1);
