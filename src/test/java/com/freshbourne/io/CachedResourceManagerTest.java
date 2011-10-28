@@ -58,19 +58,9 @@ public class CachedResourceManagerTest {
 	}
 
 	@Factory
-	public ResourceManagerTest[] resourceManagerInterface() {
-		ResourceManagerTest[] test = {new ResourceManagerTest(new Provider<ResourceManager>() {
-			@Override public ResourceManager get() {
-				try {
-					setUp();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-				return rm;
-			}
-		})};
-
-		return test;
+	public Object[] resourceManagerInterface() throws IOException {
+		setUp();
+		return new Object[]{new ResourceManagerTest(rm)};
 	}
 
 	@Test

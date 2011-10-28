@@ -32,16 +32,13 @@ public class ResourceManagerTest {
 	private static Logger LOG = Logger.getLogger(ResourceManagerTest.class);
 	private Provider<ResourceManager> provider;
 
-	ResourceManagerTest(Provider<ResourceManager> provider) {
-		checkNotNull(provider);
-		this.provider = provider;
+	ResourceManagerTest(ResourceManager rm){
+		checkNotNull(rm);
+		this.rm = rm;
 	}
-
 	@BeforeMethod
 	public void setUp() throws IOException {
-		rm = provider.get();
-		if (!rm.isOpen())
-			rm.open();
+		rm.clear();
 	}
 
 	@Test

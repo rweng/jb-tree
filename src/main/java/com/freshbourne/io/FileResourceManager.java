@@ -20,23 +20,25 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 
+import static com.google.common.base.Preconditions.checkState;
+
 
 /**
- * Writes Pages to a File.
- * It does not cache, and Pages have to be written back manually or the changes will not be written to disk.
+ * Writes Pages to a File. It does not cache, and Pages have to be written back manually or the changes will not be
+ * written to disk.
  */
 public class FileResourceManager implements ResourceManager {
-	private       RandomAccessFile      handle;
-	private final File                  file;
-	private final int                   pageSize;
-	private       FileLock              fileLock;
-	private       FileChannel           ioChannel;
-	private       ResourceHeader        header;
-	private       boolean               doLock;
+	private       RandomAccessFile handle;
+	private final File             file;
+	private final int              pageSize;
+	private       FileLock         fileLock;
+	private       FileChannel      ioChannel;
+	private       ResourceHeader   header;
+	private       boolean          doLock;
 
 	private static Log LOG = LogFactory.getLog(FileResourceManager.class);
 
-	FileResourceManager(ResourceManagerBuilder builder){
+	FileResourceManager(ResourceManagerBuilder builder) {
 		this.file = builder.getFile();
 		this.pageSize = builder.getPageSize();
 		this.doLock = builder.useLock();
@@ -69,7 +71,7 @@ public class FileResourceManager implements ResourceManager {
 
 	@Override
 	public void writePage(RawPage page) {
-		if(LOG.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 			LOG.debug("writing page to disk: " + page.id());
 		ensureOpen();
 		ensurePageExists(page.id());
@@ -239,6 +241,8 @@ public class FileResourceManager implements ResourceManager {
 	private void ensureOpen() {
 		if (!isOpen())
 			throw new IllegalStateException("Resource is not open: " + toString());
+
+		checkState(file.exists(), "File (%s) has been deleted externally.", getFile().getAbsolutePath());
 	}
 
 	/* (non-Javadoc)
@@ -248,6 +252,12 @@ public class FileResourceManager implements ResourceManager {
 	public int numberOfPages() {
 		ensureOpen();
 		return header.getNumberOfPages();
+	}
+
+	@Override public void clear() {
+		ensureOpen();
+		// file is already truncated when header initialize is called
+		header.initialize();
 	}
 
 	/* (non-Javadoc)

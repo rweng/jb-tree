@@ -88,6 +88,11 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 		return rm.numberOfPages();
 	}
 
+	@Override public void clear() {
+		cache.invalidateAll();
+		rm.clear();
+	}
+
 	@Override public RawPage createPage() {
 		RawPage page = rm.createPage();
 		cache.asMap().put(page.id(), page);

@@ -56,5 +56,9 @@ public interface ResourceManager extends PageManager<RawPage> {
 	 * @return the number of real pages, not header pages
 	 */
 	public int numberOfPages();
-	
+
+	/**
+	 * removes all pages from the ResourceManager
+	 */
+	public void clear();
 }

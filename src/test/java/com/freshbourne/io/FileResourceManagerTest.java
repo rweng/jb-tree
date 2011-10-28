@@ -26,14 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static org.fest.assertions.Assertions.assertThat;
 import static org.testng.Assert.*;
 
 public class FileResourceManagerTest {
-	
+
 	private final static String filePath = "/tmp/frm_test";
-	private final File file = new File(filePath);
+	private final        File   file     = new File(filePath);
 	private FileResourceManager rm;
-	private RawPage page;
 	private static final Log LOG = LogFactory.getLog(FileResourceManagerTest.class);
 
 
@@ -43,37 +43,37 @@ public class FileResourceManagerTest {
 	}
 
 	@AfterMethod(alwaysRun = true)
-	public void tearDown() throws IOException{
+	public void tearDown() throws IOException {
 		rm.close();
 	}
 
-	
+
 	protected FileResourceManager createNewOpenResourceManager() {
-		if(file.exists()){
+		if (file.exists()) {
 			file.delete();
 		}
-		
+
 		return createOpenResourceManager();
 	}
-	
-	protected FileResourceManager createOpenResourceManager(){
+
+	protected FileResourceManager createOpenResourceManager() {
 		rm = (FileResourceManager) new ResourceManagerBuilder().file(file).useCache(false).build();
-		
+
 		try {
 			rm.open();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 		return rm;
 	}
-	
+
 	@Test
-	public void shouldWriteOutHeaderCorrectly() throws IOException{
+	public void shouldWriteOutHeaderCorrectly() throws IOException {
 		rm = (FileResourceManager) createNewOpenResourceManager();
 		rm.createPage();
 		rm.close();
-		
+
 		RandomAccessFile rFile = new RandomAccessFile(file, "rw");
 		assertEquals(PageSize.DEFAULT_PAGE_SIZE, rFile.readInt());
 		assertEquals(1, rFile.readInt());
@@ -90,29 +90,28 @@ public class FileResourceManagerTest {
 	}
 
 
-
 // ******** TESTS **********
 
 	@Test(expectedExceptions = IllegalStateException.class)
-	public void shouldThrowExceptionIfResourceClosed() throws IOException{
+	public void shouldThrowExceptionIfResourceClosed() throws IOException {
 		rm.close();
 		rm.createPage();
 	}
 
 	@Test(expectedExceptions = PageNotFoundException.class)
-	public void shouldThrowExceptionIfPageToWriteDoesNotExist() throws IOException{
-        page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 3423);
-        rm.writePage(page);
+	public void shouldThrowExceptionIfPageToWriteDoesNotExist() throws IOException {
+		RawPage page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 3423);
+		rm.writePage(page);
 	}
 
 	@Test
-	public void shouldGenerateDifferentIdsForEachPage() throws IOException{
+	public void shouldGenerateDifferentIdsForEachPage() throws IOException {
 		assertTrue(rm.createPage().id() != rm.createPage().id());
 	}
 
 	@Test
-	public void shouldReadWrittenPages() throws IOException{
-		page = rm.createPage();
+	public void shouldReadWrittenPages() throws IOException {
+		RawPage page = rm.createPage();
 		page.bufferForWriting(0).putInt(1234);
 		rm.writePage(page);
 
@@ -120,16 +119,22 @@ public class FileResourceManagerTest {
 	}
 
 	@Test
-	public void addingAPageShouldIncreaseNumberOfPages() throws IOException{
+	public void addingAPageShouldIncreaseNumberOfPages() throws IOException {
 		int num = rm.numberOfPages();
 		rm.createPage();
 		assertEquals(num + 1, rm.numberOfPages());
 	}
 
+	@Factory
+	public Object[] createInstances() {
+		return new Object[]{new ResourceManagerTest(new ResourceManagerBuilder().file("/tmp/ResourceManagerTest").open().useCache(false).build())};
+	}
+
+
 	@Test
-	public void shouldBeAbleToReadPagesAfterReopen() throws IOException{
+	public void shouldBeAbleToReadPagesAfterReopen() throws IOException {
 		assertEquals(0, rm.numberOfPages());
-		page = rm.createPage();
+		RawPage page = rm.createPage();
 		assertEquals(1, rm.numberOfPages());
 		rm.createPage();
 		assertEquals(2, rm.numberOfPages());
@@ -152,13 +157,13 @@ public class FileResourceManagerTest {
 	}
 
 	@Test(expectedExceptions = WrongPageSizeException.class)
-	public void shouldThrowExceptionIfWrongPageSize() throws IOException{
-		page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE + 1), 1);
-        rm.addPage(page);
+	public void shouldThrowExceptionIfWrongPageSize() throws IOException {
+		RawPage page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE + 1), 1);
+		rm.addPage(page);
 	}
 
 	@Test(enabled = false)
-	public void shouldBeAbleToRemovePages() throws Exception{
+	public void shouldBeAbleToRemovePages() throws Exception {
 		RawPage p1 = rm.createPage();
 		RawPage p2 = rm.createPage();
 		int i = rm.numberOfPages();
@@ -166,10 +171,10 @@ public class FileResourceManagerTest {
 
 		rm.removePage(p1Id);
 		assertEquals(i - 1, rm.numberOfPages());
-		try{
+		try {
 			rm.getPage(p1Id);
 			fail("reading a non-existent page should throw an exeption");
-		} catch( Exception expected){
+		} catch (Exception expected) {
 		}
 
 		RawPage p3 = rm.createPage();
@@ -181,26 +186,27 @@ public class FileResourceManagerTest {
 	@Test(groups = "slow")
 	public void ensureNoHeapOverflowExeptionIsThrown() throws IOException {
 		int count = 100000;
-		for(int i = 0;i<count;i++){
-				rm.createPage();
+		for (int i = 0; i < count; i++) {
+			rm.createPage();
 		}
 		rm.close();
 		assertTrue(rm.getFile().getTotalSpace() > count * PageSize.DEFAULT_PAGE_SIZE);
 	}
 
-	@Factory
-	public ResourceManagerTest[] resourceManagerInterface() {
-		ResourceManagerTest[] test = {new ResourceManagerTest(new Provider<ResourceManager>() {
-			@Override public ResourceManager get() {
-				try {
-					setUp();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-				return rm;
-			}
-		})};
+	@Test(expectedExceptions = IllegalStateException.class)
+	public void detectExternalFileDelete() {
+		file.delete();
+		rm.createPage();
+	}
 
-		return test;
+	@Test
+	public void clear(){
+		RawPage page1 = rm.createPage();
+		page1.bufferForWriting(0).putInt(0);
+		page1.sync();
+		assertThat(rm.getFile().length()).isEqualTo(2 * rm.getPageSize());
+
+		rm.clear();
+		assertThat(rm.getFile().length()).isEqualTo(rm.getPageSize());
 	}
 }
