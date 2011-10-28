@@ -11,9 +11,13 @@
 package com.freshbourne.io;
 
 import com.google.common.cache.*;
+import com.sun.tools.internal.xjc.reader.xmlschema.parser.CustomizationContextChecker;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * This class caches RawPages coming from a ResourceManager. Through the caching, we can ensure that pages are written
@@ -26,9 +30,14 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 
 	private final ResourceManager         rm;
 	private final Cache<Integer, RawPage> cache;
+	private final int                     cacheSize;
 
 	CachedResourceManager(ResourceManager _rm, int cacheSize) {
+		checkNotNull(_rm);
+		checkArgument(cacheSize > 0, "cacheSize must be > 0");
+		
 		this.rm = _rm;
+		this.cacheSize = cacheSize;
 		this.cache = CacheBuilder.newBuilder().maximumSize(cacheSize)
 				.removalListener(new RemovalListener<Integer, RawPage>() {
 					@Override
@@ -42,6 +51,11 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 						return rm.getPage(key);
 					}
 				});
+
+	}
+
+	public int getCacheSize() {
+		return cacheSize;
 	}
 
 	@Override public void writePage(RawPage page) {
@@ -96,7 +110,7 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 	}
 
 	@Override public void sync() {
-		for(RawPage p : cache.asMap().values()){
+		for (RawPage p : cache.asMap().values()) {
 			p.sync();
 		}
 

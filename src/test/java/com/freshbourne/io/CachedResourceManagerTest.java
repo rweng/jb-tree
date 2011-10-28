@@ -34,17 +34,21 @@ public class CachedResourceManagerTest {
 
 	private ResourceManager rm;
 	private static final Logger LOG = Logger.getLogger(CachedResourceManagerTest.class);
+	private static final File file = new File("/tmp/CachedResourceManagerTest");
 
 	@BeforeMethod
 	public void setUp() throws IOException {
-		File file = new File("/tmp/CachedResourceManagerTest");
 		file.delete();
-		rm = new ResourceManagerBuilder().file(file).useCache(true).build();
+		rm = new ResourceManagerBuilder().file(file).useCache(true).open().build();
 		LOG.info("setup");
 	}
 
 	@Test
 	public void open() throws IOException {
+		rm.close();
+		file.delete();
+		rm = new ResourceManagerBuilder().file(file).useCache(true).build();
+		assertThat(rm.isOpen()).isFalse();
 		rm.open();
 		assertThat(rm.isOpen()).isTrue();
 	}
@@ -65,23 +69,21 @@ public class CachedResourceManagerTest {
 		return test;
 	}
 
-	@Test(dependsOnMethods = "open")
+	@Test
 	public void cache() throws IOException {
-		open();
-		
 		assertThat(rm.isOpen()).isTrue();
 		int count = 10;
 		RawPage[] pages = new RawPage[count];
-		
-		for(int i = 0;i<count;i++){
+
+		for (int i = 0; i < count; i++) {
 			pages[i] = rm.createPage();
 		}
 
 		CachedResourceManager crm = (CachedResourceManager) rm;
-		Cache<Integer,RawPage> cache = crm.getCache();
+		Cache<Integer, RawPage> cache = crm.getCache();
 
 		Random random = new Random();
-		for(int i = 0;i<count*10;i++){
+		for (int i = 0; i < count * 10; i++) {
 			rm.getPage(pages[random.nextInt(10)].id());
 		}
 
@@ -89,25 +91,18 @@ public class CachedResourceManagerTest {
 	}
 
 
-	/*
-	@Test
-	public void testSync() {
+	@Test(dependsOnMethods = "open")
+	public void testAutoSave() throws IOException {
 		CachedResourceManager crm = (CachedResourceManager) rm;
-		crm.getCache().asMap().
 		RawPage p = rm.createPage();
 		int testInt = 5343;
 		p.bufferForWriting(0).putInt(testInt);
 
-
-		rm.sync();
-
-		try {
-			handle.seek(rm.getPageSize());
-			assertEquals(testInt, handle.readInt());
-		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-			Assert.fail();
+		for (int i = 0; i < crm.getCacheSize() * 2; i++) {
+			rm.createPage();
 		}
+
+		assertThat(crm.getCache().asMap().containsKey(p)).isFalse();
+		assertThat(rm.getPage(p.id()).bufferForReading(0).getInt()).isEqualTo(testInt);
 	}
-	*/
 }
