@@ -279,6 +279,17 @@ public class BTreeTest {
 
 	}
 
+	@Test(expectedExceptions = IllegalStateException.class)
+	public void exceptionIfValidTreeIsLoaded() throws IOException {
+		tree.load();
+	}
+
+
+	@Test(expectedExceptions = IllegalStateException.class)
+	public void exceptionIfValidTreeIsInitialized() throws IOException {
+		tree.initialize();
+	}
+
 	@Test
 	public void iteratorsWithoutParameters() throws IOException {
 		tree.initialize();

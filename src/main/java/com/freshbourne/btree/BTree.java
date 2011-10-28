@@ -26,6 +26,7 @@ import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 
 /**
@@ -461,6 +462,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  */
 	@Override
 	public void initialize() throws IOException {
+		checkState(!valid, "tree is already valid: %s", this);
+		
 		preInitialize();
 		setRoot(leafPageManager.createPage());
 		setNumberOfEntries(0);
@@ -490,6 +493,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  */
 	@Override
 	public void load() throws IOException {
+		checkState(!valid, "BTree is already loaded: %s", this);
+		
 		if (LOG.isDebugEnabled())
 			LOG.debug("loading BTree");
 
