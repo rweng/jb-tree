@@ -24,7 +24,7 @@ public class CachedResourceManager implements ResourceManager {
 
 	CachedResourceManager(ResourceManager _rm, int cacheSize){
 		this.rm = _rm;
-		this.cache = CacheBuilder.newBuilder().maximumSize(cacheSize).softValues().build(new CacheLoader<Integer, RawPage>() {
+		this.cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build(new CacheLoader<Integer, RawPage>() {
 			@Override public RawPage load(Integer key) throws Exception {
 				return rm.getPage(key);
 			}

@@ -16,15 +16,17 @@ import org.apache.commons.logging.LogFactory;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
-
+/**
+ * A byte array, usually with an id and a ResourceManager it comes from.
+ */
 public class RawPage implements Serializable {
 
     private ByteBuffer buffer;
     private int id;
     private ResourceManager resourceManager;
     
-    private static Log LOG = LogFactory.getLog(RawPage.class);
-	
+    // private static Log LOG = LogFactory.getLog(RawPage.class);
+
     /**
      * buffer has been modified since RawPage was created?
      */
@@ -66,15 +68,6 @@ public class RawPage implements Serializable {
 		return resourceManager;
 	}
 	
-	@Override
-	protected void finalize() throws Throwable {
-		try {
-			sync();
-		} catch (Exception e) {
-			super.finalize();
-		}
-	}
-	
 	/**
 	 * syncs the RawPage with the ResourceManager its from.
 	 */
@@ -82,6 +75,4 @@ public class RawPage implements Serializable {
 		if (isModified())
 			getResourceManager().writePage(this);
 	}
-    
-    
 }

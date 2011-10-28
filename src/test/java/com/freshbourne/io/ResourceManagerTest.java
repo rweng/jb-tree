@@ -18,18 +18,21 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
+import static org.testng.Assert.assertEquals;
 
 public class ResourceManagerTest {
 	private ResourceManager rm;
 	private static Logger LOG = Logger.getLogger(ResourceManagerTest.class);
 	private Provider<ResourceManager> provider;
 
-	ResourceManagerTest(Provider<ResourceManager> provider){
+	ResourceManagerTest(Provider<ResourceManager> provider) {
 		checkNotNull(provider);
 		this.provider = provider;
 	}
@@ -37,7 +40,7 @@ public class ResourceManagerTest {
 	@BeforeMethod
 	public void setUp() throws IOException {
 		rm = provider.get();
-		if(!rm.isOpen())
+		if (!rm.isOpen())
 			rm.open();
 	}
 
@@ -48,8 +51,8 @@ public class ResourceManagerTest {
 	}
 
 
-	@Test(groups = "bla")
-	public void performance(){
+	@Test(groups = "performance")
+	public void performance() {
 		LOG.info(rm);
 		int count = 10000;
 		RawPage[] pages = new RawPage[count];
@@ -58,21 +61,48 @@ public class ResourceManagerTest {
 
 		long createStart = System.currentTimeMillis();
 		// create pages
-		for(int i = 0;i<count;i++){
+		for (int i = 0; i < count; i++) {
 			pages[i] = rm.createPage();
 		}
 		long createEnd = System.currentTimeMillis();
-		LOG.info("Time for creating "+count+" pages (in ms): " + (createEnd - createStart));
+		LOG.info("Time for creating " + count + " pages (in ms): " + (createEnd - createStart));
 
 		// randomly write to pages
 		long writeStart = System.currentTimeMillis();
-		for(int i=0; i < count; i++){
+		for (int i = 0; i < count; i++) {
 			int page = rand.nextInt(count);
 			pages[page].bufferForWriting(0).putInt(i);
 			rm.writePage(pages[page]);
 		}
 		long writeEnd = System.currentTimeMillis();
-		LOG.info("Time for writing randomly "+count+" pages (in ms): " + (writeEnd - writeStart));
+		LOG.info("Time for writing randomly " + count + " pages (in ms): " + (writeEnd - writeStart));
+	}
+
+	@Test(groups = "slow")
+	public void shouldBeAbleToCreateAMassiveNumberOfPages() {
+		List<Integer> ids = new ArrayList<Integer>();
+
+		RawPage p1 = rm.createPage();
+		p1.bufferForWriting(0).putInt(111);
+		p1.sync();
+
+		int size = 10000;
+		for (int i = 0; i < size; i++) {
+			ids.add(rm.createPage().id());
+		}
+
+		RawPage p2 = rm.createPage();
+		p2.bufferForWriting(0).putInt(222);
+		p2.sync();
+
+		assertEquals(111, rm.getPage(p1.id()).bufferForReading(0).getInt());
+		assertEquals(222, rm.getPage(p2.id()).bufferForReading(0).getInt());
+
+		assertEquals(size + 2, rm.numberOfPages());
+		for (int i = 0; i < size; i++) {
+			Integer id = ids.get(0);
+			assertEquals(id, rm.getPage(id).id());
+		}
 	}
 
 }
