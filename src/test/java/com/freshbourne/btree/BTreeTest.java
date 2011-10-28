@@ -20,6 +20,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -51,7 +52,7 @@ public class BTreeTest {
 	private static AutoSaveResourceManager rm;
 	
 	BTreeTest() {
-		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).buildAutoSave();
+		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).cacheSize(100).buildAutoSave();
 	}
 
 	@BeforeMethod
@@ -288,22 +289,30 @@ public class BTreeTest {
 		tree.initialize();
 	}
 
+	@Test(expectedExceptions = IllegalStateException.class)
+	public void exceptionIfValidTreeIsBulkInitialized() throws IOException {
+		AbstractMap.SimpleEntry content[] = {new AbstractMap.SimpleEntry(1, 2)};
+		tree.bulkInitialize(content, true);
+	}
+
+
 	@Test
-	public void iteratorsWithoutParameters() throws IOException {
-		fillTree(tree, 100000);
+	public void iteratorsWithoutParameters() throws IOException, InterruptedException {
+		LOG.setLevel(Level.DEBUG);
+		fillTree(tree, 1000);
 		tree.checkStructure();
 		
 		Iterator<Integer> iterator = tree.getIterator();
-		for (int i = 0; i < 100000; i++){
-			if(i == 192)
-				LOG.debug("dbeug");
+		for (int i = 0; i < 1000; i++){
+			LOG.info("i = " + i);
+			assertThat(iterator.hasNext()).isTrue();
 			assertThat(iterator.next()).isEqualTo(i);
 		}
 		assertThat(iterator.hasNext()).isFalse();
 	}
 
 	@Test
-	public void ranges() throws IOException {
+	public void ranges() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		List<Range<Integer>> rangeList = new ArrayList<Range<Integer>>();
 		rangeList.add(new Range(-5, 5));
@@ -581,7 +590,7 @@ public class BTreeTest {
 	}
 
 	@Test
-	public void iteratorsWithStartEndGiven() throws IOException {
+	public void iteratorsWithStartEndGiven() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		Iterator<Integer> iterator = tree.getIterator();
 		for (int i = 0; i < 100; i++)
@@ -600,7 +609,7 @@ public class BTreeTest {
 	}
 
 	@Test
-	public void close() throws IOException {
+	public void close() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		tree.close();
 		assertFalse(tree.isValid());
@@ -726,9 +735,13 @@ public class BTreeTest {
 	}
 
 
-	private void fillTree(BTree<Integer, Integer> tree, int count) {
+	private void fillTree(BTree<Integer, Integer> tree, int count) throws InterruptedException {
 		for (int i = 0; i < count; i++) {
+			if(LOG.isDebugEnabled())
+				LOG.debug("fillTree() : i = " + i);
+
 			tree.add(i, i);
+			tree.checkStructure();
 		}
 	}
 }

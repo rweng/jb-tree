@@ -247,6 +247,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @throws IOException
 	 */
 	public void bulkInitialize(SimpleEntry<K, V>[] kvs, int fromIndex, int toIndex, boolean sorted) throws IOException {
+		checkState(!valid, "BTree is already loaded: %s", this);
+		
 		int count = toIndex - fromIndex + 1;
 		if (count < 0)
 			throw new IllegalArgumentException(

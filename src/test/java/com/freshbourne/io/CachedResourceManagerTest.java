@@ -11,6 +11,7 @@
 package com.freshbourne.io;
 
 import com.google.common.cache.Cache;
+import com.google.common.collect.MapMaker;
 import com.google.common.io.Files;
 import com.google.inject.Provider;
 import org.apache.log4j.Logger;
@@ -18,11 +19,14 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
+import org.testng.collections.Lists;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ConcurrentMap;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
@@ -104,5 +108,22 @@ public class CachedResourceManagerTest {
 
 		assertThat(crm.getCache().asMap().containsKey(p)).isFalse();
 		assertThat(rm.getPage(p.id()).bufferForReading(0).getInt()).isEqualTo(testInt);
+	}
+
+	@Test
+	public void findCacheProblem() throws IOException {
+		rm.close();
+		rm = new ResourceManagerBuilder().file(file).useCache(true).cacheSize(5).open().build();
+		List<Integer> list = Lists.newArrayList();
+		for(int i = 0;i < 1250;i++){
+			RawPage page = rm.createPage();
+			list.add(page.id());
+			page.bufferForWriting(0).putInt(i);
+		}
+		rm.sync();
+		for(int i = 0;i < 1250;i++){
+			RawPage page = rm.getPage(list.get(i));
+			assertThat(page.bufferForReading(0).getInt()).isEqualTo(i);
+		}
 	}
 }
