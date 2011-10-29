@@ -19,7 +19,6 @@ package com.freshbourne.serializer;
 public interface FixLengthSerializer<InputType, ResultType> extends Serializer<InputType, ResultType> {
 	
 	/**
-	 * @param c class in question
 	 * @return length of the object returned by {@link #serialize(Object)}
 	 */
 	public int getSerializedLength();

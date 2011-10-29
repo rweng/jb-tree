@@ -17,7 +17,7 @@ public class InvalidPageException extends RuntimeException {
 		super("The page is invalid!");
 	}
 	
-	public InvalidPageException(Object p){
+	public InvalidPageException(final Object p){
 		super("Page " + p.toString() + " is invalid!");
 	}
 

@@ -45,6 +45,7 @@ interface Node<K, V> {
 	public int getNumberOfKeys();
 	
 	/**
+	 * @param key
 	 * @return boolean if the key is contained in the map
 	 */
 	public boolean containsKey(K key);
@@ -113,6 +114,7 @@ interface Node<K, V> {
 
     /**
      * @return true if all sub-nodes are in the right order and are valid
+     * @throws IllegalStateException
      */
     public void checkStructure() throws IllegalStateException;
 }

@@ -24,7 +24,7 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 	private static Logger LOG = Logger.getLogger(FixedStringSerializer.class);
 	
 	
-	private FixedStringSerializer(int length) {
+	private FixedStringSerializer(final int length) {
 		this.length = length;
 	}
 
@@ -32,15 +32,15 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 	 * @see com.freshbourne.serializer.Serializer#serialize(java.lang.Object)
 	 */
 	@Override
-	public byte[] serialize(String o) {
-		byte[] bytes = o.getBytes();
+	public byte[] serialize(final String o) {
+		final byte[] bytes = o.getBytes();
 		
 		if(bytes.length > (length - 1)){
 			throw new IllegalArgumentException("String is too long to be serialized");
 		}
 
 
-		ByteBuffer buf = ByteBuffer.allocate(length);
+		final ByteBuffer buf = ByteBuffer.allocate(length);
 		buf.putShort((short) bytes.length);
 		buf.put(bytes);
 		return buf.array();
@@ -50,11 +50,11 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 	 * @see com.freshbourne.serializer.Serializer#deserialize(java.lang.Object)
 	 */
 	@Override
-	public String deserialize(byte[] o) {
-		ByteBuffer buf = ByteBuffer.wrap(o);
-		short length = buf.getShort();
+	public String deserialize(final byte[] o) {
+		final ByteBuffer buf = ByteBuffer.wrap(o);
+		final short length = buf.getShort();
 
-		byte[] bytes = new byte[length];
+		final byte[] bytes = new byte[length];
 		buf.get(bytes);
 		return new String(bytes);
 	}

@@ -24,9 +24,9 @@ public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {
 
     @Inject
     public DataPageManager(
-    		PageManager<RawPage> bpm,
-            FixLengthSerializer<PagePointer, byte[]> pointSerializer,
-			Serializer<T, byte[]> dataSerializer
+    		final PageManager<RawPage> bpm,
+            final FixLengthSerializer<PagePointer, byte[]> pointSerializer,
+			final Serializer<T, byte[]> dataSerializer
             ){
     	super(bpm);
         this.bpm = bpm;
@@ -39,7 +39,7 @@ public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {
 	 * @see com.freshbourne.io.PageManager#hasPage(long)
 	 */
 	@Override
-	public boolean hasPage(int id) {
+	public boolean hasPage(final int id) {
 		return bpm.hasPage(id);
 	}
 
@@ -56,7 +56,7 @@ public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {
 	 * @see com.freshbourne.io.AbstractPageManager#createObjectPage(com.freshbourne.io.RawPage)
 	 */
 	@Override
-	protected DataPage<T> createObjectPage(RawPage page) {
+	protected DataPage<T> createObjectPage(final RawPage page) {
 		return new DynamicDataPage<T>(page, pointSerializer, dataSerializer);
 	}
 }

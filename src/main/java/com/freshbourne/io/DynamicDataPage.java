@@ -42,9 +42,9 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	}
 	
 	DynamicDataPage(
-			RawPage rawPage,
-			FixLengthSerializer<PagePointer, byte[]> pointSerializer, 
-			Serializer<T, byte[]> dataSerializer){
+			final RawPage rawPage,
+			final FixLengthSerializer<PagePointer, byte[]> pointSerializer,
+			final Serializer<T, byte[]> dataSerializer){
 
 		this.rawPage = rawPage;
 		
@@ -64,18 +64,18 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	 * @see com.freshbourne.btree.DataPage#add(byte[])
 	 */
 	@Override
-	public Integer add(T entry) {
+	public Integer add(final T entry) {
 		ensureValid();
 		
-		byte[] bytes = entrySerializer.serialize(entry);
+		final byte[] bytes = entrySerializer.serialize(entry);
 		
 		if(bytes.length > remaining())
 			return null;
 		
-		int bodyOffset = getBodyOffset() - bytes.length;
+		final int bodyOffset = getBodyOffset() - bytes.length;
 		rawPage.bufferForWriting(bodyOffset).put(bytes);
 		
-		int id = generateId();
+		final int id = generateId();
 		if(entries.containsKey(id)){
 			throw new IllegalStateException();
 		}
@@ -88,7 +88,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	}
 	
 	private int generateId(){
-		Random r = new Random();
+		final Random r = new Random();
 		int id;
 		while(entries.containsKey(id = r.nextInt())){}
 		return id;
@@ -102,18 +102,18 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	 * @see com.freshbourne.btree.DataPage#remove(int)
 	 */
 	@Override
-	public void remove(int id)  {
+	public void remove(final int id)  {
 		
-		Integer offset = entries.get(id);
+		final Integer offset = entries.get(id);
 		if(offset == null)
 			return;
 		
 		// move all body elements
-		int size = sizeOfEntryAt(offset);
+		final int size = sizeOfEntryAt(offset);
 		System.arraycopy(rawPage.bufferForWriting(0).array(), getBodyOffset(), rawPage.bufferForWriting(0).array(), getBodyOffset() + size, offset - getBodyOffset() );
 		
 		// adjust the entries in the entries array
-		for(int key : entries.keySet()){
+		for(final int key : entries.keySet()){
 			if(entries.get(key) < offset)
 				entries.put(key, entries.get(key) + size);
 		}
@@ -128,10 +128,10 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	 * Creates a valid header by writing the entries in memory to the header and adjusts the header limit.
 	 */
 	private void writeAndAdjustHeader() {
-		ByteBuffer buffer = rawPage().bufferForWriting(0);
+		final ByteBuffer buffer = rawPage().bufferForWriting(0);
 		buffer.putInt(entries.size() == 0 ? NO_ENTRIES_INT : entries.size());
 		
-		for(int key : entries.keySet()){
+		for(final int key : entries.keySet()){
 			buffer.putInt(key);
 			buffer.putInt(entries.get(key));
 		}	
@@ -141,16 +141,16 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	 * @see com.freshbourne.btree.DataPage#get(int)
 	 */
 	@Override
-	public T get(int id) {
+	public T get(final int id) {
 		ensureValid();
 		
 		if(!entries.containsKey(id))
 			return null;
 		
-		Integer offset = entries.get(id);
+		final Integer offset = entries.get(id);
 		
-		int size = sizeOfEntryAt(offset);
-		byte[] bytes = new byte[size];
+		final int size = sizeOfEntryAt(offset);
+		final byte[] bytes = new byte[size];
 		rawPage.bufferForReading(offset).get(bytes);
 		
 		return entrySerializer.deserialize(bytes);
@@ -161,10 +161,10 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 			throw new InvalidPageException(this);
 	}
 	
-	private int nextEntry(int offset){
+	private int nextEntry(final int offset){
 		int smallestLarger = -1;
 		
-		for(int o : entries.values()){
+		for(final int o : entries.values()){
 			if(o > offset){
 				if(o < smallestLarger || smallestLarger == -1)
 					smallestLarger = o;
@@ -174,7 +174,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 		return smallestLarger;
 	}
 	
-	private int sizeOfEntryAt(int offset){
+	private int sizeOfEntryAt(final int offset){
 		int smallestLarger = nextEntry(offset);
 		
 		if(smallestLarger == -1)
@@ -197,11 +197,11 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	public void load() {
         entries.clear();
 		
-		ByteBuffer buffer = rawPage().bufferForReading(0);
-		int numberOfEntries = buffer.getInt();
+		final ByteBuffer buffer = rawPage().bufferForReading(0);
+		final int numberOfEntries = buffer.getInt();
 		
 		for(int i = 0; i < numberOfEntries; i++){
-			int key = buffer.getInt();
+			final int key = buffer.getInt();
 			entries.put(key, buffer.getInt());
 		}
 		
@@ -210,7 +210,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	
 	private int getBodyOffset(){
 		int offset = rawPage().bufferForReading(0).limit();
-		for(int pos : entries.values()){
+		for(final int pos : entries.values()){
 			if(pos < offset)
 				offset = pos;
 		}

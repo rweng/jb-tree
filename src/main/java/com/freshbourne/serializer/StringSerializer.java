@@ -16,7 +16,7 @@ public enum StringSerializer implements Serializer<String, byte[]> {
 	 * @see com.freshbourne.serializer.Serializer#serialize(java.lang.Object)
 	 */
 	@Override
-	public byte[] serialize(String o) {
+	public byte[] serialize(final String o) {
 		return o.getBytes();
 	}
 
@@ -24,7 +24,7 @@ public enum StringSerializer implements Serializer<String, byte[]> {
 	 * @see com.freshbourne.serializer.Serializer#deserialize(java.lang.Object)
 	 */
 	@Override
-	public String deserialize(byte[] o) {
+	public String deserialize(final byte[] o) {
 		return new String(o);
 	}
 	

@@ -18,21 +18,21 @@ import java.util.concurrent.ConcurrentMap;
 public class StringCutSerializer implements FixLengthSerializer<String, byte[]> {
 	private static ConcurrentMap<Integer, StringCutSerializer> cache = null;
 
-	public static StringCutSerializer get(Integer size) {
+	public static StringCutSerializer get(final Integer size) {
 		if (cache == null) {
 			cache = new MapMaker().weakValues().makeMap();
 		} else if (cache.containsKey(size)) {
 			return cache.get(size);
 		}
 
-		StringCutSerializer s = new StringCutSerializer(size);
+		final StringCutSerializer s = new StringCutSerializer(size);
 		cache.put(size, s);
 		return s;
 	}
 
 	private int size;
 
-	private StringCutSerializer(int size) {
+	private StringCutSerializer(final int size) {
 		this.size = size;
 	}
 
@@ -40,12 +40,12 @@ public class StringCutSerializer implements FixLengthSerializer<String, byte[]> 
 		return size;
 	}
 
-	@Override public byte[] serialize(String o) {
-		ByteBuffer buf = ByteBuffer.allocate(size);
+	@Override public byte[] serialize(final String o) {
+		final ByteBuffer buf = ByteBuffer.allocate(size);
 		buf.putShort((short) 0);
 
-		byte[] bytes = o.getBytes();
-		short toWrite = (short) (bytes.length > buf.remaining() ? buf.remaining() : bytes.length);
+		final byte[] bytes = o.getBytes();
+		final short toWrite = (short) (bytes.length > buf.remaining() ? buf.remaining() : bytes.length);
 
 		buf.put(bytes, 0, toWrite);
 		buf.position(0);
@@ -54,10 +54,10 @@ public class StringCutSerializer implements FixLengthSerializer<String, byte[]> 
 		return buf.array();
 	}
 
-	@Override public String deserialize(byte[] o) {
-		ByteBuffer buf = ByteBuffer.wrap(o);
-		short length = buf.getShort();
-		byte[] bytes = new byte[length];
+	@Override public String deserialize(final byte[] o) {
+		final ByteBuffer buf = ByteBuffer.wrap(o);
+		final short length = buf.getShort();
+		final byte[] bytes = new byte[length];
 		buf.get(bytes);
 		return new String(bytes);
 	}

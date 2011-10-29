@@ -16,10 +16,6 @@ import com.freshbourne.io.AutoSaveResourceManager;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.testng.annotations.BeforeMethod;
@@ -81,18 +77,18 @@ public class BTreeTest {
 
 	@Test
 	public void testMultiLevelInsertForward() throws IOException {
-		int count = 100;
+		final int count = 100;
 
 		for (int i = 0; i < count; i++) {
 
 			assertTrue(tree.isValid());
 			tree.add(i, i);
 			tree.checkStructure();
-			Iterator<Integer> iterator = tree.getIterator();
+			final Iterator<Integer> iterator = tree.getIterator();
 
 			int latest = iterator.next();
 			for (int j = 0; j <= i - 1; j++) {
-				int next = iterator.next();
+				final int next = iterator.next();
 				assertTrue(latest <= next);
 				latest = next;
 			}
@@ -102,11 +98,11 @@ public class BTreeTest {
 
 
 		assertEquals(count, tree.getNumberOfEntries());
-		Iterator<Integer> iterator = tree.getIterator();
+		final Iterator<Integer> iterator = tree.getIterator();
 
 		int latest = iterator.next();
 		for (int i = 0; i < count - 1; i++) {
-			int next = iterator.next();
+			final int next = iterator.next();
 			assertTrue(latest <= next);
 			latest = next;
 		}
@@ -115,18 +111,18 @@ public class BTreeTest {
 
 	@Test
 	public void testMultiLevelInsertBackward() throws IOException {
-		int count = 100;
+		final int count = 100;
 
 		for (int i = 0; i < count; i++) {
 
 			assertTrue(tree.isValid());
 			tree.add(count - i, count - i);
 			tree.checkStructure();
-			Iterator<Integer> iterator = tree.getIterator();
+			final Iterator<Integer> iterator = tree.getIterator();
 
 			int latest = iterator.next();
 			for (int j = 0; j <= i - 1; j++) {
-				int next = iterator.next();
+				final int next = iterator.next();
 				assertTrue(latest <= next);
 				latest = next;
 			}
@@ -136,11 +132,11 @@ public class BTreeTest {
 
 
 		assertEquals(count, tree.getNumberOfEntries());
-		Iterator<Integer> iterator = tree.getIterator();
+		final Iterator<Integer> iterator = tree.getIterator();
 
 		int latest = iterator.next();
 		for (int i = 0; i < count - 1; i++) {
-			int next = iterator.next();
+			final int next = iterator.next();
 			assertTrue(latest <= next);
 			latest = next;
 		}
@@ -151,8 +147,8 @@ public class BTreeTest {
 	public void testLargeKeyValues() throws IOException, InterruptedException {
 		// initialize new btree
 		file.delete();
-		AutoSaveResourceManager newRm = new ResourceManagerBuilder().file(file).buildAutoSave();
-		BTree<String, String> newTree = BTree.create(newRm, FixedStringSerializer.INSTANCE_1000,
+		final AutoSaveResourceManager newRm = new ResourceManagerBuilder().file(file).buildAutoSave();
+		final BTree<String, String> newTree = BTree.create(newRm, FixedStringSerializer.INSTANCE_1000,
 				FixedStringSerializer.INSTANCE_1000,
 				StringComparator.INSTANCE);
 
@@ -162,7 +158,7 @@ public class BTreeTest {
 		newTree.initialize();
 
 		// do the actual test
-		int count = 100;
+		final int count = 100;
 		for (int i = 0; i < count; i++) {
 			if (i == 24)
 				LOG.debug("DEBUG");
@@ -172,10 +168,10 @@ public class BTreeTest {
 			newTree.checkStructure();
 		}
 
-		Iterator<String> iterator = newTree.getIterator();
+		final Iterator<String> iterator = newTree.getIterator();
 		for (int i = 0; i < count; i++) {
 			assertThat(iterator.hasNext()).isTrue();
-			String next = iterator.next();
+			final String next = iterator.next();
 			assertThat(next).isNotNull();
 			// LOG.debug("got value: " + next);
 		}
@@ -184,14 +180,14 @@ public class BTreeTest {
 
 	@Test
 	public void manualConstructor() throws IOException {
-		String filePath = "/tmp/manualConstructorTestBtree";
-		File file = new File(filePath);
+		final String filePath = "/tmp/manualConstructorTestBtree";
+		final File file = new File(filePath);
 		file.delete();
 
-		AutoSaveResourceManager pm = new ResourceManagerBuilder().file(file).buildAutoSave();
+		final AutoSaveResourceManager pm = new ResourceManagerBuilder().file(file).buildAutoSave();
 		pm.open();
 
-		BTree<Integer, String> btree = BTree.create(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
+		final BTree<Integer, String> btree = BTree.create(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
 				IntegerComparator.INSTANCE);
 
 		btree.initialize();
@@ -203,14 +199,14 @@ public class BTreeTest {
 	@Test
 	public void staticMethodConstructor() throws IOException {
 
-		BTree<Integer, String> btree =
+		final BTree<Integer, String> btree =
 				BTree.create(createResourceManager(true), IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
 						IntegerComparator.INSTANCE);
 		btree.initialize();
 		btree.sync();
 	}
 
-	private AutoSaveResourceManager createResourceManager(boolean reset) {
+	private AutoSaveResourceManager createResourceManager(final boolean reset) {
 		if (reset)
 			file.delete();
 		return new ResourceManagerBuilder().file(file).buildAutoSave();
@@ -218,13 +214,13 @@ public class BTreeTest {
 
 	@Test
 	public void integerStringTree() throws IOException {
-		AutoSaveResourceManager rm = createResourceManager(true);
+		final AutoSaveResourceManager rm = createResourceManager(true);
 		BTree<Integer, String> btree =
 				BTree.create(rm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
 						IntegerComparator.INSTANCE);
 		btree.initialize();
 
-		int count = 50;
+		final int count = 50;
 
 		for (int i = 0; i < count; i++) {
 			LOG.debug("ROUND: " + i);
@@ -232,13 +228,13 @@ public class BTreeTest {
 			btree.add(i, "" + i);
 			btree.sync();
 
-			BTree<Integer, String> btree2 =
+			final BTree<Integer, String> btree2 =
 					BTree.create(rm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
 							IntegerComparator.INSTANCE);
 			btree2.load();
 
 
-			Iterator<String> iterator = btree2.getIterator();
+			final Iterator<String> iterator = btree2.getIterator();
 
 			for (int j = 0; j <= i; j++) {
 				assertTrue(iterator.hasNext());
@@ -257,7 +253,7 @@ public class BTreeTest {
 				IntegerComparator.INSTANCE);
 		btree.load();
 
-		Iterator<String> iterator = btree.getIterator();
+		final Iterator<String> iterator = btree.getIterator();
 
 		for (int i = 0; i < count; i++) {
 			assertTrue(iterator.hasNext());
@@ -281,7 +277,7 @@ public class BTreeTest {
 
 	@Test(expectedExceptions = IllegalStateException.class)
 	public void exceptionIfValidTreeIsBulkInitialized() throws IOException {
-		AbstractMap.SimpleEntry content[] = {new AbstractMap.SimpleEntry(1, 2)};
+		final AbstractMap.SimpleEntry[] content = {new AbstractMap.SimpleEntry(1, 2)};
 		tree.bulkInitialize(content, true);
 	}
 
@@ -292,7 +288,7 @@ public class BTreeTest {
 		fillTree(tree, 1000);
 		tree.checkStructure();
 		
-		Iterator<Integer> iterator = tree.getIterator();
+		final Iterator<Integer> iterator = tree.getIterator();
 		for (int i = 0; i < 1000; i++){
 			LOG.info("i = " + i);
 			assertThat(iterator.hasNext()).isTrue();
@@ -304,7 +300,7 @@ public class BTreeTest {
 	@Test
 	public void ranges() throws IOException, InterruptedException {
 		fillTree(tree, 100);
-		List<Range<Integer>> rangeList = new ArrayList<Range<Integer>>();
+		final List<Range<Integer>> rangeList = new ArrayList<Range<Integer>>();
 		rangeList.add(new Range(-5, 5));
 
 		// 49 - 56
@@ -446,14 +442,14 @@ public class BTreeTest {
 
 	@Test
 	public void removeWithValueArgumentShouldRemoveOnlyThisValue() {
-		int k1 = Integer.MAX_VALUE;
-		int k2 = Integer.MIN_VALUE;
+		final int k1 = Integer.MAX_VALUE;
+		final int k2 = Integer.MIN_VALUE;
 		removeWithValueArgumentShouldRemoveOnlyThisValue(k1, k2);
 		tree.clear();
 		removeWithValueArgumentShouldRemoveOnlyThisValue(k2, k1);
 	}
 
-	public void removeWithValueArgumentShouldRemoveOnlyThisValue(Integer key1, Integer key2) {
+	public void removeWithValueArgumentShouldRemoveOnlyThisValue(final Integer key1, final Integer key2) {
 		tree.add(key1, value1);
 		tree.add(key1, value2);
 		tree.add(key2, value2);
@@ -481,8 +477,8 @@ public class BTreeTest {
 		assertEquals(0, tree.get(key1).size());
 	}
 
-	private void simpleTests(Integer keyToAdd) {
-		int numOfEntries = tree.getNumberOfEntries();
+	private void simpleTests(final Integer keyToAdd) {
+		final int numOfEntries = tree.getNumberOfEntries();
 
 		tree.add(keyToAdd, value2);
 		assertThat(tree.containsKey(keyToAdd)).isTrue();
@@ -496,14 +492,14 @@ public class BTreeTest {
 		assertThat(tree.getNumberOfEntries()).isEqualTo(numOfEntries);
 	}
 
-	protected void fill(int size) {
+	protected void fill(final int size) {
 		for (int i = 0; i < size; i++) {
 			tree.add(i, i);
 		}
 	}
 
 	@Test public void shouldWorkOnTheEdgeToCreateNewInnerNode() {
-		int size = 170;
+		final int size = 170;
 		fill(size);
 
 		assertThat(tree.getNumberOfEntries()).isEqualTo(size);
@@ -513,14 +509,14 @@ public class BTreeTest {
 	@Test public void iterator() {
 		Integer val;
 
-		int k1 = Integer.MIN_VALUE;
-		int k2 = Integer.MAX_VALUE;
+		final int k1 = Integer.MIN_VALUE;
+		final int k2 = Integer.MAX_VALUE;
 
 		tree.add(k1, value1);
 		tree.add(k1, value2);
 		tree.add(k2, value2);
 
-		Iterator<Integer> i = tree.getIterator();
+		final Iterator<Integer> i = tree.getIterator();
 		assertThat(i.hasNext()).isTrue();
 		val = i.next();
 		assertThat(val.equals(value1) || val.equals(value2)).isTrue();
@@ -534,7 +530,7 @@ public class BTreeTest {
 
 	@Test(groups = "slow")
 	public void shouldWorkWithMassiveValues() {
-		int size = 100000;
+		final int size = 100000;
 
 		fill(size);
 
@@ -545,21 +541,21 @@ public class BTreeTest {
 
 	@Test(enabled = false)
 	public void shouldNotHaveTooMuchOverhead() {
-		int sizeForKey = Integer.SIZE / 8;
-		int sizeForVal = Integer.SIZE / 8;
+		final int sizeForKey = Integer.SIZE / 8;
+		final int sizeForVal = Integer.SIZE / 8;
 
 		// insert 10.000 K/V pairs
-		int size = 100000;
-		long start = System.currentTimeMillis();
+		final int size = 100000;
+		final long start = System.currentTimeMillis();
 		for (int i = 0; i < size; i++) {
 			tree.add(i, i);
 		}
 
 		tree.sync();
-		long end = System.currentTimeMillis();
+		final long end = System.currentTimeMillis();
 
-		Long sizeOfData = (long) (size * (sizeForKey + sizeForVal));
-		float realSizePercent = file.length() / sizeOfData * 100;
+		final Long sizeOfData = (long) (size * (sizeForKey + sizeForVal));
+		final float realSizePercent = file.length() / sizeOfData * 100;
 
 		System.out.println("====== BTREE: SIZE OVERHEAD TEST ======");
 		System.out.println("key + value data inserted:" + sizeOfData / 1024 + "k");
@@ -613,6 +609,7 @@ public class BTreeTest {
 	/**
 	 * causes java.lang.IllegalArgumentException: for bulkinsert, you must have at least 2 page ids and keys.size() ==
 	 * (pageIds.size() - 1)
+	 * @throws java.io.IOException
 	 */
 	@Test
 	public void bulkInsertWithOnlyOnePageForNextInnerNode() throws IOException {
@@ -630,15 +627,15 @@ public class BTreeTest {
 
 	@Test
 	public void bulkInsertWithSortAndCloseAndRange() throws IOException {
-		int count = 50;
-		int from = 10;
-		int to = 39;
-		int realCount = to - from + 1;
+		final int count = 50;
+		final int from = 10;
+		final int to = 39;
+		final int realCount = to - from + 1;
 
-		AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
-		SecureRandom srand = new SecureRandom();
+		final AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
+		final SecureRandom srand = new SecureRandom();
 
-		List<Integer> keys = new LinkedList<Integer>();
+		final List<Integer> keys = new LinkedList<Integer>();
 
 		for (int i = 0; i < count; i++) {
 			int newKey = srand.nextInt();
@@ -679,8 +676,8 @@ public class BTreeTest {
 		}
 	}
 
-	public void bulkInsert(int count) throws IOException {
-		@SuppressWarnings("unchecked")
+	public void bulkInsert(final int count) throws IOException {
+		@SuppressWarnings("unchecked") final
 		AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
 
 		for (int i = 0; i < count; i++) {
@@ -705,9 +702,9 @@ public class BTreeTest {
 	}
 
 	@Test(dataProvider = "shouldBeAbleToOpenAndLoadProvider")
-	public void shouldBeAbleToOpenAndLoad(Integer key1, Integer key2) throws IOException {
-		Integer value1 = 1;
-		Integer value2 = 2;
+	public void shouldBeAbleToOpenAndLoad(final Integer key1, final Integer key2) throws IOException {
+		final Integer value1 = 1;
+		final Integer value2 = 2;
 
 		tree.close();
 		file.delete();
@@ -734,7 +731,7 @@ public class BTreeTest {
 	}
 
 
-	private void fillTree(BTree<Integer, Integer> tree, int count) throws InterruptedException {
+	private void fillTree(final BTree<Integer, Integer> tree, final int count) throws InterruptedException {
 		for (int i = 0; i < count; i++) {
 			if(LOG.isDebugEnabled())
 				LOG.debug("fillTree() : i = " + i);

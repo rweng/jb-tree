@@ -27,22 +27,20 @@ import java.util.Comparator;
 public class BTreeModule extends AbstractModule {
 
     private String indexFile;
-    private Long   bTreePageId;
 
-    public BTreeModule() {
+	public BTreeModule() {
         this(null, null);
     }
 
-    public BTreeModule(String indexFile) {
+    public BTreeModule(final String indexFile) {
         this(indexFile, null);
     }
 
-    public BTreeModule(String indexFile, Long bTreePageId) {
+    public BTreeModule(final String indexFile, final Long bTreePageId) {
         this.indexFile = indexFile;
-        this.bTreePageId = bTreePageId;
-    }
+	}
 
-    public void setIndexFile(String indexFile) {
+    public void setIndexFile(final String indexFile) {
         this.indexFile = indexFile;
     }
 
@@ -73,7 +71,7 @@ public class BTreeModule extends AbstractModule {
         bind(new TypeLiteral<Comparator<String>>() {
         }).toInstance(StringComparator.INSTANCE);
 
-        IOModule module = new IOModule();
+        final IOModule module = new IOModule();
 
         if (indexFile != null)
             module.setFile(new File(indexFile));

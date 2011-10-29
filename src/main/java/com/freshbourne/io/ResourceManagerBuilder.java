@@ -26,35 +26,35 @@ public class ResourceManagerBuilder {
 
 	private File file = null;
 
-	public ResourceManagerBuilder useCache(boolean cached) {
+	public ResourceManagerBuilder useCache(final boolean cached) {
 		this.useCache = cached;
 		return this;
 	}
 
-	public ResourceManagerBuilder useLock(boolean useLock) {
+	public ResourceManagerBuilder useLock(final boolean useLock) {
 		this.useLock = useLock;
 		return this;
 	}
 
-	public ResourceManagerBuilder cacheSize(int cacheSize) {
+	public ResourceManagerBuilder cacheSize(final int cacheSize) {
 		checkArgument(cacheSize > 0, "cacheSize must be > 0");
 		this.cacheSize = cacheSize;
 		return this;
 	}
 
-	public ResourceManagerBuilder pageSize(int pageSize) {
+	public ResourceManagerBuilder pageSize(final int pageSize) {
 		checkArgument(pageSize >= 24, "min pageSize is 24");
 		this.pageSize = pageSize;
 		return this;
 	}
 
-	public ResourceManagerBuilder file(File file) {
+	public ResourceManagerBuilder file(final File file) {
 		checkNotNull(file, "file must not be null");
 		this.file = file;
 		return this;
 	}
 
-	public ResourceManagerBuilder file(String file) {
+	public ResourceManagerBuilder file(final String file) {
 		checkNotNull(file, "file must not be null");
 		this.file = new File(file);
 		return this;

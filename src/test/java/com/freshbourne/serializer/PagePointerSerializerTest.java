@@ -10,8 +10,6 @@
 package com.freshbourne.serializer;
 
 import com.freshbourne.io.PagePointer;
-import com.freshbourne.serializer.FixLengthSerializer;
-import com.freshbourne.serializer.PagePointSerializer;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -29,8 +27,8 @@ public class PagePointerSerializerTest {
 	}
 	
 	@Test public void testSerializer(){
-		byte[] b1 = serializer.serialize(p1);
-		byte[] b2 = serializer.serialize(p2);
+		final byte[] b1 = serializer.serialize(p1);
+		final byte[] b2 = serializer.serialize(p2);
 
 		assert b1 != b2;
 		Assert.assertEquals(serializer.getSerializedLength(), b1.length);

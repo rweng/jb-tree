@@ -31,12 +31,12 @@ class InnerNodeManager<K, V> extends AbstractPageManager<InnerNode<K, V>> {
 	
 	@Inject
 	public InnerNodeManager(
-			PageManager<RawPage> bpm, 
-			DataPageManager<K> keyPageManager,
-			DataPageManager<V> valuePageManager,
-			LeafPageManager<K, V> leafPageManager,
-			FixLengthSerializer<K, byte[]> keySerializer,
-			Comparator<K> comparator) {
+			final PageManager<RawPage> bpm,
+			final DataPageManager<K> keyPageManager,
+			final DataPageManager<V> valuePageManager,
+			final LeafPageManager<K, V> leafPageManager,
+			final FixLengthSerializer<K, byte[]> keySerializer,
+			final Comparator<K> comparator) {
 		super(bpm);
 		this.keySerializer = keySerializer;
         this.keyPageManager = keyPageManager;
@@ -48,7 +48,7 @@ class InnerNodeManager<K, V> extends AbstractPageManager<InnerNode<K, V>> {
 	 * @see com.freshbourne.io.AbstractPageManager#createObjectPage()
 	 */
 	@Override
-	protected InnerNode<K, V> createObjectPage(RawPage page) {
+	protected InnerNode<K, V> createObjectPage(final RawPage page) {
 		return new InnerNode<K, V>(page, keySerializer, comparator, keyPageManager, leafPageManager, this);
 	}
 }

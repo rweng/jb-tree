@@ -12,11 +12,8 @@ package com.freshbourne.btree;
 
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.AutoSaveResourceManager;
-import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.IntegerSerializer;
-import com.freshbourne.serializer.PagePointSerializer;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -88,8 +85,6 @@ public class LeafNodeTest {
 			action = leaf.insert(key1, value1);
 		} while (action == null);
 
-		DataPageManager<Integer> keyPageManager = new DataPageManager<Integer>(rm, PagePointSerializer.INSTANCE, IntegerSerializer.INSTANCE);
-
 		assertNotNull(leaf.getLastLeafKey());
 		assertEquals(AdjustmentAction.ACTION.INSERT_NEW_NODE, action.getAction());
 
@@ -98,19 +93,19 @@ public class LeafNodeTest {
 
 		// this should still work and not throw an exception
 		stateTest(leaf);
-		LeafNode<Integer, Integer> newLeaf = lpm.getPage(action.getPageId());
+		final LeafNode<Integer, Integer> newLeaf = lpm.getPage(action.getPageId());
 		;
 		stateTest(newLeaf);
 	}
 
-	private void stateTest(LeafNode<Integer, Integer> leaf) {
-		Integer k = leaf.getLastLeafKey();
+	private void stateTest(final LeafNode<Integer, Integer> leaf) {
+		final Integer k = leaf.getLastLeafKey();
 		assertNotNull(leaf.get(k));
 		assertTrue(leaf.containsKey(k));
 
 		// all keys should be accessible
 		for (int i = 0; i < leaf.getNumberOfEntries(); i++) {
-			Integer key = leaf.getKeyAtPosition(i);
+			final Integer key = leaf.getKeyAtPosition(i);
 			assertNotNull(k);
 			assertTrue(leaf.containsKey(key));
 
@@ -156,7 +151,7 @@ public class LeafNodeTest {
 	}
 
 
-	private void fillLeaf(LeafNode<Integer, Integer> leaf, int count) {
+	private void fillLeaf(final LeafNode<Integer, Integer> leaf, final int count) {
 		for (int i = 0; i < count; i++) {
 			leaf.insert(i, i);
 		}
@@ -202,7 +197,7 @@ public class LeafNodeTest {
 
 	@Test
 	public void prependEntriesShouldWork() {
-		LeafNode<Integer, Integer> leaf2 = lpm.createPage();
+		final LeafNode<Integer, Integer> leaf2 = lpm.createPage();
 
 		int totalInserted = 0;
 
@@ -231,12 +226,14 @@ public class LeafNodeTest {
 
 	}
 
-	/** in testPrepend, one entry is inserted* */
-	private void testPrepend(LeafNode<Integer, Integer> leaf1, LeafNode<Integer, Integer> leaf2) {
+	/** in testPrepend, one entry is inserted*
+	 * @param leaf1
+	 * @param leaf2*/
+	private void testPrepend(final LeafNode<Integer, Integer> leaf1, final LeafNode<Integer, Integer> leaf2) {
 		leaf1.setNextLeafId(leaf2.getId());
 
 		// insert key so that move should happen
-		AdjustmentAction<Integer, Integer> action = leaf1.insert(1, 1);
+		final AdjustmentAction<Integer, Integer> action = leaf1.insert(1, 1);
 
 		// an update key action should be passed up
 		assertThat(action).isNotNull();
@@ -244,11 +241,11 @@ public class LeafNodeTest {
 		// make sure leaf structures are in tact
 		assertThat(leaf1.getKeyAtPosition(leaf1.getNumberOfEntries() - 1)).isEqualTo(leaf1.getLastLeafKey());
 
-		for (int key : leaf1.getKeySet()) {
+		for (final int key : leaf1.getKeySet()) {
 			assertThat(leaf1.get(key)).isNotNull();
 		}
 
-		for (int key : leaf2.getKeySet()) {
+		for (final int key : leaf2.getKeySet()) {
 			assertThat(leaf2.get(key)).isNotNull();
 		}
 	}

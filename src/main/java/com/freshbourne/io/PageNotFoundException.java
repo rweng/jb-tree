@@ -14,11 +14,11 @@ public class PageNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public PageNotFoundException(ResourceManager rm, RawPage page){
+	public PageNotFoundException(final ResourceManager rm, final RawPage page){
 		this(rm, page.id());
 	}
 	
-    public PageNotFoundException(ResourceManager rm, int pageId){
+    public PageNotFoundException(final ResourceManager rm, final int pageId){
         super("The Page with the id " + pageId + " could not be found in the ResourceManager " + rm.toString());
     }
 }

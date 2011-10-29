@@ -11,7 +11,6 @@ package com.freshbourne.io;
 
 import com.freshbourne.serializer.PagePointSerializer;
 import com.freshbourne.serializer.StringSerializer;
-import org.omg.CORBA.DynAnyPackage.Invalid;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -47,7 +46,7 @@ public class DynamicDataPageTest {
 		assertEquals(0, page.numberOfEntries());
 	}
 	
-	private void checkAndSetModified(DynamicDataPage<String> page){
+	private void checkAndSetModified(final DynamicDataPage<String> page){
 		assertTrue(page.rawPage().isModified());
 		page.rawPage().setModified(false);
 	}
@@ -63,7 +62,7 @@ public class DynamicDataPageTest {
 		page.initialize();
 		checkAndSetModified(page);
 		
-		int rest = page.remaining();
+		final int rest = page.remaining();
 		page.add("bla");
 		checkAndSetModified(page);
 		assertTrue(rest > page.remaining());
@@ -93,13 +92,13 @@ public class DynamicDataPageTest {
 		assertEquals(DynamicDataPage.NO_ENTRIES_INT, page.rawPage().bufferForReading(0).getInt());
 		assertEquals(0, page.numberOfEntries());
 		
-		int id1 = page.add(s1);
+		final int id1 = page.add(s1);
 		assertEquals(1, page.rawPage().bufferForReading(0).getInt());
 		assertEquals(1, page.numberOfEntries());
-		int id2 = page.add(s2);
+		final int id2 = page.add(s2);
 		assertEquals(2, page.rawPage().bufferForReading(0).getInt());
 		assertEquals(2, page.numberOfEntries());
-		int id3 = page.add(s3);
+		final int id3 = page.add(s3);
 		assertEquals(3, page.rawPage().bufferForReading(0).getInt());
 		assertEquals(3, page.numberOfEntries());
 		checkAndSetModified(page);
@@ -120,7 +119,7 @@ public class DynamicDataPageTest {
 		
 		page.initialize();
 		
-		int id = page.add(s3);
+		final int id = page.add(s3);
 		page.remove(id);
 		checkAndSetModified(page);
 		
@@ -133,12 +132,12 @@ public class DynamicDataPageTest {
 	public void remainingMethodShouldAdjustWhenInsertingOrRemovingEntries() throws NoSpaceException, InvalidPageException{
 		page.initialize();
 		
-		int r1 = page.remaining();
-		int id1 = page.add(s1);
-		int r2 = page.remaining();
+		final int r1 = page.remaining();
+		final int id1 = page.add(s1);
+		final int r2 = page.remaining();
 		assertTrue(r1 > r2);
-		int id2 = page.add(s2);
-		int r3 = page.remaining();
+		final int id2 = page.add(s2);
+		final int r3 = page.remaining();
 		assertTrue(r2 > r3);
 		page.remove(id1);
 		assertEquals(r1 - (r2 - r3), page.remaining());
@@ -151,7 +150,7 @@ public class DynamicDataPageTest {
 		
 		page.add(s1);
 		page.add(s2);
-		int r = page.remaining();
+		final int r = page.remaining();
 		page = new DynamicDataPage<String>(page.rawPage(), page.pagePointSerializer(), page.dataSerializer());
 		page.load();
 		assertEquals(r, page.remaining());
@@ -161,8 +160,8 @@ public class DynamicDataPageTest {
 	public void shouldHaveSameSizeAfterInsertAndRemove() throws NoSpaceException, InvalidPageException{
 		page.initialize();
 		
-		int remaining = page.remaining();
-		int id = page.add("blast");
+		final int remaining = page.remaining();
+		final int id = page.add("blast");
 		assertTrue(remaining > page.remaining());
 		page.remove(id);
 		assertEquals(remaining, page.remaining());
@@ -173,7 +172,7 @@ public class DynamicDataPageTest {
 		assertFalse(page.isValid());
 		page.initialize();
 		assertTrue(page.isValid());
-		int id = page.add(s1);
+		final int id = page.add(s1);
 		assertEquals(1, page.numberOfEntries());
 		page = new DynamicDataPage<String>(page.rawPage(), page.pagePointSerializer(), page.dataSerializer());
 		assertFalse(page.isValid());

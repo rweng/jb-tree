@@ -18,7 +18,7 @@ public enum IntegerSerializer implements FixLengthSerializer<Integer, byte[]> {
 	 * @see com.freshbourne.serializer.Serializer#serialize(java.lang.Object)
 	 */
 	@Override
-	public byte[] serialize(Integer o) {
+	public byte[] serialize(final Integer o) {
 		return ByteBuffer.allocate(4).putInt(o).array();
 	}
 
@@ -26,7 +26,7 @@ public enum IntegerSerializer implements FixLengthSerializer<Integer, byte[]> {
 	 * @see com.freshbourne.serializer.Serializer#deserialize(java.lang.Object)
 	 */
 	@Override
-	public Integer deserialize(byte[] o) {
+	public Integer deserialize(final byte[] o) {
 		return ByteBuffer.wrap(o).getInt();
 	}
 

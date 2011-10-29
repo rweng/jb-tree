@@ -21,6 +21,7 @@ public interface MultiMap<K, V> {
 	public int getNumberOfEntries();
 	
 	/**
+	 * @param key
 	 * @return boolean if the key is contained in the map
 	 */
 	public boolean containsKey(K key);
@@ -83,6 +84,7 @@ public interface MultiMap<K, V> {
      * 
      * @param from
      * @param to
+     * @return
      */
     public Iterator<V> getIterator(K from, K to);
     

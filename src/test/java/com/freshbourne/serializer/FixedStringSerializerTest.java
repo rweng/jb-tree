@@ -9,14 +9,14 @@
  */
 package com.freshbourne.serializer;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 
 public class FixedStringSerializerTest {
 	@org.testng.annotations.Test
 	public void result(){
-		String s = "bla";
-		byte[] bytes = FixedStringSerializer.INSTANCE_1000.serialize(s);
+		final String s = "bla";
+		final byte[] bytes = FixedStringSerializer.INSTANCE_1000.serialize(s);
 		assertEquals(FixedStringSerializer.INSTANCE_1000.getSerializedLength(), bytes.length);
 		assertEquals(s, FixedStringSerializer.INSTANCE_1000.deserialize(bytes));
 	}

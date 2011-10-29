@@ -20,14 +20,11 @@ import com.google.inject.Inject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 
 /**
@@ -68,12 +65,12 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	public int getMaxInnerKeys() {
-		int realSize = rm.getPageSize() - InnerNode.Header.size() - Integer.SIZE / 8;
+		final int realSize = rm.getPageSize() - InnerNode.Header.size() - Integer.SIZE / 8;
 		return realSize / (Integer.SIZE / 8 + keySerializer.getSerializedLength());
 	}
 
 	public int getMaxLeafKeys() {
-		int realSize = rm.getPageSize() - LeafNode.Header.size();
+		final int realSize = rm.getPageSize() - LeafNode.Header.size();
 		return realSize / (keySerializer.getSerializedLength() + valueSerializer.getSerializedLength());
 	}
 
@@ -101,7 +98,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 		private int offset;
 
-		private Header(int offset) {
+		private Header(final int offset) {
 			this.offset = offset;
 		}
 
@@ -124,7 +121,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 		private final char serialized;
 
-		NodeType(char value) {
+		NodeType(final char value) {
 			this.serialized = value;
 		}
 
@@ -132,8 +129,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			return serialized;
 		}
 
-		public static NodeType deserialize(char serialized) {
-			for (NodeType nt : values())
+		public static NodeType deserialize(final char serialized) {
+			for (final NodeType nt : values())
 				if (nt.serialized == serialized)
 					return nt;
 
@@ -158,17 +155,14 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 *
 	 * @throws IOException
 	 */
-	public static <K, V> BTree<K, V> create(AutoSaveResourceManager rm, FixLengthSerializer<K, byte[]> keySerializer,
-	                                        FixLengthSerializer<V, byte[]> valueSerializer,
-	                                        Comparator<K> comparator) throws IOException {
+	public static <K, V> BTree<K, V> create(final AutoSaveResourceManager rm, final FixLengthSerializer<K, byte[]> keySerializer,
+	                                        final FixLengthSerializer<V, byte[]> valueSerializer,
+	                                        final Comparator<K> comparator) throws IOException {
 
 		checkNotNull(rm);
 		checkNotNull(keySerializer);
 		checkNotNull(valueSerializer);
 		checkNotNull(comparator);
-
-		checkArgument(rm instanceof AutoSaveResourceManager, "The ResourceManager must be an AutoSaveResourceManager");
-
 
 		if (!rm.isOpen())
 			rm.open();
@@ -185,17 +179,17 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @param comparator
 	 */
 	@Inject
-	private BTree(AutoSaveResourceManager rm,
-	              FixLengthSerializer<K, byte[]> keySerializer, FixLengthSerializer<V, byte[]> valueSerializer,
-	              Comparator<K> comparator) {
+	private BTree(final AutoSaveResourceManager rm,
+	              final FixLengthSerializer<K, byte[]> keySerializer, final FixLengthSerializer<V, byte[]> valueSerializer,
+	              final Comparator<K> comparator) {
 
 		this.rm = rm;
 		this.keySerializer = keySerializer;
 		this.valueSerializer = valueSerializer;
 		this.comparator = comparator;
 
-		DataPageManager<K> keyPageManager = new DataPageManager<K>(rm, PagePointSerializer.INSTANCE, keySerializer);
-		DataPageManager<V> valuePageManager =
+		final DataPageManager<K> keyPageManager = new DataPageManager<K>(rm, PagePointSerializer.INSTANCE, keySerializer);
+		final DataPageManager<V> valuePageManager =
 				new DataPageManager<V>(rm, PagePointSerializer.INSTANCE, valueSerializer);
 
 		leafPageManager = new LeafPageManager<K, V>(rm, valueSerializer, keySerializer, comparator);
@@ -231,7 +225,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		checkArgument(isValid(), "Btree must be initialized or loaded");
 	}
 
-	public void bulkInitialize(SimpleEntry<K, V>[] kvs, boolean sorted) throws IOException {
+	public void bulkInitialize(final SimpleEntry<K, V>[] kvs, final boolean sorted) throws IOException {
 		bulkInitialize(kvs, 0, kvs.length - 1, sorted);
 	}
 
@@ -246,10 +240,10 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @param sorted
 	 * @throws IOException
 	 */
-	public void bulkInitialize(SimpleEntry<K, V>[] kvs, int fromIndex, int toIndex, boolean sorted) throws IOException {
+	public void bulkInitialize(final SimpleEntry<K, V>[] kvs, final int fromIndex, final int toIndex, final boolean sorted) throws IOException {
 		checkState(!valid, "BTree is already loaded: %s", this);
 		
-		int count = toIndex - fromIndex + 1;
+		final int count = toIndex - fromIndex + 1;
 		if (count < 0)
 			throw new IllegalArgumentException(
 					"fromIndex(" + fromIndex + ") must be smaller or equal to toIndex(" + toIndex + ")");
@@ -259,7 +253,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			Arrays.sort(kvs, fromIndex, toIndex + 1, // +1 because excluding toIndex
 					new Comparator<SimpleEntry<K, V>>() {
 						@Override
-						public int compare(SimpleEntry<K, V> kvSimpleEntry, SimpleEntry<K, V> kvSimpleEntry1) {
+						public int compare(final SimpleEntry<K, V> kvSimpleEntry, final SimpleEntry<K, V> kvSimpleEntry1) {
 							return comparator.compare(kvSimpleEntry.getKey(), kvSimpleEntry1.getKey());
 						}
 					});
@@ -276,7 +270,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		LeafNode<K, V> leafPage;
 		ArrayList<byte[]> keysForNextLayer = new ArrayList<byte[]>();
 		ArrayList<Integer> pageIds = new ArrayList<Integer>();
-		HashMap<Integer, byte[]> pageIdToSmallestKeyMap = new HashMap<Integer, byte[]>();
+		final HashMap<Integer, byte[]> pageIdToSmallestKeyMap = new HashMap<Integer, byte[]>();
 
 
 		// first insert all leafs and remember the insertedLastKeys
@@ -308,15 +302,15 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		}
 
 		// if not, build up tree
-		InnerNode<K, V> node = null;
+		InnerNode<K, V> node;
 
 		// for each layer, if pageId == 1, this page becomes the root
 		while (pageIds.size() > 1) {
 			if (LOG.isDebugEnabled())
 				LOG.debug("next inner node layer");
 
-			ArrayList<Integer> newPageIds = new ArrayList<Integer>();
-			ArrayList<byte[]> newKeysForNextLayer = new ArrayList<byte[]>();
+			final ArrayList<Integer> newPageIds = new ArrayList<Integer>();
+			final ArrayList<byte[]> newKeysForNextLayer = new ArrayList<byte[]>();
 			inserted = 0; // page ids
 
 			// we assume that fromIndex each pageId the smallest key was stored, we need to remove the last one for InnerNode#bulkinsert()
@@ -331,7 +325,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 				// create a inner node and store the smallest key
 				node = innerNodeManager.createPage(false);
 				newPageIds.add(node.getId());
-				byte[] smallestKey = pageIdToSmallestKeyMap.get(pageIds.get(inserted));
+				final byte[] smallestKey = pageIdToSmallestKeyMap.get(pageIds.get(inserted));
 				pageIdToSmallestKeyMap.put(node.getId(), smallestKey);
 
 				// dont insert the first small key to the keys for the next layer
@@ -360,7 +354,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  * @see com.freshbourne.btree.MultiMap#containsKey(java.lang.Object)
 		  */
 	@Override
-	public boolean containsKey(K key) {
+	public boolean containsKey(final K key) {
 		ensureValid();
 
 		return root.containsKey(key);
@@ -370,7 +364,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  * @see com.freshbourne.btree.MultiMap#get(java.lang.Object)
 		  */
 	@Override
-	public List<V> get(K key) {
+	public List<V> get(final K key) {
 		ensureValid();
 
 		return root.get(key);
@@ -381,12 +375,12 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  * @see com.freshbourne.btree.MultiMap#add(java.lang.Object, java.lang.Object)
 		  */
 	@Override
-	public void add(K key, V value) {
+	public void add(final K key, final V value) {
 		ensureValid();
 
 		setNumberOfEntries(getNumberOfEntries() + 1);
 
-		AdjustmentAction<K, V> result = root.insert(key, value);
+		final AdjustmentAction<K, V> result = root.insert(key, value);
 
 		// insert was successful
 		if (result == null)
@@ -395,14 +389,14 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		// a new root must be created
 		if (result.getAction() == ACTION.INSERT_NEW_NODE) {
 			// new root
-			InnerNode<K, V> newRoot = innerNodeManager.createPage();
+			final InnerNode<K, V> newRoot = innerNodeManager.createPage();
 			newRoot.initRootState(root.getId(), result.getSerializedKey(), result.getPageId());
 			setRoot(newRoot);
 		}
 
 	}
 
-	private void setRoot(Node<K, V> root) {
+	private void setRoot(final Node<K, V> root) {
 		this.root = root;
 		rawPage.bufferForWriting(Header.ROOT_ID.getOffset()).putInt(root.getId());
 	}
@@ -413,7 +407,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @param id
 	 * @return
 	 */
-	private Node<K, V> getNode(int id) {
+	private Node<K, V> getNode(final int id) {
 		if (leafPageManager.hasPage(id))
 			return leafPageManager.getPage(id);
 		else
@@ -421,7 +415,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/** @param i */
-	private void setNumberOfEntries(int i) {
+	private void setNumberOfEntries(final int i) {
 		numberOfEntries = i;
 		rawPage.bufferForWriting(Header.NUM_OF_ENTRIES.getOffset()).putInt(numberOfEntries);
 	}
@@ -430,7 +424,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  * @see com.freshbourne.btree.MultiMap#remove(java.lang.Object)
 		  */
 	@Override
-	public void remove(K key) {
+	public void remove(final K key) {
 		ensureValid();
 
 		numberOfEntries -= root.remove(key);
@@ -440,7 +434,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  * @see com.freshbourne.btree.MultiMap#remove(java.lang.Object, java.lang.Object)
 		  */
 	@Override
-	public void remove(K key, V value) {
+	public void remove(final K key, final V value) {
 		ensureValid();
 
 		setNumberOfEntries(getNumberOfEntries() - root.remove(key, value));
@@ -473,7 +467,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	public String toString(){
-		Objects.ToStringHelper helper = Objects.toStringHelper(this);
+		final Objects.ToStringHelper helper = Objects.toStringHelper(this);
 		helper.add("numberOfEntries", getNumberOfEntries());
 		helper.add("root", root);
 		helper.add("resourceManager", rm);
@@ -484,6 +478,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	/**
 	 * opens the ResourceManager, sets the rawPage and sets valid, but does not create a root leaf or set the number of
 	 * entries
+	 * @throws java.io.IOException
 	 */
 	private void preInitialize() throws IOException {
 		if (!rm.isOpen())
@@ -521,7 +516,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		rawPage = rm.getPage(1);
 		numberOfEntries = rawPage.bufferForReading(0).getInt();
 
-		int rootId = rawPage.bufferForReading(4).getInt();
+		final int rootId = rawPage.bufferForReading(4).getInt();
 		if (leafPageManager.hasPage(rootId)) {
 			root = leafPageManager.getPage(rootId);
 		} else if (innerNodeManager.hasPage(rootId)) {
@@ -582,13 +577,13 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  * @see com.freshbourne.btree.MultiMap#getIterator(java.lang.Object, java.lang.Object)
 		  */
 	@Override
-	public Iterator<V> getIterator(K from, K to) {
-		Iterator<V> result = root.getIterator(from, to);
+	public Iterator<V> getIterator(final K from, final K to) {
+		final Iterator<V> result = root.getIterator(from, to);
 		return result;
 	}
 
 
-	public Iterator<V> getIterator(List<Range<K>> ranges) {
+	public Iterator<V> getIterator(final List<Range<K>> ranges) {
 		return new BTreeIterator(ranges);
 	}
 
@@ -598,13 +593,13 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		private int         rangePointer    = -1;
 		private Iterator<V> currentIterator = null;
 
-		public BTreeIterator(List<Range<K>> ranges) {
+		public BTreeIterator(final List<Range<K>> ranges) {
 			this.ranges = cleanRanges(ranges);
 
 		}
 
-		private List<Range<K>> cleanRanges(List<Range<K>> ranges) {
-			List<Range<K>> cleaned = new LinkedList<Range<K>>();
+		private List<Range<K>> cleanRanges(final List<Range<K>> ranges) {
+			final List<Range<K>> cleaned = new LinkedList<Range<K>>();
 
 			if (ranges == null) {
 				cleaned.add(new Range());
@@ -613,7 +608,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 			// sort ranges after from key
 			Collections.sort(ranges, new Comparator<Range<K>>() {
-				@Override public int compare(Range<K> kRange, Range<K> kRange1) {
+				@Override public int compare(final Range<K> kRange, final Range<K> kRange1) {
 					if (kRange.getFrom() == null) {
 						if (kRange1.getFrom() == null)
 							return 0;
@@ -629,7 +624,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			});
 
 			Range<K> last = null;
-			for (Range<K> r : ranges) {
+			for (final Range<K> r : ranges) {
 				if (cleaned.size() == 0) {
 					cleaned.add(r);
 					last = r;
@@ -663,7 +658,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 				if (rangePointer == ranges.size() - 1)
 					return false;
 				else {
-					Range<K> range = ranges.get(++rangePointer);
+					final Range<K> range = ranges.get(++rangePointer);
 					currentIterator = root.getIterator(range.getFrom(), range.getTo());
 				}
 			}

@@ -9,7 +9,6 @@
  */
 package com.freshbourne.io;
 
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.MapMaker;
 import org.apache.log4j.Logger;
 
@@ -32,7 +31,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 
 	private final Map<Integer, T> cache = new MapMaker().weakValues().makeMap();
 
-	protected AbstractPageManager(PageManager<RawPage> rpm) {
+	protected AbstractPageManager(final PageManager<RawPage> rpm) {
 		this.rpm = rpm;
 	}
 
@@ -40,7 +39,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		return rpm;
 	}
 
-	public boolean hasRawPageManager(PageManager<RawPage> rpm) {
+	public boolean hasRawPageManager(final PageManager<RawPage> rpm) {
 		return this.rpm.equals(rpm);
 	}
 
@@ -48,17 +47,17 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		 * @see com.freshbourne.io.PageManager#getPage(int)
 		 */
 	@Override
-	public T getPage(int id) {
-		T result;
+	public T getPage(final int id) {
+		final T result;
 
-		T t = cache.get(id);
+		final T t = cache.get(id);
 		/*
 		if (t != null) {
 			return t;
 		}
 		*/
 
-		RawPage page = rpm.getPage(id);
+		final RawPage page = rpm.getPage(id);
 		if(t != null){
 			if (t.rawPage() == page) {
 				return t;
@@ -93,8 +92,8 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		return createPage(true);
 	}
 
-	public T createPage(boolean initialize) {
-		T l = createObjectPage(rpm.createPage());
+	public T createPage(final boolean initialize) {
+		final T l = createObjectPage(rpm.createPage());
 
 		if (initialize)
 			try {
@@ -115,7 +114,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		 * @see com.freshbourne.io.PageManager#removePage(int)
 		 */
 	@Override
-	public void removePage(int id) {
+	public void removePage(final int id) {
 		cache.remove(id);
 		rpm.removePage(id);
 	}
@@ -134,7 +133,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	 * @see com.freshbourne.io.PageManager#hasPage(long)
 	 */
 	@Override
-	public boolean hasPage(int id) {
+	public boolean hasPage(final int id) {
 		if (!rpm.hasPage(id))
 			return false;
 

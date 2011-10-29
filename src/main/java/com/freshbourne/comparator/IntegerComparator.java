@@ -18,7 +18,7 @@ public enum IntegerComparator implements Comparator<Integer> {
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public int compare(Integer o1, Integer o2) {
+	public int compare(final Integer o1, final Integer o2) {
 		return o1.compareTo(o2);
 	}
 

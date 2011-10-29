@@ -21,7 +21,7 @@ public class Range<T> {
 
 	public Range(){}
 
-	public Range(T from, T to){
+	public Range(final T from, final T to){
 		this.from = from;
 		this.to = to;
 	}
@@ -30,7 +30,7 @@ public class Range<T> {
 		return to;
 	}
 
-	public void setTo(T to) {
+	public void setTo(final T to) {
 		this.to = to;
 	}
 
@@ -38,7 +38,7 @@ public class Range<T> {
 		return from;
 	}
 
-	public void setFrom(T from) {
+	public void setFrom(final T from) {
 		this.from = from;
 	}
 }

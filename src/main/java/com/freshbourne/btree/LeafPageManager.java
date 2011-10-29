@@ -29,10 +29,10 @@ class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 	
 	@Inject
 	public LeafPageManager(
-			PageManager<RawPage> bpm, 
-			FixLengthSerializer<V, byte[]> valueSerializer,
-			FixLengthSerializer<K, byte[]> keySerializer,
-			Comparator<K> comparator) {
+			final PageManager<RawPage> bpm,
+			final FixLengthSerializer<V, byte[]> valueSerializer,
+			final FixLengthSerializer<K, byte[]> keySerializer,
+			final Comparator<K> comparator) {
 		super(bpm);
 		this.valueSerializer = valueSerializer;
 		this.keySerializer = keySerializer;
@@ -43,7 +43,7 @@ class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 	 * @see com.freshbourne.io.AbstractPageManager#createObjectPage()
 	 */
 	@Override
-	protected LeafNode<K, V> createObjectPage(RawPage page) {
+	protected LeafNode<K, V> createObjectPage(final RawPage page) {
 		return new LeafNode<K, V>(page, keySerializer, valueSerializer, comparator, this, 1);
 	}
 

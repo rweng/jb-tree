@@ -20,8 +20,8 @@ public enum PagePointSerializer implements FixLengthSerializer<PagePointer, byte
 	 * @see com.freshbourne.serializer.Serializer#serialize(java.lang.Object)
 	 */
 	@Override
-	public byte[] serialize(PagePointer o) {
-		ByteBuffer b = ByteBuffer.allocate(getSerializedLength());
+	public byte[] serialize(final PagePointer o) {
+		final ByteBuffer b = ByteBuffer.allocate(getSerializedLength());
 		b.putInt(o.getId());
 		b.putInt(o.getOffset());
 		return b.array();
@@ -31,10 +31,10 @@ public enum PagePointSerializer implements FixLengthSerializer<PagePointer, byte
 	 * @see com.freshbourne.serializer.Serializer#deserialize(java.lang.Object)
 	 */
 	@Override
-	public PagePointer deserialize(byte[] o) {
-		ByteBuffer b = ByteBuffer.wrap(o);
-		Integer id = b.getInt();
-		Integer offset = b.getInt();
+	public PagePointer deserialize(final byte[] o) {
+		final ByteBuffer b = ByteBuffer.wrap(o);
+		final Integer id = b.getInt();
+		final Integer offset = b.getInt();
 		return new PagePointer(id, offset);
 	}
 	

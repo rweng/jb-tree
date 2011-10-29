@@ -35,7 +35,6 @@ public interface DataPage<T> extends ComplexPage {
 	/**
 	 * removes the byte array with the given id and truncates the page
 	 * @param id of the byte array to be removed
-	 * @throws ElementNotFoundException 
 	 */
 	public void remove(int id);
 	

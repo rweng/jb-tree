@@ -29,8 +29,8 @@ public class IOModule extends AbstractModule{
 	public int cacheSize = 10;
     public boolean doLock = true;
 
-    public void resourceFile(File file){this.file = file;};
-    public void pageSize(int i){pageSize = i;}
+    public void resourceFile(final File file){this.file = file;};
+    public void pageSize(final int i){pageSize = i;}
 
 	
 	// ***** CONFIGURE *****
@@ -54,9 +54,9 @@ public class IOModule extends AbstractModule{
 	}
 
     @Provides @Singleton
-	public ResourceManager provideFileResourceManager(@PageSize int pageSize) {
+	public ResourceManager provideFileResourceManager(@PageSize final int pageSize) {
         LOG.info("getPageSize: " + pageSize);
-		ResourceManager result = new ResourceManagerBuilder().file(file).useCache(false).build();
+		final ResourceManager result = new ResourceManagerBuilder().file(file).useCache(false).build();
 		try {
 			result.open();
 		} catch (IOException e) {
@@ -66,7 +66,7 @@ public class IOModule extends AbstractModule{
 		return result;
 	}
 
-    public void setFile(File file) {
+    public void setFile(final File file) {
         this.file = file;
     }
 }

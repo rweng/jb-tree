@@ -38,7 +38,7 @@ public class FileResourceManager implements ResourceManager {
 
 	private static Log LOG = LogFactory.getLog(FileResourceManager.class);
 
-	FileResourceManager(ResourceManagerBuilder builder) {
+	FileResourceManager(final ResourceManagerBuilder builder) {
 		this.file = builder.getFile();
 		this.pageSize = builder.getPageSize();
 		this.doLock = builder.useLock();
@@ -70,16 +70,16 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	@Override
-	public void writePage(RawPage page) {
+	public void writePage(final RawPage page) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("writing page to disk: " + page.id());
 		ensureOpen();
 		ensurePageExists(page.id());
 
-		ByteBuffer buffer = page.bufferForReading(0);
+		final ByteBuffer buffer = page.bufferForReading(0);
 
 		try {
-			long offset = header.getPageOffset(page.id());
+			final long offset = header.getPageOffset(page.id());
 			ioChannel.write(buffer, offset);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -90,14 +90,14 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.PageManager#getPage(long)
 	 */
 	@Override
-	public RawPage getPage(int pageId) {
+	public RawPage getPage(final int pageId) {
 
 		ensureOpen();
 		ensurePageExists(pageId);
 
-		RawPage result;
+		final RawPage result;
 
-		ByteBuffer buf = ByteBuffer.allocate(pageSize);
+		final ByteBuffer buf = ByteBuffer.allocate(pageSize);
 
 		try {
 			ioChannel.read(buf, header.getPageOffset(pageId));
@@ -114,7 +114,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @param pageId
 	 * @throws PageNotFoundException
 	 */
-	private void ensurePageExists(int pageId) {
+	private void ensurePageExists(final int pageId) {
 		if (!header.contains(pageId))
 			throw new PageNotFoundException(this, pageId);
 	}
@@ -166,7 +166,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @throws IOException
 	 * 		Thrown, when the I/O channel could not be opened.
 	 */
-	private void initIOChannel(File file)
+	private void initIOChannel(final File file)
 			throws IOException {
 		handle = new RandomAccessFile(file, "rw");
 
@@ -210,11 +210,11 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#addPage(com.freshbourne.io.HashPage)
 	 */
 	@Override
-	public RawPage addPage(RawPage page) {
+	public RawPage addPage(final RawPage page) {
 		ensureOpen();
 		ensureCorrectPageSize(page);
 
-		RawPage result = new RawPage(page.bufferForWriting(0), header.generateId(), this);
+		final RawPage result = new RawPage(page.bufferForWriting(0), header.generateId(), this);
 
 		try {
 			ioChannel.write(page.bufferForReading(0), ioChannel.size());
@@ -233,7 +233,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @param page
 	 * @throws WrongPageSizeException
 	 */
-	private void ensureCorrectPageSize(RawPage page) {
+	private void ensureCorrectPageSize(final RawPage page) {
 		if (page.bufferForReading(0).limit() != pageSize)
 			throw new WrongPageSizeException(page, pageSize);
 	}
@@ -267,8 +267,8 @@ public class FileResourceManager implements ResourceManager {
 	public RawPage createPage() {
 		ensureOpen();
 
-		ByteBuffer buf = ByteBuffer.allocate(pageSize);
-		RawPage result = new RawPage(buf, header.generateId(), this);
+		final ByteBuffer buf = ByteBuffer.allocate(pageSize);
+		final RawPage result = new RawPage(buf, header.generateId(), this);
 
 		return result;
 	}
@@ -277,7 +277,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#removePage(long)
 	 */
 	@Override
-	public void removePage(int pageId) {
+	public void removePage(final int pageId) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -294,7 +294,7 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.PageManager#hasPage(long)
 	 */
 	@Override
-	public boolean hasPage(int id) {
+	public boolean hasPage(final int id) {
 		ensureOpen();
 		return header.contains(id);
 	}

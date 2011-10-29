@@ -10,9 +10,6 @@
 
 package com.freshbourne.io;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
@@ -33,24 +30,25 @@ public class RawPage implements Serializable {
     private boolean modified = false;
 
 
-    public RawPage(ByteBuffer buffer, int pageId){this(buffer, pageId, null);}
-    public RawPage(ByteBuffer buffer, int pageId, ResourceManager rm){
+    public RawPage(final ByteBuffer buffer, final int pageId){this(buffer, pageId, null);}
+    public RawPage(final ByteBuffer buffer, final int pageId, final ResourceManager rm){
         this.buffer = buffer;
         this.id = pageId;
         this.resourceManager = rm;
     }
 
     /**
+     * @param pos
      * @return ByteBuffer backing this RawPage
      */
-    public ByteBuffer bufferForWriting(int pos){setModified(true); buffer.position(pos); return buffer;}
-    public ByteBuffer bufferForReading(int pos){buffer.position(pos); return buffer.asReadOnlyBuffer();}
+    public ByteBuffer bufferForWriting(final int pos){setModified(true); buffer.position(pos); return buffer;}
+    public ByteBuffer bufferForReading(final int pos){buffer.position(pos); return buffer.asReadOnlyBuffer();}
     public Integer id(){return id;}
     
     	/**
 	 * @param modified the modified to set
 	 */
-	public void setModified(boolean modified) {
+	public void setModified(final boolean modified) {
 		this.modified = modified;
 	}
 

@@ -15,9 +15,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class ResourceManagerBuilderTest {
 	private ResourceManagerBuilder builder;
@@ -34,18 +32,18 @@ public class ResourceManagerBuilderTest {
 
 	@Test
 	public void buildShouldOnlyRequireAFile(){
-		ResourceManager rm = setFile().build();
+		final ResourceManager rm = setFile().build();
 		assertNotNull(rm);
 	}
 
 	@Test
 	public void defaultShouldBeAChachedFileResourceManager(){
-		ResourceManager rm = setFile().cacheSize(150).build();
+		final ResourceManager rm = setFile().cacheSize(150).build();
 		assertNotNull(rm);
 		assertEquals(150, builder.getCacheSize());
 		assertTrue(rm instanceof CachedResourceManager);
 		
-		CachedResourceManager crm = (CachedResourceManager) rm;
+		final CachedResourceManager crm = (CachedResourceManager) rm;
 		assertTrue(crm.getResourceManager() instanceof FileResourceManager);
 	}
 

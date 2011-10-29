@@ -16,7 +16,7 @@ class AdjustmentAction<K,V> {
 	private byte[] serializedKey;
 	private Integer pageId;
 	
-	protected AdjustmentAction(ACTION action, byte[] serializedKey, Integer pageId){
+	protected AdjustmentAction(final ACTION action, final byte[] serializedKey, final Integer pageId){
 		this.setAction(action);
 		this.setSerializedKey(serializedKey);
 		this.setPageId(pageId);
@@ -25,7 +25,7 @@ class AdjustmentAction<K,V> {
 	/**
 	 * @param action the action to set
 	 */
-	public void setAction(ACTION action) {
+	public void setAction(final ACTION action) {
 		this.action = action;
 	}
 
@@ -39,7 +39,7 @@ class AdjustmentAction<K,V> {
 	/**
 	 * @param pageId the node to set
 	 */
-	public void setPageId(Integer pageId) {
+	public void setPageId(final Integer pageId) {
 		this.pageId = pageId;
 	}
 
@@ -53,7 +53,7 @@ class AdjustmentAction<K,V> {
 	/**
 	 * @param serializedKey the serializedKey to set
 	 */
-	public void setSerializedKey(byte[] serializedKey) {
+	public void setSerializedKey(final byte[] serializedKey) {
 		this.serializedKey = serializedKey;
 	}
 

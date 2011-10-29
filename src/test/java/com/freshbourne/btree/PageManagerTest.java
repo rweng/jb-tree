@@ -15,8 +15,6 @@ import com.freshbourne.io.AutoSaveResourceManager;
 import com.freshbourne.io.ResourceManager;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -27,7 +25,6 @@ import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 public class PageManagerTest {
 
@@ -41,7 +38,7 @@ public class PageManagerTest {
 	@BeforeMethod
 	public void setUp() throws IOException {
 		file.delete();
-		AutoSaveResourceManager manager = new ResourceManagerBuilder().file(file).buildAutoSave();
+		final AutoSaveResourceManager manager = new ResourceManagerBuilder().file(file).buildAutoSave();
 		tree = BTree.create(manager, FixedStringSerializer.INSTANCE_1000,
 				FixedStringSerializer.INSTANCE_1000,
 				StringComparator.INSTANCE);
@@ -54,10 +51,10 @@ public class PageManagerTest {
 
 	@Test
 	public void pageCreations(){
-		List<Integer> leafs = new LinkedList();
-		List<Integer> inners = new LinkedList();
+		final List<Integer> leafs = new LinkedList();
+		final List<Integer> inners = new LinkedList();
 
-		int count = 10000;
+		final int count = 10000;
 		for(int i = 0;i<count;i++){
 			if(i%2==0){
 				leafs.add(lpm.createPage().getId());
@@ -66,11 +63,11 @@ public class PageManagerTest {
 			}
 		}
 
-		for(int id : leafs){
+		for(final int id : leafs){
 			assertNotNull(lpm.getPage(id));
 		}
 
-		for(int id : inners){
+		for(final int id : inners){
 			assertNotNull(inm.getPage(id));
 		}
 	}
@@ -78,7 +75,7 @@ public class PageManagerTest {
 	@Test(groups = "skipBeforeMethod")
 	public void doubleCreationWithCacheInvalidationShouldReturnOldInstanceIfNotGarbageCollected() throws IOException {
 		file.delete();
-		AutoSaveResourceManager manager = new ResourceManagerBuilder().file(file).cacheSize(1).buildAutoSave();
+		final AutoSaveResourceManager manager = new ResourceManagerBuilder().file(file).cacheSize(1).buildAutoSave();
 		tree = BTree.create(manager, FixedStringSerializer.INSTANCE_1000,
 				FixedStringSerializer.INSTANCE_1000,
 				StringComparator.INSTANCE);
@@ -86,13 +83,13 @@ public class PageManagerTest {
 		inm = tree.getInnerNodeManager();
 		rm = tree.getResourceManager();
 
-		LeafNode<String, String> page = lpm.createPage();
+		final LeafNode<String, String> page = lpm.createPage();
 
 		// make sure page is not in the rm cache anymore
 		lpm.createPage();
 		lpm.createPage();
 
-		LeafNode<String, String> page1 = lpm.getPage(page.getId());
+		final LeafNode<String, String> page1 = lpm.getPage(page.getId());
 
 		assertThat(page1).isSameAs(page);
 	}

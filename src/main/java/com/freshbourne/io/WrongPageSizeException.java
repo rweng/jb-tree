@@ -13,7 +13,7 @@ public class WrongPageSizeException extends IllegalStateException {
 	
 	private static final long serialVersionUID = 1L;
 
-	WrongPageSizeException(RawPage p, int expected){
+	WrongPageSizeException(final RawPage p, final int expected){
 		super("The Page " + p + " does not have the expected PageSize of " + expected);
 	}
 

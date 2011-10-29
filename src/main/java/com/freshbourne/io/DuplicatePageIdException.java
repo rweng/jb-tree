@@ -13,7 +13,7 @@ public class DuplicatePageIdException extends RuntimeException {
 	
 	private static final long serialVersionUID = 1L;
 
-	public DuplicatePageIdException(Long id) {
+	public DuplicatePageIdException(final Long id) {
 		super("The page with the id " + id + " does already exist.");
 	}
 
