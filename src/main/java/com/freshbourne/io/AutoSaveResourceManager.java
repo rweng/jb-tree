@@ -15,7 +15,7 @@ package com.freshbourne.io;
  *
  * An implementation of this interface makes sure, that pages are persisted if they are altered.
  * This is usually done with a cache in the ResourceManager.
- * 
+ *
  */
 public interface AutoSaveResourceManager extends ResourceManager {
 }

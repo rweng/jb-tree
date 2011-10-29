@@ -139,6 +139,10 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 			p.sync();
 		}
 
+		for(RawPage p : weakMap.values()){
+			p.sync();
+		}
+
 		rm.sync();
 	}
 

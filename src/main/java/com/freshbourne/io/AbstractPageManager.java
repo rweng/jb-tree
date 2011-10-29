@@ -17,13 +17,13 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * There is this special use-case when the same page is fetched twice from the PageManager. If we have no cache here,
- * at least the wrapping LeafNode (not the RawPage) will be a separate instance. If we then change one instance the
- * change isn't reflected in the second instance.
+ * There is this special use-case when the same page is fetched twice from the PageManager. If we have no cache here, at
+ * least the wrapping LeafNode (not the RawPage) will be a separate instance. If we then change one instance the change
+ * isn't reflected in the second instance.
  * <p/>
- * There are basically two ways to avoid that: don't cache any values in the leafPage and always get the values
- * directly from the RawPage. Or we could cache here, too, so that both times the same instance is returned. Last
- * option seems better regarding performance.
+ * There are basically two ways to avoid that: don't cache any values in the leafPage and always get the values directly
+ * from the RawPage. Or we could cache here, too, so that both times the same instance is returned. Last option seems
+ * better regarding performance.
  */
 public abstract class AbstractPageManager<T extends ComplexPage> implements PageManager<T> {
 
@@ -52,19 +52,28 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		T result;
 
 		// just ensure here, that if rpm caches, it's in this cache, too
+
+
+		T t = cache.get(id);
+		if (t != null) {
+			return t;
+		}
+
 		RawPage page = rpm.getPage(id);
 
-		if(cache.containsKey(id)){
-
-			T t = cache.get(id);
-			if(t.rawPage() == page){
+		/*
+		if(t != null){
+			if (t.rawPage() == page) {
 				return t;
 			} else {
-				throw new IllegalStateException();
+				LOG.warn("PageManager has an instance of " + t + " cached, which is not backed by the same RawPage "+
+				"as the one returned from the ResourceManager");
+				// throw new IllegalStateException();
 				// what, if it is a different RawPage instance, but the old RawPage might still be used somewhere?
 			}
 		}
-		
+		*/
+
 		result = createObjectPage(page);
 
 		try {
