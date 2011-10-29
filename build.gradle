@@ -61,10 +61,7 @@ dependencies {
     testCompile "org.testng:testng:6.3@jar"
     testCompile "org.mockito:mockito-all:1.8.5@jar"
 	
-	testCompile "org.hamcrest:hamcrest-core:1.2.1@jar"
-	testCompile "org.hamcrest:hamcrest-library:1.2.1@jar"
-
-    // testCompile "org.easytesting:fest:1.0.8@jar"
+	// testCompile "org.easytesting:fest:1.0.8@jar"
     testCompile "org.easytesting:fest-assert:1.4@jar"
     testCompile "org.easytesting:fest-util:1.1.6@jar"
 	
