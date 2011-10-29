@@ -54,11 +54,14 @@ public class BTreeTest {
 	
 	BTreeTest() {
 		file.delete();
-		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).cacheSize(100).open().buildAutoSave();
+		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).cacheSize(100).buildAutoSave();
 	}
 
 	@BeforeMethod
 	public void setUp() throws IOException {
+		if(!rm.isOpen())
+			rm.open();
+		
 		rm.clear();
 		tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
 				IntegerComparator.INSTANCE);
@@ -177,21 +180,6 @@ public class BTreeTest {
 			// LOG.debug("got value: " + next);
 		}
 		assertThat(iterator.hasNext()).isFalse();
-	}
-
-	@Test
-	public void defaultBTreeModule() throws IOException {
-		File file = new File("/tmp/defaultBTreeModule");
-		file.delete();
-
-		Injector i = Guice.createInjector(new BTreeModule(file.getAbsolutePath()));
-		BTree<Integer, Integer> t = i.getInstance(
-				Key.get(new TypeLiteral<BTree<Integer, Integer>>() {
-				}));
-		t.initialize();
-		t.sync();
-
-		assertTrue(file.exists());
 	}
 
 	@Test
@@ -700,7 +688,7 @@ public class BTreeTest {
 		}
 
 		tree.close();
-		rm.clear();
+		file.delete();
 		tree.bulkInitialize(kvs, true);
 
 		// check if its correct
@@ -722,7 +710,8 @@ public class BTreeTest {
 		Integer value2 = 2;
 
 		tree.close();
-		rm.clear();
+		file.delete();
+		
 		
 		tree.initialize();
 		tree.add(key1, value1);
