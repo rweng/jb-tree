@@ -1,13 +1,16 @@
 # Description
 
-This project naming is actually not correct yet.
-This repository is more about an implementation of B-Tree in line with it's interface, MultiMap.
-Every Class implementing the MultiMap interface should provide a way of storeing and accessing key-value Objects.
-The difference to a normal map is mainly that one key can have multiple values.
+This Project provides two cool things:
+
+- A flexible way of creating and handling pages on different resources (like the file system)
+- An implementation of a B+-Tree that can
+    - be ordered arbitrarily by providing a comparator
+    - serializers can be handed in as dependency
+    - the resource manager to which the B-Tree is persisted is handed in as interface.
 
 # Dev Requirements
 
-- gradle 0.9-rc3 (install on mac with homebrew: `brew install gradle --HEAD`)
+- gradle > 0.9-rc3 (install on mac with homebrew: `brew install gradle --HEAD`)
 
 # Getting started
 
@@ -27,78 +30,32 @@ get started by cloning the repository:
     gradle javadoc
     open build/doc/javadoc/index.html
 
+## Creating a ResourceManager
+
+    // creates a cached resource manager. All values are the default values and can be ommited (except file())
+    new ResourceManagerBuilder().file("/tmp/test").useLock(true).useCache(true).cacheSize(100)
+        .pageSize(PageSize.DEFAULT_PAGE_SIZE).build();
+
+    // creates a plain FileResourceManager without Caching
+    new ResourceManagerBuilder().file("/tmp/test").useCache(false).build();
+
 ## Creating a BTree Instance
-
-### With a Factory (favorite)
-
-This is the favorite way of creating a btree. The factory can be reused for different files.
-One important note: getting a btree for a file that has already been used with get() will ignore
-the Serializers and the Comparator and just return the original instance.
-
-The test for creating a BTree with a factory displays this best:
-
-    @Test
-	public void factoryConstructor() throws IOException {
-		File file = new File("/tmp/defaultBTreeModule");
-		file.delete();
-
-
-		Injector i = Guice.createInjector(new BTreeModule());
-		BTreeFactory factory = i.getInstance(BTreeFactory.class);
-		BTree<Integer, String> btree = factory.get(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
-				IntegerComparator.INSTANCE);
-		btree.initialize();
-		btree.sync();
-
-		assertTrue(file.exists());
-	}
-
-### Static method
-
-This way of creating the BTree is the most concise way. However, it does not features the caching done in the factory.
 
 	@Test
 	public void staticMethodConstructor() throws IOException {
-		File file = new File("/tmp/btree-test");
-		file.delete();
-
-		BTree<Integer, String> btree = BTree.create(file, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE, IntegerComparator.INSTANCE);
+		final BTree<Integer, String> btree =
+				BTree.create(createResourceManager(true), IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
+						IntegerComparator.INSTANCE);
 		btree.initialize();
-		btree.sync();
-
-		assertTrue(file.exists());
 	}
 
-### Manually
-
-    FileResourceManager pm = new FileResourceManager(file);
-	pm.open();
-
-	BTree<Integer, String> btree =
-		new BTree<Integer, String>(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
-	        IntegerComparator.INSTANCE);
-
-    btree.initialize();
-    btree.sync();
-
-### With the Guice BTreeModule
-
-This is kinda ugly, because getting generics from guice requires you to use Key.get together with new TypeLiteral.
-If anyone knows how to enhance that, let me know!
-
-    Injector i = Guice.createInjector(new BTreeModule("/tmp/myfile"));
-    BTree<Integer, Integer> t = i.getInstance(
-        Key.get(new TypeLiteral<BTree<Integer, Integer>>() {}));
-    t.initialize();
-
-Look at the *BTreeSmallTest* class to see the code in action.
-
+	private AutoSaveResourceManager createResourceManager(final boolean reset) {
+		if (reset)
+			file.delete();
+		return new ResourceManagerBuilder().file(file).buildAutoSave();
+	}
+	
 # Documentation
 
 You can find the Javadoc [here](http://rweng.github.com/jb-tree/doc/) -
 If you click on Network, you can see a branch called gh-pages on which you can see the commit the Javadocs are about (not always completely up-to-date).
-
-# Features
-
-- you can easily order your tree by providing a different comparator for the keys.
-- ...

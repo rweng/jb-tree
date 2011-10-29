@@ -198,12 +198,10 @@ public class BTreeTest {
 
 	@Test
 	public void staticMethodConstructor() throws IOException {
-
 		final BTree<Integer, String> btree =
 				BTree.create(createResourceManager(true), IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
 						IntegerComparator.INSTANCE);
 		btree.initialize();
-		btree.sync();
 	}
 
 	private AutoSaveResourceManager createResourceManager(final boolean reset) {
