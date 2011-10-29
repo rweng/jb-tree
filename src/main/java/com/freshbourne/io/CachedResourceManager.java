@@ -11,9 +11,11 @@
 package com.freshbourne.io;
 
 import com.google.common.cache.*;
+import com.google.common.collect.MapMaker;
 import com.sun.tools.internal.xjc.reader.xmlschema.parser.CustomizationContextChecker;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -23,6 +25,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * This class caches RawPages coming from a ResourceManager. Through the caching, we can ensure that pages are written
  * back to the ResourceManager even if they are not explicitly persisted in the using class.
  * <p/>
+ * Additionally, if a Page is requested which is not in cache but still in Memory (meaning that maybe it's still being
+ * used), then the memory instance is added to the cache and returned.
+ * <p/>
  * CachedResourceManager works with all kinds of ResourceManagers, although usually used with a {@link
  * FileResourceManager}
  */
@@ -31,6 +36,7 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 	private final ResourceManager         rm;
 	private final Cache<Integer, RawPage> cache;
 	private final int                     cacheSize;
+	private final Map<Integer, RawPage> weakMap = new MapMaker().weakValues().makeMap();
 
 	CachedResourceManager(ResourceManager _rm, int cacheSize) {
 		checkNotNull(_rm);
@@ -48,7 +54,12 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 				})
 				.build(new CacheLoader<Integer, RawPage>() {
 					@Override public RawPage load(Integer key) throws Exception {
-						return rm.getPage(key);
+						if(weakMap.containsKey(key))
+							return weakMap.get(key);
+
+						RawPage page = rm.getPage(key);
+						weakMap.put(page.id(), page);
+						return page;
 					}
 				});
 
@@ -59,11 +70,14 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 	}
 
 	@Override public void writePage(RawPage page) {
+		cache.asMap().put(page.id(), page);
+		weakMap.put(page.id(), page);
 		rm.writePage(page);
 	}
 
 	@Override public RawPage addPage(RawPage page) {
-		return rm.addPage(page);
+		throw new UnsupportedOperationException("not sure what to do with cache yet.");
+		// return rm.addPage(page);
 	}
 
 	@Override public int getPageSize() {
@@ -81,6 +95,7 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 	@Override public void close() throws IOException {
 		sync();
 		cache.invalidateAll();
+		weakMap.clear();
 		rm.close();
 	}
 
@@ -90,12 +105,14 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 
 	@Override public void clear() {
 		cache.invalidateAll();
+		weakMap.clear();
 		rm.clear();
 	}
 
 	@Override public RawPage createPage() {
 		RawPage page = rm.createPage();
 		cache.asMap().put(page.id(), page);
+		weakMap.put(page.id(), page);
 		return page;
 	}
 
@@ -109,6 +126,7 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 
 	@Override public void removePage(int id) {
 		cache.invalidate(id);
+		weakMap.remove(id);
 		rm.removePage(id);
 	}
 

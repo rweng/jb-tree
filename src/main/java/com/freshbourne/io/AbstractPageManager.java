@@ -55,7 +55,14 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		RawPage page = rpm.getPage(id);
 
 		if(cache.containsKey(id)){
-			return cache.get(id);
+
+			T t = cache.get(id);
+			if(t.rawPage() == page){
+				return t;
+			} else {
+				throw new IllegalStateException();
+				// what, if it is a different RawPage instance, but the old RawPage might still be used somewhere?
+			}
 		}
 		
 		result = createObjectPage(page);

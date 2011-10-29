@@ -107,4 +107,17 @@ public class CachedResourceManagerTest {
 		rm.open();
 		assertThat(rm.getPage(page.id())).isNotSameAs(page);
 	}
+
+	@Test
+	public void shouldReturnSameInstanceIfAlreadyInMemory(){
+		file.delete();
+		rm = new ResourceManagerBuilder().file(file).useCache(true).cacheSize(1).open().build();
+		RawPage page = rm.createPage();
+
+		// invalidate cache
+		rm.createPage();
+		rm.createPage();
+
+		assertThat(rm.getPage(page.id())).isSameAs(page);
+	}
 }
