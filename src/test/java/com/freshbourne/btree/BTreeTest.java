@@ -280,7 +280,7 @@ public class BTreeTest {
 	}
 
 
-	@Test
+	@Test(groups = "slow")
 	public void iteratorsWithoutParameters() throws IOException, InterruptedException {
 		LOG.setLevel(Level.DEBUG);
 		fillTree(tree, 1000);

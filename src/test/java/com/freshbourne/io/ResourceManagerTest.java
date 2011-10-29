@@ -10,7 +10,6 @@
 
 package com.freshbourne.io;
 
-import com.google.inject.Provider;
 import org.apache.log4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -27,7 +26,6 @@ import static org.testng.Assert.assertEquals;
 public class ResourceManagerTest {
 	private ResourceManager rm;
 	private static Logger LOG = Logger.getLogger(ResourceManagerTest.class);
-	private Provider<ResourceManager> provider;
 
 	ResourceManagerTest(final ResourceManager rm){
 		checkNotNull(rm);
