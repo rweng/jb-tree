@@ -51,28 +51,25 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	public T getPage(int id) {
 		T result;
 
-		// just ensure here, that if rpm caches, it's in this cache, too
-
-
 		T t = cache.get(id);
+		/*
 		if (t != null) {
 			return t;
 		}
+		*/
 
 		RawPage page = rpm.getPage(id);
-
-		/*
 		if(t != null){
 			if (t.rawPage() == page) {
 				return t;
 			} else {
 				LOG.warn("PageManager has an instance of " + t + " cached, which is not backed by the same RawPage "+
-				"as the one returned from the ResourceManager");
-				// throw new IllegalStateException();
+				"as the one returned from the ResourceManager. Resetting this page in the cache. Be aware that " +
+				"any changes to the old instance will not be saved.");
 				// what, if it is a different RawPage instance, but the old RawPage might still be used somewhere?
 			}
 		}
-		*/
+
 
 		result = createObjectPage(page);
 
