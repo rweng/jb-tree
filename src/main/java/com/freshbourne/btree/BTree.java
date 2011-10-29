@@ -16,7 +16,6 @@ import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.PagePointSerializer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
-import com.google.inject.Inject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -178,7 +177,6 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @param valueSerializer
 	 * @param comparator
 	 */
-	@Inject
 	private BTree(final AutoSaveResourceManager rm,
 	              final FixLengthSerializer<K, byte[]> keySerializer, final FixLengthSerializer<V, byte[]> valueSerializer,
 	              final Comparator<K> comparator) {

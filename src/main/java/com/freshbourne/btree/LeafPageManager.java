@@ -14,12 +14,9 @@ import com.freshbourne.io.AbstractPageManager;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.RawPage;
 import com.freshbourne.serializer.FixLengthSerializer;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import java.util.Comparator;
 
-@Singleton
 class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 
 	private final FixLengthSerializer<V, byte[]> valueSerializer;
@@ -27,7 +24,6 @@ class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 	
 	private final Comparator<K> comparator;
 	
-	@Inject
 	public LeafPageManager(
 			final PageManager<RawPage> bpm,
 			final FixLengthSerializer<V, byte[]> valueSerializer,

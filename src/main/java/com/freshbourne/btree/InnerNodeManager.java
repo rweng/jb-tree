@@ -14,12 +14,9 @@ import com.freshbourne.io.DataPageManager;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.RawPage;
 import com.freshbourne.serializer.FixLengthSerializer;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import java.util.Comparator;
 
-@Singleton
 class InnerNodeManager<K, V> extends AbstractPageManager<InnerNode<K, V>> {
 
 	private final FixLengthSerializer<K, byte[]> keySerializer;
@@ -29,7 +26,6 @@ class InnerNodeManager<K, V> extends AbstractPageManager<InnerNode<K, V>> {
 	private final Comparator<K> comparator;
 	private final PageManager<LeafNode<K, V>> leafPageManager;
 	
-	@Inject
 	public InnerNodeManager(
 			final PageManager<RawPage> bpm,
 			final DataPageManager<K> keyPageManager,
