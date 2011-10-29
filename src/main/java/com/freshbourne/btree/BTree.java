@@ -1,40 +1,150 @@
 /*
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ *
  * http://creativecommons.org/licenses/by-nc/3.0/
+ *
  * For alternative conditions contact the author.
  *
- * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
+ * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
 package com.freshbourne.btree;
 
 import com.freshbourne.btree.AdjustmentAction.ACTION;
 import com.freshbourne.io.*;
-import com.freshbourne.multimap.MultiMap;
 import com.freshbourne.serializer.FixLengthSerializer;
-import com.freshbourne.serializer.IntegerSerializer;
 import com.freshbourne.serializer.PagePointSerializer;
-import com.google.inject.Inject;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Objects;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 
+import static com.google.common.base.Preconditions.*;
 
-public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
+
+/**
+ * The Btree page, all leafs and innernodes have to be stored in the same RawPageManager. We used to have it differently
+ * but it is simpler this way. Now The BTree can make sure that all use the same serializers and comparators.
+ * <p/>
+ * Header: NUM_OF_ENTRIES ROOT_ID (here comes serializers etc)
+ *
+ * @param <K>
+ * @param <V>
+ */
+public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 	private static final Log LOG = LogFactory.getLog(BTree.class);
+
+	private final LeafPageManager<K, V>  leafPageManager;
+	private final InnerNodeManager<K, V> innerNodeManager;
+	private final Comparator<K>          comparator;
+	private final AutoSaveResourceManager        rm;
+	private       RawPage                rawPage;
+
+	private Node<K, V> root;
+
+	private boolean valid           = false;
+	private int     numberOfEntries = 0;
+	private FixLengthSerializer<K, byte[]> keySerializer;
+	private FixLengthSerializer<V, byte[]> valueSerializer;
+
+	/**
+	 * sync, close the ResourceManager and set to invalid
+	 *
+	 * @throws IOException
+	 */
+	public void close() throws IOException {
+		sync();
+		rm.close();
+		valid = false;
+	}
+
+	public int getMaxInnerKeys() {
+		final int realSize = rm.getPageSize() - InnerNode.Header.size() - Integer.SIZE / 8;
+		return realSize / (Integer.SIZE / 8 + keySerializer.getSerializedLength());
+	}
+
+	public int getMaxLeafKeys() {
+		final int realSize = rm.getPageSize() - LeafNode.Header.size();
+		return realSize / (keySerializer.getSerializedLength() + valueSerializer.getSerializedLength());
+	}
+
+	public FixLengthSerializer<K, byte[]> getKeySerializer() {
+		return keySerializer;
+	}
+
+	public FixLengthSerializer<V, byte[]> getValueSerializer() {
+		return valueSerializer;
+	}
+
+	@VisibleForTesting
+	public LeafPageManager<K, V> getLeafPageManager() {
+		return leafPageManager;
+	}
+
+	@VisibleForTesting
+	public InnerNodeManager<K, V> getInnerNodeManager() {
+		return innerNodeManager;
+	}
+
+	static enum Header {
+		NUM_OF_ENTRIES(0),
+		ROOT_ID(Integer.SIZE / 8);
+
+		private int offset;
+
+		private Header(final int offset) {
+			this.offset = offset;
+		}
+
+		static int size() {
+			return (2 * Integer.SIZE) / 8;
+		} // 8
+
+		int getOffset() {
+			return offset;
+		}
+	}
+
+	/**
+	 * This enum is used to make it possible for all nodes in the BTree to serialize and deserialize in a unique fashion
+	 *
+	 * @author Robin Wenglewski <robin@wenglewski.de>
+	 */
+	static enum NodeType {
+		LEAF_NODE('L'), INNER_NODE('I');
+
+		private final char serialized;
+
+		NodeType(final char value) {
+			this.serialized = value;
+		}
+
+		public char serialize() {
+			return serialized;
+		}
+
+		public static NodeType deserialize(final char serialized) {
+			for (final NodeType nt : values())
+				if (nt.serialized == serialized)
+					return nt;
+
+			return null;
+		}
+	}
+
 
 	/**
 	 * This is the probably least verbose method for creating BTrees. It accepts a file versus the FileResourceManager of
 	 * the constructor. In addition, one does not have to repeat the generic on the right hand side of the creation
 	 * assignment.
 	 *
-	 * @param file
+	 * @param rm
+	 * 		resourceManager
 	 * @param keySerializer
 	 * @param valueSerializer
 	 * @param comparator
@@ -44,98 +154,56 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 *
 	 * @throws IOException
 	 */
-	public static <K, V> BTree<K, V> create(File file, FixLengthSerializer<K, byte[]> keySerializer,
-	                                        FixLengthSerializer<V, byte[]> valueSerializer,
-	                                        Comparator<K> comparator) throws IOException {
-		FileResourceManager frm = new FileResourceManager(file);
-		frm.open();
+	public static <K, V> BTree<K, V> create(final AutoSaveResourceManager rm, final FixLengthSerializer<K, byte[]> keySerializer,
+	                                        final FixLengthSerializer<V, byte[]> valueSerializer,
+	                                        final Comparator<K> comparator) throws IOException {
 
-		return new BTree<K, V>(frm, keySerializer, valueSerializer, comparator);
-	}
+		checkNotNull(rm);
+		checkNotNull(keySerializer);
+		checkNotNull(valueSerializer);
+		checkNotNull(comparator);
 
-	public int getDepth() {
-		return root.getDepth();
+		if (!rm.isOpen())
+			rm.open();
+
+		return new BTree<K, V>(rm, keySerializer, valueSerializer, comparator);
 	}
 
 	/**
-	 * This enum is used to make it possible for all nodes in the BTree to serialize and deserialize in a unique fashion
+	 * This constructor is for manual construction.
 	 *
-	 * @author Robin Wenglewski <robin@wenglewski.de>
-	 */
-	public enum NodeType {
-		LEAF_NODE('L'), INNER_NODE('I');
-
-		private final char serialized;
-
-		NodeType(char value) {
-			this.serialized = value;
-		}
-
-		public char serialize() {
-			return serialized;
-		}
-
-		public static NodeType deserialize(char serialized) {
-			for (NodeType nt : values())
-				if (nt.serialized == serialized)
-					return nt;
-
-			return null;
-		}
-	}
-
-	private final LeafPageManager<K, V>  leafPageManager;
-	private final InnerNodeManager<K, V> innerNodeManager;
-	private final Comparator<K>          comparator;
-	private final PageManager<RawPage>   bpm;
-	private       RawPage                rawPage;
-
-	private Node<K, V> root;
-
-	private boolean valid           = false;
-	private int     numberOfEntries = 0;
-
-
-	/**
-	 * This constructor is for manual construction since it's a bit simpler than the other one. It then creates the actual
-	 * dependencies;
-	 *
-	 * @param bpm
+	 * @param rm
 	 * @param keySerializer
 	 * @param valueSerializer
 	 * @param comparator
 	 */
-	public BTree(PageManager<RawPage> bpm,
-	             FixLengthSerializer<K, byte[]> keySerializer, FixLengthSerializer<V, byte[]> valueSerializer,
-	             Comparator<K> comparator) {
+	private BTree(final AutoSaveResourceManager rm,
+	              final FixLengthSerializer<K, byte[]> keySerializer, final FixLengthSerializer<V, byte[]> valueSerializer,
+	              final Comparator<K> comparator) {
 
-		this.bpm = bpm;
+		this.rm = rm;
+		this.keySerializer = keySerializer;
+		this.valueSerializer = valueSerializer;
 		this.comparator = comparator;
 
-		DataPageManager<K> keyPageManager = new DataPageManager<K>(bpm, PagePointSerializer.INSTANCE, keySerializer);
-		DataPageManager<V> valuePageManager =
-				new DataPageManager<V>(bpm, PagePointSerializer.INSTANCE, valueSerializer);
+		final DataPageManager<K> keyPageManager = new DataPageManager<K>(rm, PagePointSerializer.INSTANCE, keySerializer);
+		final DataPageManager<V> valuePageManager =
+				new DataPageManager<V>(rm, PagePointSerializer.INSTANCE, valueSerializer);
 
-		leafPageManager = new LeafPageManager<K, V>(bpm, valueSerializer, keySerializer, comparator);
+		leafPageManager = new LeafPageManager<K, V>(rm, valueSerializer, keySerializer, comparator);
 		innerNodeManager =
-				new InnerNodeManager(bpm, keyPageManager, valuePageManager, leafPageManager, keySerializer, comparator);
+				new InnerNodeManager(rm, keyPageManager, valuePageManager, leafPageManager, keySerializer, comparator);
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("BTree created: ");
+			LOG.debug("key serializer: " + keySerializer);
+			LOG.debug("value serializer: " + valueSerializer);
+			LOG.debug("comparator: " + comparator);
+		}
 	}
 
-	/**
-	 * This is the standard constructor (for Guice) that contains all real dependencies.
-	 *
-	 * @param bpm
-	 * 		for getting a rawPage for storing meta-information like size and depth of the tree and root page
-	 * @param leafPageManager
-	 * @param innerNodeManager
-	 * @param comparator
-	 */
-	@Inject public BTree(PageManager<RawPage> bpm, LeafPageManager<K, V> leafPageManager,
-	                     InnerNodeManager<K, V> innerNodeManager, Comparator<K> comparator) {
-		this.leafPageManager = leafPageManager;
-		this.innerNodeManager = innerNodeManager;
-		this.comparator = comparator;
-		this.bpm = bpm;
+	public int getDepth() {
+		return root.getDepth();
 	}
 
 	public Comparator<K> getKeyComparator() {
@@ -143,7 +211,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#size()
+		  * @see com.freshbourne.btree.MultiMap#size()
 		  */
 	@Override
 	public int getNumberOfEntries() {
@@ -152,45 +220,73 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	}
 
 	private void ensureValid() {
-		if (!isValid())
-			throw new IllegalStateException("Btree must be initialized or loaded");
+		checkArgument(isValid(), "Btree must be initialized or loaded");
 	}
 
-	public void bulkInitialize(SimpleEntry<K, V>[] kvs, boolean sorted) throws IOException {
-		if (!sorted)
-			throw new IllegalArgumentException("KeyValueObjects must be sorted for bulkInsert to work right now");
+	public void bulkInitialize(final SimpleEntry<K, V>[] kvs, final boolean sorted) throws IOException {
+		bulkInitialize(kvs, 0, kvs.length - 1, sorted);
+	}
 
-		initialize();
-		setNumberOfEntries(kvs.length);
+	/**
+	 * Bulk initialize first creates all leafs, then goes the tree up toIndex create the InnerNodes.
+	 *
+	 * @param kvs
+	 * @param fromIndex
+	 * 		including
+	 * @param toIndex
+	 * 		including
+	 * @param sorted
+	 * @throws IOException
+	 */
+	public void bulkInitialize(final SimpleEntry<K, V>[] kvs, final int fromIndex, final int toIndex, final boolean sorted) throws IOException {
+		checkState(!valid, "BTree is already loaded: %s", this);
+		
+		final int count = toIndex - fromIndex + 1;
+		if (count < 0)
+			throw new IllegalArgumentException(
+					"fromIndex(" + fromIndex + ") must be smaller or equal to toIndex(" + toIndex + ")");
 
-		if (kvs.length == 0) {
+		// sort if not already sorted
+		if (!sorted) {
+			Arrays.sort(kvs, fromIndex, toIndex + 1, // +1 because excluding toIndex
+					new Comparator<SimpleEntry<K, V>>() {
+						@Override
+						public int compare(final SimpleEntry<K, V> kvSimpleEntry, final SimpleEntry<K, V> kvSimpleEntry1) {
+							return comparator.compare(kvSimpleEntry.getKey(), kvSimpleEntry1.getKey());
+						}
+					});
+		}
+
+		// initialize but do not create a root page or set the number of keys
+		preInitialize();
+		setNumberOfEntries(count);
+
+		if (getNumberOfEntries() == 0) {
 			return;
 		}
 
 		LeafNode<K, V> leafPage;
-		ArrayList<byte[]> rawKeys = new ArrayList<byte[]>();
+		ArrayList<byte[]> keysForNextLayer = new ArrayList<byte[]>();
 		ArrayList<Integer> pageIds = new ArrayList<Integer>();
-		HashMap<Integer, byte[]> smallestKeyOfNode = new HashMap<Integer, byte[]>();
-		HashMap<Integer, byte[]> largestKeyOfNode = new HashMap<Integer, byte[]>();
+		final HashMap<Integer, byte[]> pageIdToSmallestKeyMap = new HashMap<Integer, byte[]>();
 
 
 		// first insert all leafs and remember the insertedLastKeys
 		int inserted = 0;
 		LeafNode<K, V> previousLeaf = null;
-		while (inserted < kvs.length) {
+		while (inserted < getNumberOfEntries()) {
 			leafPage = leafPageManager.createPage(false);
-			inserted += leafPage.bulkInitialize(kvs, inserted);
 
-			largestKeyOfNode.put(leafPage.getId(), leafPage.getLastLeafKeySerialized());
-			rawKeys.add(leafPage.getLastLeafKeySerialized());
+			inserted += leafPage.bulkInitialize(kvs, inserted + fromIndex, toIndex);
 
-			// LOG.debug("largest key of page " + leafPage.getId() + " = " + leafPage.getLastLeafKey());
+			pageIdToSmallestKeyMap.put(leafPage.getId(), leafPage.getFirstLeafKeySerialized());
 
 			// set nextLeafId of previous leaf
 			// dont store the first key
 			if (previousLeaf != null) {
+				// next layer doesn't need the first key
+				keysForNextLayer.add(leafPage.getFirstLeafKeySerialized());
 				previousLeaf.setNextLeafId(leafPage.getId());
-				// rawKeys.add(leafPage.getFirstSerializedKey());
 			}
 
 			previousLeaf = leafPage;
@@ -199,74 +295,74 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 		// we are done if everything fits in one leaf
 		if (pageIds.size() == 1) {
-			root = leafPageManager.getPage(pageIds.get(0));
+			setRoot(leafPageManager.getPage(pageIds.get(0)));
 			return;
 		}
 
 		// if not, build up tree
-		InnerNode<K, V> node = null;
+		InnerNode<K, V> node;
 
+		// for each layer, if pageId == 1, this page becomes the root
 		while (pageIds.size() > 1) {
-			LOG.debug("next inner node layer");
-			ArrayList<Integer> newPageIds = new ArrayList<Integer>();
-			ArrayList<byte[]> newRawKeys = new ArrayList<byte[]>();
+			if (LOG.isDebugEnabled())
+				LOG.debug("next inner node layer");
+
+			final ArrayList<Integer> newPageIds = new ArrayList<Integer>();
+			final ArrayList<byte[]> newKeysForNextLayer = new ArrayList<byte[]>();
 			inserted = 0; // page ids
 
-			// we assume that from each pageId the largest key was stored, we need to remove the last one for innernode bulkinsert
-			rawKeys.remove(rawKeys.size() - 1);
+			// we assume that fromIndex each pageId the smallest key was stored, we need to remove the last one for InnerNode#bulkinsert()
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("new pageIds.size: " + pageIds.size());
+				LOG.debug("new keysForNextLayer.size: " + keysForNextLayer.size());
+			}
 
-			LOG.debug("new pageIds.size: " + pageIds.size());
-			LOG.debug("new rawKeys.size: " + rawKeys.size());
-
-			// fill the inner node row
+			// fill the layer row while we have pageIds to insert left
 			while (inserted < pageIds.size()) {
 
 				// create a inner node and store the smallest key
 				node = innerNodeManager.createPage(false);
 				newPageIds.add(node.getId());
+				final byte[] smallestKey = pageIdToSmallestKeyMap.get(pageIds.get(inserted));
+				pageIdToSmallestKeyMap.put(node.getId(), smallestKey);
 
-				inserted += node.bulkInitialize(rawKeys, pageIds, inserted);
-				LOG.debug("inserted " + inserted + " in inner node, pageIds.size()=" + pageIds.size());
+				// dont insert the first small key to the keys for the next layer
+				if (inserted > 0)
+					newKeysForNextLayer.add(smallestKey);
 
-				// byte[] smallestKey = smallestKeyOfNode.get(pageIds.get(inserted));
-				// smallestKeyOfNode.put(node.getId(), smallestKey);
+				inserted += node.bulkInitialize(keysForNextLayer, pageIds, inserted);
 
-				byte[] largestKey = largestKeyOfNode.get(pageIds.get(inserted - 1));
-				largestKeyOfNode.put(node.getId(), largestKey);
-				newRawKeys.add(largestKey);
-
-				if (pageIds.size() == 4) {
-					LOG.debug("largest key of current node: " + IntegerSerializer.INSTANCE.deserialize(largestKey));
-				}
+				if (LOG.isDebugEnabled())
+					LOG.debug("inserted " + inserted + " in inner node, pageIds.size()=" + pageIds.size());
 			}
 
 			// next turn, insert the ids of the pages we just created
 			pageIds = newPageIds;
-			rawKeys = newRawKeys;
+			keysForNextLayer = newKeysForNextLayer;
 		}
 
 		// here, pageIds should be 1, and the page should be an inner node
 		if (pageIds.size() == 1) {
-			root = innerNodeManager.getPage(pageIds.get(0));
+			setRoot(innerNodeManager.getPage(pageIds.get(0)));
 			return;
 		}
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#containsKey(java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#containsKey(java.lang.Object)
 		  */
 	@Override
-	public boolean containsKey(K key) {
+	public boolean containsKey(final K key) {
 		ensureValid();
 
 		return root.containsKey(key);
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#get(java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#get(java.lang.Object)
 		  */
 	@Override
-	public List<V> get(K key) {
+	public List<V> get(final K key) {
 		ensureValid();
 
 		return root.get(key);
@@ -274,15 +370,15 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#add(java.lang.Object, java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#add(java.lang.Object, java.lang.Object)
 		  */
 	@Override
-	public void add(K key, V value) {
+	public void add(final K key, final V value) {
 		ensureValid();
 
 		setNumberOfEntries(getNumberOfEntries() + 1);
 
-		AdjustmentAction<K, V> result = root.insert(key, value);
+		final AdjustmentAction<K, V> result = root.insert(key, value);
 
 		// insert was successful
 		if (result == null)
@@ -291,11 +387,16 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		// a new root must be created
 		if (result.getAction() == ACTION.INSERT_NEW_NODE) {
 			// new root
-			InnerNode<K, V> newRoot = innerNodeManager.createPage();
+			final InnerNode<K, V> newRoot = innerNodeManager.createPage();
 			newRoot.initRootState(root.getId(), result.getSerializedKey(), result.getPageId());
-			root = newRoot;
+			setRoot(newRoot);
 		}
 
+	}
+
+	private void setRoot(final Node<K, V> root) {
+		this.root = root;
+		rawPage.bufferForWriting(Header.ROOT_ID.getOffset()).putInt(root.getId());
 	}
 
 	/**
@@ -304,7 +405,7 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	 * @param id
 	 * @return
 	 */
-	private Node<K, V> getNode(int id) {
+	private Node<K, V> getNode(final int id) {
 		if (leafPageManager.hasPage(id))
 			return leafPageManager.getPage(id);
 		else
@@ -312,68 +413,84 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	}
 
 	/** @param i */
-	private void setNumberOfEntries(int i) {
+	private void setNumberOfEntries(final int i) {
 		numberOfEntries = i;
-		rawPage().bufferForWriting(0).putInt(numberOfEntries);
+		rawPage.bufferForWriting(Header.NUM_OF_ENTRIES.getOffset()).putInt(numberOfEntries);
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#remove(java.lang.Object)
 		  */
 	@Override
-	public void remove(K key) {
+	public void remove(final K key) {
 		ensureValid();
 
 		numberOfEntries -= root.remove(key);
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#remove(java.lang.Object, java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#remove(java.lang.Object, java.lang.Object)
 		  */
 	@Override
-	public void remove(K key, V value) {
+	public void remove(final K key, final V value) {
 		ensureValid();
 
 		setNumberOfEntries(getNumberOfEntries() - root.remove(key, value));
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#clear()
+		  * @see com.freshbourne.btree.MultiMap#clear()
 		  */
 	@Override
 	public void clear() {
 		ensureValid();
 
-		root.destroy();
-
+		// just set another root, the other pages stay in the file
+		LOG.info("BTree#clear() is not fully implemented yet because" +
+				" it is not possible to remove entries from the FileResourceManager");
 		root = leafPageManager.createPage();
-		numberOfEntries = 0;
+		setNumberOfEntries(0);
 	}
-
-	/** The maximum number of levels in the B-Tree. Used to prevent infinite loops when the structure is corrupted. */
-	private static final int MAX_BTREE_DEPTH = 50;
 
 	/* (non-Javadoc)
 		  * @see com.freshbourne.io.ComplexPage#initialize()
 		  */
 	@Override
 	public void initialize() throws IOException {
-		numberOfEntries = 0;
-		valid = true;
+		checkState(!valid, "tree is already valid: %s", this);
+		
+		preInitialize();
+		setRoot(leafPageManager.createPage());
+		setNumberOfEntries(0);
+	}
 
-		if (bpm.hasPage(1))
-			rawPage = bpm.getPage(1);
+	public String toString(){
+		final Objects.ToStringHelper helper = Objects.toStringHelper(this);
+		helper.add("numberOfEntries", getNumberOfEntries());
+		helper.add("root", root);
+		helper.add("resourceManager", rm);
+		helper.add("valid", valid);
+		return helper.toString();
+	}
+
+	/**
+	 * opens the ResourceManager, sets the rawPage and sets valid, but does not create a root leaf or set the number of
+	 * entries
+	 * @throws java.io.IOException
+	 */
+	private void preInitialize() throws IOException {
+		if (!rm.isOpen())
+			rm.open();
+
+		if (rm.hasPage(1))
+			rawPage = rm.getPage(1);
 		else
-			rawPage = bpm.createPage();
+			rawPage = rm.createPage();
 
 		if (rawPage.id() != 1)
 			throw new IllegalStateException("rawPage must have id 1");
 
-		root = leafPageManager.createPage();
-
-		ByteBuffer buffer = rawPage.bufferForWriting(0);
-		buffer.putInt(numberOfEntries);
-		buffer.putInt(root.getId());
+		valid = true;
 	}
 
 	/* (non-Javadoc)
@@ -381,17 +498,23 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		  */
 	@Override
 	public void load() throws IOException {
-		if (!bpm.hasPage(1)) {
+		checkState(!valid, "BTree is already loaded: %s", this);
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("loading BTree");
+
+		if (!rm.isOpen())
+			rm.open();
+
+		if (!rm.hasPage(1)) {
 			throw new IOException("Page 1 could not be found. Ensure that the BTree is initialized");
 		}
 
 
-		rawPage = bpm.getPage(1);
-
-		valid = true;
+		rawPage = rm.getPage(1);
 		numberOfEntries = rawPage.bufferForReading(0).getInt();
 
-		int rootId = rawPage().bufferForReading(4).getInt();
+		final int rootId = rawPage.bufferForReading(4).getInt();
 		if (leafPageManager.hasPage(rootId)) {
 			root = leafPageManager.getPage(rootId);
 		} else if (innerNodeManager.hasPage(rootId)) {
@@ -399,6 +522,14 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 		} else {
 			throw new IllegalStateException(
 					"Page 1 does exist, but is neither a leafPage nor a innerNodePage. This could be the result of an unclosed B-Tree.");
+		}
+
+		valid = true;
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("BTree loaded: ");
+			LOG.debug("Number of Values: " + numberOfEntries);
+			LOG.debug("root (id: " + root.getId() + "): " + root);
 		}
 	}
 
@@ -424,41 +555,136 @@ public class BTree<K, V> implements MultiMap<K, V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.io.ComplexPage#rawPage()
-		  */
-	@Override
-	public RawPage rawPage() {
-		ensureValid();
-
-		return rawPage;
-	}
-
-	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#sync()
-		  */
+			  * @see com.freshbourne.btree.MultiMap#sync()
+			  */
 	@Override
 	public void sync() {
-		bpm.sync();
+		rm.sync();
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#getIterator()
+		  * @see com.freshbourne.btree.MultiMap#getIterator()
 		  */
 	@Override
 	public Iterator<V> getIterator() {
+		ensureValid();
 		return getIterator(root.getFirstLeafKey(), root.getLastLeafKey());
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.multimap.MultiMap#getIterator(java.lang.Object, java.lang.Object)
+		  * @see com.freshbourne.btree.MultiMap#getIterator(java.lang.Object, java.lang.Object)
 		  */
 	@Override
-	public Iterator<V> getIterator(K from, K to) {
-		Iterator<V> result = root.getIterator(from, to);
+	public Iterator<V> getIterator(final K from, final K to) {
+		final Iterator<V> result = root.getIterator(from, to);
 		return result;
 	}
 
+
+	public Iterator<V> getIterator(final List<Range<K>> ranges) {
+		return new BTreeIterator(ranges);
+	}
+
+	private class BTreeIterator implements Iterator<V> {
+
+		private List<Range<K>> ranges;
+		private int         rangePointer    = -1;
+		private Iterator<V> currentIterator = null;
+
+		public BTreeIterator(final List<Range<K>> ranges) {
+			this.ranges = cleanRanges(ranges);
+
+		}
+
+		private List<Range<K>> cleanRanges(final List<Range<K>> ranges) {
+			final List<Range<K>> cleaned = new LinkedList<Range<K>>();
+
+			if (ranges == null) {
+				cleaned.add(new Range());
+				return cleaned;
+			}
+
+			// sort ranges after from key
+			Collections.sort(ranges, new Comparator<Range<K>>() {
+				@Override public int compare(final Range<K> kRange, final Range<K> kRange1) {
+					if (kRange.getFrom() == null) {
+						if (kRange1.getFrom() == null)
+							return 0;
+						else
+							return -1;
+					}
+
+					if (kRange1.getFrom() == null)
+						return 1;
+
+					return comparator.compare(kRange.getFrom(), kRange1.getFrom());
+				}
+			});
+
+			Range<K> last = null;
+			for (final Range<K> r : ranges) {
+				if (cleaned.size() == 0) {
+					cleaned.add(r);
+					last = r;
+					continue;
+				}
+
+				// only if this to() is larger than last to(), extend to()
+				if (last.getTo() != null) {
+					if ((r.getFrom() == null || comparator.compare(last.getTo(), r.getFrom()) >= 0)) {
+						if (r.getTo() == null)
+							last.setTo(null);
+						else if (comparator.compare(last.getTo(), r.getTo()) < 0) {
+							last.setTo(r.getTo());
+						}
+					} else { // separate ranges
+						cleaned.add(r);
+						last = r;
+					}
+				}
+			}
+
+			if (cleaned.size() == 0)
+				cleaned.add(new Range<K>());
+
+			return cleaned;
+		}
+
+
+		@Override public boolean hasNext() {
+			if (currentIterator == null) {
+				if (rangePointer == ranges.size() - 1)
+					return false;
+				else {
+					final Range<K> range = ranges.get(++rangePointer);
+					currentIterator = root.getIterator(range.getFrom(), range.getTo());
+				}
+			}
+
+			if (currentIterator.hasNext())
+				return true;
+
+			currentIterator = null;
+			return hasNext();
+		}
+
+		@Override public V next() {
+			if (!hasNext())
+				return null;
+			else
+				return currentIterator.next();
+		}
+
+		@Override public void remove() {
+			throw new UnsupportedOperationException();
+		}
+	}
+
 	public String getPath() {
-		return ((FileResourceManager) bpm).getFile().getAbsolutePath();
+		return ((FileResourceManager) rm).getFile().getAbsolutePath();
+	}
+
+	AutoSaveResourceManager getResourceManager() {
+		return rm;
 	}
 }

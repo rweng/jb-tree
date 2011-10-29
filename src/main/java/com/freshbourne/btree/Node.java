@@ -1,9 +1,11 @@
 /*
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ *
  * http://creativecommons.org/licenses/by-nc/3.0/
+ *
  * For alternative conditions contact the author.
  *
- * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
+ * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
 package com.freshbourne.btree;
@@ -13,7 +15,7 @@ import com.freshbourne.io.PagePointer;
 import java.util.Iterator;
 import java.util.List;
 
-public interface Node<K, V> {
+interface Node<K, V> {
 	
 	/**
 	 * inserts the key and value into the node
@@ -43,6 +45,7 @@ public interface Node<K, V> {
 	public int getNumberOfKeys();
 	
 	/**
+	 * @param key
 	 * @return boolean if the key is contained in the map
 	 */
 	public boolean containsKey(K key);
@@ -111,6 +114,7 @@ public interface Node<K, V> {
 
     /**
      * @return true if all sub-nodes are in the right order and are valid
+     * @throws IllegalStateException
      */
     public void checkStructure() throws IllegalStateException;
 }

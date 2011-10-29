@@ -1,9 +1,11 @@
 /*
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ *
  * http://creativecommons.org/licenses/by-nc/3.0/
+ *
  * For alternative conditions contact the author.
  *
- * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
+ * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 package com.freshbourne.btree;
 
@@ -13,38 +15,36 @@ import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.PageManager;
 import com.freshbourne.io.RawPage;
 import com.freshbourne.serializer.IntegerSerializer;
-import org.junit.Before;
-import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertEquals;
 
+/**
+ * @deprecated 
+ */
 public class LeafNodeUnitTest {
 	
 	private LeafNode<Integer, Integer> node;
 	
 	// dependencies
 	private RawPage rawPage;
-	private RawPage rawPage2;
 	private int minNumberOfValues = 3;
 	private int rawPageSize = 34;
 	@Mock private PageManager<LeafNode<Integer, Integer>> leafPageManager;
 
-	private LeafNode<Integer, Integer> node2;
 
-	
-	@Before
+	@BeforeMethod
 	public void setUp(){
 		MockitoAnnotations.initMocks(this); 
 		rawPage = new RawPage(ByteBuffer.allocate(rawPageSize), 100);
-		rawPage2 = new RawPage(ByteBuffer.allocate(rawPageSize), 101);
+		final RawPage rawPage2 = new RawPage(ByteBuffer.allocate(rawPageSize), 101);
 		node = new LeafNode<Integer, Integer>(rawPage, IntegerSerializer.INSTANCE,
-				IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE, leafPageManager, minNumberOfValues);
-		node2 = new LeafNode<Integer, Integer>(rawPage2, IntegerSerializer.INSTANCE,
 				IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE, leafPageManager, minNumberOfValues);
 		node.initialize();
 	}
@@ -75,8 +75,8 @@ public class LeafNodeUnitTest {
 	
 	@Test
 	public void minNumberOfValues(){
-		int tmpValues = minNumberOfValues;
-		int tmpSize = rawPageSize;
+		final int tmpValues = minNumberOfValues;
+		final int tmpSize = rawPageSize;
 		
 		minNumberOfValues = 1;
 		rawPageSize = Header.size() + 2*IntegerSerializer.INSTANCE.getSerializedLength();
@@ -132,7 +132,7 @@ public class LeafNodeUnitTest {
 	
 	@Test
 	public void testInitialize(){
-		ByteBuffer buf = rawPage.bufferForReading(0);
+		final ByteBuffer buf = rawPage.bufferForReading(0);
 		assertEquals(NodeType.LEAF_NODE.serialize(), buf.getChar());
 		assertEquals(0, buf.getInt());
 		assertEquals((int)LeafNode.NO_NEXT_LEAF, buf.getInt());
@@ -147,9 +147,9 @@ public class LeafNodeUnitTest {
 		assertEquals(101, (int) node.get(1).get(0));
 	}
 	
-	private void ensureKeyValueInRawPage(RawPage rp, int offset, int key, int value){
-		ByteBuffer buf = rp.bufferForReading(offset);
-		byte[] bytes = new byte[IntegerSerializer.INSTANCE.getSerializedLength()];
+	private void ensureKeyValueInRawPage(final RawPage rp, final int offset, final int key, final int value){
+		final ByteBuffer buf = rp.bufferForReading(offset);
+		final byte[] bytes = new byte[IntegerSerializer.INSTANCE.getSerializedLength()];
 		buf.get(bytes);
 		assertEquals(key, (int) IntegerSerializer.INSTANCE.deserialize(bytes));
 		buf.get(bytes);

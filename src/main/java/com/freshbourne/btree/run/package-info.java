@@ -7,14 +7,8 @@
  *
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
 
-public class DuplicatePageIdException extends RuntimeException {
-	
-	private static final long serialVersionUID = 1L;
-
-	public DuplicatePageIdException(final Long id) {
-		super("The page with the id " + id + " does already exist.");
-	}
-
-}
+/**
+ * package containing executable Java classes.
+ */
+package com.freshbourne.btree.run;

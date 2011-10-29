@@ -1,12 +1,14 @@
 /*
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ *
  * http://creativecommons.org/licenses/by-nc/3.0/
+ *
  * For alternative conditions contact the author.
  *
- * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
+ * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-package com.freshbourne.multimap;
+package com.freshbourne.btree;
 
 import java.util.Iterator;
 import java.util.List;
@@ -19,6 +21,7 @@ public interface MultiMap<K, V> {
 	public int getNumberOfEntries();
 	
 	/**
+	 * @param key
 	 * @return boolean if the key is contained in the map
 	 */
 	public boolean containsKey(K key);
@@ -81,6 +84,7 @@ public interface MultiMap<K, V> {
      * 
      * @param from
      * @param to
+     * @return
      */
     public Iterator<V> getIterator(K from, K to);
     

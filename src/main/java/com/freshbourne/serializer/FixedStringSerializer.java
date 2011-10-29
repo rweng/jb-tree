@@ -1,11 +1,17 @@
 /*
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ *
  * http://creativecommons.org/licenses/by-nc/3.0/
+ *
  * For alternative conditions contact the author.
  *
- * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
+ * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 package com.freshbourne.serializer;
+
+import org.apache.log4j.Logger;
+
+import java.nio.ByteBuffer;
 
 public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]> {
 	INSTANCE(100),
@@ -14,8 +20,11 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 	INSTANCE_1000(1000);
 	
 	private int length;
+
+	private static Logger LOG = Logger.getLogger(FixedStringSerializer.class);
 	
-	private FixedStringSerializer(int length) {
+	
+	private FixedStringSerializer(final int length) {
 		this.length = length;
 	}
 
@@ -23,27 +32,30 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 	 * @see com.freshbourne.serializer.Serializer#serialize(java.lang.Object)
 	 */
 	@Override
-	public byte[] serialize(String o) {
-		byte[] bytes = o.getBytes();
+	public byte[] serialize(final String o) {
+		final byte[] bytes = o.getBytes();
 		
 		if(bytes.length > (length - 1)){
 			throw new IllegalArgumentException("String is too long to be serialized");
 		}
-		
-		byte[] result = new byte[length];
-		result[0] = new Integer(bytes.length).byteValue();
-		System.arraycopy(bytes, 0, result, 1, bytes.length);
-		return result;
+
+
+		final ByteBuffer buf = ByteBuffer.allocate(length);
+		buf.putShort((short) bytes.length);
+		buf.put(bytes);
+		return buf.array();
 	}
 
 	/* (non-Javadoc)
 	 * @see com.freshbourne.serializer.Serializer#deserialize(java.lang.Object)
 	 */
 	@Override
-	public String deserialize(byte[] o) {
-		int length = o[0];
-		byte[] bytes = new byte[length];
-		System.arraycopy(o, 1, bytes, 0, bytes.length);
+	public String deserialize(final byte[] o) {
+		final ByteBuffer buf = ByteBuffer.wrap(o);
+		final short length = buf.getShort();
+
+		final byte[] bytes = new byte[length];
+		buf.get(bytes);
 		return new String(bytes);
 	}
 

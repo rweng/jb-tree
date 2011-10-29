@@ -1,20 +1,22 @@
 /*
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ *
  * http://creativecommons.org/licenses/by-nc/3.0/
+ *
  * For alternative conditions contact the author.
  *
- * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
+ * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 package com.freshbourne.btree;
 
-public class AdjustmentAction<K,V> {
+class AdjustmentAction<K,V> {
 	public enum ACTION {INSERT_NEW_NODE, UPDATE_KEY}
 	
 	private ACTION action;
 	private byte[] serializedKey;
 	private Integer pageId;
 	
-	protected AdjustmentAction(ACTION action, byte[] serializedKey, Integer pageId){
+	protected AdjustmentAction(final ACTION action, final byte[] serializedKey, final Integer pageId){
 		this.setAction(action);
 		this.setSerializedKey(serializedKey);
 		this.setPageId(pageId);
@@ -23,7 +25,7 @@ public class AdjustmentAction<K,V> {
 	/**
 	 * @param action the action to set
 	 */
-	public void setAction(ACTION action) {
+	public void setAction(final ACTION action) {
 		this.action = action;
 	}
 
@@ -37,7 +39,7 @@ public class AdjustmentAction<K,V> {
 	/**
 	 * @param pageId the node to set
 	 */
-	public void setPageId(Integer pageId) {
+	public void setPageId(final Integer pageId) {
 		this.pageId = pageId;
 	}
 
@@ -51,7 +53,7 @@ public class AdjustmentAction<K,V> {
 	/**
 	 * @param serializedKey the serializedKey to set
 	 */
-	public void setSerializedKey(byte[] serializedKey) {
+	public void setSerializedKey(final byte[] serializedKey) {
 		this.serializedKey = serializedKey;
 	}
 

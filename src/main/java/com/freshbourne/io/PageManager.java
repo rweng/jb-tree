@@ -1,9 +1,11 @@
 /*
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ *
  * http://creativecommons.org/licenses/by-nc/3.0/
+ *
  * For alternative conditions contact the author.
  *
- * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
+ * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 package com.freshbourne.io;
 
@@ -25,8 +27,6 @@ public interface PageManager<T> {
 	public T createPage();
 	
 	/**
-	 * IMPORTANT NOTE: A PageManager should cache so it can return the same Object here.
-	 * 
 	 * @param id of the page to be fetched
 	 * @return page with given id from resource or cache, null if page could not be found
 	 */
@@ -45,8 +45,8 @@ public interface PageManager<T> {
 	public boolean hasPage(int id);
 	
 	/**
-	 * forces the sync of pages to resources.
-     * This is necessary because PageManager tend to cache Pages in Memory.
+	 * Forces the sync of pages to resources.
+     * If the ResouceManager does not cache, this implementation remains empty.
 	 */
 	public void sync();
 

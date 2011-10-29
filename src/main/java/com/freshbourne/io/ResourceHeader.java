@@ -1,9 +1,11 @@
 /*
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ *
  * http://creativecommons.org/licenses/by-nc/3.0/
+ *
  * For alternative conditions contact the author.
  *
- * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
+ * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 package com.freshbourne.io;
 
@@ -27,7 +29,7 @@ public class ResourceHeader extends AbstractMustInitializeOrLoad {
 	private int lastId;
 	private ByteBuffer firstPage;
 	
-	ResourceHeader(FileChannel ioChannel, int pageSize){
+	ResourceHeader(final FileChannel ioChannel, final int pageSize){
 		this.ioChannel = ioChannel;
 		this.pageSize = pageSize;
 		this.firstPage = ByteBuffer.allocate(pageSize);
@@ -54,7 +56,7 @@ public class ResourceHeader extends AbstractMustInitializeOrLoad {
 		ioChannel.read(firstPage);
 		firstPage.position(0);
 
-        int ps = firstPage.getInt();
+        final int ps = firstPage.getInt();
 		if(pageSize != ps)
             throw new RuntimeException("Resource has a different page size");
 		
@@ -62,7 +64,7 @@ public class ResourceHeader extends AbstractMustInitializeOrLoad {
 		valid = true;
 	}
 
-	public boolean contains(int id){
+	public boolean contains(final int id){
 		return id <= lastId && id != 0;
 	}
 	
@@ -113,7 +115,7 @@ public class ResourceHeader extends AbstractMustInitializeOrLoad {
 	 * @param id
 	 * @return
 	 */
-	public Long getPageOffset(int id) {
+	public Long getPageOffset(final int id) {
 		if(!contains(id))
 			return null;
 		

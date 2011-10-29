@@ -1,22 +1,24 @@
 /*
  * This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License:
+ *
  * http://creativecommons.org/licenses/by-nc/3.0/
+ *
  * For alternative conditions contact the author.
  *
- * Copyright (c) 2010 "Robin Wenglewski <robin@wenglewski.de>"
+ * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 package com.freshbourne.io;
 
 import com.freshbourne.serializer.PagePointSerializer;
 import com.freshbourne.serializer.StringSerializer;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
-public class DynamicDataPageSpec {
+public class DynamicDataPageTest {
 	
 	private DynamicDataPage<String> page;
 	
@@ -25,7 +27,7 @@ public class DynamicDataPageSpec {
 	private String s2 = "blast";
 	private String s3 = "ups";
 	
-	@Before
+	@BeforeMethod
 	public void setUp(){
 		page = new DynamicDataPage<String>(new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 1), PagePointSerializer.INSTANCE, StringSerializer.INSTANCE);
 	}
@@ -44,13 +46,13 @@ public class DynamicDataPageSpec {
 		assertEquals(0, page.numberOfEntries());
 	}
 	
-	private void checkAndSetModified(DynamicDataPage<String> page){
+	private void checkAndSetModified(final DynamicDataPage<String> page){
 		assertTrue(page.rawPage().isModified());
 		page.rawPage().setModified(false);
 	}
 	
 	
-	@Test(expected= Exception.class)
+	@Test(expectedExceptions = InvalidPageException.class)
 	public void shouldThrowAnExceptionIfInvalidEntryId() throws Exception{
 		page.get(432);
 	}
@@ -60,24 +62,24 @@ public class DynamicDataPageSpec {
 		page.initialize();
 		checkAndSetModified(page);
 		
-		int rest = page.remaining();
+		final int rest = page.remaining();
 		page.add("bla");
 		checkAndSetModified(page);
 		assertTrue(rest > page.remaining());
 	}
 	
-	@Test(expected= InvalidPageException.class)
+	@Test(expectedExceptions = InvalidPageException.class)
 	public void shouldThrowAnExceptionOnAddIfNotValid() throws NoSpaceException, InvalidPageException{
 		page.add(s1);
 		checkAndSetModified(page);
 	}
 	
-	@Test(expected= InvalidPageException.class)
+	@Test(expectedExceptions = InvalidPageException.class)
 	public void shouldThrowAnExceptionOnGetIfNotValid() throws Exception{
 		page.get(0);
 	}
 	
-	@Test(expected= InvalidPageException.class)
+	@Test(expectedExceptions = InvalidPageException.class)
 	public void shouldThrowAnExceptionOnNumberOfEntriesIfNotValid() throws Exception{
 		page.numberOfEntries();
 	}
@@ -90,13 +92,13 @@ public class DynamicDataPageSpec {
 		assertEquals(DynamicDataPage.NO_ENTRIES_INT, page.rawPage().bufferForReading(0).getInt());
 		assertEquals(0, page.numberOfEntries());
 		
-		int id1 = page.add(s1);
+		final int id1 = page.add(s1);
 		assertEquals(1, page.rawPage().bufferForReading(0).getInt());
 		assertEquals(1, page.numberOfEntries());
-		int id2 = page.add(s2);
+		final int id2 = page.add(s2);
 		assertEquals(2, page.rawPage().bufferForReading(0).getInt());
 		assertEquals(2, page.numberOfEntries());
-		int id3 = page.add(s3);
+		final int id3 = page.add(s3);
 		assertEquals(3, page.rawPage().bufferForReading(0).getInt());
 		assertEquals(3, page.numberOfEntries());
 		checkAndSetModified(page);
@@ -117,7 +119,7 @@ public class DynamicDataPageSpec {
 		
 		page.initialize();
 		
-		int id = page.add(s3);
+		final int id = page.add(s3);
 		page.remove(id);
 		checkAndSetModified(page);
 		
@@ -130,12 +132,12 @@ public class DynamicDataPageSpec {
 	public void remainingMethodShouldAdjustWhenInsertingOrRemovingEntries() throws NoSpaceException, InvalidPageException{
 		page.initialize();
 		
-		int r1 = page.remaining();
-		int id1 = page.add(s1);
-		int r2 = page.remaining();
+		final int r1 = page.remaining();
+		final int id1 = page.add(s1);
+		final int r2 = page.remaining();
 		assertTrue(r1 > r2);
-		int id2 = page.add(s2);
-		int r3 = page.remaining();
+		final int id2 = page.add(s2);
+		final int r3 = page.remaining();
 		assertTrue(r2 > r3);
 		page.remove(id1);
 		assertEquals(r1 - (r2 - r3), page.remaining());
@@ -148,7 +150,7 @@ public class DynamicDataPageSpec {
 		
 		page.add(s1);
 		page.add(s2);
-		int r = page.remaining();
+		final int r = page.remaining();
 		page = new DynamicDataPage<String>(page.rawPage(), page.pagePointSerializer(), page.dataSerializer());
 		page.load();
 		assertEquals(r, page.remaining());
@@ -158,8 +160,8 @@ public class DynamicDataPageSpec {
 	public void shouldHaveSameSizeAfterInsertAndRemove() throws NoSpaceException, InvalidPageException{
 		page.initialize();
 		
-		int remaining = page.remaining();
-		int id = page.add("blast");
+		final int remaining = page.remaining();
+		final int id = page.add("blast");
 		assertTrue(remaining > page.remaining());
 		page.remove(id);
 		assertEquals(remaining, page.remaining());
@@ -170,7 +172,7 @@ public class DynamicDataPageSpec {
 		assertFalse(page.isValid());
 		page.initialize();
 		assertTrue(page.isValid());
-		int id = page.add(s1);
+		final int id = page.add(s1);
 		assertEquals(1, page.numberOfEntries());
 		page = new DynamicDataPage<String>(page.rawPage(), page.pagePointSerializer(), page.dataSerializer());
 		assertFalse(page.isValid());

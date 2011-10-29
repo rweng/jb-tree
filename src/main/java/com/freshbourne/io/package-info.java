@@ -7,14 +7,8 @@
  *
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
+
+/**
+ * contains everything IO related, especially ResourceManagers
+ */
 package com.freshbourne.io;
-
-public class DuplicatePageIdException extends RuntimeException {
-	
-	private static final long serialVersionUID = 1L;
-
-	public DuplicatePageIdException(final Long id) {
-		super("The page with the id " + id + " does already exist.");
-	}
-
-}
