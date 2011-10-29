@@ -51,13 +51,11 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	public T getPage(int id) {
 		T result;
 
+		// just ensure here, that if rpm caches, it's in this cache, too
 		RawPage page = rpm.getPage(id);
+
 		if(cache.containsKey(id)){
-			T t = cache.get(id);
-			if(page == t.rawPage())
-				return t;
-			else
-				cache.remove(id);
+			return cache.get(id);
 		}
 		
 		result = createObjectPage(page);
