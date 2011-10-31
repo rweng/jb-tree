@@ -109,4 +109,30 @@ public class CachedResourceManagerTest {
 
 		assertThat(rm.getPage(page.id())).isSameAs(page);
 	}
+
+	@Test
+	public void proofThatThisDoesntWork() throws InterruptedException {
+		file.delete();
+		rm = new ResourceManagerBuilder().file(file).useCache(true).cacheSize(1).open().build();
+		RawPage page = rm.createPage();
+		int id = page.id();
+
+		// invalidate cache
+		rm.createPage();
+		rm.createPage();
+
+		page.bufferForWriting(0).putInt(1000);
+		page = null;
+
+		for(int i = 0;i<500;i++)
+			rm.createPage();
+
+		System.gc();
+		Thread.sleep(1000);
+		System.gc();
+		Thread.sleep(1000);
+
+
+		assertThat(rm.getPage(id).bufferForReading(0).getInt()).isEqualTo(1000);
+	}
 }
