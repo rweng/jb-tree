@@ -206,29 +206,6 @@ public class FileResourceManager implements ResourceManager {
 		return "Resource: " + getFile().getAbsolutePath();
 	}
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#addPage(com.freshbourne.io.HashPage)
-	 */
-	@Override
-	public RawPage addPage(final RawPage page) {
-		ensureOpen();
-		ensureCorrectPageSize(page);
-
-		final RawPage result = new RawPage(page.bufferForWriting(0), header.generateId(), this);
-
-		try {
-			ioChannel.write(page.bufferForReading(0), ioChannel.size());
-		} catch (DuplicatePageIdException e) {
-			e.printStackTrace();
-			System.exit(1);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		return result;
-	}
-
 	/**
 	 * @param page
 	 * @throws WrongPageSizeException
@@ -297,14 +274,6 @@ public class FileResourceManager implements ResourceManager {
 	public boolean hasPage(final int id) {
 		ensureOpen();
 		return header.contains(id);
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#sync()
-	 */
-	@Override
-	public void sync() {
-		// empty because no caching is done, pages have to be saved manually
 	}
 
 	/** @return the handle */

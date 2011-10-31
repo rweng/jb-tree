@@ -42,7 +42,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	private final LeafPageManager<K, V>  leafPageManager;
 	private final InnerNodeManager<K, V> innerNodeManager;
 	private final Comparator<K>          comparator;
-	private final AutoSaveResourceManager        rm;
+	private final ResourceManager rm;
 	private       RawPage                rawPage;
 
 	private Node<K, V> root;
@@ -58,7 +58,6 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @throws IOException
 	 */
 	public void close() throws IOException {
-		sync();
 		rm.close();
 		valid = false;
 	}
@@ -154,7 +153,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 *
 	 * @throws IOException
 	 */
-	public static <K, V> BTree<K, V> create(final AutoSaveResourceManager rm, final FixLengthSerializer<K, byte[]> keySerializer,
+	public static <K, V> BTree<K, V> create(final ResourceManager rm, final FixLengthSerializer<K, byte[]> keySerializer,
 	                                        final FixLengthSerializer<V, byte[]> valueSerializer,
 	                                        final Comparator<K> comparator) throws IOException {
 
@@ -177,7 +176,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @param valueSerializer
 	 * @param comparator
 	 */
-	private BTree(final AutoSaveResourceManager rm,
+	private BTree(final ResourceManager rm,
 	              final FixLengthSerializer<K, byte[]> keySerializer, final FixLengthSerializer<V, byte[]> valueSerializer,
 	              final Comparator<K> comparator) {
 
@@ -555,14 +554,6 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-			  * @see com.freshbourne.btree.MultiMap#sync()
-			  */
-	@Override
-	public void sync() {
-		rm.sync();
-	}
-
-	/* (non-Javadoc)
 		  * @see com.freshbourne.btree.MultiMap#getIterator()
 		  */
 	@Override
@@ -684,7 +675,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		return ((FileResourceManager) rm).getFile().getAbsolutePath();
 	}
 
-	AutoSaveResourceManager getResourceManager() {
+	ResourceManager getResourceManager() {
 		return rm;
 	}
 }

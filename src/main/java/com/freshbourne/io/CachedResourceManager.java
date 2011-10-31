@@ -74,11 +74,6 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 		rm.writePage(page);
 	}
 
-	@Override public RawPage addPage(final RawPage page) {
-		throw new UnsupportedOperationException("not sure what to do with cache yet.");
-		// return rm.addPage(page);
-	}
-
 	@Override public int getPageSize() {
 		return rm.getPageSize();
 	}
@@ -133,7 +128,7 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 		return rm.hasPage(id);
 	}
 
-	@Override public void sync() {
+	public void sync() {
 		for (final RawPage p : cache.asMap().values()) {
 			p.sync();
 		}
@@ -141,8 +136,6 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 		for(final RawPage p : weakMap.values()){
 			p.sync();
 		}
-
-		rm.sync();
 	}
 
 	public ResourceManager getResourceManager() {

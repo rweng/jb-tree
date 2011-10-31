@@ -38,7 +38,7 @@ public class PageManagerTest {
 	@BeforeMethod
 	public void setUp() throws IOException {
 		file.delete();
-		final AutoSaveResourceManager manager = new ResourceManagerBuilder().file(file).buildAutoSave();
+		final ResourceManager manager = new ResourceManagerBuilder().file(file).useCache(false).build();
 		tree = BTree.create(manager, FixedStringSerializer.INSTANCE_1000,
 				FixedStringSerializer.INSTANCE_1000,
 				StringComparator.INSTANCE);
@@ -70,27 +70,5 @@ public class PageManagerTest {
 		for(final int id : inners){
 			assertNotNull(inm.getPage(id));
 		}
-	}
-
-	@Test(groups = "skipBeforeMethod")
-	public void doubleCreationWithCacheInvalidationShouldReturnOldInstanceIfNotGarbageCollected() throws IOException {
-		file.delete();
-		final AutoSaveResourceManager manager = new ResourceManagerBuilder().file(file).cacheSize(1).buildAutoSave();
-		tree = BTree.create(manager, FixedStringSerializer.INSTANCE_1000,
-				FixedStringSerializer.INSTANCE_1000,
-				StringComparator.INSTANCE);
-		lpm = tree.getLeafPageManager();
-		inm = tree.getInnerNodeManager();
-		rm = tree.getResourceManager();
-
-		final LeafNode<String, String> page = lpm.createPage();
-
-		// make sure page is not in the rm cache anymore
-		lpm.createPage();
-		lpm.createPage();
-
-		final LeafNode<String, String> page1 = lpm.getPage(page.getId());
-
-		assertThat(page1).isSameAs(page);
 	}
 }

@@ -152,12 +152,6 @@ public class FileResourceManagerTest {
 		assertEquals(longToCompare, rm.getPage(page.id()).bufferForWriting(0).getLong());
 	}
 
-	@Test(expectedExceptions = WrongPageSizeException.class)
-	public void shouldThrowExceptionIfWrongPageSize() throws IOException {
-		final RawPage page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE + 1), 1);
-		rm.addPage(page);
-	}
-
 	@Test(enabled = false)
 	public void shouldBeAbleToRemovePages() throws Exception {
 		final RawPage p1 = rm.createPage();

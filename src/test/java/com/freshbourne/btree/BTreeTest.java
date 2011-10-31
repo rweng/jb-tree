@@ -13,6 +13,7 @@ package com.freshbourne.btree;
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.comparator.StringComparator;
 import com.freshbourne.io.AutoSaveResourceManager;
+import com.freshbourne.io.ResourceManager;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
@@ -46,11 +47,11 @@ public class BTreeTest {
 
 	// 3 keys, 4 values
 	private static final int PAGE_SIZE = InnerNode.Header.size() + 3 * (2 * Integer.SIZE / 8) + Integer.SIZE / 8;
-	private static AutoSaveResourceManager rm;
+	private static ResourceManager rm;
 	
 	BTreeTest() {
 		file.delete();
-		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).cacheSize(100).buildAutoSave();
+		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).useCache(false).build();
 	}
 
 	@BeforeMethod
@@ -191,8 +192,7 @@ public class BTreeTest {
 				IntegerComparator.INSTANCE);
 
 		btree.initialize();
-		btree.sync();
-
+		
 		assertTrue(file.exists());
 	}
 
@@ -224,8 +224,7 @@ public class BTreeTest {
 			LOG.debug("ROUND: " + i);
 
 			btree.add(i, "" + i);
-			btree.sync();
-
+			
 			final BTree<Integer, String> btree2 =
 					BTree.create(rm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
 							IntegerComparator.INSTANCE);
@@ -243,8 +242,6 @@ public class BTreeTest {
 
 
 		}
-
-		btree.sync();
 
 		btree = BTree.create(rm, IntegerSerializer.INSTANCE,
 				FixedStringSerializer.INSTANCE_1000,
@@ -549,7 +546,6 @@ public class BTreeTest {
 			tree.add(i, i);
 		}
 
-		tree.sync();
 		final long end = System.currentTimeMillis();
 
 		final Long sizeOfData = (long) (size * (sizeForKey + sizeForVal));

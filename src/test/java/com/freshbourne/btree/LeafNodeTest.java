@@ -12,6 +12,7 @@ package com.freshbourne.btree;
 
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.AutoSaveResourceManager;
+import com.freshbourne.io.ResourceManager;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.IntegerSerializer;
 import org.testng.annotations.BeforeMethod;
@@ -35,11 +36,11 @@ public class LeafNodeTest {
 
 	private Integer value1 = 101;
 	private Integer value2 = 102;
-	private AutoSaveResourceManager rm;
+	private ResourceManager rm;
 
 	LeafNodeTest(){
 		file.delete();
-		this.rm = new ResourceManagerBuilder().file(file).open().buildAutoSave();
+		this.rm = new ResourceManagerBuilder().file(file).open().useCache(false).build();
 	}
 
 	@BeforeMethod

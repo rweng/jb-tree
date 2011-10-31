@@ -20,29 +20,7 @@ import java.io.IOException;
  * An alternative Interface is {@link AutoSaveResourceManager}.
  */
 public interface ResourceManager extends PageManager<RawPage> {
-	
-	
-	/**
-	 * write the provided RawPage to the resource.
-	 * 
-	 * @param page RawPage to write to the Resource. The ResourceManager and Id of the RawPage must be set.
-	 * @throws IOException if the page id was not found or the ResourceManager was not equal to this ResourceManager
-	 */
-	public void writePage(RawPage page);
-	
-	
-	/**
-	 * create a new Page in the Resource. The method returns
-	 * a new RawPage with the same backing buffer, but eventually with a different id.
-	 * 
-	 * A new Page must be created since the id is immutable.
-	 * 
-	 * @param page page to add
-     * @return new instance of page with ResourceManager and id set
-	 * @throws IOException
-	 */
-	public RawPage addPage(RawPage page);
-	
+
 	/**
 	 * @return size of the pages in this resource
 	 */
