@@ -468,6 +468,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		// move half the keys/pointers to the new node. remember the dropped key.
 		final byte[] keyUpwardsBytes = moveLastToNewPage(inp, getNumberOfKeys() >> 1);
 		rawPage().sync();
+		inp.rawPage().sync();
 
 		// decide where to insert the pointer we are supposed to insert
 		// if the old key position is larger than the current numberOfKeys, the
@@ -487,6 +488,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
 
 		rawPage.sync();
+		inp.rawPage().sync();
 
 		return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, keyUpwardsBytes, inp.getId());
 	}

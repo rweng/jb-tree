@@ -110,12 +110,11 @@ public class BTreeTest {
 		assertFalse(iterator.hasNext());
 	}
 
-	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
+	@Test(dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
 	public void testMultiLevelInsertBackward() throws IOException {
 		final int count = 100;
 
 		for (int i = 0; i < count; i++) {
-
 			assertTrue(tree.isValid());
 			tree.add(count - i, count - i);
 			tree.checkStructure();
@@ -277,7 +276,7 @@ public class BTreeTest {
 	}
 
 
-	@Test(groups = "slow", dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
+	@Test(groups = "slow", dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
 	public void iteratorsWithoutParameters() throws IOException, InterruptedException {
 		LOG.setLevel(Level.DEBUG);
 		fillTree(tree, 1000);
@@ -292,7 +291,7 @@ public class BTreeTest {
 		assertThat(iterator.hasNext()).isFalse();
 	}
 
-	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
+	@Test(dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
 	public void ranges() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		final List<Range<Integer>> rangeList = new ArrayList<Range<Integer>>();
@@ -550,7 +549,7 @@ public class BTreeTest {
 		//assertThat("current Size: " + realSizePercent + "%", realSizePercent, lessThan(1000f));
 	}
 
-	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
+	@Test(dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
 	public void iteratorsWithStartEndGiven() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		Iterator<Integer> iterator = tree.getIterator();
