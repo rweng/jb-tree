@@ -261,6 +261,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		setNumberOfEntries(count);
 
 		if (getNumberOfEntries() == 0) {
+			rawPage.sync();
 			return;
 		}
 
@@ -290,11 +291,13 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 			previousLeaf = leafPage;
 			pageIds.add(leafPage.getId());
+			leafPage.rawPage().sync();
 		}
 
 		// we are done if everything fits in one leaf
 		if (pageIds.size() == 1) {
 			setRoot(leafPageManager.getPage(pageIds.get(0)));
+			rawPage.sync();
 			return;
 		}
 
@@ -330,7 +333,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 					newKeysForNextLayer.add(smallestKey);
 
 				inserted += node.bulkInitialize(keysForNextLayer, pageIds, inserted);
-
+				
 				if (LOG.isDebugEnabled())
 					LOG.debug("inserted " + inserted + " in inner node, pageIds.size()=" + pageIds.size());
 			}
@@ -343,6 +346,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		// here, pageIds should be 1, and the page should be an inner node
 		if (pageIds.size() == 1) {
 			setRoot(innerNodeManager.getPage(pageIds.get(0)));
+			rawPage.sync();
 			return;
 		}
 	}
@@ -391,6 +395,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			setRoot(newRoot);
 		}
 
+		rawPage.sync();
 	}
 
 	private void setRoot(final Node<K, V> root) {
@@ -435,6 +440,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		ensureValid();
 
 		setNumberOfEntries(getNumberOfEntries() - root.remove(key, value));
+		rawPage.sync();
 	}
 
 	/* (non-Javadoc)
@@ -449,6 +455,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 				" it is not possible to remove entries from the FileResourceManager");
 		root = leafPageManager.createPage();
 		setNumberOfEntries(0);
+		rawPage.sync();
 	}
 
 	/* (non-Javadoc)
@@ -461,6 +468,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		preInitialize();
 		setRoot(leafPageManager.createPage());
 		setNumberOfEntries(0);
+		rawPage.sync();
 	}
 
 	public String toString(){

@@ -10,5 +10,8 @@
 
 /**
  * Package implementing a B+-Tree.
+ *
+ * BTree, LeafNodes and Innernodes are auto-saving, means they manage their own rawpage and don't have to be saved
+ * exernally.
  */
 package com.freshbourne.btree;

@@ -121,13 +121,13 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 			return pos == getNumberOfKeys() - 1;
 		}
 
-		public Node<K, V> getLeftNode() {
+		private Node<K, V> getLeftNode() {
 			final int offset = getOffset() - Integer.SIZE / 8;
 			final int pageId = rawPage().bufferForReading(offset).getInt();
 			return pageIdToNode(pageId);
 		}
 
-		public Node<K, V> getRightNode() {
+		private Node<K, V> getRightNode() {
 			final int offset = getOffset() + keySerializer.getSerializedLength();
 			final int pageId = rawPage().bufferForReading(offset).getInt();
 			return pageIdToNode(pageId);
@@ -180,6 +180,8 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		buf.putInt(pageId2);
 
 		setNumberOfKeys(1);
+
+		rawPage.sync();
 	}
 
 	/** @param serializedKey */
@@ -226,18 +228,14 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 				"the requested pageId " + pageId + " is neither in InnerNodePageManager nor in LeafPageManager");
 	}
 
-	private void writeNumberOfKeys() {
-		final ByteBuffer buf = rawPage.bufferForWriting(Header.NUMBER_OF_KEYS.getOffset());
-		buf.putInt(numberOfKeys);
-	}
-
 	/**
 	 * @param numberOfKeys
 	 * 		the numberOfKeys to set
 	 */
 	private void setNumberOfKeys(final int numberOfKeys) {
 		this.numberOfKeys = numberOfKeys;
-		writeNumberOfKeys();
+		final ByteBuffer buf = rawPage.bufferForWriting(Header.NUMBER_OF_KEYS.getOffset());
+		buf.putInt(numberOfKeys);
 	}
 
 	/* (non-Javadoc)
@@ -469,6 +467,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
 		// move half the keys/pointers to the new node. remember the dropped key.
 		final byte[] keyUpwardsBytes = moveLastToNewPage(inp, getNumberOfKeys() >> 1);
+		rawPage().sync();
 
 		// decide where to insert the pointer we are supposed to insert
 		// if the old key position is larger than the current numberOfKeys, the
@@ -485,6 +484,9 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 			inp.insertKeyPointerPageIdAtPosition(result.getSerializedKey(), result.getPageId(),
 					pos);
 		}
+
+
+		rawPage.sync();
 
 		return new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE, keyUpwardsBytes, inp.getId());
 	}
@@ -519,6 +521,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		// last key is dropped
 		setNumberOfKeys(getNumberOfKeys() - numberOfKeys - 1); // one key less
 
+		rawPage.sync();
 		return newPage.getFirstLeafKeySerialized();
 	}
 
@@ -564,6 +567,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		buf.putInt(pageId);
 
 		setNumberOfKeys(getNumberOfKeys() + 1);
+		rawPage().sync();
 	}
 
 	public int getMaxNumberOfKeys() {
@@ -589,12 +593,15 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		// That changes the highest key in this page, so the corresponding key
 		// must be adjusted.
 		setKey(result.getSerializedKey(), ks.pos);
+
+		rawPage.sync();
 		return null;
 	}
 
 	private void setKey(final byte[] serializedKey, final int pos) {
 		final ByteBuffer buf = rawPage().bufferForWriting(new KeyStruct(pos).getOffset());
 		buf.put(serializedKey);
+		rawPage().sync();
 	}
 
 	private void ensureValid() {
@@ -635,6 +642,8 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		setNumberOfKeys(0);
 
 		valid = true;
+
+		rawPage.sync();
 	}
 
 	/**
@@ -676,6 +685,9 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 		}
 
 		setNumberOfKeys(entriesToInsert);
+
+		rawPage.sync();
+		
 		return entriesToInsert + 1; // page ids
 	}
 

@@ -76,7 +76,7 @@ public class BTreeTest {
 	}
 
 
-	@Test
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void testMultiLevelInsertForward() throws IOException {
 		final int count = 100;
 
@@ -110,7 +110,7 @@ public class BTreeTest {
 		assertFalse(iterator.hasNext());
 	}
 
-	@Test
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void testMultiLevelInsertBackward() throws IOException {
 		final int count = 100;
 
@@ -277,7 +277,7 @@ public class BTreeTest {
 	}
 
 
-	@Test(groups = "slow")
+	@Test(groups = "slow", dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void iteratorsWithoutParameters() throws IOException, InterruptedException {
 		LOG.setLevel(Level.DEBUG);
 		fillTree(tree, 1000);
@@ -292,7 +292,7 @@ public class BTreeTest {
 		assertThat(iterator.hasNext()).isFalse();
 	}
 
-	@Test
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void ranges() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		final List<Range<Integer>> rangeList = new ArrayList<Range<Integer>>();
@@ -493,14 +493,6 @@ public class BTreeTest {
 		}
 	}
 
-	@Test public void shouldWorkOnTheEdgeToCreateNewInnerNode() {
-		final int size = 170;
-		fill(size);
-
-		assertThat(tree.getNumberOfEntries()).isEqualTo(size);
-		simpleTests(5000);
-	}
-
 	@Test public void iterator() {
 		Integer val;
 
@@ -523,7 +515,7 @@ public class BTreeTest {
 		assertThat(i.hasNext()).isFalse();
 	}
 
-	@Test(groups = "slow")
+	@Test(groups = "slow", dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void shouldWorkWithMassiveValues() {
 		final int size = 100000;
 
@@ -558,7 +550,7 @@ public class BTreeTest {
 		//assertThat("current Size: " + realSizePercent + "%", realSizePercent, lessThan(1000f));
 	}
 
-	@Test
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void iteratorsWithStartEndGiven() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		Iterator<Integer> iterator = tree.getIterator();
@@ -592,7 +584,15 @@ public class BTreeTest {
 		bulkInsert(tree.getMaxLeafKeys()); // exactly one leaf
 	}
 
-	@Test
+	@Test public void shouldWorkOnTheEdgeToCreateAnInnerNode() {
+		final int size = tree.getMaxLeafKeys();
+		fill(size);
+		tree.checkStructure();
+		assertThat(tree.getNumberOfEntries()).isEqualTo(size);
+		simpleTests(size + 1);
+	}
+
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void bulkInsert2Layers() throws IOException {
 		bulkInsert((tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys());
 
@@ -605,12 +605,12 @@ public class BTreeTest {
 	 * (pageIds.size() - 1)
 	 * @throws java.io.IOException
 	 */
-	@Test
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void bulkInsertWithOnlyOnePageForNextInnerNode() throws IOException {
 		bulkInsert((tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys() + 1);
 	}
 
-	@Test
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void bulkInsert3Layers() throws IOException {
 		bulkInsert((tree.getMaxInnerKeys() + 1) * (tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys());
 
@@ -619,7 +619,7 @@ public class BTreeTest {
 	}
 
 
-	@Test
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void bulkInsertWithSortAndCloseAndRange() throws IOException {
 		final int count = 50;
 		final int from = 10;
@@ -695,7 +695,7 @@ public class BTreeTest {
 		}
 	}
 
-	@Test(dataProvider = "shouldBeAbleToOpenAndLoadProvider")
+	@Test(dataProvider = "shouldBeAbleToOpenAndLoadProvider", dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void shouldBeAbleToOpenAndLoad(final Integer key1, final Integer key2) throws IOException {
 		final Integer value1 = 1;
 		final Integer value2 = 2;

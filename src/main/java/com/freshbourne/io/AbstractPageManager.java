@@ -68,7 +68,6 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 		if (initialize)
 			try {
 				l.initialize();
-				rpm.writePage(l.rawPage());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

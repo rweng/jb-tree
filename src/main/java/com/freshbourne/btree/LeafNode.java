@@ -21,6 +21,12 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 
 
+/**
+ * autosaves
+ *
+ * @param <K>
+ * @param <V>
+ */
 class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 
 	private static final Logger LOG = Logger.getLogger(LeafNode.class);
@@ -361,6 +367,7 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 		  */
 	@Override
 	public int remove(final K key) {
+		
 		final int pos = offsetOfKey(key);
 		if (pos == NOT_FOUND)
 			return 0;
@@ -376,6 +383,8 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 		System.arraycopy(buffer.array(), pos + sizeOfValues, buffer.array(), pos,
 				buffer.capacity() - pos - sizeOfValues);
 		setNumberOfEntries(getNumberOfEntries() - numberOfValues);
+
+		rawPage().sync();
 
 		return numberOfValues;
 	}
@@ -460,6 +469,8 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 		setNumberOfEntries(0);
 		setNextLeafId(NO_NEXT_LEAF);
 		valid = true;
+		
+		rawPage.sync();
 	}
 
 
@@ -501,6 +512,8 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 		}
 
 		setNumberOfEntries(entriesToInsert);
+
+		rawPage.sync();
 		return entriesToInsert;
 	}
 
@@ -573,6 +586,9 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 					this.insert(key, value);
 				}
 
+				rawPage.sync();
+				nextLeaf.rawPage.sync();
+				
 				return new AdjustmentAction<K, V>(ACTION.UPDATE_KEY, nextLeaf.getFirstLeafKeySerialized(), null);
 			}
 
@@ -597,6 +613,9 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 			this.insert(key, value);
 		}
 
+		rawPage.sync();
+		newLeaf.rawPage.sync();
+
 		// just to make sure, that the adjustment action is correct:
 		final AdjustmentAction<K, V> action = new AdjustmentAction<K, V>(ACTION.INSERT_NEW_NODE,
 				newLeaf.getFirstLeafKeySerialized(), newLeaf.rawPage().id());
@@ -615,6 +634,7 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 	public void setNextLeafId(final Integer id) {
 		final ByteBuffer buffer = rawPage().bufferForWriting(Header.NEXT_LEAF_ID.getOffset());
 		buffer.putInt(id == null ? NO_NEXT_LEAF : id);
+		rawPage().sync();
 	}
 
 	public boolean hasNextLeaf() {
