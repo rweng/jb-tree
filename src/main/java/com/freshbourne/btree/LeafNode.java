@@ -211,6 +211,9 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 
 
 	/**
+	 *
+	 * adds an entry to this LeafNodes rawPage, does not sync!
+	 *
 	 * @param key
 	 * @param value
 	 */
@@ -568,7 +571,7 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 		if (!isFull()) {
 			// serialize data
 			addEntry(key, value);
-
+			rawPage().sync();
 			return null;
 		}
 
