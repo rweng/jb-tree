@@ -707,13 +707,19 @@ public class BTreeTest {
 		tree.initialize();
 		tree.add(key1, value1);
 		tree.add(key2, value2);
+
+
+		assertThat(tree.getNumberOfEntries()).isEqualTo(2);
+		assertThat(tree.get(key1).get(0)).isEqualTo(value1);
+		assertThat(tree.get(key2).get(0)).isEqualTo(value2);
+
 		tree.close();
 
 		tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE);
 		tree.load();
-		assertEquals(2, tree.getNumberOfEntries());
-		assertEquals(value1, tree.get(key1).get(0));
-		assertEquals(value2, tree.get(key2).get(0));
+		assertThat(tree.getNumberOfEntries()).isEqualTo(2);
+		assertThat(tree.get(key1).get(0)).isEqualTo(value1);
+		assertThat(tree.get(key2).get(0)).isEqualTo(value2);
 	}
 
 	@DataProvider

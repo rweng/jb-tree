@@ -384,8 +384,10 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		final AdjustmentAction<K, V> result = root.insert(key, value);
 
 		// insert was successful
-		if (result == null)
+		if (result == null){
+			rawPage.sync();
 			return;
+		}
 
 		// a new root must be created
 		if (result.getAction() == ACTION.INSERT_NEW_NODE) {
