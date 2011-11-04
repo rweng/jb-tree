@@ -70,7 +70,7 @@ public class RawPage implements Serializable {
 	 * if this RawPage was modified, this method syncs the RawPage to the ResourceManager it is from.
 	 */
 	public void sync() {
-		if (isModified())
+		if (isModified() && resourceManager != null)
 			getResourceManager().writePage(this);
 	}
 }
