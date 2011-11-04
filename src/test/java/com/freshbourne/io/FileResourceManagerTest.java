@@ -123,7 +123,7 @@ public class FileResourceManagerTest {
 
 	@Factory
 	public Object[] createInstances() {
-		return new Object[]{new ResourceManagerTest(new ResourceManagerBuilder().file("/tmp/ResourceManagerTest").open().useCache(false).build())};
+		return new Object[]{new ResourceManagerTest(new ResourceManagerBuilder().file("/tmp/ResourceManagerInterfaceTest").open().useCache(false).build())};
 	}
 
 

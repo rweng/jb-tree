@@ -27,6 +27,11 @@ public class ResourceManagerTest {
 	private ResourceManager rm;
 	private static Logger LOG = Logger.getLogger(ResourceManagerTest.class);
 
+	/**
+	 * NOTE: ensure that the provided ResourceManager uses a different file than the implementation tests
+	 * 
+	 * @param rm
+	 */
 	ResourceManagerTest(final ResourceManager rm){
 		checkNotNull(rm);
 		this.rm = rm;
@@ -97,6 +102,16 @@ public class ResourceManagerTest {
 			final Integer id = ids.get(0);
 			assertEquals(id, rm.getPage(id).id());
 		}
+	}
+
+	@Test
+	public void toStringShouldAlwaysWork() throws IOException {
+		if(!rm.isOpen())
+			rm.open();
+		
+		assertThat(rm.toString()).isNotNull();
+		rm.close();
+		assertThat(rm.toString()).isNotNull();
 	}
 
 }

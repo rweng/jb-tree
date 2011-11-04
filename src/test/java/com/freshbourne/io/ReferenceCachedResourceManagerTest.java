@@ -23,7 +23,7 @@ import static org.fest.assertions.Assertions.assertThat;
 public class ReferenceCachedResourceManagerTest {
 	private ResourceManager rm;
 	private static final Logger LOG  = Logger.getLogger(ReferenceCachedResourceManagerTest.class);
-	private static final File   file = new File("/tmp/ReferenceCachedResourceManagerTest");
+	private static File   file = new File("/tmp/ReferenceCachedResourceManagerTest");
 
 	@BeforeMethod
 	public void setUp() throws IOException {
@@ -38,7 +38,13 @@ public class ReferenceCachedResourceManagerTest {
 
 	@Factory
 	public Object[] resourceManagerInterface() throws IOException {
+		// ensure that a different file is used for the ResourceManagerTest
+		File tmp = file;
+		file = new File("/tmp/cached-rmi-test");
 		setUp();
+		file = tmp;
+
+
 		return new Object[]{new ResourceManagerTest(rm)};
 	}
 

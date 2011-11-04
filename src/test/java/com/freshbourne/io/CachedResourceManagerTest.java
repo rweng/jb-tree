@@ -27,13 +27,12 @@ public class CachedResourceManagerTest {
 
 	private ResourceManager rm;
 	private static final Logger LOG = Logger.getLogger(CachedResourceManagerTest.class);
-	private static final File file = new File("/tmp/CachedResourceManagerTest");
+	private static File file = new File("/tmp/CachedResourceManagerTest");
 
 	@BeforeMethod
 	public void setUp() throws IOException {
 		file.delete();
 		rm = new ResourceManagerBuilder().file(file).useCache(true).cacheSize(1000).open().build();
-		LOG.info("setup");
 	}
 
 	@Test
@@ -48,7 +47,12 @@ public class CachedResourceManagerTest {
 
 	@Factory
 	public Object[] resourceManagerInterface() throws IOException {
+		// ensure that a different file is used for the ResourceManagerTest
+		File tmp = file;
+		file = new File("/tmp/cached-rmi-test");
 		setUp();
+		file = tmp;
+
 		return new Object[]{new ResourceManagerTest(rm)};
 	}
 
