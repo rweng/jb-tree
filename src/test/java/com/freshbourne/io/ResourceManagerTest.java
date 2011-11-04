@@ -32,9 +32,12 @@ public class ResourceManagerTest {
 	 * 
 	 * @param rm
 	 */
-	ResourceManagerTest(final ResourceManager rm){
+	ResourceManagerTest(final ResourceManager rm) throws IOException {
 		checkNotNull(rm);
 		this.rm = rm;
+
+		if(!rm.isOpen())
+			rm.open();
 	}
 	@BeforeMethod
 	public void setUp() throws IOException {
@@ -112,6 +115,15 @@ public class ResourceManagerTest {
 		assertThat(rm.toString()).isNotNull();
 		rm.close();
 		assertThat(rm.toString()).isNotNull();
+	}
+
+	@Test
+	public void openAndClose() throws IOException, InterruptedException {
+		assertThat(rm.isOpen()).isTrue();
+		rm.close();
+		assertThat(rm.isOpen()).isFalse();
+		rm.open();
+		assertThat(rm.isOpen()).isTrue();
 	}
 
 }

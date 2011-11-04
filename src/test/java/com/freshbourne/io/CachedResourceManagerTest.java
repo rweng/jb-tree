@@ -47,12 +47,6 @@ public class CachedResourceManagerTest {
 
 	@Factory
 	public Object[] resourceManagerInterface() throws IOException {
-		// ensure that a different file is used for the ResourceManagerTest
-		File tmp = file;
-		file = new File("/tmp/cached-rmi-test");
-		setUp();
-		file = tmp;
-
 		return new Object[]{new ResourceManagerTest(rm)};
 	}
 

@@ -174,11 +174,21 @@ public class FileResourceManager implements ResourceManager {
 		// Open the channel. If anything fails, make sure we close it again
 		try {
 			ioChannel = handle.getChannel();
-			try {
-				if (doLock)
-					fileLock = ioChannel.tryLock();
-			} catch (OverlappingFileLockException oflex) {
-				throw new IOException("Index file locked by other consumer.");
+			if (doLock){
+				// sometimes when directly closing and opening a ResourceManager, exception is thrown.
+				// So try 5 times in total with a sleep of 50ms to aquire a lock
+				for(int i=1; i<=5;i++){
+					try {
+						fileLock = ioChannel.tryLock();
+						break;
+					} catch (OverlappingFileLockException oflex) {
+						if(i<5){
+							LOG.warn("Index file locked by other consumer. Sleeping 50ms...");
+							Thread.sleep(50);
+						} else
+							throw new IOException(oflex);
+					}
+				}
 			}
 		} catch (Throwable t) {
 			// something failed.
