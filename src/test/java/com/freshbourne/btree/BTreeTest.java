@@ -12,7 +12,6 @@ package com.freshbourne.btree;
 
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.comparator.StringComparator;
-import com.freshbourne.io.AutoSaveResourceManager;
 import com.freshbourne.io.ResourceManager;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
@@ -147,7 +146,7 @@ public class BTreeTest {
 	public void testLargeKeyValues() throws IOException, InterruptedException {
 		// initialize new btree
 		file.delete();
-		final AutoSaveResourceManager newRm = new ResourceManagerBuilder().file(file).buildAutoSave();
+		final ResourceManager newRm = new ResourceManagerBuilder().file(file).build();
 		final BTree<String, String> newTree = BTree.create(newRm, FixedStringSerializer.INSTANCE_1000,
 				FixedStringSerializer.INSTANCE_1000,
 				StringComparator.INSTANCE);
@@ -184,7 +183,7 @@ public class BTreeTest {
 		final File file = new File(filePath);
 		file.delete();
 
-		final AutoSaveResourceManager pm = new ResourceManagerBuilder().file(file).buildAutoSave();
+		final ResourceManager pm = new ResourceManagerBuilder().file(file).build();
 		pm.open();
 
 		final BTree<Integer, String> btree = BTree.create(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
@@ -203,15 +202,15 @@ public class BTreeTest {
 		btree.initialize();
 	}
 
-	private AutoSaveResourceManager createResourceManager(final boolean reset) {
+	private ResourceManager createResourceManager(final boolean reset) {
 		if (reset)
 			file.delete();
-		return new ResourceManagerBuilder().file(file).buildAutoSave();
+		return new ResourceManagerBuilder().file(file).build();
 	}
 
 	@Test
 	public void integerStringTree() throws IOException {
-		final AutoSaveResourceManager rm = createResourceManager(true);
+		final ResourceManager rm = createResourceManager(true);
 		BTree<Integer, String> btree =
 				BTree.create(rm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
 						IntegerComparator.INSTANCE);
