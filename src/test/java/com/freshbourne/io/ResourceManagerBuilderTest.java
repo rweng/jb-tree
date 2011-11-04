@@ -37,17 +37,6 @@ public class ResourceManagerBuilderTest {
 	}
 
 	@Test
-	public void defaultShouldBeAChachedFileResourceManager(){
-		final ResourceManager rm = setFile().cacheSize(150).build();
-		assertNotNull(rm);
-		assertEquals(150, builder.getCacheSize());
-		assertTrue(rm instanceof CachedResourceManager);
-		
-		final CachedResourceManager crm = (CachedResourceManager) rm;
-		assertTrue(crm.getResourceManager() instanceof FileResourceManager);
-	}
-
-	@Test
 	public void withoutCache(){
 		assertTrue(setFile().useCache(false).build() instanceof FileResourceManager);
 	}

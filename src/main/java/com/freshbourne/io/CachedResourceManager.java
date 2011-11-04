@@ -134,7 +134,9 @@ public class CachedResourceManager implements ResourceManager {
 
 	public String toString(){
 		return Objects.toStringHelper(this)
-				.add("cacheSize", cacheSize)
+				.add("maxCacheSize", cacheSize)
+				.add("cacheSize", cache.asMap().size())
+				.add("cacheStats", cache.stats())
 				.add("resourceManager", rm)
 				.toString();
 	}

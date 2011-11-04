@@ -69,6 +69,7 @@ public class ResourceManagerTest {
 		}
 		final long writeEnd = System.currentTimeMillis();
 		LOG.info("Time for reading and writing randomly " + count + " ids (in ms): " + (writeEnd - writeStart));
+		LOG.info("ResourceManager: " + rm);
 	}
 
 	@Test(groups = "slow")

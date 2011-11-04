@@ -18,7 +18,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** used to configure and build Resource Managers */
 public class ResourceManagerBuilder {
-	private boolean useCache  = true;
+	private boolean useCache  = false;
 	private boolean useLock   = true;
 	private int     cacheSize = 100;
 	private int     pageSize  = PageSize.DEFAULT_PAGE_SIZE;
