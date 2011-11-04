@@ -204,12 +204,15 @@ public class FileResourceManager implements ResourceManager {
 		 */
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this)
+		Objects.ToStringHelper helper = Objects.toStringHelper(this)
 				.add("file", getFile().getAbsolutePath())
 				.add("isOpen", isOpen())
-				.add("pageSize", getPageSize())
-				.add("numberOfPages", numberOfPages())
-				.toString();
+				.add("pageSize", getPageSize());
+
+		if(isOpen())
+			helper.add("numberOfPages", numberOfPages());
+
+		return helper.toString();
 	}
 
 	/**
