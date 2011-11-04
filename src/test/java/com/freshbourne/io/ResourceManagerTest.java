@@ -45,29 +45,30 @@ public class ResourceManagerTest {
 
 	@Test(groups = "performance")
 	public void performance() {
-		LOG.info(rm);
+		LOG.info("ResourceManager: " + rm);
 		final int count = 10000;
-		final RawPage[] pages = new RawPage[count];
+		final int[] ids = new int[count];
 
 		final Random rand = new Random();
 
 		final long createStart = System.currentTimeMillis();
-		// create pages
+		// create ids
 		for (int i = 0; i < count; i++) {
-			pages[i] = rm.createPage();
+			ids[i] = rm.createPage().id();
 		}
 		final long createEnd = System.currentTimeMillis();
-		LOG.info("Time for creating " + count + " pages (in ms): " + (createEnd - createStart));
+		LOG.info("Time for creating " + count + " ids (in ms): " + (createEnd - createStart));
 
-		// randomly write to pages
+		// randomly write to ids
 		final long writeStart = System.currentTimeMillis();
 		for (int i = 0; i < count; i++) {
-			final int page = rand.nextInt(count);
-			pages[page].bufferForWriting(0).putInt(i);
-			rm.writePage(pages[page]);
+			final int index = rand.nextInt(count);
+			RawPage page = rm.getPage(ids[index]);
+			page.bufferForWriting(0).putInt(i);
+			page.sync();
 		}
 		final long writeEnd = System.currentTimeMillis();
-		LOG.info("Time for writing randomly " + count + " pages (in ms): " + (writeEnd - writeStart));
+		LOG.info("Time for reading and writing randomly " + count + " ids (in ms): " + (writeEnd - writeStart));
 	}
 
 	@Test(groups = "slow")

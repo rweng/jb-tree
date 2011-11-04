@@ -524,30 +524,6 @@ public class BTreeTest {
 		simpleTests(Integer.MIN_VALUE);
 	}
 
-	@Test(enabled = false)
-	public void shouldNotHaveTooMuchOverhead() {
-		final int sizeForKey = Integer.SIZE / 8;
-		final int sizeForVal = Integer.SIZE / 8;
-
-		// insert 10.000 K/V pairs
-		final int size = 100000;
-		final long start = System.currentTimeMillis();
-		for (int i = 0; i < size; i++) {
-			tree.add(i, i);
-		}
-
-		final long end = System.currentTimeMillis();
-
-		final Long sizeOfData = (long) (size * (sizeForKey + sizeForVal));
-		final float realSizePercent = file.length() / sizeOfData * 100;
-
-		System.out.println("====== BTREE: SIZE OVERHEAD TEST ======");
-		System.out.println("key + value data inserted:" + sizeOfData / 1024 + "k");
-		System.out.println("fileSize: " + file.length() / 1024 + "k (" + realSizePercent + "%)");
-		System.out.println("time for insert w/ sync in millis: " + (end - start));
-		//assertThat("current Size: " + realSizePercent + "%", realSizePercent, lessThan(1000f));
-	}
-
 	@Test(dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
 	public void iteratorsWithStartEndGiven() throws IOException, InterruptedException {
 		fillTree(tree, 100);

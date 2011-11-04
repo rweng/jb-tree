@@ -9,6 +9,7 @@
  */
 package com.freshbourne.io;
 
+import com.google.common.base.Objects;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -203,7 +204,12 @@ public class FileResourceManager implements ResourceManager {
 		 */
 	@Override
 	public String toString() {
-		return "Resource: " + getFile().getAbsolutePath();
+		return Objects.toStringHelper(this)
+				.add("file", getFile().getAbsolutePath())
+				.add("isOpen", isOpen())
+				.add("pageSize", getPageSize())
+				.add("numberOfPages", numberOfPages())
+				.toString();
 	}
 
 	/**

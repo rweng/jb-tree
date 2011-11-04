@@ -10,6 +10,7 @@
 
 package com.freshbourne.io;
 
+import com.google.common.base.Objects;
 import com.google.common.cache.*;
 import com.google.common.collect.MapMaker;
 
@@ -144,5 +145,12 @@ public class CachedResourceManager implements AutoSaveResourceManager {
 
 	public Cache<Integer, RawPage> getCache() {
 		return cache;
+	}
+
+	public String toString(){
+		return Objects.toStringHelper(this)
+				.add("cacheSize", cacheSize)
+				.add("resourceManager", rm)
+				.toString();
 	}
 }

@@ -32,7 +32,7 @@ public class CachedResourceManagerTest {
 	@BeforeMethod
 	public void setUp() throws IOException {
 		file.delete();
-		rm = new ResourceManagerBuilder().file(file).useCache(true).open().build();
+		rm = new ResourceManagerBuilder().file(file).useCache(true).cacheSize(1000).open().build();
 		LOG.info("setup");
 	}
 
