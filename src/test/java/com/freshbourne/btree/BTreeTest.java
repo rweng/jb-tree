@@ -283,7 +283,6 @@ public class BTreeTest {
 		
 		final Iterator<Integer> iterator = tree.getIterator();
 		for (int i = 0; i < 1000; i++){
-			LOG.info("i = " + i);
 			assertThat(iterator.hasNext()).isTrue();
 			assertThat(iterator.next()).isEqualTo(i);
 		}
@@ -425,7 +424,7 @@ public class BTreeTest {
 	}
 
 	@Test
-	public void clearShouldRemoveAllElements() {
+	public void clearShouldRemoveAllElements() throws IOException {
 		tree.add(key1, value1);
 		tree.add(key2, value2);
 		assertEquals(2, tree.getNumberOfEntries());
@@ -434,7 +433,7 @@ public class BTreeTest {
 	}
 
 	@Test
-	public void removeWithValueArgumentShouldRemoveOnlyThisValue() {
+	public void removeWithValueArgumentShouldRemoveOnlyThisValue() throws IOException {
 		final int k1 = Integer.MAX_VALUE;
 		final int k2 = Integer.MIN_VALUE;
 		removeWithValueArgumentShouldRemoveOnlyThisValue(k1, k2);
@@ -707,8 +706,7 @@ public class BTreeTest {
 
 	private void fillTree(final BTree<Integer, Integer> tree, final int count) throws InterruptedException {
 		for (int i = 0; i < count; i++) {
-			if(LOG.isDebugEnabled())
-				LOG.debug("fillTree() : i = " + i);
+			// LOG.info("fillTree() : i = " + i);
 
 			tree.add(i, i);
 			tree.checkStructure();

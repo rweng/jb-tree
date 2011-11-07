@@ -449,15 +449,14 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  * @see com.freshbourne.btree.MultiMap#clear()
 		  */
 	@Override
-	public void clear() {
+	public void clear() throws IOException {
 		ensureValid();
-
+		rm.clear();
+		valid = false;
+		initialize();
 		// just set another root, the other pages stay in the file
-		LOG.info("BTree#clear() is not fully implemented yet because" +
-				" it is not possible to remove entries from the FileResourceManager");
-		root = leafPageManager.createPage();
-		setNumberOfEntries(0);
-		rawPage.sync();
+		// LOG.info("BTree#clear() is not fully implemented yet because" +
+		// 		" it is not possible to remove entries from the FileResourceManager");
 	}
 
 	/* (non-Javadoc)

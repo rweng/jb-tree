@@ -123,7 +123,8 @@ public class FileResourceManagerTest {
 
 	@Factory
 	public Object[] createInstances() throws IOException {
-		return new Object[]{new ResourceManagerTest(new ResourceManagerBuilder().file("/tmp/ResourceManagerInterfaceTest").open().useCache(false).build())};
+		setUp();
+		return new Object[]{new ResourceManagerTest(rm)};
 	}
 
 

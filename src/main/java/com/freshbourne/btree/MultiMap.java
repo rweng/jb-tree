@@ -10,6 +10,7 @@
 
 package com.freshbourne.btree;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,7 +66,7 @@ public interface MultiMap<K, V> {
     /**
      * removes all keys and values
      */
-    void clear();
+    void clear() throws IOException;
     
     /**
      * @return iterator over all values

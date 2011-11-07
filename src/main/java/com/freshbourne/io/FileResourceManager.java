@@ -172,33 +172,28 @@ public class FileResourceManager implements ResourceManager {
 		handle = new RandomAccessFile(file, "rw");
 
 		// Open the channel. If anything fails, make sure we close it again
-		try {
-			ioChannel = handle.getChannel();
-			if (doLock){
-				// sometimes when directly closing and opening a ResourceManager, exception is thrown.
-				// So try 5 times in total with a sleep of 50ms to aquire a lock
-				for(int i=1; i<=5;i++){
-					try {
-						fileLock = ioChannel.tryLock();
-						break;
-					} catch (OverlappingFileLockException oflex) {
-						if(i<5){
-							LOG.warn("Index file locked by other consumer. Sleeping 50ms...");
-							Thread.sleep(50);
-						} else
-							throw new IOException(oflex);
-					}
+		for (int i = 1; i <= 5; i++) {
+			try {
+				ioChannel = handle.getChannel();
+				if (doLock) {
+					LOG.debug("trying to aquire lock ...");
+					ioChannel.lock();
+					LOG.debug("lock aquired");
+					break;
 				}
-			}
-		} catch (Throwable t) {
-			// something failed.
-			close();
+			} catch (Throwable t) {
+				LOG.warn("File " + file.getAbsolutePath() + " could not be locked in attempt " + i + ".");
 
-			// propagate the exception
-			if (t instanceof IOException) {
-				throw (IOException) t;
-			} else {
-				throw new IOException("An error occured while opening the index: " + t.getMessage());
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException ignored) {
+				}
+
+				// propagate the exception
+				if (i >= 5) {
+					close();
+					throw new IOException("An error occured while opening the index: ", t);
+				}
 			}
 		}
 	}
@@ -219,7 +214,7 @@ public class FileResourceManager implements ResourceManager {
 				.add("isOpen", isOpen())
 				.add("pageSize", getPageSize());
 
-		if(isOpen())
+		if (isOpen())
 			helper.add("numberOfPages", numberOfPages());
 
 		return helper.toString();

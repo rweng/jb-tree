@@ -38,6 +38,7 @@ public class ReferenceCachedResourceManagerTest {
 
 	@Factory
 	public Object[] resourceManagerInterface() throws IOException {
+		setUp();
 		return new Object[]{new ResourceManagerTest(rm)};
 	}
 
