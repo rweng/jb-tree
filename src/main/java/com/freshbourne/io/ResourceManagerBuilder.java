@@ -18,13 +18,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** used to configure and build Resource Managers */
 public class ResourceManagerBuilder {
-	private boolean useCache  = true;
+	private boolean useCache  = false;
 	private boolean useLock   = true;
 	private int     cacheSize = 100;
 	private int     pageSize  = PageSize.DEFAULT_PAGE_SIZE;
 	private boolean open = false;
+	private boolean useReferenceCache = false;
 
 	private File file = null;
+
+	public ResourceManagerBuilder useReferenceCache(final boolean referenceCached){
+		this.useReferenceCache = referenceCached;
+		return this;
+	}
 
 	public ResourceManagerBuilder useCache(final boolean cached) {
 		this.useCache = cached;
@@ -64,6 +70,10 @@ public class ResourceManagerBuilder {
 		checkNotNull(file, "file must be set");
 
 		ResourceManager rm = new FileResourceManager(this);
+		if(useReferenceCache){
+			rm = new ReferenceCachedResourceManager(rm);
+		}
+
 		if (useCache) {
 			rm = new CachedResourceManager(rm, cacheSize);
 		}
@@ -77,11 +87,6 @@ public class ResourceManagerBuilder {
 		}
 
 		return rm;
-	}
-
-	public AutoSaveResourceManager buildAutoSave(){
-		checkArgument(useCache, "To create an autoSaveResourceManager, useCache must be true");
-		return (AutoSaveResourceManager) build();
 	}
 
 	public ResourceManagerBuilder open(){
@@ -108,5 +113,4 @@ public class ResourceManagerBuilder {
 	boolean useLock() {
 		return useLock;
 	}
-
 }

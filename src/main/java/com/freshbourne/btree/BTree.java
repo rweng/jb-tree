@@ -42,7 +42,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	private final LeafPageManager<K, V>  leafPageManager;
 	private final InnerNodeManager<K, V> innerNodeManager;
 	private final Comparator<K>          comparator;
-	private final AutoSaveResourceManager        rm;
+	private final ResourceManager rm;
 	private       RawPage                rawPage;
 
 	private Node<K, V> root;
@@ -58,7 +58,6 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @throws IOException
 	 */
 	public void close() throws IOException {
-		sync();
 		rm.close();
 		valid = false;
 	}
@@ -154,7 +153,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 *
 	 * @throws IOException
 	 */
-	public static <K, V> BTree<K, V> create(final AutoSaveResourceManager rm, final FixLengthSerializer<K, byte[]> keySerializer,
+	public static <K, V> BTree<K, V> create(final ResourceManager rm, final FixLengthSerializer<K, byte[]> keySerializer,
 	                                        final FixLengthSerializer<V, byte[]> valueSerializer,
 	                                        final Comparator<K> comparator) throws IOException {
 
@@ -177,7 +176,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @param valueSerializer
 	 * @param comparator
 	 */
-	private BTree(final AutoSaveResourceManager rm,
+	private BTree(final ResourceManager rm,
 	              final FixLengthSerializer<K, byte[]> keySerializer, final FixLengthSerializer<V, byte[]> valueSerializer,
 	              final Comparator<K> comparator) {
 
@@ -262,6 +261,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		setNumberOfEntries(count);
 
 		if (getNumberOfEntries() == 0) {
+			rawPage.sync();
 			return;
 		}
 
@@ -291,11 +291,13 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 			previousLeaf = leafPage;
 			pageIds.add(leafPage.getId());
+			leafPage.rawPage().sync();
 		}
 
 		// we are done if everything fits in one leaf
 		if (pageIds.size() == 1) {
 			setRoot(leafPageManager.getPage(pageIds.get(0)));
+			rawPage.sync();
 			return;
 		}
 
@@ -331,7 +333,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 					newKeysForNextLayer.add(smallestKey);
 
 				inserted += node.bulkInitialize(keysForNextLayer, pageIds, inserted);
-
+				
 				if (LOG.isDebugEnabled())
 					LOG.debug("inserted " + inserted + " in inner node, pageIds.size()=" + pageIds.size());
 			}
@@ -344,6 +346,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		// here, pageIds should be 1, and the page should be an inner node
 		if (pageIds.size() == 1) {
 			setRoot(innerNodeManager.getPage(pageIds.get(0)));
+			rawPage.sync();
 			return;
 		}
 	}
@@ -381,8 +384,10 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		final AdjustmentAction<K, V> result = root.insert(key, value);
 
 		// insert was successful
-		if (result == null)
+		if (result == null){
+			rawPage.sync();
 			return;
+		}
 
 		// a new root must be created
 		if (result.getAction() == ACTION.INSERT_NEW_NODE) {
@@ -392,6 +397,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			setRoot(newRoot);
 		}
 
+		rawPage.sync();
 	}
 
 	private void setRoot(final Node<K, V> root) {
@@ -436,20 +442,21 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		ensureValid();
 
 		setNumberOfEntries(getNumberOfEntries() - root.remove(key, value));
+		rawPage.sync();
 	}
 
 	/* (non-Javadoc)
 		  * @see com.freshbourne.btree.MultiMap#clear()
 		  */
 	@Override
-	public void clear() {
+	public void clear() throws IOException {
 		ensureValid();
-
+		rm.clear();
+		valid = false;
+		initialize();
 		// just set another root, the other pages stay in the file
-		LOG.info("BTree#clear() is not fully implemented yet because" +
-				" it is not possible to remove entries from the FileResourceManager");
-		root = leafPageManager.createPage();
-		setNumberOfEntries(0);
+		// LOG.info("BTree#clear() is not fully implemented yet because" +
+		// 		" it is not possible to remove entries from the FileResourceManager");
 	}
 
 	/* (non-Javadoc)
@@ -462,12 +469,15 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		preInitialize();
 		setRoot(leafPageManager.createPage());
 		setNumberOfEntries(0);
+		rawPage.sync();
 	}
 
 	public String toString(){
 		final Objects.ToStringHelper helper = Objects.toStringHelper(this);
-		helper.add("numberOfEntries", getNumberOfEntries());
-		helper.add("root", root);
+		if(isValid()){
+			helper.add("numberOfEntries", getNumberOfEntries());
+			helper.add("root", root);
+		}
 		helper.add("resourceManager", rm);
 		helper.add("valid", valid);
 		return helper.toString();
@@ -552,14 +562,6 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		} catch (IOException e) {
 			initialize();
 		}
-	}
-
-	/* (non-Javadoc)
-			  * @see com.freshbourne.btree.MultiMap#sync()
-			  */
-	@Override
-	public void sync() {
-		rm.sync();
 	}
 
 	/* (non-Javadoc)
@@ -684,7 +686,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		return ((FileResourceManager) rm).getFile().getAbsolutePath();
 	}
 
-	AutoSaveResourceManager getResourceManager() {
+	ResourceManager getResourceManager() {
 		return rm;
 	}
 }

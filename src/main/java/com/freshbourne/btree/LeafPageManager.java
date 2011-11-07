@@ -42,5 +42,4 @@ class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 	protected LeafNode<K, V> createObjectPage(final RawPage page) {
 		return new LeafNode<K, V>(page, keySerializer, valueSerializer, comparator, this, 1);
 	}
-
 }

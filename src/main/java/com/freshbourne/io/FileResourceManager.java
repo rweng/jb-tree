@@ -9,6 +9,7 @@
  */
 package com.freshbourne.io;
 
+import com.google.common.base.Objects;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -171,23 +172,28 @@ public class FileResourceManager implements ResourceManager {
 		handle = new RandomAccessFile(file, "rw");
 
 		// Open the channel. If anything fails, make sure we close it again
-		try {
-			ioChannel = handle.getChannel();
+		for (int i = 1; i <= 5; i++) {
 			try {
-				if (doLock)
-					fileLock = ioChannel.tryLock();
-			} catch (OverlappingFileLockException oflex) {
-				throw new IOException("Index file locked by other consumer.");
-			}
-		} catch (Throwable t) {
-			// something failed.
-			close();
+				ioChannel = handle.getChannel();
+				if (doLock) {
+					LOG.debug("trying to aquire lock ...");
+					ioChannel.lock();
+					LOG.debug("lock aquired");
+					break;
+				}
+			} catch (Throwable t) {
+				LOG.warn("File " + file.getAbsolutePath() + " could not be locked in attempt " + i + ".");
 
-			// propagate the exception
-			if (t instanceof IOException) {
-				throw (IOException) t;
-			} else {
-				throw new IOException("An error occured while opening the index: " + t.getMessage());
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException ignored) {
+				}
+
+				// propagate the exception
+				if (i >= 5) {
+					close();
+					throw new IOException("An error occured while opening the index: ", t);
+				}
 			}
 		}
 	}
@@ -203,30 +209,15 @@ public class FileResourceManager implements ResourceManager {
 		 */
 	@Override
 	public String toString() {
-		return "Resource: " + getFile().getAbsolutePath();
-	}
+		Objects.ToStringHelper helper = Objects.toStringHelper(this)
+				.add("file", getFile().getAbsolutePath())
+				.add("isOpen", isOpen())
+				.add("pageSize", getPageSize());
 
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#addPage(com.freshbourne.io.HashPage)
-	 */
-	@Override
-	public RawPage addPage(final RawPage page) {
-		ensureOpen();
-		ensureCorrectPageSize(page);
+		if (isOpen())
+			helper.add("numberOfPages", numberOfPages());
 
-		final RawPage result = new RawPage(page.bufferForWriting(0), header.generateId(), this);
-
-		try {
-			ioChannel.write(page.bufferForReading(0), ioChannel.size());
-		} catch (DuplicatePageIdException e) {
-			e.printStackTrace();
-			System.exit(1);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		return result;
+		return helper.toString();
 	}
 
 	/**
@@ -297,14 +288,6 @@ public class FileResourceManager implements ResourceManager {
 	public boolean hasPage(final int id) {
 		ensureOpen();
 		return header.contains(id);
-	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#sync()
-	 */
-	@Override
-	public void sync() {
-		// empty because no caching is done, pages have to be saved manually
 	}
 
 	/** @return the handle */

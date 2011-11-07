@@ -27,13 +27,12 @@ public class CachedResourceManagerTest {
 
 	private ResourceManager rm;
 	private static final Logger LOG = Logger.getLogger(CachedResourceManagerTest.class);
-	private static final File file = new File("/tmp/CachedResourceManagerTest");
+	private static File file = new File("/tmp/CachedResourceManagerTest");
 
 	@BeforeMethod
 	public void setUp() throws IOException {
 		file.delete();
-		rm = new ResourceManagerBuilder().file(file).useCache(true).open().build();
-		LOG.info("setup");
+		rm = new ResourceManagerBuilder().file(file).useCache(true).cacheSize(1000).open().build();
 	}
 
 	@Test
@@ -95,44 +94,5 @@ public class CachedResourceManagerTest {
 		rm.close();
 		rm.open();
 		assertThat(rm.getPage(page.id())).isNotSameAs(page);
-	}
-
-	@Test
-	public void shouldReturnSameInstanceIfAlreadyInMemory(){
-		file.delete();
-		rm = new ResourceManagerBuilder().file(file).useCache(true).cacheSize(1).open().build();
-		final RawPage page = rm.createPage();
-
-		// invalidate cache
-		rm.createPage();
-		rm.createPage();
-
-		assertThat(rm.getPage(page.id())).isSameAs(page);
-	}
-
-	@Test
-	public void proofThatThisDoesntWork() throws InterruptedException {
-		file.delete();
-		rm = new ResourceManagerBuilder().file(file).useCache(true).cacheSize(1).open().build();
-		RawPage page = rm.createPage();
-		int id = page.id();
-
-		// invalidate cache
-		rm.createPage();
-		rm.createPage();
-
-		page.bufferForWriting(0).putInt(1000);
-		page = null;
-
-		for(int i = 0;i<500;i++)
-			rm.createPage();
-
-		System.gc();
-		Thread.sleep(1000);
-		System.gc();
-		Thread.sleep(1000);
-
-
-		assertThat(rm.getPage(id).bufferForReading(0).getInt()).isEqualTo(1000);
 	}
 }

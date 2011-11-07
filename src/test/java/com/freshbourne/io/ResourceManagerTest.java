@@ -27,9 +27,17 @@ public class ResourceManagerTest {
 	private ResourceManager rm;
 	private static Logger LOG = Logger.getLogger(ResourceManagerTest.class);
 
-	ResourceManagerTest(final ResourceManager rm){
+	/**
+	 * NOTE: ensure that the provided ResourceManager uses a different file than the implementation tests
+	 * 
+	 * @param rm
+	 */
+	ResourceManagerTest(final ResourceManager rm) throws IOException {
 		checkNotNull(rm);
 		this.rm = rm;
+
+		if(!rm.isOpen())
+			rm.open();
 	}
 	@BeforeMethod
 	public void setUp() throws IOException {
@@ -45,29 +53,31 @@ public class ResourceManagerTest {
 
 	@Test(groups = "performance")
 	public void performance() {
-		LOG.info(rm);
+		LOG.info("ResourceManager: " + rm);
 		final int count = 10000;
-		final RawPage[] pages = new RawPage[count];
+		final int[] ids = new int[count];
 
 		final Random rand = new Random();
 
 		final long createStart = System.currentTimeMillis();
-		// create pages
+		// create ids
 		for (int i = 0; i < count; i++) {
-			pages[i] = rm.createPage();
+			ids[i] = rm.createPage().id();
 		}
 		final long createEnd = System.currentTimeMillis();
-		LOG.info("Time for creating " + count + " pages (in ms): " + (createEnd - createStart));
+		LOG.info("Time for creating " + count + " ids (in ms): " + (createEnd - createStart));
 
-		// randomly write to pages
+		// randomly write to ids
 		final long writeStart = System.currentTimeMillis();
 		for (int i = 0; i < count; i++) {
-			final int page = rand.nextInt(count);
-			pages[page].bufferForWriting(0).putInt(i);
-			rm.writePage(pages[page]);
+			final int index = rand.nextInt(count);
+			RawPage page = rm.getPage(ids[index]);
+			page.bufferForWriting(0).putInt(i);
+			page.sync();
 		}
 		final long writeEnd = System.currentTimeMillis();
-		LOG.info("Time for writing randomly " + count + " pages (in ms): " + (writeEnd - writeStart));
+		LOG.info("Time for reading and writing randomly " + count + " ids (in ms): " + (writeEnd - writeStart));
+		LOG.info("ResourceManager: " + rm);
 	}
 
 	@Test(groups = "slow")
@@ -95,6 +105,25 @@ public class ResourceManagerTest {
 			final Integer id = ids.get(0);
 			assertEquals(id, rm.getPage(id).id());
 		}
+	}
+
+	@Test
+	public void toStringShouldAlwaysWork() throws IOException {
+		if(!rm.isOpen())
+			rm.open();
+		
+		assertThat(rm.toString()).isNotNull();
+		rm.close();
+		assertThat(rm.toString()).isNotNull();
+	}
+
+	@Test
+	public void openAndClose() throws IOException, InterruptedException {
+		assertThat(rm.isOpen()).isTrue();
+		rm.close();
+		assertThat(rm.isOpen()).isFalse();
+		rm.open();
+		assertThat(rm.isOpen()).isTrue();
 	}
 
 }

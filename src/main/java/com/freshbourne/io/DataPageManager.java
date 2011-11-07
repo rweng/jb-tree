@@ -38,16 +38,7 @@ public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {
 	public boolean hasPage(final int id) {
 		return bpm.hasPage(id);
 	}
-
-	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#sync()
-	 */
-	@Override
-	public void sync() {
-		// TODO Auto-generated method stub
-		
-	}
-
+	
 	/* (non-Javadoc)
 	 * @see com.freshbourne.io.AbstractPageManager#createObjectPage(com.freshbourne.io.RawPage)
 	 */

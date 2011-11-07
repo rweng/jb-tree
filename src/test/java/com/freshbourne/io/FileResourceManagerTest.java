@@ -122,8 +122,9 @@ public class FileResourceManagerTest {
 	}
 
 	@Factory
-	public Object[] createInstances() {
-		return new Object[]{new ResourceManagerTest(new ResourceManagerBuilder().file("/tmp/ResourceManagerTest").open().useCache(false).build())};
+	public Object[] createInstances() throws IOException {
+		setUp();
+		return new Object[]{new ResourceManagerTest(rm)};
 	}
 
 
@@ -150,12 +151,6 @@ public class FileResourceManagerTest {
 
 		assertEquals(2, rm.numberOfPages());
 		assertEquals(longToCompare, rm.getPage(page.id()).bufferForWriting(0).getLong());
-	}
-
-	@Test(expectedExceptions = WrongPageSizeException.class)
-	public void shouldThrowExceptionIfWrongPageSize() throws IOException {
-		final RawPage page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE + 1), 1);
-		rm.addPage(page);
 	}
 
 	@Test(enabled = false)

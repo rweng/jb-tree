@@ -12,6 +12,7 @@ package com.freshbourne.btree;
 
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.io.AutoSaveResourceManager;
+import com.freshbourne.io.ResourceManager;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.IntegerSerializer;
 import org.testng.annotations.BeforeMethod;
@@ -35,11 +36,11 @@ public class LeafNodeTest {
 
 	private Integer value1 = 101;
 	private Integer value2 = 102;
-	private AutoSaveResourceManager rm;
+	private ResourceManager rm;
 
 	LeafNodeTest(){
 		file.delete();
-		this.rm = new ResourceManagerBuilder().file(file).open().buildAutoSave();
+		this.rm = new ResourceManagerBuilder().file(file).open().useCache(false).build();
 	}
 
 	@BeforeMethod
@@ -197,7 +198,8 @@ public class LeafNodeTest {
 
 	@Test
 	public void prependEntriesShouldWork() {
-		final LeafNode<Integer, Integer> leaf2 = lpm.createPage();
+		final int leaf2Id = lpm.createPage().getId();
+
 
 		int totalInserted = 0;
 
@@ -208,10 +210,10 @@ public class LeafNodeTest {
 		}
 
 		// in testPrepend, one entry is inserted
-		testPrepend(leaf, leaf2);
+		testPrepend(leaf, lpm.getPage(leaf2Id));
 		totalInserted++;
 
-		assertThat(leaf.getNumberOfEntries() + leaf2.getNumberOfEntries()).isEqualTo(totalInserted);
+		assertThat(leaf.getNumberOfEntries() + lpm.getPage(leaf2Id).getNumberOfEntries()).isEqualTo(totalInserted);
 
 		// should work again, when we have to actually move some entries in leaf2
 		for (int i = leaf.getNumberOfEntries(); i < leaf
@@ -220,9 +222,9 @@ public class LeafNodeTest {
 			totalInserted++;
 		}
 
-		testPrepend(leaf, leaf2);
+		testPrepend(leaf, lpm.getPage(leaf2Id));
 		totalInserted++;
-		assertThat(leaf.getNumberOfEntries() + leaf2.getNumberOfEntries()).isEqualTo(totalInserted);
+		assertThat(leaf.getNumberOfEntries() + lpm.getPage(leaf2Id).getNumberOfEntries()).isEqualTo(totalInserted);
 
 	}
 

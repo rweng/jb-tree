@@ -12,7 +12,7 @@ package com.freshbourne.btree;
 
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.comparator.StringComparator;
-import com.freshbourne.io.AutoSaveResourceManager;
+import com.freshbourne.io.ResourceManager;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
@@ -46,15 +46,13 @@ public class BTreeTest {
 
 	// 3 keys, 4 values
 	private static final int PAGE_SIZE = InnerNode.Header.size() + 3 * (2 * Integer.SIZE / 8) + Integer.SIZE / 8;
-	private static AutoSaveResourceManager rm;
+	private static ResourceManager rm;
 	
-	BTreeTest() {
-		file.delete();
-		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).cacheSize(100).buildAutoSave();
-	}
-
 	@BeforeMethod
 	public void setUp() throws IOException {
+		file.delete();
+		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).useCache(false).build();
+
 		if(!rm.isOpen())
 			rm.open();
 		
@@ -75,7 +73,7 @@ public class BTreeTest {
 	}
 
 
-	@Test
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void testMultiLevelInsertForward() throws IOException {
 		final int count = 100;
 
@@ -109,12 +107,11 @@ public class BTreeTest {
 		assertFalse(iterator.hasNext());
 	}
 
-	@Test
+	@Test(dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
 	public void testMultiLevelInsertBackward() throws IOException {
 		final int count = 100;
 
 		for (int i = 0; i < count; i++) {
-
 			assertTrue(tree.isValid());
 			tree.add(count - i, count - i);
 			tree.checkStructure();
@@ -147,7 +144,7 @@ public class BTreeTest {
 	public void testLargeKeyValues() throws IOException, InterruptedException {
 		// initialize new btree
 		file.delete();
-		final AutoSaveResourceManager newRm = new ResourceManagerBuilder().file(file).buildAutoSave();
+		final ResourceManager newRm = new ResourceManagerBuilder().file(file).build();
 		final BTree<String, String> newTree = BTree.create(newRm, FixedStringSerializer.INSTANCE_1000,
 				FixedStringSerializer.INSTANCE_1000,
 				StringComparator.INSTANCE);
@@ -184,15 +181,14 @@ public class BTreeTest {
 		final File file = new File(filePath);
 		file.delete();
 
-		final AutoSaveResourceManager pm = new ResourceManagerBuilder().file(file).buildAutoSave();
+		final ResourceManager pm = new ResourceManagerBuilder().file(file).build();
 		pm.open();
 
 		final BTree<Integer, String> btree = BTree.create(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
 				IntegerComparator.INSTANCE);
 
 		btree.initialize();
-		btree.sync();
-
+		
 		assertTrue(file.exists());
 	}
 
@@ -204,15 +200,15 @@ public class BTreeTest {
 		btree.initialize();
 	}
 
-	private AutoSaveResourceManager createResourceManager(final boolean reset) {
+	private ResourceManager createResourceManager(final boolean reset) {
 		if (reset)
 			file.delete();
-		return new ResourceManagerBuilder().file(file).buildAutoSave();
+		return new ResourceManagerBuilder().file(file).build();
 	}
 
 	@Test
 	public void integerStringTree() throws IOException {
-		final AutoSaveResourceManager rm = createResourceManager(true);
+		final ResourceManager rm = createResourceManager(true);
 		BTree<Integer, String> btree =
 				BTree.create(rm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
 						IntegerComparator.INSTANCE);
@@ -224,8 +220,7 @@ public class BTreeTest {
 			LOG.debug("ROUND: " + i);
 
 			btree.add(i, "" + i);
-			btree.sync();
-
+			
 			final BTree<Integer, String> btree2 =
 					BTree.create(rm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
 							IntegerComparator.INSTANCE);
@@ -243,8 +238,6 @@ public class BTreeTest {
 
 
 		}
-
-		btree.sync();
 
 		btree = BTree.create(rm, IntegerSerializer.INSTANCE,
 				FixedStringSerializer.INSTANCE_1000,
@@ -280,7 +273,7 @@ public class BTreeTest {
 	}
 
 
-	@Test(groups = "slow")
+	@Test(groups = "slow", dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
 	public void iteratorsWithoutParameters() throws IOException, InterruptedException {
 		LOG.setLevel(Level.DEBUG);
 		fillTree(tree, 1000);
@@ -288,14 +281,13 @@ public class BTreeTest {
 		
 		final Iterator<Integer> iterator = tree.getIterator();
 		for (int i = 0; i < 1000; i++){
-			LOG.info("i = " + i);
 			assertThat(iterator.hasNext()).isTrue();
 			assertThat(iterator.next()).isEqualTo(i);
 		}
 		assertThat(iterator.hasNext()).isFalse();
 	}
 
-	@Test
+	@Test(dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
 	public void ranges() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		final List<Range<Integer>> rangeList = new ArrayList<Range<Integer>>();
@@ -430,7 +422,7 @@ public class BTreeTest {
 	}
 
 	@Test
-	public void clearShouldRemoveAllElements() {
+	public void clearShouldRemoveAllElements() throws IOException {
 		tree.add(key1, value1);
 		tree.add(key2, value2);
 		assertEquals(2, tree.getNumberOfEntries());
@@ -439,7 +431,7 @@ public class BTreeTest {
 	}
 
 	@Test
-	public void removeWithValueArgumentShouldRemoveOnlyThisValue() {
+	public void removeWithValueArgumentShouldRemoveOnlyThisValue() throws IOException {
 		final int k1 = Integer.MAX_VALUE;
 		final int k2 = Integer.MIN_VALUE;
 		removeWithValueArgumentShouldRemoveOnlyThisValue(k1, k2);
@@ -496,14 +488,6 @@ public class BTreeTest {
 		}
 	}
 
-	@Test public void shouldWorkOnTheEdgeToCreateNewInnerNode() {
-		final int size = 170;
-		fill(size);
-
-		assertThat(tree.getNumberOfEntries()).isEqualTo(size);
-		simpleTests(5000);
-	}
-
 	@Test public void iterator() {
 		Integer val;
 
@@ -526,7 +510,7 @@ public class BTreeTest {
 		assertThat(i.hasNext()).isFalse();
 	}
 
-	@Test(groups = "slow")
+	@Test(groups = "slow", dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void shouldWorkWithMassiveValues() {
 		final int size = 100000;
 
@@ -537,32 +521,7 @@ public class BTreeTest {
 		simpleTests(Integer.MIN_VALUE);
 	}
 
-	@Test(enabled = false)
-	public void shouldNotHaveTooMuchOverhead() {
-		final int sizeForKey = Integer.SIZE / 8;
-		final int sizeForVal = Integer.SIZE / 8;
-
-		// insert 10.000 K/V pairs
-		final int size = 100000;
-		final long start = System.currentTimeMillis();
-		for (int i = 0; i < size; i++) {
-			tree.add(i, i);
-		}
-
-		tree.sync();
-		final long end = System.currentTimeMillis();
-
-		final Long sizeOfData = (long) (size * (sizeForKey + sizeForVal));
-		final float realSizePercent = file.length() / sizeOfData * 100;
-
-		System.out.println("====== BTREE: SIZE OVERHEAD TEST ======");
-		System.out.println("key + value data inserted:" + sizeOfData / 1024 + "k");
-		System.out.println("fileSize: " + file.length() / 1024 + "k (" + realSizePercent + "%)");
-		System.out.println("time for insert w/ sync in millis: " + (end - start));
-		//assertThat("current Size: " + realSizePercent + "%", realSizePercent, lessThan(1000f));
-	}
-
-	@Test
+	@Test(dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
 	public void iteratorsWithStartEndGiven() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		Iterator<Integer> iterator = tree.getIterator();
@@ -596,7 +555,15 @@ public class BTreeTest {
 		bulkInsert(tree.getMaxLeafKeys()); // exactly one leaf
 	}
 
-	@Test
+	@Test public void shouldWorkOnTheEdgeToCreateAnInnerNode() {
+		final int size = tree.getMaxLeafKeys();
+		fill(size);
+		tree.checkStructure();
+		assertThat(tree.getNumberOfEntries()).isEqualTo(size);
+		simpleTests(size + 1);
+	}
+
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void bulkInsert2Layers() throws IOException {
 		bulkInsert((tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys());
 
@@ -609,12 +576,12 @@ public class BTreeTest {
 	 * (pageIds.size() - 1)
 	 * @throws java.io.IOException
 	 */
-	@Test
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void bulkInsertWithOnlyOnePageForNextInnerNode() throws IOException {
 		bulkInsert((tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys() + 1);
 	}
 
-	@Test
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void bulkInsert3Layers() throws IOException {
 		bulkInsert((tree.getMaxInnerKeys() + 1) * (tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys());
 
@@ -623,7 +590,7 @@ public class BTreeTest {
 	}
 
 
-	@Test
+	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void bulkInsertWithSortAndCloseAndRange() throws IOException {
 		final int count = 50;
 		final int from = 10;
@@ -699,7 +666,7 @@ public class BTreeTest {
 		}
 	}
 
-	@Test(dataProvider = "shouldBeAbleToOpenAndLoadProvider")
+	@Test(dataProvider = "shouldBeAbleToOpenAndLoadProvider", dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void shouldBeAbleToOpenAndLoad(final Integer key1, final Integer key2) throws IOException {
 		final Integer value1 = 1;
 		final Integer value2 = 2;
@@ -711,13 +678,26 @@ public class BTreeTest {
 		tree.initialize();
 		tree.add(key1, value1);
 		tree.add(key2, value2);
+
+
+		assertThat(tree.getNumberOfEntries()).isEqualTo(2);
+		assertThat(tree.get(key1).get(0)).isEqualTo(value1);
+		assertThat(tree.get(key2).get(0)).isEqualTo(value2);
+
 		tree.close();
 
 		tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE);
 		tree.load();
-		assertEquals(2, tree.getNumberOfEntries());
-		assertEquals(value1, tree.get(key1).get(0));
-		assertEquals(value2, tree.get(key2).get(0));
+		assertThat(tree.getNumberOfEntries()).isEqualTo(2);
+		assertThat(tree.get(key1).get(0)).isEqualTo(value1);
+		assertThat(tree.get(key2).get(0)).isEqualTo(value2);
+	}
+
+	@Test
+	public void toStringShouldAlwaysWork() throws IOException {
+		assertThat(tree.toString()).isNotNull();
+		tree.close();
+		assertThat(tree.toString()).isNotNull();
 	}
 
 	@DataProvider
@@ -731,8 +711,7 @@ public class BTreeTest {
 
 	private void fillTree(final BTree<Integer, Integer> tree, final int count) throws InterruptedException {
 		for (int i = 0; i < count; i++) {
-			if(LOG.isDebugEnabled())
-				LOG.debug("fillTree() : i = " + i);
+			// LOG.info("fillTree() : i = " + i);
 
 			tree.add(i, i);
 			tree.checkStructure();
