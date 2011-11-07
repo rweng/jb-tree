@@ -48,13 +48,11 @@ public class BTreeTest {
 	private static final int PAGE_SIZE = InnerNode.Header.size() + 3 * (2 * Integer.SIZE / 8) + Integer.SIZE / 8;
 	private static ResourceManager rm;
 	
-	BTreeTest() {
-		file.delete();
-		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).useCache(false).build();
-	}
-
 	@BeforeMethod
 	public void setUp() throws IOException {
+		file.delete();
+		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).useCache(false).build();
+
 		if(!rm.isOpen())
 			rm.open();
 		

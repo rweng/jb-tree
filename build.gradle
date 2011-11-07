@@ -40,31 +40,22 @@ sourceSets {
 
 repositories {
     mavenCentral()
-    mavenRepo urls: "http://guice-maven.googlecode.com/svn/trunk"
-    mavenRepo urls: "http://repository.codehaus.org"
+    mavenRepo url: "http://guice-maven.googlecode.com/svn/trunk"
+    mavenRepo url: "http://repository.codehaus.org"
 }
 
 dependencies {
-    // compile "com.google.inject:guice:3.0@jar"
-    // compile "javax.inject:javax.inject:1@jar" // dependency needed by guice
-    // compile "aopalliance:aopalliance:1.0@jar"
-
-    compile "commons-logging:commons-logging:1.0.4@jar"
-    compile "commons-logging:commons-logging-api:1.0.4@jar"
-    // compile "org.apache.jcs:jcs:1.3@jar"
-
-    compile "log4j:log4j:1.2.16@jar"
-
     compile group: 'com.google.guava', name: 'guava', version: '10.0.1'
 
-    // testCompile "junit:junit:4.8.2@jar"
+    compile "commons-logging:commons-logging:1.0.4"
+
+    // TEST-COMPILE
+    testCompile "log4j:log4j:1.2.16"
+
     testCompile "org.testng:testng:6.2.1"
-    testCompile "org.mockito:mockito-all:1.8.5@jar"
+    testCompile "org.mockito:mockito-all:1.8.5"
 
-    // testCompile "org.easytesting:fest:1.0.8@jar"
-    testCompile "org.easytesting:fest-assert:1.4@jar"
-    testCompile "org.easytesting:fest-util:1.1.6@jar"
-
+    testCompile "org.easytesting:fest-assert:1.4"
 }
 
 //************* OWN TASKS ********************
