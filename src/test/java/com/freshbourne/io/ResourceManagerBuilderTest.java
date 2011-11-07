@@ -15,7 +15,8 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class ResourceManagerBuilderTest {
 	private ResourceManagerBuilder builder;

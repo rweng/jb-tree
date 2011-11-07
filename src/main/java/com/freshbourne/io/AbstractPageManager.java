@@ -9,15 +9,14 @@
  */
 package com.freshbourne.io;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 public abstract class AbstractPageManager<T extends ComplexPage> implements PageManager<T> {
 
-	private static final Logger LOG = Logger.getLogger(AbstractPageManager.class);
+	private static final Log LOG = LogFactory.getLog(AbstractPageManager.class);
 	private final PageManager<RawPage> rpm;
 
 	protected AbstractPageManager(final PageManager<RawPage> rpm) {

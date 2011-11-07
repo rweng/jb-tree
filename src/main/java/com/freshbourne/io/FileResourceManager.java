@@ -19,7 +19,6 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -185,7 +184,7 @@ public class FileResourceManager implements ResourceManager {
 				LOG.warn("File " + file.getAbsolutePath() + " could not be locked in attempt " + i + ".");
 
 				try {
-					Thread.sleep(100);
+					Thread.sleep(200);
 				} catch (InterruptedException ignored) {
 				}
 

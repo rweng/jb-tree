@@ -11,7 +11,6 @@
 package com.freshbourne.btree;
 
 import com.freshbourne.comparator.StringComparator;
-import com.freshbourne.io.AutoSaveResourceManager;
 import com.freshbourne.io.ResourceManager;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
@@ -24,7 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.testng.Assert.assertNotNull;
 
 public class PageManagerTest {
 
@@ -64,11 +62,11 @@ public class PageManagerTest {
 		}
 
 		for(final int id : leafs){
-			assertNotNull(lpm.getPage(id));
+			assertThat(lpm.getPage(id)).isNotNull();
 		}
 
 		for(final int id : inners){
-			assertNotNull(inm.getPage(id));
+			assertThat(inm.getPage(id)).isNotNull();
 		}
 	}
 }

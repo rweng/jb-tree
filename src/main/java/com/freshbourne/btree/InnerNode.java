@@ -13,7 +13,8 @@ import com.freshbourne.btree.AdjustmentAction.ACTION;
 import com.freshbourne.btree.BTree.NodeType;
 import com.freshbourne.io.*;
 import com.freshbourne.serializer.FixLengthSerializer;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -33,7 +34,7 @@ import java.util.*;
 class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 
 	private static final NodeType NODE_TYPE = NodeType.INNER_NODE;
-	private static final Logger   LOG       = Logger.getLogger(InnerNode.class);
+	private static final Log LOG       = LogFactory.getLog(InnerNode.class);
 
 	static enum Header {
 		NODE_TYPE(0) {}, // char

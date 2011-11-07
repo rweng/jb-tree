@@ -12,10 +12,8 @@ package com.freshbourne.io;
 
 import com.google.common.base.Objects;
 import com.google.common.cache.*;
-import com.google.common.collect.MapMaker;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkArgument;

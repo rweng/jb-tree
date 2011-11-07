@@ -11,7 +11,6 @@ package com.freshbourne.btree;
 
 
 import com.freshbourne.comparator.IntegerComparator;
-import com.freshbourne.io.AutoSaveResourceManager;
 import com.freshbourne.io.ResourceManager;
 import com.freshbourne.io.ResourceManagerBuilder;
 import com.freshbourne.serializer.IntegerSerializer;
