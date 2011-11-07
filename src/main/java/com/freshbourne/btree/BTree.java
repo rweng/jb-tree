@@ -474,8 +474,10 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 	public String toString(){
 		final Objects.ToStringHelper helper = Objects.toStringHelper(this);
-		helper.add("numberOfEntries", getNumberOfEntries());
-		helper.add("root", root);
+		if(isValid()){
+			helper.add("numberOfEntries", getNumberOfEntries());
+			helper.add("root", root);
+		}
 		helper.add("resourceManager", rm);
 		helper.add("valid", valid);
 		return helper.toString();

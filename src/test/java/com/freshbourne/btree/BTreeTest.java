@@ -695,6 +695,13 @@ public class BTreeTest {
 		assertThat(tree.get(key2).get(0)).isEqualTo(value2);
 	}
 
+	@Test
+	public void toStringShouldAlwaysWork() throws IOException {
+		assertThat(tree.toString()).isNotNull();
+		tree.close();
+		assertThat(tree.toString()).isNotNull();
+	}
+
 	@DataProvider
 	public Object[][] shouldBeAbleToOpenAndLoadProvider(){
 		return new Object[][]{
