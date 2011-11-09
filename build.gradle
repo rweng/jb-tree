@@ -14,7 +14,7 @@ apply plugin: 'idea'
 
 // java
 sourceCompatibility = 1.6
-version = '0.0.2'
+version = '0.0.3'
 jar {
     manifest {
         attributes 'Implementation-Title': 'jb-tree', 'Implementation-Version': version
@@ -61,7 +61,7 @@ dependencies {
 //************* OWN TASKS ********************
 
 task publishJar(dependsOn: jar) << {
-    run("cp -f " + jar.archivePath + " /Users/robin/Dropbox/public/jb-tree-0.0.2.jar")
+    run("cp -f " + jar.archivePath + " /Users/robin/Dropbox/public/jb-tree-0.0.3.jar")
 }
 
 //************* HELPER METHODS ********************
