@@ -8,14 +8,14 @@
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.Serializer;
 
 public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {
 
-    private final PageManager<RawPage> bpm;
+    private final PageManager<RawPage>                     bpm;
     private final FixLengthSerializer<PagePointer, byte[]> pointSerializer;
     private final Serializer<T, byte[]> dataSerializer;
 
@@ -32,7 +32,7 @@ public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {
 
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#hasPage(long)
+	 * @see com.freshbourne.io.rm.PageManager#hasPage(long)
 	 */
 	@Override
 	public boolean hasPage(final int id) {
@@ -40,7 +40,7 @@ public class DataPageManager<T> extends AbstractPageManager<DataPage<T>> {
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.AbstractPageManager#createObjectPage(com.freshbourne.io.RawPage)
+	 * @see com.freshbourne.io.rm.AbstractPageManager#createObjectPage(com.freshbourne.io.rm.RawPage)
 	 */
 	@Override
 	protected DataPage<T> createObjectPage(final RawPage page) {

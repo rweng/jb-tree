@@ -8,7 +8,7 @@
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.MapMaker;

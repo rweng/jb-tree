@@ -10,9 +10,9 @@
 
 package com.freshbourne.btree;
 
-import com.freshbourne.io.AbstractPageManager;
-import com.freshbourne.io.PageManager;
-import com.freshbourne.io.RawPage;
+import com.freshbourne.io.rm.AbstractPageManager;
+import com.freshbourne.io.rm.PageManager;
+import com.freshbourne.io.rm.RawPage;
 import com.freshbourne.serializer.FixLengthSerializer;
 
 import java.util.Comparator;
@@ -36,7 +36,7 @@ class LeafPageManager<K,V> extends AbstractPageManager<LeafNode<K,V>> {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.AbstractPageManager#createObjectPage()
+	 * @see com.freshbourne.io.rm.AbstractPageManager#createObjectPage()
 	 */
 	@Override
 	protected LeafNode<K, V> createObjectPage(final RawPage page) {

@@ -7,7 +7,7 @@
  *
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.Serializer;

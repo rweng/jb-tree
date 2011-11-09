@@ -11,8 +11,8 @@
 package com.freshbourne.btree;
 
 import com.freshbourne.comparator.StringComparator;
-import com.freshbourne.io.ResourceManager;
-import com.freshbourne.io.ResourceManagerBuilder;
+import com.freshbourne.io.rm.ResourceManager;
+import com.freshbourne.io.rm.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

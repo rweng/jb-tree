@@ -11,8 +11,8 @@ package com.freshbourne.btree.run;
 
 import com.freshbourne.btree.BTree;
 import com.freshbourne.comparator.IntegerComparator;
-import com.freshbourne.io.ResourceManager;
-import com.freshbourne.io.ResourceManagerBuilder;
+import com.freshbourne.io.rm.ResourceManager;
+import com.freshbourne.io.rm.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
 import org.apache.commons.logging.Log;

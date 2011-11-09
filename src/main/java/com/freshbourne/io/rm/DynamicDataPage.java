@@ -7,7 +7,7 @@
  *
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.Serializer;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
-public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
+public class DynamicDataPage<T> implements DataPage<T>, ComplexPage {
 	
 	private final RawPage rawPage;
 	
@@ -191,7 +191,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 		return rawPage.bufferForReading(0).limit() - getHeaderSize() - bodyUsedBytes();
 	}
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ComplexPage#load()
+	 * @see com.freshbourne.io.rm.ComplexPage#load()
 	 */
 	@Override
 	public void load() {
@@ -218,7 +218,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ComplexPage#isValid()
+	 * @see com.freshbourne.io.rm.ComplexPage#isValid()
 	 */
 	@Override
 	public boolean isValid() {
@@ -235,7 +235,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
     }
 
     /* (non-Javadoc)
-      * @see com.freshbourne.io.DataPage#numberOfEntries()
+      * @see com.freshbourne.io.rm.DataPage#numberOfEntries()
       */
 	@Override
 	public int numberOfEntries() throws InvalidPageException {
@@ -245,7 +245,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ComplexPage#rawPage()
+	 * @see com.freshbourne.io.rm.ComplexPage#rawPage()
 	 */
 	@Override
 	public RawPage rawPage() {
@@ -253,7 +253,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.DataPage#pagePointSerializer()
+	 * @see com.freshbourne.io.rm.DataPage#pagePointSerializer()
 	 */
 	@Override
 	public FixLengthSerializer<PagePointer, byte[]> pagePointSerializer() {
@@ -261,7 +261,7 @@ public class DynamicDataPage<T> implements DataPage<T>, ComplexPage{
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.DataPage#dataSerializer()
+	 * @see com.freshbourne.io.rm.DataPage#dataSerializer()
 	 */
 	@Override
 	public Serializer<T, byte[]> dataSerializer() {

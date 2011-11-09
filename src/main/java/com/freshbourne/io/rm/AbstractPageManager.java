@@ -7,7 +7,7 @@
  *
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,7 +32,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	}
 
 	/* (non-Javadoc)
-		 * @see com.freshbourne.io.PageManager#getPage(int)
+		 * @see com.freshbourne.io.rm.PageManager#getPage(int)
 		 */
 	@Override
 	public T getPage(final int id) {
@@ -54,7 +54,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	}
 
 	/* (non-Javadoc)
-		 * @see com.freshbourne.io.PageManager#createPage()
+		 * @see com.freshbourne.io.rm.PageManager#createPage()
 		 */
 	@Override
 	public T createPage() {
@@ -79,7 +79,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 
 
 	/* (non-Javadoc)
-		 * @see com.freshbourne.io.PageManager#removePage(int)
+		 * @see com.freshbourne.io.rm.PageManager#removePage(int)
 		 */
 	@Override
 	public void removePage(final int id) {
@@ -97,7 +97,7 @@ public abstract class AbstractPageManager<T extends ComplexPage> implements Page
 	protected abstract T createObjectPage(RawPage page);
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#hasPage(long)
+	 * @see com.freshbourne.io.rm.PageManager#hasPage(long)
 	 */
 	@Override
 	public boolean hasPage(final int id) {

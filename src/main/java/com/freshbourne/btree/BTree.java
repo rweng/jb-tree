@@ -12,6 +12,10 @@ package com.freshbourne.btree;
 
 import com.freshbourne.btree.AdjustmentAction.ACTION;
 import com.freshbourne.io.*;
+import com.freshbourne.io.rm.DataPageManager;
+import com.freshbourne.io.rm.FileResourceManager;
+import com.freshbourne.io.rm.RawPage;
+import com.freshbourne.io.rm.ResourceManager;
 import com.freshbourne.serializer.FixLengthSerializer;
 import com.freshbourne.serializer.PagePointSerializer;
 import com.google.common.annotations.VisibleForTesting;
@@ -43,7 +47,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	private final InnerNodeManager<K, V> innerNodeManager;
 	private final Comparator<K>          comparator;
 	private final ResourceManager rm;
-	private       RawPage                rawPage;
+	private       RawPage         rawPage;
 
 	private Node<K, V> root;
 
@@ -460,7 +464,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.io.ComplexPage#initialize()
+		  * @see com.freshbourne.io.rm.ComplexPage#initialize()
 		  */
 	@Override
 	public void initialize() throws IOException {
@@ -504,7 +508,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.io.ComplexPage#load()
+		  * @see com.freshbourne.io.rm.ComplexPage#load()
 		  */
 	@Override
 	public void load() throws IOException {
@@ -544,7 +548,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.io.ComplexPage#isValid()
+		  * @see com.freshbourne.io.rm.ComplexPage#isValid()
 		  */
 	@Override
 	public boolean isValid() {

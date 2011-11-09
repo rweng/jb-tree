@@ -8,10 +8,12 @@
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
+import com.freshbourne.io.rm.RawPage;
+import com.freshbourne.io.rm.ResourceHeader;
+import com.freshbourne.io.rm.ResourceManager;
 import com.google.common.collect.Lists;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;

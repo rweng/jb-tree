@@ -7,8 +7,13 @@
  *
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
+import com.freshbourne.io.NoSpaceException;
+import com.freshbourne.io.rm.DynamicDataPage;
+import com.freshbourne.io.rm.InvalidPageException;
+import com.freshbourne.io.rm.PageSize;
+import com.freshbourne.io.rm.RawPage;
 import com.freshbourne.serializer.PagePointSerializer;
 import com.freshbourne.serializer.StringSerializer;
 import org.testng.annotations.BeforeMethod;
@@ -129,7 +134,7 @@ public class DynamicDataPageTest {
 	}
 	
 	@Test
-	public void remainingMethodShouldAdjustWhenInsertingOrRemovingEntries() throws NoSpaceException, InvalidPageException{
+	public void remainingMethodShouldAdjustWhenInsertingOrRemovingEntries() throws NoSpaceException, InvalidPageException {
 		page.initialize();
 		
 		final int r1 = page.remaining();

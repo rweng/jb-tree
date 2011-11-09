@@ -7,14 +7,14 @@
  *
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
-public class DuplicatePageIdException extends RuntimeException {
+public class WrongPageSizeException extends IllegalStateException {
 	
 	private static final long serialVersionUID = 1L;
 
-	public DuplicatePageIdException(final Long id) {
-		super("The page with the id " + id + " does already exist.");
+	WrongPageSizeException(final RawPage p, final int expected){
+		super("The Page " + p + " does not have the expected PageSize of " + expected);
 	}
 
 }

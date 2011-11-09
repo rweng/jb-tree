@@ -11,7 +11,7 @@ package com.freshbourne.btree;
 
 import com.freshbourne.btree.AdjustmentAction.ACTION;
 import com.freshbourne.btree.BTree.NodeType;
-import com.freshbourne.io.*;
+import com.freshbourne.io.rm.*;
 import com.freshbourne.serializer.FixLengthSerializer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -465,7 +465,7 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.io.ComplexPage#initialize()
+		  * @see com.freshbourne.io.rm.ComplexPage#initialize()
 		  */
 	@Override
 	public void initialize() {
@@ -523,7 +523,7 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.io.ComplexPage#load()
+		  * @see com.freshbourne.io.rm.ComplexPage#load()
 		  */
 	@Override
 	public void load() {
@@ -537,7 +537,7 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.io.ComplexPage#isValid()
+		  * @see com.freshbourne.io.rm.ComplexPage#isValid()
 		  */
 	@Override
 	public boolean isValid() {
@@ -555,7 +555,7 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.io.ComplexPage#rawPage()
+		  * @see com.freshbourne.io.rm.ComplexPage#rawPage()
 		  */
 	@Override
 	public RawPage rawPage() {

@@ -7,7 +7,7 @@
  *
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
 import com.google.common.base.Objects;
 import org.apache.commons.logging.Log;
@@ -32,7 +32,7 @@ public class FileResourceManager implements ResourceManager {
 	private final File             file;
 	private       FileLock         fileLock;
 	private       FileChannel      ioChannel;
-	private       ResourceHeader   header;
+	private ResourceHeader header;
 	private       boolean          doLock;
 
 	private static Log LOG = LogFactory.getLog(FileResourceManager.class);
@@ -44,7 +44,7 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	/* (non-Javadoc)
-		 * @see com.freshbourne.io.ResourceManager#open()
+		 * @see com.freshbourne.io.rm.ResourceManager#open()
 		 */
 	@Override
 	public void open() throws IOException {
@@ -87,7 +87,7 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#getPage(long)
+	 * @see com.freshbourne.io.rm.PageManager#getPage(long)
 	 */
 	@Override
 	public RawPage getPage(final int pageId) {
@@ -120,7 +120,7 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#close()
+	 * @see com.freshbourne.io.rm.ResourceManager#close()
 	 */
 	@Override
 	public void close() throws IOException {
@@ -144,7 +144,7 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#getPageSize()
+	 * @see com.freshbourne.io.rm.ResourceManager#getPageSize()
 	 */
 	@Override
 	public Integer getPageSize() {
@@ -223,7 +223,7 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#numberOfPages()
+	 * @see com.freshbourne.io.rm.ResourceManager#numberOfPages()
 	 */
 	@Override
 	public int numberOfPages() {
@@ -245,7 +245,7 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#createPage()
+	 * @see com.freshbourne.io.rm.ResourceManager#createPage()
 	 */
 	@Override
 	public RawPage createPage() {
@@ -258,7 +258,7 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.ResourceManager#removePage(long)
+	 * @see com.freshbourne.io.rm.ResourceManager#removePage(long)
 	 */
 	@Override
 	public void removePage(final int pageId) {
@@ -275,7 +275,7 @@ public class FileResourceManager implements ResourceManager {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.freshbourne.io.PageManager#hasPage(long)
+	 * @see com.freshbourne.io.rm.PageManager#hasPage(long)
 	 */
 	@Override
 	public boolean hasPage(final int id) {

@@ -8,8 +8,11 @@
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
+import com.freshbourne.io.rm.FileResourceManager;
+import com.freshbourne.io.rm.ResourceManager;
+import com.freshbourne.io.rm.ResourceManagerBuilder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

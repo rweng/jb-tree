@@ -8,7 +8,7 @@
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
 
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
 import com.google.common.cache.Cache;
 import org.apache.log4j.Logger;

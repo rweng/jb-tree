@@ -7,7 +7,7 @@
  *
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
 /**
  * None of the methods throw an IOException. It is assumed, that the PageManager has an open Resource to which it can

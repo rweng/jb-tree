@@ -10,7 +10,7 @@
 
 package com.freshbourne.btree;
 
-import com.freshbourne.io.PagePointer;
+import com.freshbourne.io.rm.PagePointer;
 
 import java.util.Iterator;
 import java.util.List;

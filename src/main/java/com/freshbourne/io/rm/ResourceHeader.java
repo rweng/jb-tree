@@ -7,10 +7,10 @@
  *
  * Copyright (c) 2011 "Robin Wenglewski <robin@wenglewski.de>"
  */
-package com.freshbourne.io;
+package com.freshbourne.io.rm;
 
+import com.freshbourne.io.AbstractMustInitializeOrLoad;
 import com.google.common.annotations.VisibleForTesting;
-import sun.jvm.hotspot.utilities.HeapHprofBinWriter;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

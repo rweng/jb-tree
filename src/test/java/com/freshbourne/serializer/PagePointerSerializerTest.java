@@ -9,7 +9,7 @@
  */
 package com.freshbourne.serializer;
 
-import com.freshbourne.io.PagePointer;
+import com.freshbourne.io.rm.PagePointer;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

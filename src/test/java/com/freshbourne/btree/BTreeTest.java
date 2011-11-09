@@ -12,8 +12,8 @@ package com.freshbourne.btree;
 
 import com.freshbourne.comparator.IntegerComparator;
 import com.freshbourne.comparator.StringComparator;
-import com.freshbourne.io.ResourceManager;
-import com.freshbourne.io.ResourceManagerBuilder;
+import com.freshbourne.io.rm.ResourceManager;
+import com.freshbourne.io.rm.ResourceManagerBuilder;
 import com.freshbourne.serializer.FixedStringSerializer;
 import com.freshbourne.serializer.IntegerSerializer;
 import org.apache.log4j.Level;

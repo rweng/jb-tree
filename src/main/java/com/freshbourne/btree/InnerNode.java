@@ -11,7 +11,7 @@ package com.freshbourne.btree;
 
 import com.freshbourne.btree.AdjustmentAction.ACTION;
 import com.freshbourne.btree.BTree.NodeType;
-import com.freshbourne.io.*;
+import com.freshbourne.io.rm.*;
 import com.freshbourne.serializer.FixLengthSerializer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -143,7 +143,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 	private final RawPage                        rawPage;
 	private final Comparator<K>                  comparator;
 	private final PageManager<LeafNode<K, V>>    leafPageManager;
-	private final PageManager<InnerNode<K, V>>   innerNodePageManager;
+	private final PageManager<InnerNode<K, V>> innerNodePageManager;
 	private       FixLengthSerializer<K, byte[]> keySerializer;
 
 	private int numberOfKeys;
@@ -329,7 +329,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.io.ComplexPage#load()
+		  * @see com.freshbourne.io.rm.ComplexPage#load()
 		  */
 	@Override
 	public void load() throws IOException {
@@ -345,7 +345,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.io.ComplexPage#isValid()
+		  * @see com.freshbourne.io.rm.ComplexPage#isValid()
 		  */
 	@Override
 	public boolean isValid() {
@@ -366,7 +366,7 @@ class InnerNode<K, V> implements Node<K, V>, ComplexPage {
 	}
 
 	/* (non-Javadoc)
-		  * @see com.freshbourne.io.ComplexPage#rawPage()
+		  * @see com.freshbourne.io.rm.ComplexPage#rawPage()
 		  */
 	@Override
 	public RawPage rawPage() {
