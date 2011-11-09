@@ -21,6 +21,7 @@ import java.util.Random;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.Fail.fail;
 import static org.testng.Assert.assertEquals;
 
 public class ResourceManagerTest {
@@ -127,4 +128,23 @@ public class ResourceManagerTest {
 		assertThat(rm.isOpen()).isTrue();
 	}
 
+	@Test
+	public void shouldBeAbleToRemovePages() throws Exception {
+		final RawPage p1 = rm.createPage();
+		final int i = rm.numberOfPages();
+		final Integer p1Id = p1.id();
+
+		rm.removePage(p1Id);
+		assertThat(rm.numberOfPages()).isEqualTo(i - 1);
+		try {
+			rm.getPage(p1Id);
+			fail("reading a non-existent page should throw an exeption");
+		} catch (Exception expected) {
+		}
+
+		final RawPage p3 = rm.createPage();
+		assertThat( rm.numberOfPages()).isEqualTo(i);
+		rm.removePage(p3.id());
+		assertThat(rm.numberOfPages()).isEqualTo(i - 1);
+	}
 }

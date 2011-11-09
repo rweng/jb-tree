@@ -71,8 +71,8 @@ public class FileResourceManagerTest {
 		rm.close();
 
 		final RandomAccessFile rFile = new RandomAccessFile(file, "rw");
-		assertEquals(PageSize.DEFAULT_PAGE_SIZE, rFile.readInt());
-		assertEquals(1, rFile.readInt());
+		rFile.seek(ResourceHeader.Header.PAGE_SIZE.offset);
+		assertThat(rFile.readInt()).isEqualTo(PageSize.DEFAULT_PAGE_SIZE);
 		rFile.close();
 	}
 
@@ -118,7 +118,7 @@ public class FileResourceManagerTest {
 	public void addingAPageShouldIncreaseNumberOfPages() throws IOException {
 		final int num = rm.numberOfPages();
 		rm.createPage();
-		assertEquals(num + 1, rm.numberOfPages());
+		assertThat(rm.numberOfPages()).isEqualTo(num + 1);
 	}
 
 	@Factory
@@ -151,26 +151,6 @@ public class FileResourceManagerTest {
 
 		assertEquals(2, rm.numberOfPages());
 		assertEquals(longToCompare, rm.getPage(page.id()).bufferForWriting(0).getLong());
-	}
-
-	@Test(enabled = false)
-	public void shouldBeAbleToRemovePages() throws Exception {
-		final RawPage p1 = rm.createPage();
-		final int i = rm.numberOfPages();
-		final Integer p1Id = p1.id();
-
-		rm.removePage(p1Id);
-		assertEquals(i - 1, rm.numberOfPages());
-		try {
-			rm.getPage(p1Id);
-			fail("reading a non-existent page should throw an exeption");
-		} catch (Exception expected) {
-		}
-
-		final RawPage p3 = rm.createPage();
-		assertEquals(i, rm.numberOfPages());
-		rm.removePage(p3.id());
-		assertEquals(i - 1, rm.numberOfPages());
 	}
 
 	@Test(groups = "slow")

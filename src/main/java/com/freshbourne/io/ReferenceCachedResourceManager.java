@@ -30,7 +30,7 @@ public class ReferenceCachedResourceManager implements ResourceManager {
 		this.map = new MapMaker().weakValues().makeMap();
 	}
 
-	@Override public int getPageSize() {
+	@Override public Integer getPageSize() {
 		return rm.getPageSize();
 	}
 

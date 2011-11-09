@@ -66,7 +66,7 @@ public class CachedResourceManager implements ResourceManager {
 		rm.writePage(page);
 	}
 
-	@Override public int getPageSize() {
+	@Override public Integer getPageSize() {
 		return rm.getPageSize();
 	}
 

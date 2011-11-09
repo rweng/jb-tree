@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkState;
 public class FileResourceManager implements ResourceManager {
 	private       RandomAccessFile handle;
 	private final File             file;
-	private final int              pageSize;
 	private       FileLock         fileLock;
 	private       FileChannel      ioChannel;
 	private       ResourceHeader   header;
@@ -40,8 +39,8 @@ public class FileResourceManager implements ResourceManager {
 
 	FileResourceManager(final ResourceManagerBuilder builder) {
 		this.file = builder.getFile();
-		this.pageSize = builder.getPageSize();
 		this.doLock = builder.useLock();
+		this.header = new ResourceHeader(this, builder.getPageSize());
 	}
 
 	/* (non-Javadoc)
@@ -58,8 +57,9 @@ public class FileResourceManager implements ResourceManager {
 		}
 
 		initIOChannel(getFile());
-		this.header = new ResourceHeader(ioChannel, pageSize);
 
+		if(header.isValid())
+			header = new ResourceHeader(this, header.getPageSize());
 
 		if (handle.length() == 0) {
 			header.initialize();
@@ -97,7 +97,7 @@ public class FileResourceManager implements ResourceManager {
 
 		final RawPage result;
 
-		final ByteBuffer buf = ByteBuffer.allocate(pageSize);
+		final ByteBuffer buf = ByteBuffer.allocate(header.getPageSize());
 
 		try {
 			ioChannel.read(buf, header.getPageOffset(pageId));
@@ -124,10 +124,6 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void close() throws IOException {
-		if (header != null) {
-			header = null;
-		}
-
 		try {
 			if (fileLock != null && fileLock.isValid()) {
 				fileLock.release();
@@ -151,8 +147,8 @@ public class FileResourceManager implements ResourceManager {
 	 * @see com.freshbourne.io.ResourceManager#getPageSize()
 	 */
 	@Override
-	public int getPageSize() {
-		return pageSize;
+	public Integer getPageSize() {
+		return header.getPageSize();
 	}
 
 	/**
@@ -219,15 +215,6 @@ public class FileResourceManager implements ResourceManager {
 		return helper.toString();
 	}
 
-	/**
-	 * @param page
-	 * @throws WrongPageSizeException
-	 */
-	private void ensureCorrectPageSize(final RawPage page) {
-		if (page.bufferForReading(0).limit() != pageSize)
-			throw new WrongPageSizeException(page, pageSize);
-	}
-
 	private void ensureOpen() {
 		if (!isOpen())
 			throw new IllegalStateException("Resource is not open: " + toString());
@@ -246,7 +233,14 @@ public class FileResourceManager implements ResourceManager {
 
 	@Override public void clear() {
 		ensureOpen();
-		// file is already truncated when header initialize is called
+		header = new ResourceHeader(this, header.getPageSize());
+
+		try {
+			ioChannel.truncate(0);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
 		header.initialize();
 	}
 
@@ -257,7 +251,7 @@ public class FileResourceManager implements ResourceManager {
 	public RawPage createPage() {
 		ensureOpen();
 
-		final ByteBuffer buf = ByteBuffer.allocate(pageSize);
+		final ByteBuffer buf = ByteBuffer.allocate(header.getPageSize());
 		final RawPage result = new RawPage(buf, header.generateId(), this);
 
 		return result;
@@ -268,7 +262,7 @@ public class FileResourceManager implements ResourceManager {
 	 */
 	@Override
 	public void removePage(final int pageId) {
-		throw new UnsupportedOperationException();
+		header.removePage(pageId);
 	}
 
 	@Override
@@ -287,11 +281,6 @@ public class FileResourceManager implements ResourceManager {
 	public boolean hasPage(final int id) {
 		ensureOpen();
 		return header.contains(id);
-	}
-
-	/** @return the handle */
-	public RandomAccessFile getHandle() {
-		return handle;
 	}
 
 	/** @return the file */
