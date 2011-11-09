@@ -9,7 +9,8 @@
  */
 package com.freshbourne.serializer;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.nio.ByteBuffer;
 
@@ -21,7 +22,7 @@ public enum FixedStringSerializer implements FixLengthSerializer<String, byte[]>
 	
 	private int length;
 
-	private static Logger LOG = Logger.getLogger(FixedStringSerializer.class);
+	private static Log LOG = LogFactory.getLog(FixedStringSerializer.class);
 	
 	
 	private FixedStringSerializer(final int length) {
