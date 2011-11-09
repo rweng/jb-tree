@@ -40,8 +40,8 @@ sourceSets {
 
 repositories {
     mavenCentral()
-    mavenRepo url: "http://guice-maven.googlecode.com/svn/trunk"
-    mavenRepo url: "http://repository.codehaus.org"
+    mavenRepo urls: "http://guice-maven.googlecode.com/svn/trunk"
+    mavenRepo urls: "http://repository.codehaus.org"
 }
 
 dependencies {
