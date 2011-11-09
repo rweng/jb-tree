@@ -29,18 +29,19 @@ public class ResourceManagerTest {
 
 	/**
 	 * NOTE: ensure that the provided ResourceManager uses a different file than the implementation tests
-	 * 
+	 *
 	 * @param rm
 	 */
 	ResourceManagerTest(final ResourceManager rm) throws IOException {
 		checkNotNull(rm);
 		this.rm = rm;
-
-		if(!rm.isOpen())
-			rm.open();
 	}
+
 	@BeforeMethod
 	public void setUp() throws IOException {
+		if (!rm.isOpen())
+			rm.open();
+
 		rm.clear();
 	}
 
@@ -109,9 +110,9 @@ public class ResourceManagerTest {
 
 	@Test
 	public void toStringShouldAlwaysWork() throws IOException {
-		if(!rm.isOpen())
+		if (!rm.isOpen())
 			rm.open();
-		
+
 		assertThat(rm.toString()).isNotNull();
 		rm.close();
 		assertThat(rm.toString()).isNotNull();
