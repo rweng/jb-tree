@@ -29,6 +29,7 @@ import java.util.*;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 
 public class BTreeTest {
@@ -555,7 +556,8 @@ public class BTreeTest {
 		bulkInsert(tree.getMaxLeafKeys()); // exactly one leaf
 	}
 
-	@Test public void shouldWorkOnTheEdgeToCreateAnInnerNode() {
+	@Test
+	public void shouldWorkOnTheEdgeToCreateAnInnerNode() {
 		final int size = tree.getMaxLeafKeys();
 		fill(size);
 		tree.checkStructure();
@@ -641,9 +643,8 @@ public class BTreeTest {
 		}
 	}
 
-	public void bulkInsert(final int count) throws IOException {
-		@SuppressWarnings("unchecked") final
-		AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
+	private void bulkInsert(final int count) throws IOException {
+		final AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
 
 		for (int i = 0; i < count; i++) {
 			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(i, i);
@@ -655,15 +656,29 @@ public class BTreeTest {
 
 		// check if its correct
 		LOG.debug("checking bulkinsert results...");
-		assertEquals(count, tree.getNumberOfEntries());
+		assertThat(tree.getNumberOfEntries()).isEqualTo(count);
 
 		tree.checkStructure();
 
 		for (int i = 0; i < count; i++) {
-			assertTrue(tree.get(kvs[i].getKey()).size() > 0, "tree doesn't have key " + i);
-			assertEquals(1, tree.get(kvs[i].getKey()).size(), "size problem with key " + i);
-			assertEquals(kvs[i].getValue(), tree.get(kvs[i].getKey()).get(0));
+			assertThat(tree.get(kvs[i].getKey()).size() > 0).isTrue();
+			assertThat(tree.get(kvs[i].getKey()).size()).isEqualTo(1);
+			assertThat(tree.get(kvs[i].getKey()).get(0)).isEqualTo(kvs[i].getValue());
 		}
+	}
+
+	@Test(groups = "focus", expectedExceptions = NullPointerException.class)
+	public void bulkInsertWithNullValues() throws IOException {
+		int count = 1;
+		final AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[2];
+
+		for (int i = 0; i < count; i++) {
+			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(i, i);
+		}
+
+		tree.close();
+		file.delete();
+		tree.bulkInitialize(kvs, true);
 	}
 
 	@Test(dataProvider = "shouldBeAbleToOpenAndLoadProvider", dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
