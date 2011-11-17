@@ -333,7 +333,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	public void bulkInitialize(final SimpleEntry<K, V>[] kvs, final int fromIndex, final int toIndex, final boolean sorted) throws IOException {
 		checkState(!valid, "BTree is already loaded: %s", this);
 
-		for(int i=0;i<kvs.length;i++){
+		for(int i=fromIndex;i<=toIndex;i++){
 			checkNotNull(kvs[i], "array given to bulkInitialize must not contain null values");
 		}
 

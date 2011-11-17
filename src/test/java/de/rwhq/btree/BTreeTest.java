@@ -604,15 +604,14 @@ public class BTreeTest {
 
 		final List<Integer> keys = new LinkedList<Integer>();
 
-		for (int i = 0; i < count; i++) {
+		for (int i = from; i <= to; i++) {
 			int newKey = srand.nextInt();
 
 			while (keys.contains(newKey)) {
 				newKey = srand.nextInt();
 			}
 
-			if (i >= from && i <= to)
-				keys.add(newKey);
+			keys.add(newKey);
 			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(newKey, newKey);
 		}
 
@@ -680,6 +679,7 @@ public class BTreeTest {
 		file.delete();
 		tree.bulkInitialize(kvs, true);
 	}
+
 
 	@Test(dataProvider = "shouldBeAbleToOpenAndLoadProvider", dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void shouldBeAbleToOpenAndLoad(final Integer key1, final Integer key2) throws IOException {
