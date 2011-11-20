@@ -16,9 +16,15 @@ apply plugin: 'idea'
 sourceCompatibility = 1.6
 version = '0.0.3'
 jar {
+    // include all dependency jars in this jars lib/ folder
+    from configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+
     manifest {
         attributes 'Implementation-Title': 'jb-tree', 'Implementation-Version': version
     }
+
+    // add source code to distribution jar
+    from sourceSets.main.allJava
 }
 
 test {
