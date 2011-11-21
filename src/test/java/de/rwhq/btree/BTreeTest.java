@@ -33,8 +33,6 @@ import static org.testng.Assert.assertEquals;
 
 
 public class BTreeTest {
-
-	private BTree<Integer, Integer> tree;
 	private static final Logger LOG  = Logger.getLogger(BTreeTest.class);
 	private static final File   file = new File("/tmp/btree-small-test");
 
@@ -48,6 +46,8 @@ public class BTreeTest {
 	// 3 keys, 4 values
 	private static final int PAGE_SIZE = InnerNode.Header.size() + 3 * (2 * Integer.SIZE / 8) + Integer.SIZE / 8;
 	private static ResourceManager rm;
+
+	private BTree<Integer, Integer> tree;
 	
 	@BeforeMethod
 	public void setUp() throws IOException {
@@ -63,7 +63,7 @@ public class BTreeTest {
 		tree.initialize();
 	}
 
-	@Test(groups = "skipBeforeFilter")
+	@Test
 	public void testInitialize() throws IOException {
 		rm.clear();
 		tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
@@ -199,12 +199,6 @@ public class BTreeTest {
 				BTree.create(createResourceManager(true), IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
 						IntegerComparator.INSTANCE);
 		btree.initialize();
-	}
-
-	private ResourceManager createResourceManager(final boolean reset) {
-		if (reset)
-			file.delete();
-		return new ResourceManagerBuilder().file(file).build();
 	}
 
 	@Test
@@ -440,22 +434,6 @@ public class BTreeTest {
 		removeWithValueArgumentShouldRemoveOnlyThisValue(k2, k1);
 	}
 
-	public void removeWithValueArgumentShouldRemoveOnlyThisValue(final Integer key1, final Integer key2) {
-		tree.add(key1, value1);
-		tree.add(key1, value2);
-		tree.add(key2, value2);
-
-		assertEquals(3, tree.getNumberOfEntries());
-		assertEquals(2, tree.get(key1).size());
-		assertEquals(1, tree.get(key2).size());
-
-		tree.remove(key1, value2);
-		assertEquals(2, tree.getNumberOfEntries());
-		assertEquals(1, tree.get(key1).size());
-		assertEquals(value1, tree.get(key1).get(0));
-		assertEquals(value2, tree.get(key2).get(0));
-	}
-
 	@Test
 	public void removeWithOnlyKeyArgumentShouldRemoveAllValues() {
 		tree.add(key1, value1);
@@ -466,27 +444,6 @@ public class BTreeTest {
 		tree.remove(key1);
 		assertEquals(1, tree.getNumberOfEntries());
 		assertEquals(0, tree.get(key1).size());
-	}
-
-	private void simpleTests(final Integer keyToAdd) {
-		final int numOfEntries = tree.getNumberOfEntries();
-
-		tree.add(keyToAdd, value2);
-		assertThat(tree.containsKey(keyToAdd)).isTrue();
-		assertThat(tree.get(keyToAdd).get(0)).isEqualTo(value2);
-		assertThat(tree.getNumberOfEntries()).isEqualTo(numOfEntries + 1);
-
-		tree.remove(keyToAdd);
-		assertThat(tree.containsKey(keyToAdd)).isFalse();
-
-		assertThat(tree.get(keyToAdd).size()).isEqualTo(0);
-		assertThat(tree.getNumberOfEntries()).isEqualTo(numOfEntries);
-	}
-
-	protected void fill(final int size) {
-		for (int i = 0; i < size; i++) {
-			tree.add(i, i);
-		}
 	}
 
 	@Test public void iterator() {
@@ -642,31 +599,7 @@ public class BTreeTest {
 		}
 	}
 
-	private void bulkInsert(final int count) throws IOException {
-		final AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
-
-		for (int i = 0; i < count; i++) {
-			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(i, i);
-		}
-
-		tree.close();
-		file.delete();
-		tree.bulkInitialize(kvs, true);
-
-		// check if its correct
-		LOG.debug("checking bulkinsert results...");
-		assertThat(tree.getNumberOfEntries()).isEqualTo(count);
-
-		tree.checkStructure();
-
-		for (int i = 0; i < count; i++) {
-			assertThat(tree.get(kvs[i].getKey()).size() > 0).isTrue();
-			assertThat(tree.get(kvs[i].getKey()).size()).isEqualTo(1);
-			assertThat(tree.get(kvs[i].getKey()).get(0)).isEqualTo(kvs[i].getValue());
-		}
-	}
-
-	@Test(groups = "focus", expectedExceptions = NullPointerException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void bulkInsertWithNullValues() throws IOException {
 		int count = 1;
 		final AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[2];
@@ -721,6 +654,74 @@ public class BTreeTest {
 				{20, 10},
 				{10, 20}
 		};
+	}
+
+
+	private void removeWithValueArgumentShouldRemoveOnlyThisValue(final Integer key1, final Integer key2) {
+		tree.add(key1, value1);
+		tree.add(key1, value2);
+		tree.add(key2, value2);
+
+		assertEquals(3, tree.getNumberOfEntries());
+		assertEquals(2, tree.get(key1).size());
+		assertEquals(1, tree.get(key2).size());
+
+		tree.remove(key1, value2);
+		assertEquals(2, tree.getNumberOfEntries());
+		assertEquals(1, tree.get(key1).size());
+		assertEquals(value1, tree.get(key1).get(0));
+		assertEquals(value2, tree.get(key2).get(0));
+	}
+
+	private ResourceManager createResourceManager(final boolean reset) {
+		if (reset)
+			file.delete();
+		return new ResourceManagerBuilder().file(file).build();
+	}
+
+	private void simpleTests(final Integer keyToAdd) {
+		final int numOfEntries = tree.getNumberOfEntries();
+
+		tree.add(keyToAdd, value2);
+		assertThat(tree.containsKey(keyToAdd)).isTrue();
+		assertThat(tree.get(keyToAdd).get(0)).isEqualTo(value2);
+		assertThat(tree.getNumberOfEntries()).isEqualTo(numOfEntries + 1);
+
+		tree.remove(keyToAdd);
+		assertThat(tree.containsKey(keyToAdd)).isFalse();
+
+		assertThat(tree.get(keyToAdd).size()).isEqualTo(0);
+		assertThat(tree.getNumberOfEntries()).isEqualTo(numOfEntries);
+	}
+
+	protected void fill(final int size) {
+		for (int i = 0; i < size; i++) {
+			tree.add(i, i);
+		}
+	}
+
+	private void bulkInsert(final int count) throws IOException {
+		final AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
+
+		for (int i = 0; i < count; i++) {
+			kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(i, i);
+		}
+
+		tree.close();
+		file.delete();
+		tree.bulkInitialize(kvs, true);
+
+		// check if its correct
+		LOG.debug("checking bulkinsert results...");
+		assertThat(tree.getNumberOfEntries()).isEqualTo(count);
+
+		tree.checkStructure();
+
+		for (int i = 0; i < count; i++) {
+			assertThat(tree.get(kvs[i].getKey()).size() > 0).isTrue();
+			assertThat(tree.get(kvs[i].getKey()).size()).isEqualTo(1);
+			assertThat(tree.get(kvs[i].getKey()).get(0)).isEqualTo(kvs[i].getValue());
+		}
 	}
 
 

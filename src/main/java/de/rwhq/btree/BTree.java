@@ -22,6 +22,7 @@ import de.rwhq.serializer.FixLengthSerializer;
 import de.rwhq.serializer.PagePointSerializer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.ranges.RangeException;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
@@ -560,62 +561,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		}
 
 		public BTreeIterator(final List<Range<K>> ranges) {
-			this.ranges = cleanRanges(ranges);
-
-		}
-
-		private List<Range<K>> cleanRanges(final List<Range<K>> ranges) {
-			final List<Range<K>> cleaned = new LinkedList<Range<K>>();
-
-			if (ranges == null) {
-				cleaned.add(new Range());
-				return cleaned;
-			}
-
-			// sort ranges after from key
-			Collections.sort(ranges, new Comparator<Range<K>>() {
-				@Override public int compare(final Range<K> kRange, final Range<K> kRange1) {
-					if (kRange.getFrom() == null) {
-						if (kRange1.getFrom() == null)
-							return 0;
-						else
-							return -1;
-					}
-
-					if (kRange1.getFrom() == null)
-						return 1;
-
-					return comparator.compare(kRange.getFrom(), kRange1.getFrom());
-				}
-			});
-
-			Range<K> last = null;
-			for (final Range<K> r : ranges) {
-				if (cleaned.size() == 0) {
-					cleaned.add(r);
-					last = r;
-					continue;
-				}
-
-				// only if this to() is larger than last to(), extend to()
-				if (last.getTo() != null) {
-					if ((r.getFrom() == null || comparator.compare(last.getTo(), r.getFrom()) >= 0)) {
-						if (r.getTo() == null)
-							last.setTo(null);
-						else if (comparator.compare(last.getTo(), r.getTo()) < 0) {
-							last.setTo(r.getTo());
-						}
-					} else { // separate ranges
-						cleaned.add(r);
-						last = r;
-					}
-				}
-			}
-
-			if (cleaned.size() == 0)
-				cleaned.add(new Range<K>());
-
-			return cleaned;
+			Range.merge(ranges, comparator);
+			this.ranges = ranges;
 		}
 	}
 
