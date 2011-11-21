@@ -15,12 +15,9 @@ import com.google.common.collect.Lists;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Very generic Range object for getting values form the BTree
@@ -28,46 +25,6 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <T>
  */
 public class Range<T> {
-	private T from;
-	private T to;
-	private Comparator<T> comparator;
-
-	public Range() {
-	}
-
-	public Range(final T from, final T to) {
-		this(from, to, null);
-	}
-
-	public Range(final T from, final T to, final Comparator<T> comparator){
-		this.from = from;
-		this.to = to;
-		this.comparator = comparator;
-	}
-
-	public boolean contains(T obj){
-		checkNotNull(comparator, "comparator must not be null for contains() to work");
-		checkNotNull(obj, "can't check contains on null. Check from/to directly.");
-
-		return (from == null || comparator.compare(from, obj) <= 0) &&
-				(to == null || comparator.compare(obj, to) <= 0);
-	}
-
-	public T getTo() {
-		return to;
-	}
-
-	public void setTo(final T to) {
-		this.to = to;
-	}
-
-	public T getFrom() {
-		return from;
-	}
-
-	public void setFrom(final T from) {
-		this.from = from;
-	}
 
 	public static <K> void merge(List<Range<K>> ranges, final Comparator<K> comparator) {
 		checkNotNull(ranges, "range list must not be null");
@@ -118,6 +75,59 @@ public class Range<T> {
 		}
 
 		ranges.removeAll(toRemove);
+	}
+	private T from;
+	private T to;
+
+	private Comparator<T> comparator;
+
+	public Comparator<T> getComparator() {
+		return comparator;
+	}
+
+	public void setComparator(Comparator<T> comparator) {
+		this.comparator = comparator;
+	}
+
+	public Range() {
+	}
+
+	public Range(final T from, final T to) {
+		this(from, to, null);
+	}
+
+	public Range(final T from, final T to, final Comparator<T> comparator){
+		this.from = from;
+		this.to = to;
+		this.comparator = comparator;
+	}
+
+	public boolean contains(T obj){
+		return contains(obj, comparator);
+	}
+
+	public boolean contains(T obj, Comparator<T> comparator){
+		checkNotNull(obj, "can't check contains on null. Check from/to directly.");
+		checkNotNull(comparator, "comparator must not be null for contains() to work");
+
+		return (from == null || comparator.compare(from, obj) <= 0) &&
+				(to == null || comparator.compare(obj, to) <= 0);
+	}
+
+	public T getTo() {
+		return to;
+	}
+
+	public void setTo(final T to) {
+		this.to = to;
+	}
+
+	public T getFrom() {
+		return from;
+	}
+
+	public void setFrom(final T from) {
+		this.from = from;
 	}
 
 	public String toString() {
