@@ -12,6 +12,7 @@ package de.rwhq.btree;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import de.rwhq.btree.AdjustmentAction.ACTION;
 import de.rwhq.io.MustInitializeOrLoad;
 import de.rwhq.io.rm.DataPageManager;
@@ -562,7 +563,14 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 		public BTreeIterator(final List<Range<K>> ranges) {
 			Range.merge(ranges, comparator);
-			this.ranges = ranges;
+			
+			// if we alter the range list more than merging, create a new list
+			if(ranges.isEmpty()){
+				this.ranges = Lists.newArrayList();
+				this.ranges.add(new Range(null, null));
+			} else {
+				this.ranges = ranges;
+			}
 		}
 	}
 

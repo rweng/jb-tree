@@ -48,15 +48,15 @@ public class BTreeTest {
 	private static ResourceManager rm;
 
 	private BTree<Integer, Integer> tree;
-	
+
 	@BeforeMethod
 	public void setUp() throws IOException {
 		file.delete();
 		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).useCache(false).build();
 
-		if(!rm.isOpen())
+		if (!rm.isOpen())
 			rm.open();
-		
+
 		rm.clear();
 		tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
 				IntegerComparator.INSTANCE);
@@ -185,11 +185,12 @@ public class BTreeTest {
 		final ResourceManager pm = new ResourceManagerBuilder().file(file).build();
 		pm.open();
 
-		final BTree<Integer, String> btree = BTree.create(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
-				IntegerComparator.INSTANCE);
+		final BTree<Integer, String> btree =
+				BTree.create(pm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE,
+						IntegerComparator.INSTANCE);
 
 		btree.initialize();
-		
+
 		assertTrue(file.exists());
 	}
 
@@ -215,7 +216,7 @@ public class BTreeTest {
 			LOG.debug("ROUND: " + i);
 
 			btree.add(i, "" + i);
-			
+
 			final BTree<Integer, String> btree2 =
 					BTree.create(rm, IntegerSerializer.INSTANCE, FixedStringSerializer.INSTANCE_1000,
 							IntegerComparator.INSTANCE);
@@ -273,16 +274,16 @@ public class BTreeTest {
 		LOG.setLevel(Level.DEBUG);
 		fillTree(tree, 1000);
 		tree.checkStructure();
-		
+
 		final Iterator<Integer> iterator = tree.getIterator();
-		for (int i = 0; i < 1000; i++){
+		for (int i = 0; i < 1000; i++) {
 			assertThat(iterator.hasNext()).isTrue();
 			assertThat(iterator.next()).isEqualTo(i);
 		}
 		assertThat(iterator.hasNext()).isFalse();
 	}
 
-	@Test(dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
+	@Test //(dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
 	public void ranges() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		final List<Range<Integer>> rangeList = new ArrayList<Range<Integer>>();
@@ -299,83 +300,83 @@ public class BTreeTest {
 		Iterator<Integer> iterator = tree.getIterator(rangeList);
 
 		for (int i = 0; i <= 5; i++) {
-			assertEquals(i, (int) iterator.next());
+			assertThat((int) iterator.next()).isEqualTo(i);
 		}
 
 		for (int i = 49; i <= 56; i++)
-			assertEquals(i, (int) iterator.next());
+			assertThat((int) iterator.next()).isEqualTo(i);
 
 		for (int i = 95; i < 100; i++) {
-			assertEquals(i, (int) iterator.next());
+			assertThat((int) iterator.next()).isEqualTo(i);
 		}
-		assertFalse(iterator.hasNext());
+		assertThat(iterator.hasNext()).isFalse();
 
 
 		rangeList.clear();
 		iterator = tree.getIterator(rangeList);
 		for (int i = 0; i < 100; i++) {
-			assertNotNull(iterator.next());
+			assertThat(iterator.next()).isNotNull();
 		}
-		assertNull(iterator.next());
+		assertThat(iterator.next()).isNull();
 
 		rangeList.add(new Range(null, 50));
 		iterator = tree.getIterator(rangeList);
 		for (int i = 0; i <= 50; i++) {
-			assertNotNull(iterator.next());
+			assertThat(iterator.next()).isNotNull();
 		}
-		assertNull(iterator.next());
+		assertThat(iterator.next()).isNull();
 
 		rangeList.add(new Range<Integer>(0, 75));
 		iterator = tree.getIterator(rangeList);
 		for (int i = 0; i <= 75; i++) {
-			assertNotNull(iterator.next());
+			assertThat(iterator.next()).isNotNull();
 		}
-		assertNull(iterator.next());
+		assertThat(iterator.next()).isNull();
 
 		rangeList.clear();
 		rangeList.add(new Range(50, null));
 		iterator = tree.getIterator(rangeList);
 		for (int i = 50; i <= 99; i++) {
-			assertNotNull(iterator.next());
+			assertThat(iterator.next()).isNotNull();
 		}
-		assertNull(iterator.next());
+		assertThat(iterator.next()).isNull();
 
 		rangeList.add(new Range(25, 99));
 		iterator = tree.getIterator(rangeList);
 		for (int i = 25; i <= 99; i++) {
-			assertNotNull(iterator.next());
+			assertThat(iterator.next()).isNotNull();
 		}
-		assertNull(iterator.next());
+		assertThat(iterator.next()).isNull();
 
 
 		rangeList.add(new Range(null, null));
 		rangeList.add(new Range(null, 23));
 		iterator = tree.getIterator(rangeList);
 		for (int i = 0; i <= 99; i++) {
-			assertNotNull(iterator.next());
+			assertThat(iterator.next()).isNotNull();
 		}
-		assertNull(iterator.next());
+		assertThat(iterator.next()).isNull();
 
 
 		// with null as search range
-		iterator = tree.getIterator(null);
-		for (int i = 0; i <= 99; i++) {
-			assertNotNull(iterator.next());
+		try {
+			iterator = tree.getIterator(null);
+			fail("tree.getIterator(null) should throw an exception");
+		} catch (NullPointerException ignored) {
 		}
-		assertNull(iterator.next());
 
 		// with an empty list as search range
 		rangeList.clear();
 		iterator = tree.getIterator(rangeList);
 		for (int i = 0; i <= 99; i++) {
-			assertNotNull(iterator.next());
+			assertThat(iterator.next()).isNotNull();
 		}
-		assertNull(iterator.next());
+		assertThat(iterator.next()).isNull();
 	}
 
 	@Test
 	public void shouldBeEmptyAfterCreation() {
-		assertEquals(0, tree.getNumberOfEntries());
+		assertThat(tree.getNumberOfEntries()).isEqualTo(0);
 	}
 
 	@Test
@@ -446,7 +447,8 @@ public class BTreeTest {
 		assertEquals(0, tree.get(key1).size());
 	}
 
-	@Test public void iterator() {
+	@Test
+	public void iterator() {
 		Integer val;
 
 		final int k1 = Integer.MIN_VALUE;
@@ -533,6 +535,7 @@ public class BTreeTest {
 	/**
 	 * causes java.lang.IllegalArgumentException: for bulkinsert, you must have at least 2 page ids and keys.size() ==
 	 * (pageIds.size() - 1)
+	 *
 	 * @throws java.io.IOException
 	 */
 	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
@@ -574,7 +577,7 @@ public class BTreeTest {
 
 		tree.close();
 		file.delete();
-		
+
 		tree.bulkInitialize(kvs, from, to, false);
 
 		assertEquals(to - from + 1, tree.getNumberOfEntries());
@@ -614,15 +617,16 @@ public class BTreeTest {
 	}
 
 
-	@Test(dataProvider = "shouldBeAbleToOpenAndLoadProvider", dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
+	@Test(dataProvider = "shouldBeAbleToOpenAndLoadProvider",
+			dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void shouldBeAbleToOpenAndLoad(final Integer key1, final Integer key2) throws IOException {
 		final Integer value1 = 1;
 		final Integer value2 = 2;
 
 		tree.close();
 		file.delete();
-		
-		
+
+
 		tree.initialize();
 		tree.add(key1, value1);
 		tree.add(key2, value2);
@@ -649,7 +653,7 @@ public class BTreeTest {
 	}
 
 	@DataProvider
-	public Object[][] shouldBeAbleToOpenAndLoadProvider(){
+	public Object[][] shouldBeAbleToOpenAndLoadProvider() {
 		return new Object[][]{
 				{20, 10},
 				{10, 20}

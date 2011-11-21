@@ -59,6 +59,18 @@ public class RangeTest {
 	}
 
 	@Test
+	public void mergeWithNulls(){
+		list = Lists.newArrayList();
+		list.add(new Range(25, null));
+		list.add(new Range(null, null));
+		list.add(new Range(null, 23));
+
+		Range.merge(list, IntegerComparator.INSTANCE);
+		
+		assertThat(list).hasSize(1).contains(new Range(null, null));
+	}
+
+	@Test
 	public void contains(){
 		Range<Integer> range = list.get(0);
 

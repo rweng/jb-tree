@@ -112,6 +112,8 @@ public class Range<T> {
 				} else { // separate ranges
 					last = r;
 				}
+			} else {
+				toRemove.add(r);
 			}
 		}
 
