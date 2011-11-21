@@ -25,7 +25,7 @@ public class RangeTest {
 	@BeforeMethod
 	public void setUp(){
 		list = Lists.newArrayList();
-		list.add(new Range(-5, 5));
+		list.add(new Range(-5, 5, IntegerComparator.INSTANCE));
 		list.add(new Range(0, 10));
 		list.add(new Range(100, 1000));
 	}
@@ -49,5 +49,29 @@ public class RangeTest {
 		list.add(new Range(null, 0));
 		Range.merge(list, IntegerComparator.INSTANCE);
 		assertThat(list).contains(new Range(null, 10));
+	}
+
+	@Test
+	public void mergeWithLowerRangeLater(){
+		list.add(new Range(-6,-4));
+		Range.merge(list, IntegerComparator.INSTANCE);
+		assertThat(list).contains(new Range(-6, 10));
+	}
+
+	@Test
+	public void contains(){
+		Range<Integer> range = list.get(0);
+
+		assertThat(range.contains(0)).isTrue();
+		assertThat(range.contains(-5)).isTrue();
+		assertThat(range.contains(5)).isTrue();
+
+		assertThat(range.contains(6)).isFalse();
+		assertThat(range.contains(-6)).isFalse();
+	}
+
+	@Test(expectedExceptions = NullPointerException.class)
+	public void containsNullShouldThrow(){
+		list.get(0).contains(null);
 	}
 }

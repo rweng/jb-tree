@@ -11,13 +11,16 @@
 package de.rwhq.btree;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Very generic Range object for getting values form the BTree
@@ -27,13 +30,27 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class Range<T> {
 	private T from;
 	private T to;
+	private Comparator<T> comparator;
 
 	public Range() {
 	}
 
 	public Range(final T from, final T to) {
+		this(from, to, null);
+	}
+
+	public Range(final T from, final T to, final Comparator<T> comparator){
 		this.from = from;
 		this.to = to;
+		this.comparator = comparator;
+	}
+
+	public boolean contains(T obj){
+		checkNotNull(comparator, "comparator must not be null for contains() to work");
+		checkNotNull(obj, "can't check contains on null. Check from/to directly.");
+
+		return (from == null || comparator.compare(from, obj) <= 0) &&
+				(to == null || comparator.compare(obj, to) <= 0);
 	}
 
 	public T getTo() {
@@ -75,6 +92,7 @@ public class Range<T> {
 		});
 
 		Range<K> last = null;
+		List<Range<K>> toRemove = Lists.newArrayList();
 		for (final Range<K> r : ranges) {
 			if (last == null) {
 				last = r;
@@ -90,12 +108,14 @@ public class Range<T> {
 						last.setTo(r.getTo());
 					}
 
-					ranges.remove(r);
+					toRemove.add(r);
 				} else { // separate ranges
 					last = r;
 				}
 			}
 		}
+
+		ranges.removeAll(toRemove);
 	}
 
 	public String toString() {
