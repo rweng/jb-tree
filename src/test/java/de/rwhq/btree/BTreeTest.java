@@ -380,6 +380,20 @@ public class BTreeTest {
 	}
 
 	@Test
+	public void getIteratorShouldEnsureValid() throws IOException {
+		tree.close();
+		try{
+			tree.getIterator();
+			fail("getIterator should ensure valid");
+		} catch (IllegalStateException e){}
+
+		try{
+			tree.getIterator(Integer.MIN_VALUE, Integer.MAX_VALUE);
+			fail("getIterator should ensure valid");
+		} catch (IllegalStateException e){}
+	}
+
+	@Test
 	public void shouldContainAddedEntries() {
 		tree.add(key1, value1);
 		assertTrue(tree.containsKey(key1));

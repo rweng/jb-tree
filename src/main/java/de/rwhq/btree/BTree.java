@@ -188,7 +188,6 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  */
 	@Override
 	public Iterator<V> getIterator() {
-		ensureValid();
 		return getIterator(root.getFirstLeafKey(), root.getLastLeafKey());
 	}
 
@@ -197,6 +196,8 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		  */
 	@Override
 	public Iterator<V> getIterator(final K from, final K to) {
+		ensureValid();
+				
 		final Iterator<V> result = root.getIterator(from, to);
 		return result;
 	}
@@ -608,7 +609,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 	private void ensureValid() {
-		checkArgument(isValid(), "Btree must be initialized or loaded");
+		checkState(isValid(), "Btree must be initialized or loaded");
 	}
 
 	private void setRoot(final Node<K, V> root) {
