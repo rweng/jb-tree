@@ -24,12 +24,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <T>
  */
 public class Range<T> {
-
-	public static <K> TreeSet<Range<K>> merge(final Collection<Range<K>> ranges, final Comparator<K> comparator) {
-		checkNotNull(ranges, "range list must not be null");
-		checkNotNull(comparator, "comparator must not be null");
-
-		TreeSet<Range<K>> tmpSet = Sets.newTreeSet(new Comparator<Range<K>>() {
+	public static <K> Comparator<Range<K>> createRangeComparator(final Comparator<K> comparator){
+		return new Comparator<Range<K>>() {
 			private int compareWithNull(K k1, K k2, boolean nullIsSmallest) {
 				if (k1 == null) {
 					if (k2 == null) {
@@ -53,7 +49,14 @@ public class Range<T> {
 
 				return compareWithNull(r1.getTo(), r2.getTo(), false);
 			}
-		});
+		};
+	}
+	
+	public static <K> TreeSet<Range<K>> merge(final Collection<Range<K>> ranges, final Comparator<K> comparator) {
+		checkNotNull(ranges, "range list must not be null");
+		checkNotNull(comparator, "comparator must not be null");
+
+		TreeSet<Range<K>> tmpSet = Sets.newTreeSet(createRangeComparator(comparator));
 
 		tmpSet.addAll(ranges);
 		Range<K> last = null;
