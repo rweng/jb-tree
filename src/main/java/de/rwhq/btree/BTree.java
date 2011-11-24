@@ -469,7 +469,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	}
 
 
-	public Iterator<V> getIterator(final List<Range<K>> ranges) {
+	public Iterator<V> getIterator(final Collection<Range<K>> ranges) {
 		return new BTreeIterator(ranges);
 	}
 
@@ -529,17 +529,18 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 
 	private class BTreeIterator implements Iterator<V> {
 
-		private List<Range<K>> ranges;
-		private int         rangePointer    = -1;
+		private Collection<Range<K>> ranges;
+		
 		private Iterator<V> currentIterator = null;
+		private Iterator<Range<K>> rangesIterator;
 
 
 		@Override public boolean hasNext() {
 			if (currentIterator == null) {
-				if (rangePointer == ranges.size() - 1)
+				if (!rangesIterator.hasNext())
 					return false;
 				else {
-					final Range<K> range = ranges.get(++rangePointer);
+					final Range<K> range = rangesIterator.next();
 					currentIterator = root.getIterator(range.getFrom(), range.getTo());
 				}
 			}
@@ -562,16 +563,14 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 			throw new UnsupportedOperationException();
 		}
 
-		public BTreeIterator(final List<Range<K>> ranges) {
-			Range.merge(ranges, comparator);
-			
-			// if we alter the range list more than merging, create a new list
+		public BTreeIterator(final Collection<Range<K>> ranges) {
+			this.ranges = Range.merge(ranges, comparator);
+
 			if(ranges.isEmpty()){
-				this.ranges = Lists.newArrayList();
 				this.ranges.add(new Range(null, null));
-			} else {
-				this.ranges = ranges;
 			}
+
+			this.rangesIterator = this.ranges.iterator();
 		}
 	}
 

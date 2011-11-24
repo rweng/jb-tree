@@ -283,7 +283,7 @@ public class BTreeTest {
 		assertThat(iterator.hasNext()).isFalse();
 	}
 
-	@Test //(dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
+	@Test
 	public void ranges() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		final List<Range<Integer>> rangeList = new ArrayList<Range<Integer>>();

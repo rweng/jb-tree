@@ -15,7 +15,9 @@ import de.rwhq.comparator.IntegerComparator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -32,23 +34,35 @@ public class RangeTest {
 
 	@Test
 	public void merge(){
-		Range.merge(list, IntegerComparator.INSTANCE);
-		assertThat(list.size()).isEqualTo(2);
-		assertThat(list).contains(new Range(-5, 10), new Range(100, 1000));
+		TreeSet<Range<Integer>> merge = Range.merge(list, IntegerComparator.INSTANCE);
+		assertThat(merge).hasSize(2).contains(new Range(-5, 10), new Range(100, 1000));
+	}
+
+	@Test
+	public void mergeNotOnlyByFrom(){
+		ArrayList<Range<Integer>> rangeList = Lists.newArrayList();
+		rangeList.add(new Range(50, 55));
+		rangeList.add(new Range(52, 53));
+		rangeList.add(new Range(49, 53));
+		rangeList.add(new Range(52, 56));
+
+		TreeSet<Range<Integer>> merge = Range.merge(rangeList, IntegerComparator.INSTANCE);
+		assertThat(merge).hasSize(1).contains(new Range(49, 56));
+
 	}
 
 	@Test
 	public void mergeWithNullTo(){
 		list.add(new Range(500, null));
-		Range.merge(list, IntegerComparator.INSTANCE);
-		assertThat(list).contains(new Range(100, null));
+		TreeSet<Range<Integer>> merge = Range.merge(list, IntegerComparator.INSTANCE);
+		assertThat(merge).contains(new Range(100, null));
 	}
 
 	@Test
 	public void mergeWithNullFrom(){
 		list.add(new Range(null, 0));
-		Range.merge(list, IntegerComparator.INSTANCE);
-		assertThat(list).contains(new Range(null, 10));
+		TreeSet<Range<Integer>> merge = Range.merge(list, IntegerComparator.INSTANCE);
+		assertThat(merge).contains(new Range(null, 10));
 	}
 
 	@Test
@@ -65,9 +79,20 @@ public class RangeTest {
 		list.add(new Range(null, null));
 		list.add(new Range(null, 23));
 
-		Range.merge(list, IntegerComparator.INSTANCE);
-		
-		assertThat(list).hasSize(1).contains(new Range(null, null));
+		TreeSet<Range<Integer>> merge = Range.merge(list, IntegerComparator.INSTANCE);
+
+		assertThat(merge).hasSize(1).contains(new Range(null, null));
+	}
+
+	@Test
+	public void mergeWithDuplicates(){
+		list = Lists.newArrayList();
+		list.add(new Range(1,3));
+		list.add(new Range(1,3));
+		list.add(new Range(9,10));
+
+		TreeSet<Range<Integer>> merged = Range.merge(list, IntegerComparator.INSTANCE);
+		assertThat(merged).hasSize(2).contains(new Range(1,3), new Range(9,10));
 	}
 
 	@Test

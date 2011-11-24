@@ -12,10 +12,9 @@ package de.rwhq.btree;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -26,31 +25,43 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Range<T> {
 
-	public static <K> void merge(List<Range<K>> ranges, final Comparator<K> comparator) {
+	public static <K> TreeSet<Range<K>> merge(final Collection<Range<K>> ranges, final Comparator<K> comparator) {
 		checkNotNull(ranges, "range list must not be null");
 		checkNotNull(comparator, "comparator must not be null");
 
-		// sort ranges after from key
-		Collections.sort(ranges, new Comparator<Range<K>>() {
-			@Override
-			public int compare(final Range<K> kRange, final Range<K> kRange1) {
-				if (kRange.getFrom() == null) {
-					if (kRange1.getFrom() == null)
+		TreeSet<Range<K>> tmpSet = Sets.newTreeSet(new Comparator<Range<K>>() {
+			private int compareWithNull(K k1, K k2, boolean nullIsSmallest) {
+				if (k1 == null) {
+					if (k2 == null) {
 						return 0;
-					else
-						return -1;
+					} else {
+						return nullIsSmallest ? -1 : 1;
+					}
+				} else if (k2 == null) {
+					return nullIsSmallest ? 1 : -1;
 				}
 
-				if (kRange1.getFrom() == null)
-					return 1;
+				return comparator.compare(k1, k2);
+			}
 
-				return comparator.compare(kRange.getFrom(), kRange1.getFrom());
+			@Override
+			public int compare(final Range<K> r1, final Range<K> r2) {
+				int compareResult = compareWithNull(r1.getFrom(), r2.getFrom(), true);
+
+				if (compareResult != 0)
+					return compareResult;
+
+				return compareWithNull(r1.getTo(), r2.getTo(), false);
 			}
 		});
 
+		tmpSet.addAll(ranges);
 		Range<K> last = null;
-		List<Range<K>> toRemove = Lists.newArrayList();
-		for (final Range<K> r : ranges) {
+
+		Iterator<Range<K>> iterator = tmpSet.iterator();
+		while (iterator.hasNext()) {
+			Range<K> r = iterator.next();
+
 			if (last == null) {
 				last = r;
 				continue;
@@ -65,17 +76,18 @@ public class Range<T> {
 						last.setTo(r.getTo());
 					}
 
-					toRemove.add(r);
+					iterator.remove();
 				} else { // separate ranges
 					last = r;
 				}
 			} else {
-				toRemove.add(r);
+				iterator.remove();
 			}
 		}
 
-		ranges.removeAll(toRemove);
+		return tmpSet;
 	}
+
 	private T from;
 	private T to;
 
@@ -96,17 +108,17 @@ public class Range<T> {
 		this(from, to, null);
 	}
 
-	public Range(final T from, final T to, final Comparator<T> comparator){
+	public Range(final T from, final T to, final Comparator<T> comparator) {
 		this.from = from;
 		this.to = to;
 		this.comparator = comparator;
 	}
 
-	public boolean contains(T obj){
+	public boolean contains(T obj) {
 		return contains(obj, comparator);
 	}
 
-	public boolean contains(T obj, Comparator<T> comparator){
+	public boolean contains(T obj, Comparator<T> comparator) {
 		checkNotNull(obj, "can't check contains on null. Check from/to directly.");
 		checkNotNull(comparator, "comparator must not be null for contains() to work");
 
