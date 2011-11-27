@@ -150,6 +150,16 @@ public class LeafNodeTest {
 		assertFalse(iterator.hasNext());
 	}
 
+	@Test
+	public void iteratorStartingInTheMiddle(){
+		fillLeaf(leaf, 10);
+		Iterator<Integer> iterator = leaf.getIterator(5, null);
+		for(int i = 5; i<10;i++)
+			assertThat(iterator.next()).isEqualTo(i);
+		
+		assertThat(iterator.next()).isNull();
+	}
+
 
 	private void fillLeaf(final LeafNode<Integer, Integer> leaf, final int count) {
 		for (int i = 0; i < count; i++) {
