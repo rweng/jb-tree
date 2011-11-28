@@ -15,15 +15,15 @@ import de.rwhq.comparator.IntegerComparator;
 import de.rwhq.io.rm.PageManager;
 import de.rwhq.io.rm.RawPage;
 import de.rwhq.serializer.IntegerSerializer;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import java.nio.ByteBuffer;
 
+import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
 
 /**
  * @deprecated 
@@ -39,7 +39,7 @@ public class LeafNodeUnitTest {
 	@Mock private PageManager<LeafNode<Integer, Integer>> leafPageManager;
 
 
-	@BeforeMethod
+	@Before
 	public void setUp(){
 		MockitoAnnotations.initMocks(this); 
 		rawPage = new RawPage(ByteBuffer.allocate(rawPageSize), 100);
@@ -53,16 +53,16 @@ public class LeafNodeUnitTest {
 	public void load(){
 		node.insert(1, 101);
 		node.insert(2, 201);
-		assertEquals(2, node.getNumberOfEntries());
+		assertThat( node.getNumberOfEntries()).isEqualTo(2);
 		
 		node = new LeafNode<Integer, Integer>(rawPage, IntegerSerializer.INSTANCE,
 				IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE, leafPageManager, minNumberOfValues);
 		
 		
 		node.load();
-		assertEquals(2, node.getNumberOfEntries());
-		assertEquals(101, (int) node.getFirst(1));
-		assertEquals(201, (int) node.getFirst(2));
+		assertThat( node.getNumberOfEntries()).isEqualTo(2);
+		assertThat( (int) node.getFirst(1)).isEqualTo(101);
+		assertThat( (int) node.getFirst(2)).isEqualTo(201);
 		
 	}
 	
@@ -133,9 +133,9 @@ public class LeafNodeUnitTest {
 	@Test
 	public void testInitialize(){
 		final ByteBuffer buf = rawPage.bufferForReading(0);
-		assertEquals(NodeType.LEAF_NODE.serialize(), buf.getChar());
-		assertEquals(0, buf.getInt());
-		assertEquals((int)LeafNode.NO_NEXT_LEAF, buf.getInt());
+		assertThat( buf.getChar()).isEqualTo(NodeType.LEAF_NODE.serialize());
+		assertThat( buf.getInt()).isEqualTo(0);
+		assertThat( buf.getInt()).isEqualTo((int)LeafNode.NO_NEXT_LEAF);
 	}
 	
 	@Test
@@ -143,17 +143,17 @@ public class LeafNodeUnitTest {
 		node.insert(1, 101);
 		ensureKeyValueInRawPage(rawPage, Header.size(), 1, 101);
 		
-		assertEquals(1, node.get(1).size());
-		assertEquals(101, (int) node.get(1).get(0));
+		assertThat( node.get(1).size()).isEqualTo(1);
+		assertThat( (int) node.get(1).get(0)).isEqualTo(101);
 	}
 	
 	private void ensureKeyValueInRawPage(final RawPage rp, final int offset, final int key, final int value){
 		final ByteBuffer buf = rp.bufferForReading(offset);
 		final byte[] bytes = new byte[IntegerSerializer.INSTANCE.getSerializedLength()];
 		buf.get(bytes);
-		assertEquals(key, (int) IntegerSerializer.INSTANCE.deserialize(bytes));
+		assertThat( (int) IntegerSerializer.INSTANCE.deserialize(bytes)).isEqualTo(key);
 		buf.get(bytes);
-		assertEquals(value, (int) IntegerSerializer.INSTANCE.deserialize(bytes));
+		assertThat( (int) IntegerSerializer.INSTANCE.deserialize(bytes)).isEqualTo(value);
 	}
 	
 	@Test
@@ -163,11 +163,11 @@ public class LeafNodeUnitTest {
 		ensureKeyValueInRawPage(rawPage, Header.size() + 2*IntegerSerializer.INSTANCE.getSerializedLength(), 10, 1001);
 		
 
-		assertEquals(1, node.get(1).size());
-		assertEquals(101, (int) node.get(1).get(0));
+		assertThat( node.get(1).size()).isEqualTo(1);
+		assertThat( (int) node.get(1).get(0)).isEqualTo(101);
 
-		assertEquals(1, node.get(10).size());
-		assertEquals(1001, (int) node.get(10).get(0));
+		assertThat( node.get(10).size()).isEqualTo(1);
+		assertThat( (int) node.get(10).get(0)).isEqualTo(1001);
 	}
 	
 	@Test
@@ -176,9 +176,9 @@ public class LeafNodeUnitTest {
 		node.insert(1, 102);
 		ensureKeyValueInRawPage(rawPage, Header.size(), 1, 102);
 		
-		assertEquals(2, node.get(1).size());
-		assertEquals(102, (int) node.get(1).get(0));
-		assertEquals(101, (int) node.get(1).get(1));
+		assertThat( node.get(1).size()).isEqualTo(2);
+		assertThat( (int) node.get(1).get(0)).isEqualTo(102);
+		assertThat( (int) node.get(1).get(1)).isEqualTo(101);
 	}
 	
 	@Test

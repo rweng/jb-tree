@@ -12,9 +12,8 @@ package de.rwhq.io.rm;
 
 import com.google.common.cache.Cache;
 import org.apache.log4j.Logger;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Factory;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,13 +25,22 @@ import static org.fest.assertions.Assertions.assertThat;
 public class CachedResourceManagerTest {
 
 	private ResourceManager rm;
-	private static final Logger LOG = Logger.getLogger(CachedResourceManagerTest.class);
-	private static File file = new File("/tmp/CachedResourceManagerTest");
+	private static final Logger LOG  = Logger.getLogger(CachedResourceManagerTest.class);
+	private static       File   file = new File("/tmp/CachedResourceManagerTest");
 
-	@BeforeMethod
+	@Before
 	public void setUp() throws IOException {
 		file.delete();
 		rm = new ResourceManagerBuilder().file(file).useCache(true).cacheSize(1000).open().build();
+	}
+
+	public static class ResourceManagerTestImpl extends ResourceManagerTest {
+
+		@Override
+		protected ResourceManager resetResourceManager() {
+			file.delete();
+			return new ResourceManagerBuilder().file(file).useCache(true).cacheSize(1000).open().build();
+		}
 	}
 
 	@Test
@@ -45,11 +53,6 @@ public class CachedResourceManagerTest {
 		assertThat(rm.isOpen()).isTrue();
 	}
 
-	@Factory
-	public Object[] resourceManagerInterface() throws IOException {
-		setUp();
-		return new Object[]{new ResourceManagerTest(rm)};
-	}
 
 	@Test
 	public void cache() throws IOException {
@@ -73,7 +76,7 @@ public class CachedResourceManagerTest {
 	}
 
 
-	@Test(dependsOnMethods = "open")
+	@Test
 	public void testAutoSave() throws IOException {
 		final CachedResourceManager crm = (CachedResourceManager) rm;
 		final RawPage p = rm.createPage();

@@ -12,8 +12,8 @@ package de.rwhq.btree;
 
 import com.google.common.collect.Lists;
 import de.rwhq.comparator.IntegerComparator;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import static org.fest.assertions.Assertions.assertThat;
 public class RangeTest {
 	private List<Range<Integer>> list;
 
-	@BeforeMethod
+	@Before
 	public void setUp(){
 		list = Lists.newArrayList();
 		list.add(new Range(-5, 5, IntegerComparator.INSTANCE));
@@ -107,7 +107,7 @@ public class RangeTest {
 		assertThat(range.contains(-6)).isFalse();
 	}
 
-	@Test(expectedExceptions = NullPointerException.class)
+	@Test(expected = NullPointerException.class)
 	public void containsNullShouldThrow(){
 		list.get(0).contains(null);
 	}

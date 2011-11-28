@@ -12,12 +12,13 @@ package de.rwhq.io.rm;
 import de.rwhq.io.NoSpaceException;
 import de.rwhq.serializer.PagePointSerializer;
 import de.rwhq.serializer.StringSerializer;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.testng.Assert.*;
+import static org.fest.assertions.Assertions.assertThat;
+
 
 public class DynamicDataPageTest {
 	
@@ -28,32 +29,32 @@ public class DynamicDataPageTest {
 	private String s2 = "blast";
 	private String s3 = "ups";
 	
-	@BeforeMethod
+	@Before
 	public void setUp(){
 		page = new DynamicDataPage<String>(new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 1), PagePointSerializer.INSTANCE, StringSerializer.INSTANCE);
 	}
 	
 	@Test
 	public void shouldHaveToInitialize(){
-		assertFalse(page.isValid());
+		assertThat(page.isValid()).isFalse();
 		page.initialize();
-		assertTrue(page.isValid());
+		assertThat(page.isValid()).isTrue();
 		checkAndSetModified(page);
 	}
 	
 	@Test
 	public void shouldBeEmptyAfterInitialize() throws InvalidPageException{
 		page.initialize();
-		assertEquals(0, page.numberOfEntries());
+		assertThat( page.numberOfEntries()).isEqualTo(0);
 	}
 	
 	private void checkAndSetModified(final DynamicDataPage<String> page){
-		assertTrue(page.rawPage().isModified());
+		assertThat(page.rawPage().isModified()).isTrue();
 		page.rawPage().setModified(false);
 	}
 	
 	
-	@Test(expectedExceptions = InvalidPageException.class)
+	@Test(expected = InvalidPageException.class)
 	public void shouldThrowAnExceptionIfInvalidEntryId() throws Exception{
 		page.get(432);
 	}
@@ -66,21 +67,21 @@ public class DynamicDataPageTest {
 		final int rest = page.remaining();
 		page.add("bla");
 		checkAndSetModified(page);
-		assertTrue(rest > page.remaining());
+		assertThat(rest > page.remaining()).isTrue();
 	}
 	
-	@Test(expectedExceptions = InvalidPageException.class)
+	@Test(expected = InvalidPageException.class)
 	public void shouldThrowAnExceptionOnAddIfNotValid() throws NoSpaceException, InvalidPageException{
 		page.add(s1);
 		checkAndSetModified(page);
 	}
 	
-	@Test(expectedExceptions = InvalidPageException.class)
+	@Test(expected = InvalidPageException.class)
 	public void shouldThrowAnExceptionOnGetIfNotValid() throws Exception{
 		page.get(0);
 	}
 	
-	@Test(expectedExceptions = InvalidPageException.class)
+	@Test(expected = InvalidPageException.class)
 	public void shouldThrowAnExceptionOnNumberOfEntriesIfNotValid() throws Exception{
 		page.numberOfEntries();
 	}
@@ -90,29 +91,29 @@ public class DynamicDataPageTest {
 		
 		page.initialize();
 		
-		assertEquals(DynamicDataPage.NO_ENTRIES_INT, page.rawPage().bufferForReading(0).getInt());
-		assertEquals(0, page.numberOfEntries());
+		assertThat( page.rawPage().bufferForReading(0).getInt()).isEqualTo(DynamicDataPage.NO_ENTRIES_INT);
+		assertThat( page.numberOfEntries()).isEqualTo(0);
 		
 		final int id1 = page.add(s1);
-		assertEquals(1, page.rawPage().bufferForReading(0).getInt());
-		assertEquals(1, page.numberOfEntries());
+		assertThat( page.rawPage().bufferForReading(0).getInt()).isEqualTo(1);
+		assertThat( page.numberOfEntries()).isEqualTo(1);
 		final int id2 = page.add(s2);
-		assertEquals(2, page.rawPage().bufferForReading(0).getInt());
-		assertEquals(2, page.numberOfEntries());
+		assertThat( page.rawPage().bufferForReading(0).getInt()).isEqualTo(2);
+		assertThat( page.numberOfEntries()).isEqualTo(2);
 		final int id3 = page.add(s3);
-		assertEquals(3, page.rawPage().bufferForReading(0).getInt());
-		assertEquals(3, page.numberOfEntries());
+		assertThat( page.rawPage().bufferForReading(0).getInt()).isEqualTo(3);
+		assertThat( page.numberOfEntries()).isEqualTo(3);
 		checkAndSetModified(page);
 		
-		assertEquals(s1, page.get(id1));
-		assertEquals(s3, page.get(id3));
+		assertThat( page.get(id1)).isEqualTo(s1);
+		assertThat( page.get(id3)).isEqualTo(s3);
 		
 		page.remove(id1);
-		assertEquals(2, page.rawPage().bufferForReading(0).getInt());
-		assertEquals(2, page.numberOfEntries());
+		assertThat( page.rawPage().bufferForReading(0).getInt()).isEqualTo(2);
+		assertThat( page.numberOfEntries()).isEqualTo(2);
 		checkAndSetModified(page);
-		assertEquals(s2, page.get(id2));
-		assertEquals(s3, page.get(id3));
+		assertThat( page.get(id2)).isEqualTo(s2);
+		assertThat( page.get(id3)).isEqualTo(s3);
 	}
 	
 	@Test
@@ -124,8 +125,8 @@ public class DynamicDataPageTest {
 		page.remove(id);
 		checkAndSetModified(page);
 		
-		assertEquals(null, page.get(id));
-		assertEquals(null, page.get(id + 5));
+		assertThat( page.get(id)).isEqualTo(null);
+		assertThat( page.get(id + 5)).isEqualTo(null);
 		
 	}
 	
@@ -136,14 +137,14 @@ public class DynamicDataPageTest {
 		final int r1 = page.remaining();
 		final int id1 = page.add(s1);
 		final int r2 = page.remaining();
-		assertTrue(r1 > r2);
+		assertThat(r1 > r2).isTrue();
 		final int id2 = page.add(s2);
 		final int r3 = page.remaining();
-		assertTrue(r2 > r3);
+		assertThat(r2 > r3).isTrue();
 		page.remove(id1);
-		assertEquals(r1 - (r2 - r3), page.remaining());
+		assertThat( page.remaining()).isEqualTo(r1 - (r2 - r3));
 		page.remove(id2);
-		assertEquals(r1, page.remaining());
+		assertThat( page.remaining()).isEqualTo(r1);
 	}
 	
 	@Test public void remainingValueShouldBeCorrectAfterReload() throws NoSpaceException, InvalidPageException{
@@ -154,7 +155,7 @@ public class DynamicDataPageTest {
 		final int r = page.remaining();
 		page = new DynamicDataPage<String>(page.rawPage(), page.pagePointSerializer(), page.dataSerializer());
 		page.load();
-		assertEquals(r, page.remaining());
+		assertThat( page.remaining()).isEqualTo(r);
 	}
 	
 	@Test
@@ -163,23 +164,23 @@ public class DynamicDataPageTest {
 		
 		final int remaining = page.remaining();
 		final int id = page.add("blast");
-		assertTrue(remaining > page.remaining());
+		assertThat(remaining > page.remaining()).isTrue();
 		page.remove(id);
-		assertEquals(remaining, page.remaining());
+		assertThat( page.remaining()).isEqualTo(remaining);
 	}
 	
 	@Test
 	public void shouldLoadCorrectly() throws Exception{
-		assertFalse(page.isValid());
+		assertThat(page.isValid()).isFalse();
 		page.initialize();
-		assertTrue(page.isValid());
+		assertThat(page.isValid()).isTrue();
 		final int id = page.add(s1);
-		assertEquals(1, page.numberOfEntries());
+		assertThat( page.numberOfEntries()).isEqualTo(1);
 		page = new DynamicDataPage<String>(page.rawPage(), page.pagePointSerializer(), page.dataSerializer());
-		assertFalse(page.isValid());
+		assertThat(page.isValid()).isFalse();
 		page.load();
-		assertTrue(page.isValid());
-		assertEquals(1, page.numberOfEntries());
-		assertEquals(s1, page.get(id));
+		assertThat(page.isValid()).isTrue();
+		assertThat( page.numberOfEntries()).isEqualTo(1);
+		assertThat( page.get(id)).isEqualTo(s1);
 	}
 }

@@ -9,15 +9,16 @@
  */
 package de.rwhq.serializer;
 
-import static org.testng.Assert.assertEquals;
+import org.junit.Test;
 
+import static org.fest.assertions.Assertions.assertThat;
 
 public class FixedStringSerializerTest {
-	@org.testng.annotations.Test
+	@Test
 	public void result(){
 		final String s = "bla";
 		final byte[] bytes = FixedStringSerializer.INSTANCE_1000.serialize(s);
-		assertEquals(FixedStringSerializer.INSTANCE_1000.getSerializedLength(), bytes.length);
-		assertEquals(s, FixedStringSerializer.INSTANCE_1000.deserialize(bytes));
+		assertThat( bytes.length).isEqualTo(FixedStringSerializer.INSTANCE_1000.getSerializedLength());
+		assertThat( FixedStringSerializer.INSTANCE_1000.deserialize(bytes)).isEqualTo(s);
 	}
 }

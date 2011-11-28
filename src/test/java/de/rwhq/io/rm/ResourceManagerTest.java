@@ -11,8 +11,8 @@
 package de.rwhq.io.rm;
 
 import org.apache.log4j.Logger;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,24 +22,16 @@ import java.util.Random;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
-import static org.testng.Assert.assertEquals;
 
-public class ResourceManagerTest {
+public abstract class ResourceManagerTest {
 	private ResourceManager rm;
 	private static Logger LOG = Logger.getLogger(ResourceManagerTest.class);
 
-	/**
-	 * NOTE: ensure that the provided ResourceManager uses a different file than the implementation tests
-	 *
-	 * @param rm
-	 */
-	ResourceManagerTest(final ResourceManager rm) throws IOException {
-		checkNotNull(rm);
-		this.rm = rm;
-	}
+	protected abstract ResourceManager resetResourceManager();
 
-	@BeforeMethod
-	public void setUp() throws IOException {
+	@Before
+	public void setUpResourceManagerTest() throws IOException {
+		rm = resetResourceManager();
 		if (!rm.isOpen())
 			rm.open();
 
@@ -53,7 +45,7 @@ public class ResourceManagerTest {
 	}
 
 
-	@Test(groups = "performance")
+	@Test
 	public void performance() {
 		LOG.info("ResourceManager: " + rm);
 		final int count = 10000;
@@ -82,7 +74,7 @@ public class ResourceManagerTest {
 		LOG.info("ResourceManager: " + rm);
 	}
 
-	@Test(groups = "slow")
+	@Test
 	public void shouldBeAbleToCreateAMassiveNumberOfPages() {
 		final List<Integer> ids = new ArrayList<Integer>();
 
@@ -99,13 +91,13 @@ public class ResourceManagerTest {
 		p2.bufferForWriting(0).putInt(222);
 		p2.sync();
 
-		assertEquals(111, rm.getPage(p1.id()).bufferForReading(0).getInt());
-		assertEquals(222, rm.getPage(p2.id()).bufferForReading(0).getInt());
+		assertThat( rm.getPage(p1.id()).bufferForReading(0).getInt()).isEqualTo(111);
+		assertThat( rm.getPage(p2.id()).bufferForReading(0).getInt()).isEqualTo(222);
 
-		assertEquals(size + 2, rm.numberOfPages());
+		assertThat( rm.numberOfPages()).isEqualTo(size + 2);
 		for (int i = 0; i < size; i++) {
 			final Integer id = ids.get(0);
-			assertEquals(id, rm.getPage(id).id());
+			assertThat( rm.getPage(id).id()).isEqualTo(id);
 		}
 	}
 
@@ -124,6 +116,7 @@ public class ResourceManagerTest {
 		assertThat(rm.isOpen()).isTrue();
 		rm.close();
 		assertThat(rm.isOpen()).isFalse();
+		Thread.sleep(500);
 		rm.open();
 		assertThat(rm.isOpen()).isTrue();
 	}

@@ -14,8 +14,8 @@ import de.rwhq.comparator.StringComparator;
 import de.rwhq.io.rm.ResourceManager;
 import de.rwhq.io.rm.ResourceManagerBuilder;
 import de.rwhq.serializer.FixedStringSerializer;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +33,7 @@ public class PageManagerTest {
 	private LeafPageManager<String, String>  lpm;
 	private InnerNodeManager<String, String> inm;
 
-	@BeforeMethod
+	@Before
 	public void setUp() throws IOException {
 		file.delete();
 		final ResourceManager manager = new ResourceManagerBuilder().file(file).useCache(false).build();

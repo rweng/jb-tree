@@ -18,9 +18,8 @@ import de.rwhq.serializer.FixedStringSerializer;
 import de.rwhq.serializer.IntegerSerializer;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,8 +27,7 @@ import java.security.SecureRandom;
 import java.util.*;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.testng.Assert.*;
-import static org.testng.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 
 public class BTreeTest {
@@ -49,7 +47,7 @@ public class BTreeTest {
 
 	private BTree<Integer, Integer> tree;
 
-	@BeforeMethod
+	@Before
 	public void setUp() throws IOException {
 		file.delete();
 		rm = new ResourceManagerBuilder().useLock(true).pageSize(PAGE_SIZE).file(file).useCache(false).build();
@@ -74,13 +72,13 @@ public class BTreeTest {
 	}
 
 
-	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
+	@Test
 	public void testMultiLevelInsertForward() throws IOException {
 		final int count = 100;
 
 		for (int i = 0; i < count; i++) {
 
-			assertTrue(tree.isValid());
+			assertThat(tree.isValid()).isTrue();
 			tree.add(i, i);
 			tree.checkStructure();
 			final Iterator<Integer> iterator = tree.getIterator();
@@ -88,32 +86,32 @@ public class BTreeTest {
 			int latest = iterator.next();
 			for (int j = 0; j <= i - 1; j++) {
 				final int next = iterator.next();
-				assertTrue(latest <= next);
+				assertThat(latest <= next).isTrue();
 				latest = next;
 			}
 
-			assertFalse(iterator.hasNext());
+			assertThat(iterator.hasNext()).isFalse();
 		}
 
 
-		assertEquals(count, tree.getNumberOfEntries());
+		assertThat(tree.getNumberOfEntries()).isEqualTo(count);
 		final Iterator<Integer> iterator = tree.getIterator();
 
 		int latest = iterator.next();
 		for (int i = 0; i < count - 1; i++) {
 			final int next = iterator.next();
-			assertTrue(latest <= next);
+			assertThat(latest <= next).isTrue();
 			latest = next;
 		}
-		assertFalse(iterator.hasNext());
+		assertThat(iterator.hasNext()).isFalse();
 	}
 
-	@Test(dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
+	@Test
 	public void testMultiLevelInsertBackward() throws IOException {
 		final int count = 100;
 
 		for (int i = 0; i < count; i++) {
-			assertTrue(tree.isValid());
+			assertThat(tree.isValid()).isTrue();
 			tree.add(count - i, count - i);
 			tree.checkStructure();
 			final Iterator<Integer> iterator = tree.getIterator();
@@ -121,24 +119,24 @@ public class BTreeTest {
 			int latest = iterator.next();
 			for (int j = 0; j <= i - 1; j++) {
 				final int next = iterator.next();
-				assertTrue(latest <= next);
+				assertThat(latest <= next).isTrue();
 				latest = next;
 			}
 
-			assertFalse(iterator.hasNext());
+			assertThat(iterator.hasNext()).isFalse();
 		}
 
 
-		assertEquals(count, tree.getNumberOfEntries());
+		assertThat(tree.getNumberOfEntries()).isEqualTo(count);
 		final Iterator<Integer> iterator = tree.getIterator();
 
 		int latest = iterator.next();
 		for (int i = 0; i < count - 1; i++) {
 			final int next = iterator.next();
-			assertTrue(latest <= next);
+			assertThat(latest <= next).isTrue();
 			latest = next;
 		}
-		assertFalse(iterator.hasNext());
+		assertThat(iterator.hasNext()).isFalse();
 	}
 
 	@Test
@@ -191,7 +189,7 @@ public class BTreeTest {
 
 		btree.initialize();
 
-		assertTrue(file.exists());
+		assertThat(file.exists()).isTrue();
 	}
 
 	@Test
@@ -226,11 +224,11 @@ public class BTreeTest {
 			final Iterator<String> iterator = btree2.getIterator();
 
 			for (int j = 0; j <= i; j++) {
-				assertTrue(iterator.hasNext());
+				assertThat(iterator.hasNext()).isTrue();
 				LOG.debug("next value:" + iterator.next());
 			}
 
-			assertFalse(iterator.hasNext());
+			assertThat(iterator.hasNext()).isFalse();
 
 
 		}
@@ -243,33 +241,33 @@ public class BTreeTest {
 		final Iterator<String> iterator = btree.getIterator();
 
 		for (int i = 0; i < count; i++) {
-			assertTrue(iterator.hasNext());
+			assertThat(iterator.hasNext()).isTrue();
 			LOG.debug("next value:" + iterator.next());
 		}
 
-		assertFalse(iterator.hasNext());
+		assertThat(iterator.hasNext()).isFalse();
 
 	}
 
-	@Test(expectedExceptions = IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void exceptionIfValidTreeIsLoaded() throws IOException {
 		tree.load();
 	}
 
 
-	@Test(expectedExceptions = IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void exceptionIfValidTreeIsInitialized() throws IOException {
 		tree.initialize();
 	}
 
-	@Test(expectedExceptions = IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void exceptionIfValidTreeIsBulkInitialized() throws IOException {
 		final AbstractMap.SimpleEntry[] content = {new AbstractMap.SimpleEntry(1, 2)};
 		tree.bulkInitialize(content, true);
 	}
 
 
-	@Test(groups = "slow", dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
+	@Test
 	public void iteratorsWithoutParameters() throws IOException, InterruptedException {
 		LOG.setLevel(Level.DEBUG);
 		fillTree(tree, 1000);
@@ -396,48 +394,48 @@ public class BTreeTest {
 	@Test
 	public void shouldContainAddedEntries() {
 		tree.add(key1, value1);
-		assertTrue(tree.containsKey(key1));
-		assertEquals(1, tree.get(key1).size());
-		assertEquals(value1, tree.get(key1).get(0));
-		assertEquals(1, tree.getNumberOfEntries());
+		assertThat(tree.containsKey(key1)).isTrue();
+		assertThat( tree.get(key1).size()).isEqualTo(1);
+		assertThat( tree.get(key1).get(0)).isEqualTo(value1);
+		assertThat( tree.getNumberOfEntries()).isEqualTo(1);
 
 		tree.add(key1, value2);
-		assertTrue(tree.containsKey(key1));
-		assertEquals(2, tree.get(key1).size());
-		assertTrue(tree.get(key1).contains(value1));
-		assertTrue(tree.get(key1).contains(value2));
-		assertEquals(2, tree.getNumberOfEntries());
+		assertThat(tree.containsKey(key1)).isTrue();
+		assertThat( tree.get(key1).size()).isEqualTo(2);
+		assertThat(tree.get(key1).contains(value1)).isTrue();
+		assertThat(tree.get(key1).contains(value2)).isTrue();
+		assertThat( tree.getNumberOfEntries()).isEqualTo(2);
 
 		tree.add(key2, value2);
-		assertTrue(tree.containsKey(key2));
-		assertEquals(1, tree.get(key2).size());
-		assertTrue(tree.get(key1).contains(value2));
-		assertTrue(tree.get(key1).contains(value1));
-		assertTrue(tree.get(key1).size() == 2);
-		assertEquals(3, tree.getNumberOfEntries());
+		assertThat(tree.containsKey(key2)).isTrue();
+		assertThat( tree.get(key2).size()).isEqualTo(1);
+		assertThat(tree.get(key1).contains(value2)).isTrue();
+		assertThat(tree.get(key1).contains(value1)).isTrue();
+		assertThat(tree.get(key1).size() == 2).isTrue();
+		assertThat( tree.getNumberOfEntries()).isEqualTo(3);
 	}
 
 	@Test
 	public void shouldReturnEmptyArrayIfKeyNotFound() {
-		assertEquals(0, tree.get(key1).size());
+		assertThat( tree.get(key1).size()).isEqualTo(0);
 	}
 
 	@Test
 	public void shouldBeAbleToRemoveInsertedEntries() {
 		tree.add(key1, value1);
-		assertTrue(tree.containsKey(key1));
+		assertThat(tree.containsKey(key1)).isTrue();
 		tree.remove(key1);
-		assertFalse(tree.containsKey(key1));
-		assertEquals(0, tree.getNumberOfEntries());
+		assertThat(tree.containsKey(key1)).isFalse();
+		assertThat( tree.getNumberOfEntries()).isEqualTo(0);
 	}
 
 	@Test
 	public void clearShouldRemoveAllElements() throws IOException {
 		tree.add(key1, value1);
 		tree.add(key2, value2);
-		assertEquals(2, tree.getNumberOfEntries());
+		assertThat( tree.getNumberOfEntries()).isEqualTo(2);
 		tree.clear();
-		assertEquals(0, tree.getNumberOfEntries());
+		assertThat( tree.getNumberOfEntries()).isEqualTo(0);
 	}
 
 	@Test
@@ -455,10 +453,10 @@ public class BTreeTest {
 		tree.add(key1, value2);
 		tree.add(key2, value2);
 
-		assertEquals(3, tree.getNumberOfEntries());
+		assertThat( tree.getNumberOfEntries()).isEqualTo(3);
 		tree.remove(key1);
-		assertEquals(1, tree.getNumberOfEntries());
-		assertEquals(0, tree.get(key1).size());
+		assertThat( tree.getNumberOfEntries()).isEqualTo(1);
+		assertThat( tree.get(key1).size()).isEqualTo(0);
 	}
 
 	@Test
@@ -484,42 +482,42 @@ public class BTreeTest {
 		assertThat(i.hasNext()).isFalse();
 	}
 
-	@Test(groups = "slow", dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
+	@Test
 	public void shouldWorkWithMassiveValues() {
 		final int size = 100000;
 
 		fill(size);
 
-		assertEquals(size, tree.getNumberOfEntries());
+		assertThat( tree.getNumberOfEntries()).isEqualTo(size);
 		simpleTests(Integer.MAX_VALUE);
 		simpleTests(Integer.MIN_VALUE);
 	}
 
-	@Test(dependsOnMethods = {"shouldWorkOnTheEdgeToCreateAnInnerNode", "shouldBeAbleToOpenAndLoad"})
+	@Test
 	public void iteratorsWithStartEndGiven() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		Iterator<Integer> iterator = tree.getIterator();
 		for (int i = 0; i < 100; i++)
-			assertEquals(i, (int) iterator.next());
-		assertFalse(iterator.hasNext());
+			assertThat( (int) iterator.next()).isEqualTo(i);
+		assertThat(iterator.hasNext()).isFalse();
 
 		iterator = tree.getIterator(-50, 50);
 		for (int i = 0; i <= 50; i++)
-			assertEquals(i, (int) iterator.next());
-		assertFalse(iterator.hasNext());
+			assertThat( (int) iterator.next()).isEqualTo(i);
+		assertThat(iterator.hasNext()).isFalse();
 
 		iterator = tree.getIterator(50, 150);
 		for (int i = 50; i < 100; i++)
-			assertEquals(i, (int) iterator.next());
-		assertFalse(iterator.hasNext());
+			assertThat( (int) iterator.next()).isEqualTo(i);
+		assertThat(iterator.hasNext()).isFalse();
 	}
 
 	@Test
 	public void close() throws IOException, InterruptedException {
 		fillTree(tree, 100);
 		tree.close();
-		assertFalse(tree.isValid());
-		assertFalse(tree.getResourceManager().isOpen());
+		assertThat(tree.isValid()).isFalse();
+		assertThat(tree.getResourceManager().isOpen()).isFalse();
 	}
 
 	@Test
@@ -538,12 +536,12 @@ public class BTreeTest {
 		simpleTests(size + 1);
 	}
 
-	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
+	@Test
 	public void bulkInsert2Layers() throws IOException {
 		bulkInsert((tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys());
 
 		// make sure the test is checking 2 layers
-		assertEquals(2, tree.getDepth());
+		assertThat( tree.getDepth()).isEqualTo(2);
 	}
 
 	/**
@@ -552,21 +550,21 @@ public class BTreeTest {
 	 *
 	 * @throws java.io.IOException
 	 */
-	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
+	@Test
 	public void bulkInsertWithOnlyOnePageForNextInnerNode() throws IOException {
 		bulkInsert((tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys() + 1);
 	}
 
-	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
+	@Test
 	public void bulkInsert3Layers() throws IOException {
 		bulkInsert((tree.getMaxInnerKeys() + 1) * (tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys());
 
 		// just to make sure that the test is really checking 3 layers
-		assertTrue(tree.getDepth() >= 3);
+		assertThat(tree.getDepth() >= 3).isTrue();
 	}
 
 
-	@Test(dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
+	@Test
 	public void bulkInsertWithSortAndCloseAndRange() throws IOException {
 		final int count = 50;
 		final int from = 10;
@@ -594,29 +592,29 @@ public class BTreeTest {
 
 		tree.bulkInitialize(kvs, from, to, false);
 
-		assertEquals(to - from + 1, tree.getNumberOfEntries());
+		assertThat( tree.getNumberOfEntries()).isEqualTo(to - from + 1);
 		tree.checkStructure();
 
 		Collections.sort(keys, IntegerComparator.INSTANCE);
 		for (int i = 0; i < realCount; i++) {
-			assertEquals(1, tree.get(keys.get(i)).size(), "size problem with key " + i);
-			assertEquals(keys.get(i), tree.get(keys.get(i)).get(0));
+			assertThat(tree.get(keys.get(i)).size()).as( "size problem with key " + i).isEqualTo(1);
+			assertThat( tree.get(keys.get(i)).get(0)).isEqualTo(keys.get(i));
 		}
 
 		tree.close();
 		tree.load();
 
 		// test everything again
-		assertEquals(realCount, tree.getNumberOfEntries());
+		assertThat( tree.getNumberOfEntries()).isEqualTo(realCount);
 		tree.checkStructure();
 
 		for (int i = 0; i < realCount; i++) {
-			assertEquals(1, tree.get(keys.get(i)).size(), "size problem with key " + i);
-			assertEquals(keys.get(i), tree.get(keys.get(i)).get(0));
+			assertThat(tree.get(keys.get(i)).size()).as( "size problem with key " + i).isEqualTo(1);
+			assertThat( tree.get(keys.get(i)).get(0)).isEqualTo(keys.get(i));
 		}
 	}
 
-	@Test(expectedExceptions = NullPointerException.class)
+	@Test(expected = NullPointerException.class)
 	public void bulkInsertWithNullValues() throws IOException {
 		int count = 1;
 		final AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[2];
@@ -631,8 +629,6 @@ public class BTreeTest {
 	}
 
 
-	@Test(dataProvider = "shouldBeAbleToOpenAndLoadProvider",
-			dependsOnMethods = "shouldWorkOnTheEdgeToCreateAnInnerNode")
 	public void shouldBeAbleToOpenAndLoad(final Integer key1, final Integer key2) throws IOException {
 		final Integer value1 = 1;
 		final Integer value2 = 2;
@@ -666,12 +662,10 @@ public class BTreeTest {
 		assertThat(tree.toString()).isNotNull();
 	}
 
-	@DataProvider
-	public Object[][] shouldBeAbleToOpenAndLoadProvider() {
-		return new Object[][]{
-				{20, 10},
-				{10, 20}
-		};
+	@Test
+	public void shouldBeAbleToOpenAndLoad() throws IOException {
+		shouldBeAbleToOpenAndLoad(20, 10);
+		shouldBeAbleToOpenAndLoad(10, 20);
 	}
 
 
@@ -680,15 +674,15 @@ public class BTreeTest {
 		tree.add(key1, value2);
 		tree.add(key2, value2);
 
-		assertEquals(3, tree.getNumberOfEntries());
-		assertEquals(2, tree.get(key1).size());
-		assertEquals(1, tree.get(key2).size());
+		assertThat( tree.getNumberOfEntries()).isEqualTo(3);
+		assertThat( tree.get(key1).size()).isEqualTo(2);
+		assertThat( tree.get(key2).size()).isEqualTo(1);
 
 		tree.remove(key1, value2);
-		assertEquals(2, tree.getNumberOfEntries());
-		assertEquals(1, tree.get(key1).size());
-		assertEquals(value1, tree.get(key1).get(0));
-		assertEquals(value2, tree.get(key2).get(0));
+		assertThat( tree.getNumberOfEntries()).isEqualTo(2);
+		assertThat( tree.get(key1).size()).isEqualTo(1);
+		assertThat( tree.get(key1).get(0)).isEqualTo(value1);
+		assertThat( tree.get(key2).get(0)).isEqualTo(value2);
 	}
 
 	private ResourceManager createResourceManager(final boolean reset) {

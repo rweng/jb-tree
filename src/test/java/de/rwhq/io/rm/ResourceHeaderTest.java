@@ -11,10 +11,10 @@
 package de.rwhq.io.rm;
 
 import com.google.common.collect.Lists;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -29,7 +29,7 @@ public class ResourceHeaderTest {
 	private ResourceHeader     header;
 	private ArrayList<RawPage> pages;
 
-	@BeforeMethod
+	@Before
 	public void setUp() {
 		pages = Lists.newArrayList();
 
@@ -63,7 +63,7 @@ public class ResourceHeaderTest {
 		reset(rm);
 	}
 
-	@Test(dependsOnMethods = "initialize")
+	@Test
 	public void load() throws IOException {
 		initialize();
 
@@ -77,7 +77,7 @@ public class ResourceHeaderTest {
 		assertThat(header2.getPageSize()).isEqualTo(pageSize);
 	}
 
-	@Test(dependsOnMethods = "initialize")
+	@Test
 	public void generateId(){
 		initialize();
 		
@@ -89,7 +89,7 @@ public class ResourceHeaderTest {
 		verifyNoMoreInteractions(rm);
 	}
 
-	@Test(dependsOnMethods = "initialize")
+	@Test
 	public void removeWithoutOverflow(){
 		initialize();
 

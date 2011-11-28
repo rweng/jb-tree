@@ -10,23 +10,22 @@
 
 package de.rwhq.io.rm;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.fest.assertions.Assertions.assertThat;
 
 public class ResourceManagerBuilderTest {
 	private ResourceManagerBuilder builder;
 
-	@BeforeMethod
+	@Before
 	public void setUp(){
 		builder = new ResourceManagerBuilder();
 	}
 
-	@Test(expectedExceptions = NullPointerException.class)
+	@Test(expected = NullPointerException.class)
 	public void buildShouldRequireAFile(){
 		builder.build();
 	}
@@ -34,12 +33,12 @@ public class ResourceManagerBuilderTest {
 	@Test
 	public void buildShouldOnlyRequireAFile(){
 		final ResourceManager rm = setFile().build();
-		assertNotNull(rm);
+		assertThat(rm).isNotNull();
 	}
 
 	@Test
 	public void withoutCache(){
-		assertTrue(setFile().useCache(false).build() instanceof FileResourceManager);
+		assertThat(setFile().useCache(false).build() instanceof FileResourceManager).isTrue();
 	}
 
 	private ResourceManagerBuilder setFile(){

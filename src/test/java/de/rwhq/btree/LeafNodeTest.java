@@ -14,15 +14,14 @@ import de.rwhq.comparator.IntegerComparator;
 import de.rwhq.io.rm.ResourceManager;
 import de.rwhq.io.rm.ResourceManagerBuilder;
 import de.rwhq.serializer.IntegerSerializer;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.testng.Assert.*;
 
 public class LeafNodeTest {
 
@@ -37,34 +36,35 @@ public class LeafNodeTest {
 	private Integer value2 = 102;
 	private ResourceManager rm;
 
-	LeafNodeTest(){
+	public LeafNodeTest(){
 		file.delete();
 		this.rm = new ResourceManagerBuilder().file(file).open().useCache(false).build();
 	}
 
-	@BeforeMethod
+	@Before
 	public void setUp() throws IOException {
 		rm.clear();
 		lpm = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE).getLeafPageManager();
 		leaf = lpm.createPage();
 	}
 
-	@Test public void shouldBeAbleToInsertAndGet() {
+	@Test
+	public void shouldBeAbleToInsertAndGet() {
 		leaf.insert(key1, value1);
-		assertTrue(leaf.containsKey(key1));
-		assertEquals(1, leaf.getNumberOfEntries());
-		assertEquals(1, leaf.get(key1).size());
-		assertEquals(value1, leaf.get(key1).get(0));
+		assertThat(leaf.containsKey(key1)).isTrue();
+		assertThat( leaf.getNumberOfEntries()).isEqualTo(1);
+		assertThat( leaf.get(key1).size()).isEqualTo(1);
+		assertThat( leaf.get(key1).get(0)).isEqualTo(value1);
 	}
 
 	@Test public void shouldBeAbleToGetLastKeyAndPointer() {
 		leaf.insert(key1, value1);
-		assertNotNull(leaf.getLastLeafKey());
-		assertNotNull(leaf.getLastLeafKeySerialized());
+		assertThat(leaf.getLastLeafKey()).isNotNull();
+		assertThat(leaf.getLastLeafKeySerialized()).isNotNull();
 
 		leaf.insert(key2, value2);
-		assertNotNull(leaf.getLastLeafKey());
-		assertNotNull(leaf.getLastLeafKeySerialized());
+		assertThat(leaf.getLastLeafKey()).isNotNull();
+		assertThat(leaf.getLastLeafKeySerialized()).isNotNull();
 	}
 
 	@Test public void shouldAlwaysWorkAfterReload() {
@@ -72,10 +72,10 @@ public class LeafNodeTest {
 			leaf.insert(key1, value1);
 		}
 		leaf.insert(key2, value2);
-		assertEquals(6, leaf.getNumberOfEntries());
+		assertThat( leaf.getNumberOfEntries()).isEqualTo(6);
 		leaf.load();
-		assertEquals(6, leaf.getNumberOfEntries());
-		assertEquals(1, leaf.get(key2).size());
+		assertThat( leaf.getNumberOfEntries()).isEqualTo(6);
+		assertThat( leaf.get(key2).size()).isEqualTo(1);
 
 	}
 
@@ -85,10 +85,10 @@ public class LeafNodeTest {
 			action = leaf.insert(key1, value1);
 		} while (action == null);
 
-		assertNotNull(leaf.getLastLeafKey());
-		assertEquals(AdjustmentAction.ACTION.INSERT_NEW_NODE, action.getAction());
+		assertThat(leaf.getLastLeafKey()).isNotNull();
+		assertThat( action.getAction()).isEqualTo(AdjustmentAction.ACTION.INSERT_NEW_NODE);
 
-		assertNotNull(action.getSerializedKey());
+		assertThat(action.getSerializedKey()).isNotNull();
 
 
 		// this should still work and not throw an exception
@@ -100,17 +100,17 @@ public class LeafNodeTest {
 
 	private void stateTest(final LeafNode<Integer, Integer> leaf) {
 		final Integer k = leaf.getLastLeafKey();
-		assertNotNull(leaf.get(k));
-		assertTrue(leaf.containsKey(k));
+		assertThat(leaf.get(k)).isNotNull();
+		assertThat(leaf.containsKey(k)).isTrue();
 
 		// all keys should be accessible
 		for (int i = 0; i < leaf.getNumberOfEntries(); i++) {
 			final Integer key = leaf.getKeyAtPosition(i);
-			assertNotNull(k);
-			assertTrue(leaf.containsKey(key));
+			assertThat(k).isNotNull();
+			assertThat(leaf.containsKey(key)).isTrue();
 
 		}
-		assertEquals(k, leaf.getKeyAtPosition(leaf.getNumberOfEntries() - 1));
+		assertThat( leaf.getKeyAtPosition(leaf.getNumberOfEntries() - 1)).isEqualTo(k);
 
 	}
 
@@ -120,34 +120,34 @@ public class LeafNodeTest {
 
 		Iterator<Integer> iterator = leaf.getIterator(-5, 5);
 		for (int i = 0; i <= 5; i++)
-			assertEquals(i, (int) iterator.next());
-		assertFalse(iterator.hasNext());
+			assertThat( (int) iterator.next()).isEqualTo(i);
+		assertThat(iterator.hasNext()).isFalse();
 
 		iterator = leaf.getIterator(5, 15);
 		for (int i = 5; i < 10; i++)
-			assertEquals(i, (int) iterator.next());
-		assertFalse(iterator.hasNext());
+			assertThat( (int) iterator.next()).isEqualTo(i);
+		assertThat(iterator.hasNext()).isFalse();
 
 		iterator = leaf.getIterator(0, 9);
 		for (int i = 0; i < 10; i++)
-			assertEquals(i, (int) iterator.next());
-		assertFalse(iterator.hasNext());
+			assertThat( (int) iterator.next()).isEqualTo(i);
+		assertThat(iterator.hasNext()).isFalse();
 
 
 		iterator = leaf.getIterator(5, null);
 		for (int i = 5; i < 10; i++)
-			assertEquals(i, (int) iterator.next());
-		assertFalse(iterator.hasNext());
+			assertThat( (int) iterator.next()).isEqualTo(i);
+		assertThat(iterator.hasNext()).isFalse();
 
 		iterator = leaf.getIterator(null, 5);
 		for (int i = 0; i <= 5; i++)
-			assertEquals(i, (int) iterator.next());
-		assertFalse(iterator.hasNext());
+			assertThat( (int) iterator.next()).isEqualTo(i);
+		assertThat(iterator.hasNext()).isFalse();
 
 		iterator = leaf.getIterator(null, null);
 		for (int i = 0; i < 10; i++)
-			assertEquals(i, (int) iterator.next());
-		assertFalse(iterator.hasNext());
+			assertThat( (int) iterator.next()).isEqualTo(i);
+		assertThat(iterator.hasNext()).isFalse();
 	}
 
 	@Test
@@ -170,25 +170,25 @@ public class LeafNodeTest {
 	@Test
 	public void shouldContainAddedEntries() {
 		leaf.insert(key1, value1);
-		assertTrue(leaf.containsKey(key1));
-		assertEquals(1, leaf.get(key1).size());
-		assertEquals(value1, leaf.get(key1).get(0));
-		assertEquals(1, leaf.getNumberOfEntries());
+		assertThat(leaf.containsKey(key1)).isTrue();
+		assertThat( leaf.get(key1).size()).isEqualTo(1);
+		assertThat( leaf.get(key1).get(0)).isEqualTo(value1);
+		assertThat( leaf.getNumberOfEntries()).isEqualTo(1);
 
 		leaf.insert(key1, value2);
-		assertTrue(leaf.containsKey(key1));
-		assertEquals(2, leaf.get(key1).size());
-		assertTrue(leaf.get(key1).contains(value1));
-		assertTrue(leaf.get(key1).contains(value2));
-		assertEquals(2, leaf.getNumberOfEntries());
+		assertThat(leaf.containsKey(key1)).isTrue();
+		assertThat( leaf.get(key1).size()).isEqualTo(2);
+		assertThat(leaf.get(key1).contains(value1)).isTrue();
+		assertThat(leaf.get(key1).contains(value2)).isTrue();
+		assertThat( leaf.getNumberOfEntries()).isEqualTo(2);
 
 		leaf.insert(key2, value2);
-		assertTrue(leaf.containsKey(key2));
-		assertEquals(1, leaf.get(key2).size());
-		assertTrue(leaf.get(key1).contains(value2));
-		assertTrue(leaf.get(key1).contains(value1));
-		assertTrue(leaf.get(key1).size() == 2);
-		assertEquals(3, leaf.getNumberOfEntries());
+		assertThat(leaf.containsKey(key2)).isTrue();
+		assertThat( leaf.get(key2).size()).isEqualTo(1);
+		assertThat(leaf.get(key1).contains(value2)).isTrue();
+		assertThat(leaf.get(key1).contains(value1)).isTrue();
+		assertThat(leaf.get(key1).size() == 2).isTrue();
+		assertThat( leaf.getNumberOfEntries()).isEqualTo(3);
 	}
 
 	@Test
@@ -197,11 +197,11 @@ public class LeafNodeTest {
 		leaf.insert(key1, value2);
 		leaf.insert(key2, value2);
 
-		assertEquals(3, leaf.getNumberOfEntries());
+		assertThat( leaf.getNumberOfEntries()).isEqualTo(3);
 		leaf.remove(key1, value2);
-		assertEquals(1, leaf.get(key1).size());
-		assertEquals(value1, leaf.get(key1).get(0));
-		assertEquals(value2, leaf.get(key2).get(0));
+		assertThat( leaf.get(key1).size()).isEqualTo(1);
+		assertThat( leaf.get(key1).get(0)).isEqualTo(value1);
+		assertThat( leaf.get(key2).get(0)).isEqualTo(value2);
 	}
 
 

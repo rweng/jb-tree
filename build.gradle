@@ -27,10 +27,6 @@ jar {
     from sourceSets.main.allJava
 }
 
-test {
-    useTestNG()
-}
-
 sourceSets {
     main {
         java {
@@ -58,9 +54,8 @@ dependencies {
     // TEST-COMPILE
     testCompile "log4j:log4j:1.2.16"
 
-    testCompile "org.testng:testng:6.2.1"
+    testCompile "junit:junit:4.10"
     testCompile "org.mockito:mockito-all:1.8.5"
-
     testCompile "org.easytesting:fest-assert:1.4"
 }
 

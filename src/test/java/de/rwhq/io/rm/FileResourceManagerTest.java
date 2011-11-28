@@ -10,10 +10,9 @@
 
 package de.rwhq.io.rm;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Factory;
-import org.testng.annotations.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,26 +20,15 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.testng.Assert.*;
+import static org.junit.Assert.fail;
 
 public class FileResourceManagerTest {
 
 	private final static String filePath = "/tmp/frm_test";
-	private final        File   file     = new File(filePath);
-	private FileResourceManager rm;
-	
-	@BeforeMethod(alwaysRun = true)
-	public void setUp() throws IOException {
-		rm = createNewOpenResourceManager();
-	}
-
-	@AfterMethod(alwaysRun = true)
-	public void tearDown() throws IOException {
-		rm.close();
-	}
+	private final static File   file     = new File(filePath);
 
 
-	protected FileResourceManager createNewOpenResourceManager() {
+	static FileResourceManager createNewOpenResourceManager() {
 		if (file.exists()) {
 			file.delete();
 		}
@@ -48,8 +36,8 @@ public class FileResourceManagerTest {
 		return createOpenResourceManager();
 	}
 
-	protected FileResourceManager createOpenResourceManager() {
-		rm = (FileResourceManager) new ResourceManagerBuilder().file(file).useCache(false).build();
+	static FileResourceManager createOpenResourceManager() {
+		FileResourceManager rm = (FileResourceManager) new ResourceManagerBuilder().file(file).useCache(false).build();
 
 		try {
 			rm.open();
@@ -58,6 +46,17 @@ public class FileResourceManagerTest {
 		}
 
 		return rm;
+	}
+	private FileResourceManager rm;
+
+	@Before
+	public void setUp() throws IOException {
+		rm = createNewOpenResourceManager();
+	}
+
+	@After
+	public void tearDown() throws IOException {
+		rm.close();
 	}
 
 	@Test
@@ -72,25 +71,25 @@ public class FileResourceManagerTest {
 		rFile.close();
 	}
 
-	@Test(expectedExceptions = IOException.class)
+	@Test(expected = IOException.class)
 	public void shouldThrowExceptionIfFileIsLocked() throws IOException {
 		rm = (FileResourceManager) new ResourceManagerBuilder().file(file).useCache(false).build();
 		rm.open();
-		final FileResourceManager rm2 = (FileResourceManager) new ResourceManagerBuilder().file(file).useCache(false).build();
+		final FileResourceManager rm2 =
+				(FileResourceManager) new ResourceManagerBuilder().file(file).useCache(false).build();
 		rm2.open();
 		fail("FileResourceManager should throw an IOException if the file is already locked");
 	}
 
-
 // ******** TESTS **********
 
-	@Test(expectedExceptions = IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void shouldThrowExceptionIfResourceClosed() throws IOException {
 		rm.close();
 		rm.createPage();
 	}
 
-	@Test(expectedExceptions = PageNotFoundException.class)
+	@Test(expected = PageNotFoundException.class)
 	public void shouldThrowExceptionIfPageToWriteDoesNotExist() throws IOException {
 		final RawPage page = new RawPage(ByteBuffer.allocate(PageSize.DEFAULT_PAGE_SIZE), 3423);
 		rm.writePage(page);
@@ -98,7 +97,7 @@ public class FileResourceManagerTest {
 
 	@Test
 	public void shouldGenerateDifferentIdsForEachPage() throws IOException {
-		assertTrue(rm.createPage().id() != rm.createPage().id());
+		assertThat(rm.createPage().id() != rm.createPage().id()).isTrue();
 	}
 
 	@Test
@@ -107,7 +106,7 @@ public class FileResourceManagerTest {
 		page.bufferForWriting(0).putInt(1234);
 		rm.writePage(page);
 
-		assertEquals(rm.getPage(page.id()).bufferForWriting(0), page.bufferForWriting(0));
+		assertThat(page.bufferForWriting(0)).isEqualTo(rm.getPage(page.id()).bufferForWriting(0));
 	}
 
 	@Test
@@ -117,56 +116,49 @@ public class FileResourceManagerTest {
 		assertThat(rm.numberOfPages()).isEqualTo(num + 1);
 	}
 
-	@Factory
-	public Object[] createInstances() throws IOException {
-		setUp();
-		return new Object[]{new ResourceManagerTest(rm)};
-	}
-
-
 	@Test
 	public void shouldBeAbleToReadPagesAfterReopen() throws IOException {
-		assertEquals(0, rm.numberOfPages());
+		assertThat(rm.numberOfPages()).isEqualTo(0);
 		final RawPage page = rm.createPage();
-		assertEquals(1, rm.numberOfPages());
+		assertThat(rm.numberOfPages()).isEqualTo(1);
 		rm.createPage();
-		assertEquals(2, rm.numberOfPages());
+		assertThat(rm.numberOfPages()).isEqualTo(2);
 
 		final long longToCompare = 12345L;
 		final ByteBuffer buf = page.bufferForWriting(0);
 		buf.putLong(longToCompare);
 		rm.writePage(page);
 
-		assertEquals(2, rm.numberOfPages());
-		assertEquals(longToCompare, rm.getPage(page.id()).bufferForWriting(0).getLong());
+		assertThat(rm.numberOfPages()).isEqualTo(2);
+		assertThat(rm.getPage(page.id()).bufferForWriting(0).getLong()).isEqualTo(longToCompare);
 
 		rm.close();
 
 		// throw away all local variables
 		rm = createOpenResourceManager();
 
-		assertEquals(2, rm.numberOfPages());
-		assertEquals(longToCompare, rm.getPage(page.id()).bufferForWriting(0).getLong());
+		assertThat(rm.numberOfPages()).isEqualTo(2);
+		assertThat(rm.getPage(page.id()).bufferForWriting(0).getLong()).isEqualTo(longToCompare);
 	}
 
-	@Test(groups = "slow")
+	@Test
 	public void ensureNoHeapOverflowExeptionIsThrown() throws IOException {
 		final int count = 100000;
 		for (int i = 0; i < count; i++) {
 			rm.createPage();
 		}
 		rm.close();
-		assertTrue(rm.getFile().getTotalSpace() > count * PageSize.DEFAULT_PAGE_SIZE);
+		assertThat(rm.getFile().getTotalSpace() > count * PageSize.DEFAULT_PAGE_SIZE).isTrue();
 	}
 
-	@Test(expectedExceptions = IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void detectExternalFileDelete() {
 		file.delete();
 		rm.createPage();
 	}
 
 	@Test
-	public void clear(){
+	public void clear() {
 		final RawPage page1 = rm.createPage();
 		page1.bufferForWriting(0).putInt(0);
 		page1.sync();
@@ -174,5 +166,13 @@ public class FileResourceManagerTest {
 
 		rm.clear();
 		assertThat(rm.getFile().length()).isEqualTo(rm.getPageSize());
+	}
+
+	public static class ResourceManagerTestImpl extends ResourceManagerTest {
+
+		@Override
+		protected ResourceManager resetResourceManager() {
+			return createNewOpenResourceManager();
+		}
 	}
 }

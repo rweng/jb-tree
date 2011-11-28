@@ -10,9 +10,9 @@
 
 package de.rwhq.serializer;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.fest.assertions.Assertions.assertThat;
 
 public class StringCutSerializerTest {
 	private static final StringCutSerializer serializer;
@@ -24,31 +24,32 @@ public class StringCutSerializerTest {
 
 	@Test
 	public void shouldBeSingleton() {
-		assertSame(serializer, StringCutSerializer.get(10));
-		assertNotSame(serializer, StringCutSerializer.get(11));
+		assertThat( StringCutSerializer.get(10)).isSameAs(serializer);
+		assertThat( StringCutSerializer.get(11)).isNotSameAs(serializer);
+		
 	}
 
 	@Test
 	public void serializeAcceptableStringsShouldWork() {
-		assertEquals(testStr, serializer.deserialize(serializer.serialize(testStr)));
+		assertThat( serializer.deserialize(serializer.serialize(testStr))).isEqualTo(testStr);
 	}
 
 	@Test
 	public void fillCompletely() {
 		final String filled = "12345678";
-		assertEquals(filled, serializer.deserialize(serializer.serialize(filled)));
+		assertThat( serializer.deserialize(serializer.serialize(filled))).isEqualTo(filled);
 	}
 
 	@Test
 	public void tooLongIsCut() {
 		final String tooLong = "123456789000";
-		assertEquals("12345678", serializer.deserialize(serializer.serialize(tooLong)));
+		assertThat( serializer.deserialize(serializer.serialize(tooLong))).isEqualTo("12345678");
 	}
 
 	@Test
 	public void emptyString() {
 		final String empty = "";
-		assertEquals(empty, serializer.deserialize(serializer.serialize(empty)));
+		assertThat( serializer.deserialize(serializer.serialize(empty))).isEqualTo(empty);
 	}
 
 }

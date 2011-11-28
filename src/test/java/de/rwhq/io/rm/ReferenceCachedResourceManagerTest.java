@@ -11,9 +11,8 @@
 package de.rwhq.io.rm;
 
 import org.apache.log4j.Logger;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Factory;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,21 +24,24 @@ public class ReferenceCachedResourceManagerTest {
 	private static final Logger LOG  = Logger.getLogger(ReferenceCachedResourceManagerTest.class);
 	private static File   file = new File("/tmp/ReferenceCachedResourceManagerTest");
 
-	@BeforeMethod
+	@Before
 	public void setUp() throws IOException {
 		file.delete();
 		rm = new ResourceManagerBuilder().file(file).useCache(false).useReferenceCache(true).open().build();
 	}
 
+	public static class ResourceManagerTestImpl extends ResourceManagerTest {
+
+		@Override
+		protected ResourceManager resetResourceManager() {
+			file.delete();
+			return new ResourceManagerBuilder().file(file).useCache(false).useReferenceCache(true).open().build();
+		}
+	}
+
 	@Test
 	public void instanceOfReferenceCachedResourceManager(){
 		assertThat(rm).isInstanceOf(ReferenceCachedResourceManager.class);
-	}
-
-	@Factory
-	public Object[] resourceManagerInterface() throws IOException {
-		setUp();
-		return new Object[]{new ResourceManagerTest(rm)};
 	}
 
 
