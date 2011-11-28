@@ -31,7 +31,7 @@ public class CachedResourceManagerTest {
 	@Before
 	public void setUp() throws IOException {
 		file.delete();
-		rm = new ResourceManagerBuilder().file(file).useCache(true).cacheSize(1000).open().build();
+		rm = new ResourceManagerBuilder().file(file).cacheSize(0).cacheSize(1000).open().build();
 	}
 
 	public static class ResourceManagerTestImpl extends ResourceManagerTest {
@@ -39,7 +39,7 @@ public class CachedResourceManagerTest {
 		@Override
 		protected ResourceManager resetResourceManager() {
 			file.delete();
-			return new ResourceManagerBuilder().file(file).useCache(true).cacheSize(1000).open().build();
+			return new ResourceManagerBuilder().file(file).cacheSize(0).cacheSize(1000).open().build();
 		}
 	}
 
@@ -47,7 +47,7 @@ public class CachedResourceManagerTest {
 	public void open() throws IOException {
 		rm.close();
 		file.delete();
-		rm = new ResourceManagerBuilder().file(file).useCache(true).build();
+		rm = new ResourceManagerBuilder().file(file).cacheSize(0).build();
 		assertThat(rm.isOpen()).isFalse();
 		rm.open();
 		assertThat(rm.isOpen()).isTrue();

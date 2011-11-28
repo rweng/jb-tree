@@ -27,7 +27,7 @@ public class ReferenceCachedResourceManagerTest {
 	@Before
 	public void setUp() throws IOException {
 		file.delete();
-		rm = new ResourceManagerBuilder().file(file).useCache(false).useReferenceCache(true).open().build();
+		rm = new ResourceManagerBuilder().file(file).cacheSize(0).useReferenceCache(true).open().build();
 	}
 
 	public static class ResourceManagerTestImpl extends ResourceManagerTest {
@@ -35,7 +35,7 @@ public class ReferenceCachedResourceManagerTest {
 		@Override
 		protected ResourceManager resetResourceManager() {
 			file.delete();
-			return new ResourceManagerBuilder().file(file).useCache(false).useReferenceCache(true).open().build();
+			return new ResourceManagerBuilder().file(file).cacheSize(0).useReferenceCache(true).open().build();
 		}
 	}
 

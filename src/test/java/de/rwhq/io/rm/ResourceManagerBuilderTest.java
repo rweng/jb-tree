@@ -38,7 +38,7 @@ public class ResourceManagerBuilderTest {
 
 	@Test
 	public void withoutCache(){
-		assertThat(setFile().useCache(false).build() instanceof FileResourceManager).isTrue();
+		assertThat(setFile().cacheSize(0).build() instanceof FileResourceManager).isTrue();
 	}
 
 	private ResourceManagerBuilder setFile(){

@@ -38,7 +38,7 @@ public class LeafNodeTest {
 
 	public LeafNodeTest(){
 		file.delete();
-		this.rm = new ResourceManagerBuilder().file(file).open().useCache(false).build();
+		this.rm = new ResourceManagerBuilder().file(file).open().cacheSize(0).build();
 	}
 
 	@Before

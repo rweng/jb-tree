@@ -36,7 +36,7 @@ public class PageManagerTest {
 	@Before
 	public void setUp() throws IOException {
 		file.delete();
-		final ResourceManager manager = new ResourceManagerBuilder().file(file).useCache(false).build();
+		final ResourceManager manager = new ResourceManagerBuilder().file(file).cacheSize(0).build();
 		tree = BTree.create(manager, FixedStringSerializer.INSTANCE_1000,
 				FixedStringSerializer.INSTANCE_1000,
 				StringComparator.INSTANCE);

@@ -18,7 +18,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** used to configure and build Resource Managers */
 public class ResourceManagerBuilder {
-	private boolean useCache  = false;
 	private boolean useLock   = true;
 	private int     cacheSize = 100;
 	private int     pageSize  = PageSize.DEFAULT_PAGE_SIZE;
@@ -32,18 +31,13 @@ public class ResourceManagerBuilder {
 		return this;
 	}
 
-	public ResourceManagerBuilder useCache(final boolean cached) {
-		this.useCache = cached;
-		return this;
-	}
-
 	public ResourceManagerBuilder useLock(final boolean useLock) {
 		this.useLock = useLock;
 		return this;
 	}
 
 	public ResourceManagerBuilder cacheSize(final int cacheSize) {
-		checkArgument(cacheSize > 0, "cacheSize must be > 0");
+		checkArgument(cacheSize >= 0, "cacheSize must be positive");
 		this.cacheSize = cacheSize;
 		return this;
 	}
@@ -74,7 +68,7 @@ public class ResourceManagerBuilder {
 			rm = new ReferenceCachedResourceManager(rm);
 		}
 
-		if (useCache) {
+		if (cacheSize > 0) {
 			rm = new CachedResourceManager(rm, cacheSize);
 		}
 
@@ -104,10 +98,6 @@ public class ResourceManagerBuilder {
 
 	int getPageSize() {
 		return pageSize;
-	}
-
-	boolean useCache() {
-		return useCache;
 	}
 
 	boolean useLock() {
