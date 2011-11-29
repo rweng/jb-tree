@@ -12,7 +12,6 @@ package de.rwhq.btree;
 
 import de.rwhq.comparator.IntegerComparator;
 import de.rwhq.comparator.StringComparator;
-import de.rwhq.io.rm.CachedResourceManager;
 import de.rwhq.io.rm.ResourceManager;
 import de.rwhq.io.rm.ResourceManagerBuilder;
 import de.rwhq.serializer.FixedStringSerializer;
