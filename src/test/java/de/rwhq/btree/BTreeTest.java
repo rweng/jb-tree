@@ -806,8 +806,7 @@ public class BTreeTest {
 			}
 			return total;
 		}
-
-		@Test
+		
 		public void randomReadsWithCache() throws InterruptedException, IOException {
 			int cacheSize = 1000;
 			int entries = 10 * 1000;
@@ -825,7 +824,6 @@ public class BTreeTest {
 					entries + " entries took " + time + " milliseconds");
 		}
 
-		@Test
 		public void randomReadsWithReferenceCache() throws IOException, InterruptedException {
 			int entries = 10 * 1000;
 			int numOfReads = 1000 * 1000;
@@ -841,9 +839,8 @@ public class BTreeTest {
 					entries + " entries took " + time + " milliseconds");
 		}
 
-		public void continuousInserts() throws InterruptedException, IOException {
-			int count = 100 * 1000;
-			int pageSize = 4096;
+		private void continuousInserts(int pageSize) throws InterruptedException, IOException {
+			int count = 1000 * 1000;
 
 			file.delete();
 			rm = new ResourceManagerBuilder().useLock(true).pageSize(pageSize).file(file).cacheSize(0).open().build();
@@ -863,19 +860,24 @@ public class BTreeTest {
 				assertThat(tree.get(i)).hasSize(1).contains(i);
 			tree.checkStructure();
 
-			LOG.info("continously inserting " + count + " Integers took " + diff + " milliseconds");
+			log(count, diff, pageSize);
 		}
 
-		public void bulkInsert() throws IOException {
-			int count = 100 * 1000;
-			int pageSize = 4096;
+		@Test
+		public void continuousInserts() throws IOException, InterruptedException {
+			continuousInserts(4 * 1024);
+			continuousInserts(64 * 1024);
+		}
+
+		private void bulkInsert(int pageSize) throws IOException {
+			int count = 1000 * 1000;
 
 			file.delete();
 			rm = new ResourceManagerBuilder().useLock(true).pageSize(pageSize).file(file).cacheSize(0).open().build();
 			tree = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE,
 					IntegerComparator.INSTANCE);
 
-			assertThat(tree.getResourceManager().getPageSize()).isEqualTo(4096);
+			assertThat(tree.getResourceManager().getPageSize()).isEqualTo(pageSize);
 
 			AbstractMap.SimpleEntry[] buffer = new AbstractMap.SimpleEntry[count];
 			for (int i = 0; i < count; i++) {
@@ -894,7 +896,26 @@ public class BTreeTest {
 				assertThat(tree.get(i)).hasSize(1).contains(i);
 
 			tree.checkStructure();
-			LOG.info("bulk inserting " + count + " Integers took " + diff + " milliseconds");
+
+			log(count, diff, pageSize);
 		}
+
+		private void log(int count, long diff, int pageSize){
+			// time information
+			LOG.info("inserting " + count + " Integers with pageSize " + pageSize + " took " + diff + " milliseconds");
+
+			// file size information
+			LOG.info("the tree file has a size of " + (file.length() / 1024) + "kb");
+			LOG.info("filled with " + count + " Integers (4byte) gives a total usage of " + (count * 4 / 1024) + "kb");
+			LOG.info("that an overhead of " + (100d * (file.length() / (count * 4)) - 100) + "%");
+		}
+
+		@Test
+		public void bulkInsert() throws IOException {
+			bulkInsert(4 * 1024);
+			bulkInsert(64 * 1024);
+		}
+
+
 	}
 }
