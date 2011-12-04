@@ -16,8 +16,8 @@ import de.rwhq.io.rm.ResourceManager;
 import de.rwhq.io.rm.ResourceManagerBuilder;
 import de.rwhq.serializer.FixedStringSerializer;
 import de.rwhq.serializer.IntegerSerializer;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -34,7 +34,7 @@ import static org.junit.Assert.fail;
 
 @RunWith(Enclosed.class)
 public class BTreeTest {
-	private static final Logger LOG  = Logger.getLogger(BTreeTest.class);
+	private static final Log LOG  = LogFactory.getLog(BTreeTest.class);
 	private static final File   file = new File("/tmp/btree-small-test");
 
 
@@ -741,7 +741,6 @@ public class BTreeTest {
 
 		@Test
 		public void iteratorsWithoutParameters() throws IOException, InterruptedException {
-			LOG.setLevel(Level.DEBUG);
 			fillTreeWithStructureCheck(tree, 1000);
 			tree.checkStructure();
 
@@ -779,10 +778,9 @@ public class BTreeTest {
 		}
 
 		@Test
-		public void randomReads() throws InterruptedException {
+		public void randomReads() throws InterruptedException, IOException {
 			int entries = 10 * 1000;
 			int numOfReads = 1000 * 1000;
-
 
 			assertThat(tree.getResourceManager().getPageSize()).isEqualTo(4096);
 			long diff = testReads(entries, numOfReads);
@@ -846,7 +844,7 @@ public class BTreeTest {
 			rm = new ResourceManagerBuilder().useLock(true).pageSize(pageSize).file(file).cacheSize(0).open().build();
 			tree = createNewTree(rm);
 
-			assertThat(tree.getResourceManager().getPageSize()).isEqualTo(4096);
+			assertThat(tree.getResourceManager().getPageSize()).isEqualTo(pageSize);
 
 			long start = System.currentTimeMillis();
 			fillTree(tree, count);

@@ -14,6 +14,8 @@ import de.rwhq.comparator.IntegerComparator;
 import de.rwhq.io.rm.ResourceManager;
 import de.rwhq.io.rm.ResourceManagerBuilder;
 import de.rwhq.serializer.IntegerSerializer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,6 +26,7 @@ import java.util.Iterator;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class LeafNodeTest {
+	private static final Log LOG = LogFactory.getLog(LeafNodeTest.class);
 
 	private final static File file = new File("/tmp/LeafNodeTest");
 	private LeafNode<Integer, Integer> leaf;
@@ -43,6 +46,7 @@ public class LeafNodeTest {
 
 	@Before
 	public void setUp() throws IOException {
+		LOG.warn("setting up leafnodetest");
 		rm.clear();
 		lpm = BTree.create(rm, IntegerSerializer.INSTANCE, IntegerSerializer.INSTANCE, IntegerComparator.INSTANCE).getLeafPageManager();
 		leaf = lpm.createPage();

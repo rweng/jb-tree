@@ -10,7 +10,7 @@ This Project provides two cool things:
 
 # Dev Requirements
 
-- gradle > 0.9-rc3 (install on mac with homebrew: `brew install gradle --HEAD`)
+- gradle >= 1.0-milestone-6 (install on mac with homebrew: `brew install gradle --HEAD`)
 
 # Getting started
 

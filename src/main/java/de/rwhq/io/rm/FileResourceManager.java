@@ -73,6 +73,7 @@ public class FileResourceManager implements ResourceManager {
 	public void writePage(final RawPage page) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("writing page to disk: " + page.id());
+		
 		ensureOpen();
 		ensurePageExists(page.id());
 
