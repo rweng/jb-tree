@@ -35,8 +35,8 @@ import static org.junit.Assert.fail;
 
 @RunWith(Enclosed.class)
 public class BTreeTest {
-	private static final Log LOG  = LogFactory.getLog(BTreeTest.class);
-	private static final File   file = new File("/tmp/btree-small-test");
+	private static final Log  LOG  = LogFactory.getLog(BTreeTest.class);
+	private static final File file = new File("/tmp/btree-small-test");
 
 
 	private static final Integer key1 = 1;
@@ -763,7 +763,7 @@ public class BTreeTest {
 			fillTree(tree, size);
 
 			assertThat(tree.getNumberOfEntries()).isEqualTo(size);
-			
+
 			simpleTests(tree, Integer.MAX_VALUE);
 			simpleTests(tree, Integer.MIN_VALUE);
 		}
@@ -791,10 +791,11 @@ public class BTreeTest {
 
 		@Ignore
 		@Test
-		private void randomReadsWithCache() throws IOException, InterruptedException {
+		public void randomReadsWithCache() throws IOException, InterruptedException {
+			randomReadsWithCache(5);
+			randomReadsWithCache(25);
+			randomReadsWithCache(50);
 			randomReadsWithCache(100);
-			randomReadsWithCache(1000);
-			
 		}
 
 		private void randomReadsWithCache(int cacheSize) throws InterruptedException, IOException {
@@ -853,7 +854,7 @@ public class BTreeTest {
 			long total = 0;
 			for (int i = 0; i < reads; i++) {
 				int next = rand.nextInt(entries);
-				
+
 				long start = System.currentTimeMillis();
 				tree.get(next);
 				total += System.currentTimeMillis() - start;
@@ -916,7 +917,7 @@ public class BTreeTest {
 			log(count, diff, pageSize);
 		}
 
-		private void log(int count, long diff, int pageSize){
+		private void log(int count, long diff, int pageSize) {
 			// time information
 			LOG.info("inserting " + count + " Integers with pageSize " + pageSize + " took " + diff + " milliseconds");
 
