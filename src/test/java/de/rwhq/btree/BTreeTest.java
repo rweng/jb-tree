@@ -19,6 +19,7 @@ import de.rwhq.serializer.IntegerSerializer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -101,50 +102,13 @@ public class BTreeTest {
 			tree = createNewTree(PAGE_SIZE);
 		}
 
-		private void removeWithValueArgumentShouldRemoveOnlyThisValue(final Integer key1, final Integer key2) {
-			tree.add(key1, value1);
-			tree.add(key1, value2);
-			tree.add(key2, value2);
-
-			assertThat(tree.getNumberOfEntries()).isEqualTo(3);
-			assertThat(tree.get(key1).size()).isEqualTo(2);
-			assertThat(tree.get(key2).size()).isEqualTo(1);
-
-			tree.remove(key1, value2);
-			assertThat(tree.getNumberOfEntries()).isEqualTo(2);
-			assertThat(tree.get(key1).size()).isEqualTo(1);
-			assertThat(tree.get(key1).get(0)).isEqualTo(value1);
-			assertThat(tree.get(key2).get(0)).isEqualTo(value2);
-		}
-
-		private ResourceManager createResourceManager(final boolean reset) {
-			if (reset)
-				file.delete();
-			return new ResourceManagerBuilder().file(file).build();
-		}
-
-		private void bulkInsert(final int count) throws IOException {
-			final AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
-
-			for (int i = 0; i < count; i++) {
-				kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(i, i);
-			}
-
-			tree.close();
-			file.delete();
-			tree.bulkInitialize(kvs, true);
-
-			// check if its correct
-			LOG.debug("checking bulkinsert results...");
-			assertThat(tree.getNumberOfEntries()).isEqualTo(count);
-
-			tree.checkStructure();
-
-			for (int i = 0; i < count; i++) {
-				assertThat(tree.get(kvs[i].getKey()).size() > 0).isTrue();
-				assertThat(tree.get(kvs[i].getKey()).size()).isEqualTo(1);
-				assertThat(tree.get(kvs[i].getKey()).get(0)).isEqualTo(kvs[i].getValue());
-			}
+		@Test
+		public void removeWithValueArgumentShouldRemoveOnlyThisValue() throws IOException {
+			final int k1 = Integer.MAX_VALUE;
+			final int k2 = Integer.MIN_VALUE;
+			removeWithValueArgumentShouldRemoveOnlyThisValue(k1, k2);
+			tree.clear();
+			removeWithValueArgumentShouldRemoveOnlyThisValue(k2, k1);
 		}
 
 		@Test
@@ -513,15 +477,6 @@ public class BTreeTest {
 		}
 
 		@Test
-		public void removeWithValueArgumentShouldRemoveOnlyThisValue() throws IOException {
-			final int k1 = Integer.MAX_VALUE;
-			final int k2 = Integer.MIN_VALUE;
-			removeWithValueArgumentShouldRemoveOnlyThisValue(k1, k2);
-			tree.clear();
-			removeWithValueArgumentShouldRemoveOnlyThisValue(k2, k1);
-		}
-
-		@Test
 		public void removeWithOnlyKeyArgumentShouldRemoveAllValues() {
 			tree.add(key1, value1);
 			tree.add(key1, value2);
@@ -730,6 +685,52 @@ public class BTreeTest {
 			tree.close();
 			assertThat(tree.toString()).isNotNull();
 		}
+
+		private void removeWithValueArgumentShouldRemoveOnlyThisValue(final Integer key1, final Integer key2) {
+			tree.add(key1, value1);
+			tree.add(key1, value2);
+			tree.add(key2, value2);
+
+			assertThat(tree.getNumberOfEntries()).isEqualTo(3);
+			assertThat(tree.get(key1).size()).isEqualTo(2);
+			assertThat(tree.get(key2).size()).isEqualTo(1);
+
+			tree.remove(key1, value2);
+			assertThat(tree.getNumberOfEntries()).isEqualTo(2);
+			assertThat(tree.get(key1).size()).isEqualTo(1);
+			assertThat(tree.get(key1).get(0)).isEqualTo(value1);
+			assertThat(tree.get(key2).get(0)).isEqualTo(value2);
+		}
+
+		private ResourceManager createResourceManager(final boolean reset) {
+			if (reset)
+				file.delete();
+			return new ResourceManagerBuilder().file(file).build();
+		}
+
+		private void bulkInsert(final int count) throws IOException {
+			final AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
+
+			for (int i = 0; i < count; i++) {
+				kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(i, i);
+			}
+
+			tree.close();
+			file.delete();
+			tree.bulkInitialize(kvs, true);
+
+			// check if its correct
+			LOG.debug("checking bulkinsert results...");
+			assertThat(tree.getNumberOfEntries()).isEqualTo(count);
+
+			tree.checkStructure();
+
+			for (int i = 0; i < count; i++) {
+				assertThat(tree.get(kvs[i].getKey()).size() > 0).isTrue();
+				assertThat(tree.get(kvs[i].getKey()).size()).isEqualTo(1);
+				assertThat(tree.get(kvs[i].getKey()).get(0)).isEqualTo(kvs[i].getValue());
+			}
+		}
 	}
 
 	public static class Slow {
@@ -739,6 +740,7 @@ public class BTreeTest {
 			tree = createNewTree(PAGE_SIZE);
 		}
 
+		@Ignore
 		@Test
 		public void iteratorsWithoutParameters() throws IOException, InterruptedException {
 			fillTreeWithStructureCheck(tree, 1000);
@@ -753,6 +755,7 @@ public class BTreeTest {
 		}
 
 
+		@Ignore
 		@Test
 		public void shouldWorkWithMassiveValues() throws InterruptedException {
 			final int size = 100000;
@@ -773,10 +776,7 @@ public class BTreeTest {
 			tree = createNewTree(4096);
 		}
 
-		@Test
-		public void enableTestsManually() {
-		}
-
+		@Ignore
 		@Test
 		public void randomReads() throws InterruptedException, IOException {
 			int entries = 10 * 1000;
@@ -789,22 +789,8 @@ public class BTreeTest {
 					entries + " entries took " + diff + " milliseconds");
 		}
 
-		private long testReads(int entries, int reads) throws InterruptedException {
-			assertThat(tree.getResourceManager().getPageSize()).isEqualTo(4096);
-			fillTree(tree, entries);
-			Random rand = new Random();
-
-			long total = 0;
-			for (int i = 0; i < reads; i++) {
-				int next = rand.nextInt(entries);
-				
-				long start = System.currentTimeMillis();
-				tree.get(next);
-				total += System.currentTimeMillis() - start;
-			}
-			return total;
-		}
-		
+		@Ignore
+		@Test
 		public void randomReadsWithCache() throws InterruptedException, IOException {
 			int cacheSize = 1000;
 			int entries = 10 * 1000;
@@ -822,6 +808,8 @@ public class BTreeTest {
 					entries + " entries took " + time + " milliseconds");
 		}
 
+		@Ignore
+		@Test
 		public void randomReadsWithReferenceCache() throws IOException, InterruptedException {
 			int entries = 10 * 1000;
 			int numOfReads = 1000 * 1000;
@@ -835,6 +823,36 @@ public class BTreeTest {
 
 			LOG.info("reading " + numOfReads + " random entries from a tree (with weakReferenceCache) with " +
 					entries + " entries took " + time + " milliseconds");
+		}
+
+		@Ignore
+		@Test
+		public void continuousInserts() throws IOException, InterruptedException {
+			continuousInserts(4 * 1024);
+			continuousInserts(64 * 1024);
+		}
+
+		@Ignore
+		@Test
+		public void bulkInsert() throws IOException {
+			bulkInsert(4 * 1024);
+			bulkInsert(64 * 1024);
+		}
+
+		private long testReads(int entries, int reads) throws InterruptedException {
+			assertThat(tree.getResourceManager().getPageSize()).isEqualTo(4096);
+			fillTree(tree, entries);
+			Random rand = new Random();
+
+			long total = 0;
+			for (int i = 0; i < reads; i++) {
+				int next = rand.nextInt(entries);
+				
+				long start = System.currentTimeMillis();
+				tree.get(next);
+				total += System.currentTimeMillis() - start;
+			}
+			return total;
 		}
 
 		private void continuousInserts(int pageSize) throws InterruptedException, IOException {
@@ -859,12 +877,6 @@ public class BTreeTest {
 			tree.checkStructure();
 
 			log(count, diff, pageSize);
-		}
-
-		@Test
-		public void continuousInserts() throws IOException, InterruptedException {
-			continuousInserts(4 * 1024);
-			continuousInserts(64 * 1024);
 		}
 
 		private void bulkInsert(int pageSize) throws IOException {
@@ -906,12 +918,6 @@ public class BTreeTest {
 			LOG.info("the tree file has a size of " + (file.length() / 1024) + "kb");
 			LOG.info("filled with " + count + " Integers (4byte) gives a total usage of " + (count * 4 / 1024) + "kb");
 			LOG.info("that an overhead of " + (100d * (file.length() / (count * 4)) - 100) + "%");
-		}
-
-		@Test
-		public void bulkInsert() throws IOException {
-			bulkInsert(4 * 1024);
-			bulkInsert(64 * 1024);
 		}
 
 

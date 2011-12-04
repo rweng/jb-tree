@@ -62,6 +62,7 @@ dependencies {
 
 test {
     testLogging.showStandardStreams = true
+    jvmArgs '-Xms1024m', '-Xmx1024m'
 }
 
 sourceSets.test.runtimeClasspath += files(sourceSets.test.java.srcDirs)
