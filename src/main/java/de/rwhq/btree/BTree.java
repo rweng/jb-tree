@@ -473,10 +473,6 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		return new BTreeIterator(ranges);
 	}
 
-	public String getPath() {
-		return ((FileResourceManager) rm).getFile().getAbsolutePath();
-	}
-
 	ResourceManager getResourceManager() {
 		return rm;
 	}
