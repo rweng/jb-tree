@@ -791,8 +791,13 @@ public class BTreeTest {
 
 		@Ignore
 		@Test
-		public void randomReadsWithCache() throws InterruptedException, IOException {
-			int cacheSize = 1000;
+		private void randomReadsWithCache() throws IOException, InterruptedException {
+			randomReadsWithCache(100);
+			randomReadsWithCache(1000);
+			
+		}
+
+		private void randomReadsWithCache(int cacheSize) throws InterruptedException, IOException {
 			int entries = 10 * 1000;
 			int numOfReads = 1000 * 1000;
 
@@ -805,7 +810,8 @@ public class BTreeTest {
 			long time = testReads(entries, numOfReads);
 
 			LOG.info("reading " + numOfReads + " random entries from a tree (cacheSize=" + cacheSize + ") with " +
-					entries + " entries took " + time + " milliseconds");
+					entries + " entries took " + time + " milliseconds. fileSize: " +
+					(((double) (file.length())) / 1024) + "kb");
 		}
 
 		@Ignore
@@ -917,7 +923,7 @@ public class BTreeTest {
 			// file size information
 			LOG.info("the tree file has a size of " + (file.length() / 1024) + "kb");
 			LOG.info("filled with " + count + " Integers (4byte) gives a total usage of " + (count * 4 / 1024) + "kb");
-			LOG.info("that an overhead of " + (100d * (file.length() / (count * 4)) - 100) + "%");
+			LOG.info("that is an overhead of " + (100d * (file.length() / (count * 4)) - 100) + "%");
 		}
 
 
