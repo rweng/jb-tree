@@ -51,7 +51,15 @@ public class Range<T> {
 			}
 		};
 	}
-	
+
+	/**
+	 * merges the given Collection of Ranges by using the provided comparator.
+	 * 
+	 * @param ranges
+	 * @param comparator
+	 * @param <K>
+	 * @return
+	 */
 	public static <K> TreeSet<Range<K>> merge(final Collection<Range<K>> ranges, final Comparator<K> comparator) {
 		checkNotNull(ranges, "range list must not be null");
 		checkNotNull(comparator, "comparator must not be null");
