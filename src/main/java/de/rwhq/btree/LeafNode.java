@@ -496,7 +496,7 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 	 * 	    usually lvs.length - 1
 	 * @return number of keys inserted
 	 */
-	public int bulkInitialize(final SimpleEntry<K, V>[] kvs, final int from, final int maxTo) {
+	public int bulkInitialize(final SimpleEntry<K, ?>[] kvs, final int from, final int maxTo) {
 		initialize();
 
 		final int remainingToInsert = maxTo - from + 1;
@@ -509,9 +509,21 @@ class LeafNode<K, V> implements Node<K, V>, ComplexPage {
 		final int entriesThatFit = buf.remaining() / entrySize;
 		final int entriesToInsert = entriesThatFit > remainingToInsert ? remainingToInsert : entriesThatFit;
 
-		for (int i = 0; i < entriesToInsert; i++) {
-			buf.put(keySerializer.serialize(kvs[from + i].getKey()));
-			buf.put(valueSerializer.serialize(kvs[from + i].getValue()));
+		// determine value type
+		boolean isSerialized = (kvs[from].getValue() instanceof byte[]);
+
+
+
+		if(!isSerialized){
+			for (int i = 0; i < entriesToInsert; i++) {
+				buf.put(keySerializer.serialize(kvs[from + i].getKey()));
+				buf.put(valueSerializer.serialize((V) kvs[from + i].getValue()));
+			}
+		} else {
+			for (int i = 0; i < entriesToInsert; i++) {
+				buf.put(keySerializer.serialize(kvs[from + i].getKey()));
+				buf.put((byte[]) kvs[from + i].getValue());
+			}
 		}
 
 		setNumberOfEntries(entriesToInsert);

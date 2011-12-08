@@ -318,7 +318,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		return this.comparator;
 	}
 
-	public void bulkInitialize(final SimpleEntry<K, V>[] kvs, final boolean sorted) throws IOException {
+	public void bulkInitialize(final SimpleEntry<K, ?>[] kvs, final boolean sorted) throws IOException {
 		bulkInitialize(kvs, 0, kvs.length - 1, sorted);
 	}
 
@@ -333,7 +333,7 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 	 * @param sorted
 	 * @throws IOException
 	 */
-	public void bulkInitialize(final SimpleEntry<K, V>[] kvs, final int fromIndex, final int toIndex, final boolean sorted) throws IOException {
+	public void bulkInitialize(final SimpleEntry<K, ?>[] kvs, final int fromIndex, final int toIndex, final boolean sorted) throws IOException {
 		LOG.info("bulkInitializing BTree: " + this);
 		
 		checkState(!valid, "BTree is already loaded: %s", this);
@@ -350,9 +350,9 @@ public class BTree<K, V> implements MultiMap<K, V>, MustInitializeOrLoad {
 		// sort if not already sorted
 		if (!sorted) {
 			Arrays.sort(kvs, fromIndex, toIndex + 1, // +1 because excluding toIndex
-					new Comparator<SimpleEntry<K, V>>() {
+					new Comparator<SimpleEntry<K, ?>>() {
 						@Override
-						public int compare(final SimpleEntry<K, V> kvSimpleEntry, final SimpleEntry<K, V> kvSimpleEntry1) {
+						public int compare(final SimpleEntry<K, ?> kvSimpleEntry, final SimpleEntry<K, ?> kvSimpleEntry1) {
 							return comparator.compare(kvSimpleEntry.getKey(), kvSimpleEntry1.getKey());
 						}
 					});

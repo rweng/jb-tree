@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -583,6 +584,14 @@ public class BTreeTest {
 
 
 		@Test
+		public void bulkInsertRaw3Layers() throws IOException {
+			bulkInsertRaw((tree.getMaxInnerKeys() + 1) * (tree.getMaxInnerKeys() + 1) * tree.getMaxLeafKeys());
+
+			// just to make sure that the test is really checking 3 layers
+			assertThat(tree.getDepth() >= 3).isTrue();
+		}
+
+		@Test
 		public void bulkInsertWithSortAndCloseAndRange() throws IOException {
 			final int count = 50;
 			final int from = 10;
@@ -708,6 +717,19 @@ public class BTreeTest {
 			return new ResourceManagerBuilder().file(file).build();
 		}
 
+		private void bulkInsert(AbstractMap.SimpleEntry<Integer, ?>[] kvs) throws IOException {
+			tree.close();
+			file.delete();
+			tree.bulkInitialize(kvs, true);
+
+			// check if its correct
+			LOG.debug("checking bulkinsert results...");
+			assertThat(tree.getNumberOfEntries()).isEqualTo(kvs.length);
+
+			tree.checkStructure();
+
+		}
+
 		private void bulkInsert(final int count) throws IOException {
 			final AbstractMap.SimpleEntry<Integer, Integer>[] kvs = new AbstractMap.SimpleEntry[count];
 
@@ -715,22 +737,33 @@ public class BTreeTest {
 				kvs[i] = new AbstractMap.SimpleEntry<Integer, Integer>(i, i);
 			}
 
-			tree.close();
-			file.delete();
-			tree.bulkInitialize(kvs, true);
+			bulkInsert(kvs);
 
-			// check if its correct
-			LOG.debug("checking bulkinsert results...");
-			assertThat(tree.getNumberOfEntries()).isEqualTo(count);
 
-			tree.checkStructure();
-
-			for (int i = 0; i < count; i++) {
+			for (int i = 0; i < kvs.length; i++) {
 				assertThat(tree.get(kvs[i].getKey()).size() > 0).isTrue();
 				assertThat(tree.get(kvs[i].getKey()).size()).isEqualTo(1);
-				assertThat(tree.get(kvs[i].getKey()).get(0)).isEqualTo(kvs[i].getValue());
 			}
 		}
+
+		private void bulkInsertRaw(final int count) throws IOException {
+			final AbstractMap.SimpleEntry<Integer, byte[]>[] kvs = new AbstractMap.SimpleEntry[count];
+
+			for (int i = 0; i < count; i++) {
+				kvs[i] = new AbstractMap.SimpleEntry<Integer, byte[]>(i, ByteBuffer.allocate(4).putInt(i).array());
+			}
+
+			bulkInsert(kvs);
+
+
+			for (int i = 0; i < kvs.length; i++) {
+				assertThat(tree.get(kvs[i].getKey()).size() > 0).isTrue();
+				assertThat(tree.get(kvs[i].getKey()).size()).isEqualTo(1);
+				assertThat(tree.get(kvs[i].getKey()).get(0)).isEqualTo(ByteBuffer.wrap(kvs[i].getValue()).getInt());
+			}
+		}
+
+
 	}
 
 	public static class Slow {
